@@ -1,0 +1,1045 @@
+<title>Таргет KYOTO</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  --paper:#F1EFE9;
+  --surface:#FCFBF8;
+  --surface-2:#E7E4DA;
+  --ink:#191A16;
+  --ink-2:#43453D;
+  --muted:#797B71;
+  --line:#D8D5C9;
+  --line-soft:#E5E2D8;
+  --flame:#B4441E;
+  --flame-soft:#F6E6DE;
+  --slate:#31505F;
+  --slate-soft:#E1EAEE;
+  --moss:#3F6244;
+  --moss-soft:#E3EDE2;
+  --amber:#8A6410;
+  --amber-soft:#F6EEDC;
+  --shadow:0 1px 2px rgba(25,26,22,.05), 0 10px 24px -14px rgba(25,26,22,.22);
+}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#151612;
+    --surface:#1E1F1A;
+    --surface-2:#2A2C25;
+    --ink:#EDEBE3;
+    --ink-2:#BCBBB0;
+    --muted:#8A8C80;
+    --line:#33352C;
+    --line-soft:#272921;
+    --flame:#E0784F;
+    --flame-soft:#332017;
+    --slate:#8FB6C6;
+    --slate-soft:#1A2A31;
+    --moss:#8CB68F;
+    --moss-soft:#1B2A1D;
+    --amber:#D3A44E;
+    --amber-soft:#2C2413;
+    --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 24px -14px rgba(0,0,0,.7);
+  }
+}
+
+:root[data-theme="dark"]{
+  --paper:#151612;
+  --surface:#1E1F1A;
+  --surface-2:#2A2C25;
+  --ink:#EDEBE3;
+  --ink-2:#BCBBB0;
+  --muted:#8A8C80;
+  --line:#33352C;
+  --line-soft:#272921;
+  --flame:#E0784F;
+  --flame-soft:#332017;
+  --slate:#8FB6C6;
+  --slate-soft:#1A2A31;
+  --moss:#8CB68F;
+  --moss-soft:#1B2A1D;
+  --amber:#D3A44E;
+  --amber-soft:#2C2413;
+  --shadow:0 1px 2px rgba(0,0,0,.5), 0 10px 24px -14px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:Literata,Georgia,"Times New Roman",serif;
+  font-size:16.5px;
+  line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+
+.wrap{
+  max-width:960px;
+  margin:0 auto;
+  padding:clamp(30px,5vw,60px) clamp(18px,4vw,40px) 100px;
+  display:flex;
+  flex-direction:column;
+  gap:clamp(48px,6vw,72px);
+}
+
+.disp{font-family:Oswald,"Arial Narrow",sans-serif;letter-spacing:.01em}
+.mono{font-family:"JetBrains Mono",ui-monospace,"SF Mono",monospace;font-variant-numeric:tabular-nums}
+
+h1{
+  font-family:Oswald,"Arial Narrow",sans-serif;
+  font-size:clamp(34px,6.4vw,58px);
+  line-height:1.02;
+  font-weight:600;
+  letter-spacing:-.005em;
+  text-transform:uppercase;
+  margin:0;
+  text-wrap:balance;
+}
+
+h2{
+  font-family:Oswald,"Arial Narrow",sans-serif;
+  font-size:clamp(21px,3vw,27px);
+  line-height:1.14;
+  font-weight:500;
+  letter-spacing:.005em;
+  margin:0;
+  text-wrap:balance;
+}
+
+h3{
+  font-family:Oswald,"Arial Narrow",sans-serif;
+  font-size:17px;
+  font-weight:500;
+  line-height:1.28;
+  margin:0;
+  text-wrap:balance;
+}
+
+p{margin:0;max-width:68ch}
+
+a{color:var(--slate)}
+
+code{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:.85em;
+  background:var(--surface-2);
+  padding:1.5px 5px;
+  border-radius:2px;
+}
+
+.eyebrow{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:11px;
+  font-weight:500;
+  letter-spacing:.17em;
+  text-transform:uppercase;
+  color:var(--flame);
+  margin:0;
+}
+
+.lede{
+  font-size:clamp(17.5px,2.1vw,20px);
+  line-height:1.5;
+  color:var(--ink-2);
+  max-width:62ch;
+  margin:0;
+}
+
+.note{font-size:14.5px;color:var(--muted);max-width:70ch;margin:0}
+
+.stack{display:flex;flex-direction:column;gap:14px}
+.stack-lg{display:flex;flex-direction:column;gap:26px}
+
+section{display:flex;flex-direction:column;gap:26px}
+
+.sec-head{
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  padding-bottom:16px;
+  border-bottom:1px solid var(--line);
+}
+
+.card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:3px;
+  padding:22px 24px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+/* ---------- header ---------- */
+
+header{display:flex;flex-direction:column;gap:22px}
+
+.mark{
+  font-family:Oswald,"Arial Narrow",sans-serif;
+  font-size:14px;
+  letter-spacing:.42em;
+  text-transform:uppercase;
+  color:var(--flame);
+  font-weight:500;
+}
+
+.meta-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 30px;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:11.5px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.meta-row b{color:var(--ink-2);font-weight:500}
+
+/* ---------- thesis split ---------- */
+
+.split-wrap{display:flex;flex-direction:column;gap:10px}
+
+.split{
+  display:flex;
+  height:74px;
+  border:1px solid var(--line);
+  border-radius:3px;
+  overflow:hidden;
+}
+.split > div{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  color:#FCFBF8;
+  padding:0 8px;
+  text-align:center;
+}
+.split .sushi{background:var(--slate);flex:37}
+.split .kitchen{background:var(--flame);flex:63}
+.split .pct{
+  font-family:Oswald,"Arial Narrow",sans-serif;
+  font-size:23px;
+  font-weight:600;
+  line-height:1;
+}
+.split .lbl{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10px;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  opacity:.88;
+}
+
+.versus{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+  border-radius:3px;
+  overflow:hidden;
+}
+.versus > div{background:var(--surface);padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.versus h3{color:var(--muted);font-size:12px;letter-spacing:.13em;text-transform:uppercase}
+.versus ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.versus li{font-size:15px;line-height:1.42;color:var(--ink-2)}
+.versus .col-fact li b{color:var(--ink);font-weight:600}
+
+@media (max-width:640px){
+  .versus{grid-template-columns:1fr}
+}
+
+/* ---------- stats ---------- */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:1px;
+  background:var(--line);
+  border:1px solid var(--line);
+  border-radius:3px;
+  overflow:hidden;
+}
+.stat{background:var(--surface);padding:16px 18px;display:flex;flex-direction:column;gap:5px}
+.stat .v{
+  font-family:Oswald,"Arial Narrow",sans-serif;
+  font-size:25px;
+  font-weight:600;
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.stat .k{font-size:13px;line-height:1.35;color:var(--muted)}
+.stat.hot .v{color:var(--flame)}
+.stat.cool .v{color:var(--slate)}
+
+/* ---------- day strip ---------- */
+
+.day{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:3px;
+  padding:22px 20px 16px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  overflow-x:auto;
+}
+
+.bars{
+  display:grid;
+  grid-template-columns:repeat(13,minmax(30px,1fr));
+  gap:4px;
+  align-items:end;
+  height:170px;
+  min-width:470px;
+}
+.bar{display:flex;flex-direction:column;height:100%;gap:5px}
+.bar .track{flex:1;display:flex;align-items:flex-end;min-height:0}
+.bar .fill{
+  width:100%;
+  border-radius:2px 2px 0 0;
+  background:var(--surface-2);
+}
+.bar.peak .fill{background:var(--flame)}
+.bar.dip .fill{
+  background:repeating-linear-gradient(
+    -45deg,
+    var(--surface-2) 0 4px,
+    transparent 4px 8px
+  );
+  border:1px dashed var(--muted);
+  border-bottom:0;
+}
+.bar .n{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10.5px;
+  text-align:center;
+  color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+.bar.peak .n{color:var(--flame);font-weight:500}
+
+.hours{
+  display:grid;
+  grid-template-columns:repeat(13,minmax(30px,1fr));
+  gap:4px;
+  min-width:470px;
+  padding-top:9px;
+  border-top:1px solid var(--line);
+}
+.hours span{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10.5px;
+  text-align:center;
+  color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+
+.lanes{display:flex;flex-direction:column;gap:5px;min-width:470px}
+.lane{
+  display:grid;
+  grid-template-columns:repeat(13,minmax(30px,1fr));
+  gap:4px;
+  align-items:center;
+}
+.lane .seg{
+  height:24px;
+  border-radius:2px;
+  display:flex;
+  align-items:center;
+  padding:0 7px;
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:#FCFBF8;
+  white-space:nowrap;
+  overflow:hidden;
+}
+.seg.lunch{background:var(--flame)}
+.seg.after{background:var(--amber)}
+.seg.eve{background:var(--slate)}
+
+.legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 20px;
+  font-size:13px;
+  color:var(--muted);
+}
+.legend span{display:flex;align-items:center;gap:7px}
+.legend i{width:11px;height:11px;border-radius:2px;flex:none;display:block}
+
+/* ---------- campaigns ---------- */
+
+.camps{display:flex;flex-direction:column;gap:14px}
+
+.camp{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-left:3px solid var(--accent,var(--flame));
+  border-radius:3px;
+  padding:20px 22px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  gap:13px;
+}
+.camp.c-lunch{--accent:var(--flame)}
+.camp.c-eve{--accent:var(--slate)}
+.camp.c-after{--accent:var(--amber)}
+.camp.c-sat{--accent:var(--muted)}
+
+.camp-top{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px}
+.camp-share{
+  font-family:Oswald,"Arial Narrow",sans-serif;
+  font-size:24px;
+  font-weight:600;
+  color:var(--accent,var(--flame));
+  font-variant-numeric:tabular-nums;
+  line-height:1;
+}
+.share-bar{height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.share-bar i{display:block;height:100%;background:var(--accent,var(--flame))}
+
+.specs{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px 20px;
+}
+.spec{display:flex;flex-direction:column;gap:1px}
+.spec .sk{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10px;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.spec .sv{font-size:14.5px;color:var(--ink-2);line-height:1.35}
+
+/* ---------- tables ---------- */
+
+.t-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:520px}
+th,td{
+  text-align:left;
+  padding:11px 15px;
+  border-bottom:1px solid var(--line-soft);
+  font-size:14.5px;
+  line-height:1.4;
+}
+th{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10.5px;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--muted);
+  font-weight:500;
+  background:var(--surface-2);
+  white-space:nowrap;
+}
+tr:last-child td{border-bottom:0}
+td.num{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+td b{font-weight:600}
+
+.tag{
+  display:inline-block;
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10px;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  padding:2px 7px;
+  border-radius:2px;
+}
+.tag.a{background:var(--flame-soft);color:var(--flame)}
+.tag.b{background:var(--amber-soft);color:var(--amber)}
+.tag.c{background:var(--surface-2);color:var(--muted)}
+
+/* ---------- callouts ---------- */
+
+.callout{
+  border-left:3px solid var(--amber);
+  background:var(--amber-soft);
+  border-radius:0 3px 3px 0;
+  padding:16px 19px;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+.callout.stop{border-left-color:var(--flame);background:var(--flame-soft)}
+.callout.go{border-left-color:var(--moss);background:var(--moss-soft)}
+.callout h3{font-size:15px}
+.callout p{font-size:15px;color:var(--ink-2)}
+
+/* ---------- creatives ---------- */
+
+.crea{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+.crea-card{
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:3px;
+  padding:19px 21px;
+  display:flex;
+  flex-direction:column;
+  gap:11px;
+  box-shadow:var(--shadow);
+}
+.crea-card .who{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10px;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:var(--muted);
+}
+.hooks{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px}
+.hooks li{
+  font-size:15px;
+  line-height:1.4;
+  padding-left:15px;
+  position:relative;
+  color:var(--ink);
+}
+.hooks li::before{
+  content:"";
+  position:absolute;
+  left:0;top:.62em;
+  width:6px;height:1px;
+  background:var(--flame);
+}
+.shoot{
+  font-size:13.5px;
+  color:var(--muted);
+  padding-top:10px;
+  border-top:1px solid var(--line-soft);
+  line-height:1.45;
+}
+
+/* ---------- steps ---------- */
+
+.steps{display:flex;flex-direction:column;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden}
+.step{
+  background:var(--surface);
+  padding:15px 20px 15px 60px;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:3px;
+}
+.step .n{
+  position:absolute;
+  left:20px;
+  top:15px;
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:12px;
+  color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+.step .w{
+  font-family:"JetBrains Mono",ui-monospace,monospace;
+  font-size:10px;
+  letter-spacing:.11em;
+  text-transform:uppercase;
+  color:var(--flame);
+}
+.step p{font-size:15px;color:var(--ink-2)}
+
+/* ---------- gaps ---------- */
+
+.gaps{display:flex;flex-direction:column;gap:12px}
+.gap-item{
+  display:flex;
+  gap:16px;
+  align-items:baseline;
+  padding-bottom:12px;
+  border-bottom:1px solid var(--line-soft);
+}
+.gap-item:last-child{border-bottom:0;padding-bottom:0}
+.gap-item .fig{
+  font-family:Oswald,"Arial Narrow",sans-serif;
+  font-size:20px;
+  font-weight:600;
+  color:var(--flame);
+  flex:none;
+  min-width:86px;
+  font-variant-numeric:tabular-nums;
+  line-height:1.2;
+}
+.gap-item p{font-size:15px;color:var(--ink-2)}
+
+footer{
+  padding-top:24px;
+  border-top:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  font-size:13.5px;
+  color:var(--muted);
+}
+footer b{color:var(--ink-2);font-weight:600}
+
+:focus-visible{outline:2px solid var(--flame);outline-offset:2px}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+}
+</style>
+
+<div class="wrap">
+
+<header>
+  <div class="mark">KYOTO</div>
+  <h1>Таргет по своим цифрам</h1>
+  <p class="lede">Настройка рекламы, собранная не по учебнику для суши-баров, а по 656 чекам из Poster. Главный вывод пришлось написать первым: вы рекламируете не тот продукт.</p>
+  <div class="meta-row">
+    <span>Данные · <b>28 дней по 23.08.2026</b></span>
+    <span>Чеков · <b>656</b></span>
+    <span>Выручка · <b>104,5 млн сум</b></span>
+    <span>Средний чек · <b>159 258 сум</b></span>
+  </div>
+</header>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Разворот</p>
+    <h2>Вывеска говорит одно, касса — другое</h2>
+  </div>
+
+  <div class="split-wrap">
+    <div class="split">
+      <div class="sushi">
+        <span class="pct">37%</span>
+        <span class="lbl">суши · роллы · сеты</span>
+      </div>
+      <div class="kitchen">
+        <span class="pct">63%</span>
+        <span class="lbl">корейская и европейская кухня</span>
+      </div>
+    </div>
+    <p class="note">36,4 млн против 63,2 млн сум за 28 дней. Абсолютный лидер продаж — Кук-си, 66–72 порции в месяц. Дальше окрошка, стейк, картофель по-домашнему. Ни одной суши-позиции в топе.</p>
+  </div>
+
+  <div class="versus">
+    <div>
+      <h3>Как принято себя описывать</h3>
+      <ul>
+        <li>Суши-бар, роллы и сеты</li>
+        <li>Вечернее заведение</li>
+        <li>Главное окно — пятница и суббота</li>
+        <li>Гость проводит вечер в зале</li>
+      </ul>
+    </div>
+    <div class="col-fact">
+      <h3>Что говорят 656 чеков</h3>
+      <ul>
+        <li>Роллы и сеты — <b>37% выручки</b></li>
+        <li>Два равных пика: <b>обед 12–14 и ужин 19–21</b></li>
+        <li><b>Понедельник — лучший день</b>, суббота — худший</li>
+        <li><b>68% берут навынос</b>, зал 29%, доставка 3%</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout stop">
+    <h3>Что это значит для рекламы</h3>
+    <p>Реклама роллов приводит гостя за японской кухней — он получает корейско-европейскую и не возвращается. А человек, которому нужен нормальный обед рядом с работой, проходит мимо, потому что «там суши». Герой креатива — обед и Кук-си. Роллы уходят на второй план: у них выше маржа (Филадельфия 78% против окрошки 60%), поэтому их место — допродажа внутри чека, а не приманка в холодном трафике.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Сначала</p>
+    <h2>Блокер, без которого кампании не запускаются</h2>
+  </div>
+
+  <div class="callout">
+    <h3>Сайта нет в интернете</h3>
+    <p>Он работает по локальному адресу 192.168.1.55:8080. Домен не куплен, сервер не арендован — рекламная ссылка откроется только у вас дома. Купить домен и сервер: 1–2 дня, около 140 000 сум в месяц плюс 27 000 сум в год за зону .uz.</p>
+  </div>
+
+  <div class="callout go">
+    <h3>Но ждать сайт не обязательно</h3>
+    <p>Кампании с целью «Сообщения» ведут клик сразу в Direct или Telegram — сайт не нужен. Сейчас это даже лучше сайта: в базе Poster ноль клиентов за 656 чеков, а каждый диалог из рекламы — это контакт, который можно вернуть. И ещё одно: на сайте пока только 12 суши-позиций, кук-си и супов там нет. Реклама обеда, ведущая на страницу с роллами, потеряет гостя на первом экране.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">День</p>
+    <h2>Где в сутках лежат деньги</h2>
+  </div>
+
+  <p>Спрос по времени открытия чека — не закрытия. По закрытию картина ложная: 255 чеков из 656 «закрываются» в 22:00, потому что кассиры проводят их пачкой в конце смены.</p>
+
+  <div class="day">
+    <div class="bars">
+      <div class="bar"><div class="n">12</div><div class="track"><div class="fill" style="height:14.6%"></div></div></div>
+      <div class="bar"><div class="n">11</div><div class="track"><div class="fill" style="height:13.4%"></div></div></div>
+      <div class="bar peak"><div class="n">64</div><div class="track"><div class="fill" style="height:78%"></div></div></div>
+      <div class="bar peak"><div class="n">82</div><div class="track"><div class="fill" style="height:100%"></div></div></div>
+      <div class="bar dip"><div class="n">47</div><div class="track"><div class="fill" style="height:57.3%"></div></div></div>
+      <div class="bar dip"><div class="n">50</div><div class="track"><div class="fill" style="height:61%"></div></div></div>
+      <div class="bar"><div class="n">43</div><div class="track"><div class="fill" style="height:52.4%"></div></div></div>
+      <div class="bar dip"><div class="n">33</div><div class="track"><div class="fill" style="height:40.2%"></div></div></div>
+      <div class="bar"><div class="n">52</div><div class="track"><div class="fill" style="height:63.4%"></div></div></div>
+      <div class="bar peak"><div class="n">79</div><div class="track"><div class="fill" style="height:96.3%"></div></div></div>
+      <div class="bar peak"><div class="n">75</div><div class="track"><div class="fill" style="height:91.5%"></div></div></div>
+      <div class="bar"><div class="n">62</div><div class="track"><div class="fill" style="height:75.6%"></div></div></div>
+      <div class="bar"><div class="n">44</div><div class="track"><div class="fill" style="height:53.7%"></div></div></div>
+    </div>
+
+    <div class="hours">
+      <span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span>
+    </div>
+
+    <div class="lanes">
+      <div class="lane">
+        <div class="seg lunch" style="grid-column:1 / span 4">Обед · 10:30–13:30</div>
+      </div>
+      <div class="lane">
+        <div class="seg after" style="grid-column:5 / span 4">Поздний обед · 13:30–17:00</div>
+      </div>
+      <div class="lane">
+        <div class="seg eve" style="grid-column:8 / span 4">Вечер и доставка · 17:00–20:30</div>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i style="background:var(--flame)"></i>Пик спроса</span>
+      <span><i style="background:var(--surface-2);border:1px dashed var(--muted)"></i>Провал — дешёвые показы, простаивающая кухня</span>
+      <span><i style="background:var(--surface-2)"></i>Остальные часы</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat hot"><span class="v">215 тыс</span><span class="k">средний чек в 19:00 — самый дорогой гость дня</span></div>
+    <div class="stat"><span class="v">145 тыс</span><span class="k">средний чек на обеде в 12:00</span></div>
+    <div class="stat cool"><span class="v">+49%</span><span class="k">насколько вечерний чек выше обеденного</span></div>
+    <div class="stat"><span class="v">33</span><span class="k">чека в 17:00 против 79 в 19:00 — провал дня</span></div>
+  </div>
+
+  <p class="note">По дням недели картина перевёрнута относительно учебника: понедельник даёт 4,28 млн сум и 111 чеков, суббота — 2,88 млн и 79 чеков. Бюджет распределяем на будни, суббота получает только тестовую кампанию.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Кампании</p>
+    <h2>Четыре кампании и как делится бюджет</h2>
+  </div>
+
+  <div class="camps">
+
+    <div class="camp c-lunch">
+      <div class="camp-top">
+        <h3>Обед — главная</h3>
+        <span class="camp-share">40%</span>
+      </div>
+      <div class="share-bar"><i style="width:40%"></i></div>
+      <p>Ваш сильнейший час не оформлен как предложение. Обед 12–14 даёт 192 чека, и это будни. Гость не хочет выбирать из 275 позиций — он хочет поесть за 20 минут.</p>
+      <div class="specs">
+        <div class="spec"><span class="sk">Цель</span><span class="sv">Сообщения → Direct и Telegram</span></div>
+        <div class="spec"><span class="sk">Гео</span><span class="sv">Радиус 1,5–3 км, не больше</span></div>
+        <div class="spec"><span class="sk">Дни</span><span class="sv">Пн–Пт, выходные выключены</span></div>
+        <div class="spec"><span class="sk">Время</span><span class="sv">10:30–13:30</span></div>
+      </div>
+      <p class="note">Узкое гео — не экономия, а логика: навынос 68% значит, что гость идёт пешком или едет пару минут. Широкий радиус сожжёт бюджет на тех, кто никогда не доедет.</p>
+    </div>
+
+    <div class="camp c-eve">
+      <div class="camp-top">
+        <h3>Вечер и доставка</h3>
+        <span class="camp-share">35%</span>
+      </div>
+      <div class="share-bar"><i style="width:35%"></i></div>
+      <p>Вечерний чек на 49% выше обеденного — это самые дорогие гости. Здесь же главный неиспользованный рычаг: доставка это 20 чеков из 656, при том что 68% и так забирают еду с собой. Готовность есть не в зале уже доказана.</p>
+      <div class="specs">
+        <div class="spec"><span class="sk">Цель</span><span class="sv">Сообщения, после сайта — Продажи</span></div>
+        <div class="spec"><span class="sk">Гео</span><span class="sv">Радиус 3–5 км</span></div>
+        <div class="spec"><span class="sk">Дни</span><span class="sv">Пн–Пт и воскресенье</span></div>
+        <div class="spec"><span class="sk">Время</span><span class="sv">17:00–20:30</span></div>
+      </div>
+      <div class="callout" style="margin-top:2px">
+        <h3>Перед запуском — один звонок</h3>
+        <p>В Poster все 280 позиций помечены видимыми в Яндекс Доставке, Uzum Tezkor, Wolt и Tutun — кто-то проделал эту работу целиком. А заказов почти нет. Выясните, живые ли интеграции или висят в черновике: час работы, бесплатно, и может оказаться, что проблема вообще не в рекламе.</p>
+      </div>
+    </div>
+
+    <div class="camp c-after">
+      <div class="camp-top">
+        <h3>Провал 14–17</h3>
+        <span class="camp-share">15%</span>
+      </div>
+      <div class="share-bar"><i style="width:15%"></i></div>
+      <p>После обеда средний чек падает до 115–120 тысяч — худший показатель дня, а в 17:00 проседает и количество. Кухня простаивает, аренда идёт. Любой чек здесь почти чистая прибыль, и показы в эти часы дешевле.</p>
+      <div class="specs">
+        <div class="spec"><span class="sk">Оффер</span><span class="sv">Суп + второе + напиток одной ценой</span></div>
+        <div class="spec"><span class="sk">Из чего</span><span class="sv">Гарниры 77%, корейские салаты 75%, лимонады 73% маржи</span></div>
+        <div class="spec"><span class="sk">Время</span><span class="sv">13:30–17:00, Пн–Пт</span></div>
+      </div>
+    </div>
+
+    <div class="camp c-sat">
+      <div class="camp-top">
+        <h3>Суббота — тест</h3>
+        <span class="camp-share">10%</span>
+      </div>
+      <div class="share-bar"><i style="width:10%"></i></div>
+      <p>Суббота даёт 2,88 млн против 4,28 млн в понедельник. Это не то, что надо обслуживать, — это то, что надо вытягивать. Но малым бюджетом: пока не доказано, что субботний спрос вообще есть. Через три недели, если стоимость заказа вдвое хуже обеденной кампании, — выключить и переложить бюджет в обед.</p>
+    </div>
+
+  </div>
+
+  <div class="callout stop">
+    <h3>Саке в таргет не идёт</h3>
+    <p>Реклама алкоголя режется модерацией Meta и рискует блокировкой кабинета. Саке остаётся допродажей в зале, но не приманкой в объявлении.</p>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Экономика</p>
+    <h2>Сколько можно платить за заказ</h2>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><span class="v">159 258</span><span class="k">средний чек, сум</span></div>
+    <div class="stat"><span class="v">66,1%</span><span class="k">продуктовая маржа</span></div>
+    <div class="stat cool"><span class="v">105 тыс</span><span class="k">валовая прибыль с чека, сум</span></div>
+    <div class="stat hot"><span class="v">15–25 тыс</span><span class="k">целевая цена заказа из рекламы</span></div>
+  </div>
+
+  <p>Если отдавать на привлечение треть валовой прибыли, потолок — около 35 000 сум за заказ. Целевой уровень ставим ниже: 15 000–25 000 сум, примерно 1,2–2 доллара по курсу ~12 500 сум. Курс проверьте на день пополнения — Meta списывает в USD.</p>
+
+  <p><b>Задача в числах.</b> Количество чеков падает три недели подряд: 190 → 152 → 145 в неделю. Вернуть это падение — плюс 6–7 чеков в день. При цене заказа 20 000 сум это около 130 000 сум в день, то есть бюджет <b>10–12 долларов в день, примерно 330 в месяц</b>. Ниже 8 долларов в день ставить нельзя: алгоритм не успеет обучиться.</p>
+
+  <p class="note">Оценка отдачи при попадании в цель: +6 чеков в день это около +28 млн сум выручки в месяц и ~18 млн валовой прибыли при расходе на рекламу ~4 млн. Это прикидка по вашему среднему чеку и типичным ставкам Ташкента, а не прогноз — проверять через 3–4 недели на своих цифрах.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">ABC</p>
+    <h2>Что рекламируем, что допродаём, что не трогаем</h2>
+  </div>
+
+  <p>80% выручки делают 59 позиций из 131 продающейся — при меню в 275 блюд. Хвост в рекламу не идёт вообще.</p>
+
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Группа</th><th>Категория</th><th>Доля выручки</th><th>Маржа</th><th>Роль в таргете</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="tag a">A</span></td><td>Вторые блюда Европа</td><td class="num">13,6%</td><td class="num">67%</td><td>Герой креатива</td></tr>
+        <tr><td><span class="tag a">A</span></td><td>Сэты</td><td class="num">13,2%</td><td class="num">66%</td><td>Вечер и суббота</td></tr>
+        <tr><td><span class="tag a">A</span></td><td>Ролы</td><td class="num">10,7%</td><td class="num">74%</td><td>Только ретаргет, не холодный трафик</td></tr>
+        <tr><td><span class="tag a">A</span></td><td>Супы Корея</td><td class="num">8,6%</td><td class="num">66%</td><td>Герой обеденной кампании</td></tr>
+        <tr><td><span class="tag a">A</span></td><td>Супы Европа</td><td class="num">8,1%</td><td class="num">68%</td><td>Обед</td></tr>
+        <tr><td><span class="tag b">B</span></td><td>Вторые блюда Корея</td><td class="num">7,1%</td><td class="num">70%</td><td>Внутрь комбо</td></tr>
+        <tr><td><span class="tag b">B</span></td><td>Салаты Европа</td><td class="num">6,7%</td><td class="num">69%</td><td>Внутрь комбо</td></tr>
+        <tr><td><span class="tag b">B</span></td><td>Гарниры</td><td class="num">4,0%</td><td class="num"><b>77%</b></td><td>Допродажа — лучшая маржа</td></tr>
+        <tr><td><span class="tag b">B</span></td><td>Салаты Корея</td><td class="num">3,3%</td><td class="num"><b>75%</b></td><td>Допродажа</td></tr>
+        <tr><td><span class="tag b">B</span></td><td>Лимонады</td><td class="num">2,0%</td><td class="num"><b>73%</b></td><td>В каждое комбо принудительно</td></tr>
+        <tr><td><span class="tag c">C</span></td><td>Хвост, ~70 позиций</td><td class="num">—</td><td class="num">—</td><td>Не рекламировать</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="note">Напитки сейчас 2% выручки и есть только в 22% чеков — при марже 73%. Каждый лимонад, вшитый в комбо, почти чистая прибыль. Это самая дешёвая прибавка к чеку из всех доступных.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Креативы</p>
+    <h2>Что снимать и что писать</h2>
+  </div>
+
+  <div class="crea">
+
+    <div class="crea-card">
+      <span class="who">Кампания «Обед» · главный</span>
+      <h3>Кук-си</h3>
+      <ul class="hooks">
+        <li>Обед за 10 минут, если позвонить заранее.</li>
+        <li>66 порций за месяц. Мы её не продвигаем — её просто берут.</li>
+        <li>В +40 холодный бульон работает лучше кофе.</li>
+      </ul>
+      <p class="shoot">Вертикаль 9:16, 6–8 сек. Конденсат на пиале, палочки поднимают лапшу и держат в кадре две секунды, дневной свет от окна. Цена текстом с первой секунды.</p>
+    </div>
+
+    <div class="crea-card">
+      <span class="who">Кампания «Вечер и доставка»</span>
+      <h3>Распаковка</h3>
+      <ul class="hooks">
+        <li>68% из вас забирают заказ сами. А можно было не выходить.</li>
+        <li>Вечер, когда не надо думать, что готовить.</li>
+        <li>Всё то же самое — но приезжает к вам.</li>
+      </ul>
+      <p class="shoot">Четыре кадра, 12 сек: курьер у двери, руки берут пакет, крышка открывается и идёт пар, первый кусочек. Снимается за десять минут.</p>
+    </div>
+
+    <div class="crea-card">
+      <span class="who">Кампания «Провал 14–17»</span>
+      <h3>Поздний обед</h3>
+      <ul class="hooks">
+        <li>Пришли в три — обслужим как в час.</li>
+        <li>Полный обед по цене, которая не требует объяснений.</li>
+        <li>Тихий час на кухне — ваш выигрыш.</li>
+      </ul>
+      <p class="shoot">Три предмета одним планом: суп, второе, стакан. Пар от горячего, рука берёт стакан. Никакой студии, дневной свет.</p>
+    </div>
+
+    <div class="crea-card">
+      <span class="who">Только ретаргет</span>
+      <h3>Роллы</h3>
+      <ul class="hooks">
+        <li>Звук, ради которого стоит жить.</li>
+      </ul>
+      <p>Филадельфия в холодный трафик не идёт — она приводит не ту аудиторию. Но как ASMR-формат работает вирусно и годится для органических Reels.</p>
+      <p class="shoot">Крупный план, нож входит, сыр тянется, реальный звук без музыки.</p>
+    </div>
+
+  </div>
+
+  <p class="note">Цены в текстах подставьте свои — я их не выдумываю. Формула каждого объявления одна: хук в одну строку, аппетитная деталь, конкретика с ценой, призыв написать.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Порядок</p>
+    <h2>Что за чем запускать</h2>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <span class="n">01</span>
+      <span class="w">Неделя 0</span>
+      <p>Позвонить в Яндекс Доставку, Uzum Tezkor, Wolt и Tutun — выяснить статус интеграций. Час работы, бесплатно, потенциально стоит больше всего остального плана.</p>
+    </div>
+    <div class="step">
+      <span class="n">02</span>
+      <span class="w">Неделя 0</span>
+      <p>Купить домен и сервер, выложить сайт. Снять три вертикальных видео — полдня на телефон. Завести Business Manager, привязать Instagram, пополнить кабинет.</p>
+    </div>
+    <div class="step">
+      <span class="n">03</span>
+      <span class="w">Неделя 1</span>
+      <p>Запустить кампанию «Обед», 5 долларов в день, цель «Сообщения». Настроить быстрые ответы в Direct: приветствие, меню, «когда забрать». Реклама, на которую отвечают через час, не работает.</p>
+    </div>
+    <div class="step">
+      <span class="n">04</span>
+      <span class="w">Неделя 1</span>
+      <p>Каждый диалог заносить в базу контактов. Цель на 90 дней — 300 контактов: этого хватает, чтобы одна рассылка давала измеримый прирост заказов.</p>
+    </div>
+    <div class="step">
+      <span class="n">05</span>
+      <span class="w">Неделя 2</span>
+      <p>Добавить кампанию «Вечер», 4 доллара в день. Вставить пиксель в сайт, проверить события через Meta Pixel Helper тестовым заказом.</p>
+    </div>
+    <div class="step">
+      <span class="n">06</span>
+      <span class="w">Неделя 3</span>
+      <p>Добавить «Провал 14–17» и тестовую субботу на остаток бюджета. Включить ретаргетинг: писавшие в Direct без заказа, посетители сайта, брошенные корзины.</p>
+    </div>
+    <div class="step">
+      <span class="n">07</span>
+      <span class="w">Неделя 4</span>
+      <p>Первая сверка: расход кабинета против чеков в Poster за те же дни. Считать по кассе, а не по кабинету — Meta покажет переписки, деньги покажет касса.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Измерение</p>
+    <h2>Что уже встроено в сайт</h2>
+  </div>
+
+  <p>Таргет без измерений — слив бюджета, поэтому слой трекинга в сайт уже добавлен и ждёт запуска. Чтобы включить: создать пиксель в Meta Events Manager и вставить его ID в строку <code>META_PIXEL_ID</code> в index.html. Пока поле пустое, сайт работает как раньше.</p>
+
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Событие</th><th>Когда срабатывает</th><th>Зачем</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="num">PageView</td><td>Открытие сайта</td><td>База для аудиторий ретаргета</td></tr>
+        <tr><td class="num">ViewContent</td><td>Гость доскроллил до меню</td><td>Тёплая аудитория</td></tr>
+        <tr><td class="num">AddToCart</td><td>Блюдо добавлено в корзину</td><td>Горячая аудитория</td></tr>
+        <tr><td class="num">InitiateCheckout</td><td>Нажал «Оформить заказ»</td><td>Диагностика воронки</td></tr>
+        <tr><td class="num">Purchase</td><td>Заказ отправлен, с суммой</td><td><b>Главное событие оптимизации</b></td></tr>
+        <tr><td class="num">Schedule</td><td>Отправлена бронь стола</td><td>Оптимизация брони зала</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout go">
+    <h3>Заявка теперь говорит, откуда пришёл гость</h3>
+    <p>Если человек кликнул по рекламе, в Telegram-заявке появится строка вида «Источник: ig · кампания: lunch · креатив: kuksi-video». Вы видите, какое объявление принесло каждый конкретный заказ, и сверяете с Poster — без разбирательств в рекламном кабинете.</p>
+  </div>
+
+  <div class="t-scroll">
+    <table>
+      <thead>
+        <tr><th>Метрика</th><th>Сейчас</th><th>Цель</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Чеков в день — главная</td><td class="num">23</td><td class="num"><b>30</b></td></tr>
+        <tr><td>Доля доставки</td><td class="num">3%</td><td class="num"><b>15%</b></td></tr>
+        <tr><td>Контактов в базе</td><td class="num">0</td><td class="num"><b>300</b></td></tr>
+        <tr><td>Напиток в чеке</td><td class="num">22%</td><td class="num"><b>50%</b></td></tr>
+        <tr><td>Цена заказа из рекламы</td><td class="num">—</td><td class="num"><b>15–25 тыс сум</b></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p class="note">Смотреть раз в две недели, не чаще — иначе будете реагировать на шум. Если реклама крутится, а чеков не прибавилось, проблема не в настройках кабинета.</p>
+</section>
+
+<section>
+  <div class="sec-head">
+    <p class="eyebrow">Границы</p>
+    <h2>Чего таргет не исправит</h2>
+  </div>
+
+  <div class="card">
+    <div class="gaps">
+      <div class="gap-item">
+        <span class="fig">0</span>
+        <p><b>клиентов в базе Poster.</b> За 656 чеков не сохранён ни один контакт. Пока это так, реклама льёт воду в дырявое ведро: вернуть купившего дешевле, чем найти нового, но возвращать некого — вы не знаете, кто у вас покупал.</p>
+      </div>
+      <div class="gap-item">
+        <span class="fig">4,8 млн</span>
+        <p><b>сум в 29 чеках закрыты без оплаты</b> — 4,6% оборота, больше, чем приносит вся доставка. Пока это не разобрано, эффект рекламы вы считаете от завышенной выручки.</p>
+      </div>
+      <div class="gap-item">
+        <span class="fig">0</span>
+        <p><b>акций за месяц.</b> Нет ни одного инструмента управлять спросом в слабые часы — а именно туда бьют две из четырёх кампаний.</p>
+      </div>
+      <div class="gap-item">
+        <span class="fig">275</span>
+        <p><b>позиций в меню при 23 чеках в день.</b> У 125 ингредиентов нулевой расход за две недели, остатки недостоверны. Реклама приведёт гостя, но кухня, закуп и склад к росту не готовы.</p>
+      </div>
+    </div>
+  </div>
+
+  <p>Таргет добавит поток. Он не заменит базу клиентов, кассовую дисциплину и сокращение меню — а без них поток вытечет обратно.</p>
+</section>
+
+<footer>
+  <p><b>Источник данных:</b> Poster, 656 чеков за 28 дней по 23 августа 2026. Все цифры фактические, оценки прироста помечены отдельно.</p>
+  <p><b>Отношение к контент-плану:</b> контент разговаривает с теми, кто вас уже знает. Таргет отвечает за то, откуда возьмутся новые чеки. Это разные задачи, и одна другую не заменяет.</p>
+  <p><b>Следующий пересмотр:</b> через четыре недели после запуска первой кампании — когда появится своя стоимость заказа вместо бенчмарков.</p>
+</footer>
+
+</div>
