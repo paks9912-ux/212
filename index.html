@@ -2966,6 +2966,73 @@ async function sendTelegramMessage(text) {
 
 
 /* =====================================================
+   ADS TRACKING — META PIXEL + UTM
+   Настройка под таргет: см. TARGET-PLAN.md в корне репо.
+===================================================== */
+
+// ID пикселя из Meta Events Manager (формат: "1234567890123456").
+// Пока поле пустое — события не отправляются, сайт работает как раньше.
+const META_PIXEL_ID = "";
+
+if (META_PIXEL_ID) {
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window,document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', META_PIXEL_ID);
+    fbq('track', 'PageView');
+}
+
+function track(eventName, params) {
+    if (typeof fbq === "function") {
+        try { fbq("track", eventName, params || {}); } catch (e) {}
+    }
+}
+
+// Запоминаем UTM-метки перехода (атрибуция последнего клика, 30 дней),
+// чтобы в Telegram-заявке было видно, с какой рекламы пришёл заказ.
+const UTM_KEYS = ["utm_source","utm_medium","utm_campaign","utm_content","utm_term"];
+
+(function captureUtm(){
+    try {
+        const params = new URLSearchParams(location.search);
+        const utm = {};
+        UTM_KEYS.forEach(key => {
+            const value = params.get(key);
+            if (value) utm[key] = value.slice(0, 100);
+        });
+        if (params.get("fbclid")) utm.fbclid = "yes";
+        if (Object.keys(utm).length) {
+            utm.ts = Date.now();
+            localStorage.setItem("kyoto_utm", JSON.stringify(utm));
+        }
+    } catch (error) {}
+})();
+
+function getAttributionLine() {
+    const organic = "🌐 Источник: прямой заход / органика";
+    try {
+        const raw = localStorage.getItem("kyoto_utm");
+        if (!raw) return organic;
+        const utm = JSON.parse(raw);
+        if (Date.now() - (utm.ts || 0) > 30*24*60*60*1000) return organic;
+        const parts = [];
+        if (utm.utm_source) parts.push(utm.utm_source);
+        if (utm.utm_campaign) parts.push("кампания: " + utm.utm_campaign);
+        if (utm.utm_content) parts.push("креатив: " + utm.utm_content);
+        if (!parts.length && utm.fbclid) parts.push("реклама Meta");
+        return parts.length ? "🎯 Источник: " + parts.join(" · ") : organic;
+    } catch (error) {
+        return organic;
+    }
+}
+
+
+/* =====================================================
    HELPERS
 ===================================================== */
 
@@ -3847,6 +3914,14 @@ function addToCart(productId){
 
     showToast();
 
+    track("AddToCart", {
+        content_type: "product",
+        content_ids: [product.id],
+        content_name: product.name,
+        value: product.price,
+        currency: "UZS"
+    });
+
 }
 
 
@@ -4373,13 +4448,22 @@ document
             }
 
             const items = Object.values(cart);
+            const orderTotal = getCartTotal();
+            const orderIds = items.map(item => item.id);
             let message = `<b>🍱 НОВЫЙ ЗАКАЗ — KYOTO</b>\n\n`;
-            
+
             items.forEach((item, idx) => {
                 message += `${idx + 1}. <b>${item.name}</b> x ${item.quantity} = ${formatPrice(item.price * item.quantity)}\n`;
             });
 
-            message += `\n<b>ИТОГО: ${formatPrice(getCartTotal())}</b>`;
+            message += `\n<b>ИТОГО: ${formatPrice(orderTotal)}</b>`;
+            message += `\n\n${getAttributionLine()}`;
+
+            track("InitiateCheckout", {
+                value: orderTotal,
+                currency: "UZS",
+                num_items: getCartCount()
+            });
 
             const btn = document.getElementById("checkoutButton");
             btn.disabled = true;
@@ -4388,6 +4472,12 @@ document
             const sent = await sendTelegramMessage(message);
 
             if(sent) {
+                track("Purchase", {
+                    value: orderTotal,
+                    currency: "UZS",
+                    content_type: "product",
+                    content_ids: orderIds
+                });
                 cart = {};
                 saveCart();
                 updateCartCounter();
@@ -4545,7 +4635,8 @@ reservationForm.addEventListener(
             `⏰ <b>Время:</b> ${reservationData.time}\n` +
             `👥 <b>Гости:</b> ${reservationData.guests}\n` +
             `🎉 <b>Повод:</b> ${reservationData.occasion}\n` +
-            `💬 <b>Пожелания:</b> ${reservationData.message}`;
+            `💬 <b>Пожелания:</b> ${reservationData.message}\n\n` +
+            getAttributionLine();
 
         const submitBtn = document.getElementById("reserveBtn");
         submitBtn.disabled = true;
@@ -4553,6 +4644,7 @@ reservationForm.addEventListener(
         const sent = await sendTelegramMessage(message);
 
         if(sent) {
+            track("Schedule");
             reservationForm.style.display = "none";
             reservationSuccess.classList.add("active");
             reservationSuccess.scrollIntoView({
@@ -4566,6 +4658,33 @@ reservationForm.addEventListener(
 
     }
 );
+
+
+/* =====================================================
+   MENU VIEW TRACKING
+===================================================== */
+
+(function trackMenuView(){
+
+    const menuSection = document.getElementById("menu");
+
+    if(!menuSection || !("IntersectionObserver" in window)) return;
+
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting){
+                track("ViewContent", {
+                    content_name: "menu",
+                    content_type: "product_group"
+                });
+                observer.disconnect();
+            }
+        });
+    }, { threshold: 0.3 });
+
+    observer.observe(menuSection);
+
+})();
 
 
 /* =====================================================
