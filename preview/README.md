@@ -15,14 +15,14 @@
 |---|---|
 | 1 — Аудит | ✅ `/AUDIT.md` |
 | 2 — Design System + Header + Hero | ✅ в этом файле |
-| 3 — Menu + Hits + Product Cards | ⏳ |
+| 3 — Menu + Hits + Product Cards | ✅ |
 | 4 — Cart + Real Checkout | ⏳ |
 | 5 — Delivery + Brand + Footer + Reservation | ⏳ |
 | 6 — Mobile + Accessibility + Animations | ⏳ |
 | 7 — SEO + Performance + Final QA | ⏳ |
 
-Секции ниже hero (меню, корзина, бронь, футер) пока в старом виде —
-они переделываются в фазах 3–5. Работают они при этом как раньше.
+Секции ниже меню (корзина, бронь, футер) пока в старом виде —
+они переделываются в фазах 4–5. Работают они при этом как раньше.
 
 ## Важно перед выкаткой
 

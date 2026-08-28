@@ -1000,8 +1000,10 @@ button{
    COMMON
 ===================================================== */
 
+/* .menu-section исключена: у неё своя сетка (.section + .wrap).
+   Старые overflow:hidden и display:flex ломали sticky-табы и давали
+   двойной отступ поверх .wrap. */
 .ritual,
-.menu-section,
 .omakase,
 .experience,
 .reservation{
@@ -1193,316 +1195,377 @@ button{
 }
 
 
+
 /* =====================================================
-   MENU
+   SECTION SHELL
+===================================================== */
+
+.section{
+    padding-block:clamp(56px,8vw,var(--s9));
+}
+
+.section-head{
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    gap:var(--s5);
+    margin-bottom:var(--s6);
+}
+
+.section-eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:var(--s3);
+    margin-bottom:var(--s3);
+    font-size:12px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    font-weight:500;
+    color:var(--muted);
+}
+
+.section-eyebrow::before{
+    content:"";
+    width:22px;
+    height:1px;
+    background:var(--accent);
+    flex:none;
+}
+
+.section-title{
+    font-size:clamp(30px,5vw,54px);
+    line-height:1.05;
+    font-weight:300;
+    letter-spacing:-.035em;
+}
+
+.section-note{
+    max-width:34ch;
+    font-size:15px;
+    line-height:1.6;
+    color:var(--muted);
+}
+
+
+/* =====================================================
+   MENU TABS — sticky, горизонтальный скролл на мобильном
 ===================================================== */
 
 .menu-section{
-    background:#070707;
-    min-height:auto;
-    padding-bottom:12vh;
-}
-
-.menu-content{
     position:relative;
-    width:100%;
-    max-width:1500px;
-    margin:0 auto;
-    padding-top:14vh;
 }
 
-.menu-intro{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-end;
-    margin-bottom:65px;
-}
-
-.menu-title-label{
-    font-size:8px;
-    letter-spacing:.3em;
-    color:rgba(242,239,232,.35);
-    margin-bottom:25px;
-}
-
-.menu-title{
-    font-size:clamp(70px,10vw,160px);
-    line-height:.8;
-    font-weight:300;
-    letter-spacing:-.08em;
-}
-
-.menu-description{
-    max-width:330px;
-    font-size:11px;
-    line-height:1.9;
-    color:rgba(242,239,232,.4);
+.menu-tabs-wrap{
+    position:sticky;
+    top:var(--header-h);
+    z-index:300;
+    margin-bottom:var(--s6);
+    background:rgba(10,10,10,.88);
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+    border-block:1px solid var(--line);
 }
 
 .menu-tabs{
     display:flex;
-    gap:35px;
-    border-bottom:1px solid rgba(242,239,232,.1);
-    margin-bottom:45px;
+    gap:var(--s2);
+    overflow-x:auto;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    padding-block:10px;
+}
+
+.menu-tabs::-webkit-scrollbar{
+    display:none;
 }
 
 .menu-tab{
-    position:relative;
-    padding:0 0 18px;
-    background:none;
-    border:0;
-    color:rgba(242,239,232,.3);
-    font-size:8px;
-    letter-spacing:.25em;
-    cursor:pointer;
-    transition:color .4s ease;
-}
-
-.menu-tab::after{
-    content:"";
-    position:absolute;
-    left:0;
-    bottom:-1px;
-    width:0;
-    height:1px;
-    background:var(--red);
-    transition:
-        width .5s cubic-bezier(.16,1,.3,1);
-}
-
-.menu-tab:hover,
-.menu-tab.active{
-    color:var(--white);
-}
-
-.menu-tab.active::after{
-    width:100%;
-}
-
-.products{
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:70px 25px;
-}
-
-.product-card{
-    position:relative;
-    transition:
-        opacity .6s ease,
-        transform .7s cubic-bezier(.16,1,.3,1);
-}
-
-.products.has-hover .product-card:not(.is-hovered){
-    opacity:.32;
-    transform:scale(.985);
-}
-
-.product-image{
-    position:relative;
-    width:100%;
-    aspect-ratio:4/4.7;
-    overflow:hidden;
-    background:#101010;
-    margin-bottom:22px;
-    cursor:pointer;
-    isolation:isolate;
-    transition:
-        transform 1s cubic-bezier(.16,1,.3,1);
-}
-
-.product-image::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    z-index:2;
-    pointer-events:none;
-    background:
-        radial-gradient(
-            circle at var(--mouse-x,50%) var(--mouse-y,50%),
-            rgba(255,255,255,.12),
-            transparent 25%
-        );
-    opacity:0;
-    transition:opacity .5s ease;
-}
-
-.product-image::after{
-    content:"";
-    position:absolute;
-    left:0;
-    bottom:0;
-    width:100%;
-    height:2px;
-    background:var(--red);
-    transform:scaleX(0);
-    transform-origin:left;
-    transition:
-        transform .7s cubic-bezier(.16,1,.3,1);
-    z-index:4;
-}
-
-.product-photo{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-    filter:
-        saturate(.72)
-        contrast(1.08)
-        brightness(.78);
-    transform:scale(1.015);
-    transition:
-        transform 1.2s cubic-bezier(.16,1,.3,1),
-        filter 1.2s ease;
-}
-
-.product-card.is-hovered .product-photo{
-    transform:scale(1.08);
-    filter:
-        saturate(.92)
-        contrast(1.05)
-        brightness(.9);
-}
-
-.product-card.is-hovered .product-image::before{
-    opacity:1;
-}
-
-.product-card.is-hovered .product-image::after{
-    transform:scaleX(1);
-}
-
-.product-overlay{
-    position:absolute;
-    inset:0;
-    z-index:3;
-    background:
-        linear-gradient(
-            to top,
-            rgba(0,0,0,.65),
-            rgba(0,0,0,.08) 55%,
-            rgba(0,0,0,.1)
-        );
-    pointer-events:none;
-}
-
-.product-label{
-    position:absolute;
-    left:20px;
-    bottom:18px;
-    z-index:5;
-    font-size:7px;
-    letter-spacing:.3em;
-    color:rgba(255,255,255,.7);
-}
-
-.product-meta{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    gap:20px;
-}
-
-.product-name{
-    font-size:12px;
-    font-weight:400;
-    letter-spacing:.04em;
-}
-
-.product-price{
-    font-size:11px;
+    flex:none;
+    min-height:44px;
+    padding:0 var(--s4);
+    border-radius:var(--r-pill);
+    font-size:15px;
+    font-weight:600;
     white-space:nowrap;
-    color:rgba(242,239,232,.55);
+    color:var(--muted);
+    transition:
+        background var(--t-base) var(--ease),
+        color var(--t-base) var(--ease);
 }
 
-.product-card.is-hovered .product-name{
+.menu-tab:hover{
+    color:var(--text-soft);
+    background:rgba(255,255,255,.05);
+}
+
+.menu-tab.active{
+    background:var(--accent);
     color:#fff;
-    transform:translateX(3px);
 }
 
-.product-card.is-hovered .product-price{
-    color:var(--red);
-}
-
-.product-description{
-    margin-top:9px;
-    max-width:330px;
-    font-size:9px;
-    line-height:1.7;
-    color:rgba(242,239,232,.3);
+.menu-tab-count{
+    margin-left:7px;
+    font-size:13px;
+    font-weight:500;
+    opacity:.65;
+    font-variant-numeric:tabular-nums;
 }
 
 
 /* =====================================================
-   ADD BUTTON
+   PRODUCT GRID + CARD
 ===================================================== */
 
-.add-product{
-    position:relative;
-    width:100%;
-    margin-top:18px;
-    padding:14px 8px;
-    background:none;
-    border:1px solid rgba(242,239,232,.12);
-    color:rgba(242,239,232,.55);
-    font-size:7px;
-    letter-spacing:.22em;
-    cursor:pointer;
-    overflow:hidden;
-    transition:
-        color .4s ease,
-        border-color .4s ease,
-        background .4s ease,
-        transform .3s ease;
+.products{
+    display:grid;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:var(--s5) var(--s4);
 }
 
-.add-product::before{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:var(--white);
-    transform:translateX(-101%);
+.product-card{
+    display:flex;
+    flex-direction:column;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:var(--r-lg);
+    overflow:hidden;
     transition:
-        transform .55s cubic-bezier(.16,1,.3,1);
-    z-index:-1;
+        border-color var(--t-base) var(--ease),
+        transform var(--t-base) var(--ease);
+}
+
+.product-card:hover{
+    border-color:var(--line-strong);
+    transform:translateY(-2px);
+}
+
+.product-image{
+    position:relative;
+    aspect-ratio:4/3;
+    overflow:hidden;
+    background:var(--graphite);
+}
+
+.product-photo{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    transition:transform var(--t-slow) var(--ease);
+}
+
+.product-card:hover .product-photo{
+    transform:scale(1.045);
+}
+
+.product-badge{
+    position:absolute;
+    top:10px;
+    left:10px;
+    z-index:2;
+}
+
+.product-body{
+    display:flex;
+    flex-direction:column;
+    flex:1;
+    gap:var(--s2);
+    padding:var(--s4);
+}
+
+.product-name{
+    font-size:15px;
+    font-weight:600;
+    letter-spacing:.01em;
+    line-height:1.25;
+}
+
+.product-description{
+    font-size:13px;
+    line-height:1.45;
+    color:var(--muted);
+    display:-webkit-box;
+    -webkit-line-clamp:2;
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+}
+
+.product-price{
+    margin-top:auto;
+    padding-top:var(--s2);
+    font-size:17px;
+    font-weight:600;
+    letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;
+}
+
+.product-action{
+    margin-top:var(--s3);
+}
+
+
+/* ---- Кнопка «Добавить» ---- */
+
+.add-product{
+    width:100%;
+    min-height:46px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:var(--s2);
+    border:1px solid var(--line-strong);
+    border-radius:var(--r-pill);
+    color:var(--text-soft);
+    font-size:14px;
+    font-weight:600;
+    transition:
+        background var(--t-base) var(--ease),
+        border-color var(--t-base) var(--ease),
+        color var(--t-base) var(--ease);
 }
 
 .add-product:hover{
-    color:#050505;
-    border-color:var(--white);
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
 }
 
-.add-product:hover::before{
-    transform:translateX(0);
+.add-product svg{
+    width:16px;
+    height:16px;
+    flex:none;
 }
 
 
-/*
-   СОСТОЯНИЕ:
-   товар уже добавлен
-*/
+/* ---- Счётчик «− N +» на месте кнопки ---- */
 
-.add-product.added{
-    background:rgba(217,74,67,.08);
-    border-color:rgba(217,74,67,.45);
-    color:var(--red);
+.qty-stepper{
+    display:grid;
+    grid-template-columns:46px 1fr 46px;
+    align-items:center;
+    min-height:46px;
+    border:1px solid var(--accent);
+    border-radius:var(--r-pill);
+    background:var(--accent-soft);
+    overflow:hidden;
 }
 
-.add-product.added:hover{
-    background:rgba(217,74,67,.15);
-    border-color:var(--red);
-    color:var(--red);
+.qty-btn{
+    height:46px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:19px;
+    line-height:1;
+    color:var(--text-soft);
+    transition:background var(--t-fast) var(--ease);
 }
 
-.add-product.added::before{
-    display:none;
+.qty-btn:hover{
+    background:rgba(255,255,255,.08);
 }
 
-.menu-bottom{
-    position:relative;
-    margin-top:80px;
+.qty-value{
+    text-align:center;
+    font-size:15px;
+    font-weight:700;
+    font-variant-numeric:tabular-nums;
+}
+
+
+/* =====================================================
+   HITS
+===================================================== */
+
+.hits{
+    border-top:1px solid var(--line);
+}
+
+.hits .products{
+    grid-template-columns:repeat(6,minmax(0,1fr));
+}
+
+.menu-empty{
+    grid-column:1/-1;
+    padding:var(--s8) 0;
+    text-align:center;
+    font-size:15px;
+    color:var(--muted);
+}
+
+
+/* =====================================================
+   RESPONSIVE — MENU
+===================================================== */
+
+@media(max-width:1200px){
+
+    .hits .products{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+}
+
+@media(max-width:900px){
+
+    .section-head{
+        display:block;
+    }
+
+    .section-note{
+        margin-top:var(--s4);
+    }
+
+    .products,
+    .hits .products{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        gap:var(--s4) var(--s3);
+    }
+
+    .menu-tabs-wrap{
+        margin-inline:calc(var(--page) * -1);
+        padding-inline:var(--page);
+    }
+
+    .product-body{
+        padding:var(--s3);
+        gap:6px;
+    }
+
+    .product-name{
+        font-size:14px;
+    }
+
+    .product-description{
+        font-size:12.5px;
+        -webkit-line-clamp:2;
+    }
+
+    .product-price{
+        font-size:16px;
+    }
+
+    .add-product{
+        font-size:13px;
+    }
+
+    .add-product .add-label-long{
+        display:none;
+    }
+}
+
+@media(max-width:400px){
+
+    .products,
+    .hits .products{
+        gap:var(--s3) 10px;
+    }
+
+    .qty-stepper{
+        grid-template-columns:44px 1fr 44px;
+    }
+
+    .qty-btn{
+        height:44px;
+    }
 }
 
 
@@ -2258,13 +2321,19 @@ button{
 .toast{
     position:fixed;
     left:50%;
-    bottom:30px;
+    bottom:calc(24px + env(safe-area-inset-bottom));
     transform:translate(-50%,30px);
-    background:rgba(242,239,232,.95);
-    color:#050505;
-    padding:13px 22px;
-    font-size:8px;
-    letter-spacing:.18em;
+    max-width:calc(100vw - 32px);
+    background:var(--text-soft);
+    color:#0A0A0A;
+    padding:13px 20px;
+    border-radius:var(--r-pill);
+    box-shadow:var(--shadow-soft);
+    font-size:14px;
+    font-weight:600;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
     z-index:800;
     opacity:0;
     pointer-events:none;
@@ -2388,81 +2457,10 @@ button{
     }
 
 
-    /* MENU */
-
-    .menu-content{
-        padding-top:10vh;
-    }
-
-    .menu-intro{
-        display:block;
-        margin-bottom:45px;
-    }
-
-    .menu-title{
-        font-size:18vw;
-        margin-bottom:30px;
-    }
-
-    .menu-description{
-        max-width:280px;
-    }
-
-    .menu-tabs{
-        gap:20px;
-        overflow-x:auto;
-        scrollbar-width:none;
-    }
-
-    .menu-tabs::-webkit-scrollbar{
-        display:none;
-    }
-
-    .menu-tab{
-        flex:none;
-        font-size:7px;
-    }
-
-    .products{
-        grid-template-columns:1fr 1fr;
-        gap:45px 12px;
-    }
-
-    .products.has-hover .product-card:not(.is-hovered){
-        opacity:1;
-        transform:none;
-    }
-
-    .product-meta{
-        display:block;
-    }
-
-    .product-name{
-        font-size:10px;
-    }
-
-    .product-price{
-        display:block;
-        margin-top:6px;
-        font-size:9px;
-    }
-
-    .product-description{
-        font-size:8px;
-    }
-
-    .add-product{
-        font-size:5.5px;
-        letter-spacing:.12em;
-        padding:12px 3px;
-    }
-
-    .menu-bottom{
-        margin-top:60px;
-        gap:20px;
-        line-height:1.6;
-    }
-
+    /* Старые мобильные правила меню удалены: они перекрывали новую
+       типографику (.add-product был 5.5px, .product-name 10px) и ломали
+       выравнивание карточек. Меню теперь адаптируется в блоке
+       @media(max-width:900px) выше. */
 
     /* OMAKASE */
 
@@ -2626,8 +2624,8 @@ KYOTO
 
 <nav class="header-nav" aria-label="Основная навигация">
 <a href="#menu">Меню</a>
-<a href="#menu">Хиты</a>
-<a href="#menu">Сеты</a>
+<a href="#hits">Хиты</a>
+<a href="#menu" data-category="sets">Сеты</a>
 <a href="#reservation">Бронь</a>
 <a href="#contacts">Контакты</a>
 </nav>
@@ -2670,8 +2668,8 @@ aria-controls="mobileNav"
 
 <nav class="mobile-nav" id="mobileNav" aria-label="Мобильная навигация">
 <a href="#menu">Меню</a>
-<a href="#menu">Хиты</a>
-<a href="#menu">Сеты</a>
+<a href="#hits">Хиты</a>
+<a href="#menu" data-category="sets">Сеты</a>
 <a href="#reservation">Бронь стола</a>
 <a href="#contacts">Контакты</a>
 </nav>
@@ -2763,6 +2761,85 @@ alt="Сет KYOTO: роллы и суши на тёмной керамическ
 
 </section>
 
+<!-- =====================================================
+     ХИТЫ
+===================================================== -->
+
+<section class="section hits" id="hits" aria-labelledby="hitsTitle">
+
+<div class="wrap">
+
+<div class="section-head reveal">
+
+<div>
+<p class="section-eyebrow">Берут чаще всего</p>
+<h2 class="section-title" id="hitsTitle">Хиты KYOTO</h2>
+</div>
+
+<p class="section-note">
+Если выбираете впервые — начните отсюда.
+Добавляется в один клик.
+</p>
+
+</div>
+
+<div class="products" id="hitsGrid"></div>
+
+</div>
+
+</section>
+
+
+<!-- =====================================================
+     МЕНЮ
+===================================================== -->
+
+<section class="section menu-section" id="menu" aria-labelledby="menuTitle">
+
+<div class="wrap">
+
+<div class="section-head reveal">
+
+<div>
+<p class="section-eyebrow">Меню</p>
+<h2 class="section-title" id="menuTitle">Всё меню KYOTO</h2>
+</div>
+
+<p class="section-note">
+От классических суши до авторских сетов.
+Выберите категорию.
+</p>
+
+</div>
+
+</div>
+
+<div class="menu-tabs-wrap">
+<div class="wrap">
+<div
+class="menu-tabs"
+id="menuTabs"
+role="tablist"
+aria-label="Категории меню"
+></div>
+</div>
+</div>
+
+<div class="wrap">
+
+<div
+class="products"
+id="products"
+role="tabpanel"
+aria-live="polite"
+></div>
+
+</div>
+
+</section>
+
+
+
 <section class="ritual" id="ritual">
 
 <div class="precision-circle"></div>
@@ -2827,88 +2904,6 @@ THE ART OF JAPANESE DINING
 
 <span>
 SCROLL TO DISCOVER
-</span>
-
-</div>
-
-</section>
-
-
-<section class="menu-section" id="menu">
-
-<div class="menu-header">
-
-<span>02</span>
-<span>MENU</span>
-<span>KYOTO · JAPAN</span>
-
-</div>
-
-
-<div class="menu-content">
-
-<div class="menu-intro">
-
-<div>
-
-<div class="menu-title-label">
-KYOTO MENU
-</div>
-
-<h2 class="menu-title">
-MENU
-</h2>
-
-</div>
-
-
-<p class="menu-description">
-
-От классических суши
-до авторских сетов.
-Выберите то, что
-соответствует вашему
-настроению.
-
-</p>
-
-</div>
-
-
-<div class="menu-tabs">
-
-<button class="menu-tab active" data-category="sushi">
-SUSHI
-</button>
-
-<button class="menu-tab" data-category="rolls">
-ROLLS
-</button>
-
-<button class="menu-tab" data-category="sets">
-SETS
-</button>
-
-<button class="menu-tab" data-category="sake">
-SAKE
-</button>
-
-</div>
-
-
-<div class="products" id="products"></div>
-
-</div>
-
-
-<div class="menu-bottom">
-
-<span>
-Выберите блюдо и добавьте его в заказ.
-</span>
-
-<span>
-02 / 05
 </span>
 
 </div>
@@ -3936,88 +3931,84 @@ applySiteConfig();
 
 
 /* =====================================================
-   PRODUCTS
+   КАТЕГОРИИ
+
+   Порядок и подписи задаются здесь. Категория без товаров
+   НЕ отображается — «Горячее» и «Супы» уже описаны, чтобы
+   добавить их позже одними данными, без правки вёрстки.
+===================================================== */
+
+const CATEGORIES=[
+    {key:"hits",   label:"Хиты"},        /* виртуальная: product.hit === true */
+    {key:"rolls",  label:"Роллы"},
+    {key:"sets",   label:"Сеты"},
+    {key:"sushi",  label:"Суши"},
+    {key:"hot",    label:"Горячее"},
+    {key:"soups",  label:"Супы"},
+    {key:"drinks", label:"Напитки"}
+];
+
+
+/* =====================================================
+   ТОВАРЫ
+
+   id, name, price и image не изменены — это те же 12 позиций,
+   что и на действующем сайте, с теми же ценами.
+
+   hit:true — какие позиции показывать в блоке «Хиты KYOTO».
+   Отмечено по типовому спросу; поправьте под реальные продажи,
+   блок соберётся заново сам.
 ===================================================== */
 
 const products=[
 
     {
-        id:"sushi-salmon",
-        category:"sushi",
-        name:"SALMON",
-        description:"Лосось, рис, васаби",
-        price:49000,
-        label:"SALMON",
-        image:"https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1000&q=85"
-    },
-
-    {
-        id:"sushi-tuna",
-        category:"sushi",
-        name:"TUNA",
-        description:"Тунец, рис, васаби",
-        price:59000,
-        label:"TUNA",
-        image:"https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&w=1000&q=85"
-    },
-
-    {
-        id:"sushi-shrimp",
-        category:"sushi",
-        name:"EBI",
-        description:"Тигровая креветка, рис",
-        price:55000,
-        label:"EBI",
-        image:"https://images.unsplash.com/photo-1563612116625-3012372fccce?auto=format&fit=crop&w=1000&q=85"
-    },
-
-    {
         id:"roll-philadelphia",
         category:"rolls",
+        hit:true,
         name:"PHILADELPHIA",
         description:"Лосось, сливочный сыр, авокадо",
         price:89000,
-        label:"PHILADELPHIA",
         image:"https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=1000&q=85"
     },
 
     {
         id:"roll-spicy",
         category:"rolls",
+        hit:true,
         name:"SPICY TUNA",
         description:"Тунец, спайси соус, огурец",
         price:99000,
-        label:"SPICY TUNA",
         image:"https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=1000&q=85"
     },
 
     {
         id:"roll-dragon",
         category:"rolls",
+        hit:true,
         name:"DRAGON",
         description:"Угорь, авокадо, соус унаги",
         price:119000,
-        label:"DRAGON",
         image:"https://images.unsplash.com/photo-1559410540-0b7e6e5d4e36?auto=format&fit=crop&w=1000&q=85"
     },
 
     {
         id:"set-kyoto",
         category:"sets",
+        hit:true,
         name:"KYOTO SET",
         description:"24 шт. — выбор шефа",
         price:249000,
-        label:"KYOTO SET",
         image:"https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=1000&q=85"
     },
 
     {
         id:"set-samurai",
         category:"sets",
+        hit:true,
         name:"SAMURAI",
         description:"32 шт. — суши и роллы",
         price:319000,
-        label:"SAMURAI",
         image:"https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=1000&q=85"
     },
 
@@ -4027,41 +4018,66 @@ const products=[
         name:"OMAKASE",
         description:"40 шт. — премиальный сет",
         price:449000,
-        label:"OMAKASE",
         image:"https://images.unsplash.com/photo-1617196034183-421b4917c92d?auto=format&fit=crop&w=1000&q=85"
     },
 
     {
+        id:"sushi-salmon",
+        category:"sushi",
+        hit:true,
+        name:"SALMON",
+        description:"Лосось, рис, васаби",
+        price:49000,
+        image:"https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"sushi-tuna",
+        category:"sushi",
+        name:"TUNA",
+        description:"Тунец, рис, васаби",
+        price:59000,
+        image:"https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"sushi-shrimp",
+        category:"sushi",
+        name:"EBI",
+        description:"Тигровая креветка, рис",
+        price:55000,
+        image:"https://images.unsplash.com/photo-1563612116625-3012372fccce?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
         id:"sake-junmai",
-        category:"sake",
+        category:"drinks",
         name:"JUNMAI",
         description:"Японское саке",
         price:189000,
-        label:"JUNMAI",
         image:"https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1000&q=85"
     },
 
     {
         id:"sake-dassai",
-        category:"sake",
+        category:"drinks",
         name:"DASSAI",
         description:"Premium Junmai Daiginjo",
         price:329000,
-        label:"DASSAI",
         image:"https://images.unsplash.com/photo-1576675466969-38eeae4b41f6?auto=format&fit=crop&w=1000&q=85"
     },
 
     {
         id:"sake-nigori",
-        category:"sake",
+        category:"drinks",
         name:"NIGORI",
         description:"Мягкое сливочное саке",
         price:219000,
-        label:"NIGORI",
         image:"https://images.unsplash.com/photo-1596450514735-111a2e2d3f9d?auto=format&fit=crop&w=1000&q=85"
     }
 
 ];
+
 
 
 /* =====================================================
@@ -4231,7 +4247,9 @@ function addToCart(productId){
 
     renderCart();
 
-    showToast();
+    syncProductControls();
+
+    showToast("✓ Добавлено — "+product.name);
 
 }
 
@@ -4264,19 +4282,7 @@ function changeQuantity(
 
     renderCart();
 
-    const activeTab =
-        document.querySelector(
-            ".menu-tab.active"
-        );
-
-    if(activeTab){
-
-        renderProducts(
-            activeTab.dataset.category,
-            false
-        );
-
-    }
+    syncProductControls();
 
 }
 
@@ -4434,304 +4440,315 @@ cartOverlay.addEventListener(
 );
 
 
+
 /* =====================================================
-   RENDER PRODUCTS
+   RENDER — КАТЕГОРИИ, КАРТОЧКИ, ХИТЫ
 ===================================================== */
 
-function renderProducts(
-    category="sushi",
-    preserveScroll=true
-){
+const menuTabs =
+    document.getElementById("menuTabs");
 
-    const currentScroll =
-        window.scrollY;
+const hitsGrid =
+    document.getElementById("hitsGrid");
 
+let activeCategory = "hits";
 
-    const filtered =
-        products.filter(
-            product =>
-                product.category ===
-                category
-        );
 
+function getCategoryProducts(key){
 
-    productsContainer.innerHTML =
-        filtered.map(
-            product=>{
+    return key === "hits"
+        ? products.filter(item => item.hit)
+        : products.filter(item => item.category === key);
 
-                const quantity =
-                    cart[product.id]
-                    ? cart[product.id].quantity
-                    : 0;
+}
 
 
-                return`
+/* Категории без товаров не показываем */
+function getVisibleCategories(){
 
-                    <article
-                        class="product-card"
-                        data-product="${product.id}"
-                    >
-
-                        <div
-                            class="product-image"
-                            data-move
-                        >
-
-                            <img
-                                class="product-photo"
-                                src="${product.image}"
-                                alt="${product.name}"
-                                loading="lazy"
-                            >
-
-                            <div class="product-overlay"></div>
-
-                            <div class="product-label">
-                                KYOTO / ${product.label}
-                            </div>
-
-                        </div>
-
-
-                        <div class="product-meta">
-
-                            <div class="product-name">
-                                ${product.name}
-                            </div>
-
-                            <div class="product-price">
-                                ${formatPrice(product.price)}
-                            </div>
-
-                        </div>
-
-
-                        <div class="product-description">
-                            ${product.description}
-                        </div>
-
-
-                        <button
-                            class="add-product ${
-                                quantity>0
-                                ?"added"
-                                :""
-                            }"
-                            data-id="${product.id}"
-                        >
-
-                            ${
-                                quantity>0
-                                ?"ДОБАВЛЕНО · "+quantity+" → КОРЗИНА"
-                                :"ДОБАВИТЬ В ЗАКАЗ"
-                            }
-
-                        </button>
-
-                    </article>
-
-                `;
-
-            }
-        )
-        .join("");
-
-
-    if(preserveScroll){
-
-        requestAnimationFrame(
-            ()=>{
-
-                window.scrollTo(
-                    0,
-                    currentScroll
-                );
-
-            }
-        );
-
-    }
-
-
-    const cards =
-        document.querySelectorAll(
-            ".product-card"
-        );
-
-
-    cards.forEach(
-        card=>{
-
-            const image =
-                card.querySelector(
-                    "[data-move]"
-                );
-
-
-            card.addEventListener(
-                "mouseenter",
-                ()=>{
-
-                    productsContainer.classList.add(
-                        "has-hover"
-                    );
-
-                    card.classList.add(
-                        "is-hovered"
-                    );
-
-                }
-            );
-
-
-            card.addEventListener(
-                "mouseleave",
-                ()=>{
-
-                    productsContainer.classList.remove(
-                        "has-hover"
-                    );
-
-                    card.classList.remove(
-                        "is-hovered"
-                    );
-
-                    image.style.transform =
-                        "translate(0,0)";
-
-                }
-            );
-
-
-            card.addEventListener(
-                "mousemove",
-                event=>{
-
-                    const rect =
-                        card.getBoundingClientRect();
-
-                    const x =
-                        (
-                            event.clientX-
-                            rect.left
-                        )/
-                        rect.width;
-
-                    const y =
-                        (
-                            event.clientY-
-                            rect.top
-                        )/
-                        rect.height;
-
-                    const moveX =
-                        (x-.5)*10;
-
-                    const moveY =
-                        (y-.5)*10;
-
-                    image.style.setProperty(
-                        "--mouse-x",
-                        `${x*100}%`
-                    );
-
-                    image.style.setProperty(
-                        "--mouse-y",
-                        `${y*100}%`
-                    );
-
-                    image.style.transform =
-                        `translate(
-                            ${moveX}px,
-                            ${moveY}px
-                        )`;
-
-                }
-            );
-
-
-            const button =
-                card.querySelector(
-                    ".add-product"
-                );
-
-
-            button.addEventListener(
-                "click",
-                ()=>{
-
-                    const productId =
-                        button.dataset.id;
-
-
-                    if(cart[productId]){
-
-                        openCart();
-
-                        return;
-
-                    }
-
-
-                    addToCart(
-                        productId
-                    );
-
-
-                    renderProducts(
-                        category,
-                        true
-                    );
-
-                }
-            );
-
-        }
+    return CATEGORIES.filter(
+        category => getCategoryProducts(category.key).length > 0
     );
 
 }
 
 
-/* =====================================================
-   TABS
-===================================================== */
+function escapeHtml(value){
 
-document
-    .querySelectorAll(
-        ".menu-tab"
-    )
-    .forEach(
-        tab=>{
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;");
 
-            tab.addEventListener(
-                "click",
-                ()=>{
+}
 
-                    document
-                        .querySelectorAll(
-                            ".menu-tab"
-                        )
-                        .forEach(
-                            item =>
-                                item.classList.remove(
-                                    "active"
-                                )
-                        );
 
-                    tab.classList.add(
-                        "active"
-                    );
+function imageSrcset(url){
 
-                    renderProducts(
-                        tab.dataset.category,
-                        true
-                    );
+    const base = url.replace(/&w=\d+/,"");
 
-                }
-            );
+    return [
+        base.replace(/w=\d+/,"w=400") + " 400w",
+        base.replace(/w=\d+/,"w=700") + " 700w",
+        base.replace(/w=\d+/,"w=1000") + " 1000w"
+    ].join(", ");
 
-        }
+}
+
+
+/* Блок действия: «Добавить» или счётчик «− N +».
+   Живёт отдельно, чтобы обновлять его без перерисовки карточки. */
+function productActionHTML(product){
+
+    const quantity =
+        cart[product.id]
+            ? cart[product.id].quantity
+            : 0;
+
+    if(quantity > 0){
+
+        return `
+            <div class="qty-stepper">
+                <button
+                    class="qty-btn"
+                    type="button"
+                    data-act="dec"
+                    data-id="${product.id}"
+                    aria-label="Убрать одну порцию: ${escapeHtml(product.name)}"
+                >−</button>
+                <span class="qty-value" aria-live="polite">${quantity}</span>
+                <button
+                    class="qty-btn"
+                    type="button"
+                    data-act="inc"
+                    data-id="${product.id}"
+                    aria-label="Добавить ещё одну порцию: ${escapeHtml(product.name)}"
+                >+</button>
+            </div>
+        `;
+    }
+
+    return `
+        <button
+            class="add-product"
+            type="button"
+            data-act="add"
+            data-id="${product.id}"
+            aria-label="Добавить в заказ: ${escapeHtml(product.name)}"
+        >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+            Добавить
+        </button>
+    `;
+}
+
+
+function productCardHTML(product){
+
+    const name = escapeHtml(product.name);
+
+    return `
+        <article class="product-card" data-product="${product.id}">
+
+            <div class="product-image">
+                ${product.hit ? '<span class="badge badge-hit product-badge">Хит</span>' : ""}
+                <img
+                    class="product-photo"
+                    src="${product.image}"
+                    srcset="${imageSrcset(product.image)}"
+                    sizes="(max-width:900px) 46vw, 23vw"
+                    width="1000"
+                    height="750"
+                    loading="lazy"
+                    decoding="async"
+                    alt="${name} — ${escapeHtml(product.description)}"
+                >
+            </div>
+
+            <div class="product-body">
+
+                <h3 class="product-name">${name}</h3>
+
+                <p class="product-description">${escapeHtml(product.description)}</p>
+
+                <p class="product-price">${formatPrice(product.price)}</p>
+
+                <div class="product-action" data-action-for="${product.id}">
+                    ${productActionHTML(product)}
+                </div>
+
+            </div>
+
+        </article>
+    `;
+}
+
+
+function renderGrid(container, list, emptyText){
+
+    if(!container) return;
+
+    container.innerHTML =
+        list.length
+            ? list.map(productCardHTML).join("")
+            : `<p class="menu-empty">${emptyText}</p>`;
+
+}
+
+
+function renderProducts(category){
+
+    if(category){
+        activeCategory = category;
+    }
+
+    renderGrid(
+        productsContainer,
+        getCategoryProducts(activeCategory),
+        "В этой категории пока нет позиций."
     );
+
+}
+
+
+function renderHits(){
+
+    renderGrid(
+        hitsGrid,
+        products.filter(item => item.hit).slice(0,6),
+        ""
+    );
+
+}
+
+
+function renderTabs(){
+
+    if(!menuTabs) return;
+
+    menuTabs.innerHTML =
+        getVisibleCategories()
+            .map(category=>{
+
+                const count =
+                    getCategoryProducts(category.key).length;
+
+                return `
+                    <button
+                        class="menu-tab${
+                            category.key === activeCategory ? " active" : ""
+                        }"
+                        type="button"
+                        role="tab"
+                        aria-selected="${category.key === activeCategory}"
+                        data-category="${category.key}"
+                    >${category.label}<span class="menu-tab-count">${count}</span></button>
+                `;
+            })
+            .join("");
+
+}
+
+
+/* Обновляет только блоки действия — без перерисовки сетки,
+   поэтому не сбрасывается позиция скролла и не мигают карточки. */
+function syncProductControls(){
+
+    document
+        .querySelectorAll("[data-action-for]")
+        .forEach(node=>{
+
+            const product =
+                products.find(
+                    item => item.id === node.dataset.actionFor
+                );
+
+            if(!product) return;
+
+            node.innerHTML = productActionHTML(product);
+
+        });
+
+}
+
+
+/* Одна делегированная обработка на всю страницу:
+   работает и в «Хитах», и в меню, и для будущих блоков. */
+document.addEventListener("click", event=>{
+
+    const control =
+        event.target.closest("[data-act]");
+
+    if(!control) return;
+
+    const id = control.dataset.id;
+
+    if(!id) return;
+
+    if(control.dataset.act === "add"){
+        addToCart(id);
+        return;
+    }
+
+    if(control.dataset.act === "inc"){
+        changeQuantity(id, 1);
+        return;
+    }
+
+    if(control.dataset.act === "dec"){
+        changeQuantity(id, -1);
+    }
+
+});
+
+
+/* Переключение категорий */
+if(menuTabs){
+
+    menuTabs.addEventListener("click", event=>{
+
+        const tab =
+            event.target.closest(".menu-tab");
+
+        if(!tab) return;
+
+        activeCategory = tab.dataset.category;
+
+        renderTabs();
+        renderProducts();
+
+        const activeTab =
+            menuTabs.querySelector(".menu-tab.active");
+
+        if(activeTab){
+            activeTab.scrollIntoView({
+                behavior:"smooth",
+                block:"nearest",
+                inline:"center"
+            });
+        }
+
+    });
+
+}
+
+
+/* Ссылки вида href="#menu" data-category="sets" открывают нужную категорию */
+document.addEventListener("click", event=>{
+
+    const link =
+        event.target.closest("a[data-category]");
+
+    if(!link) return;
+
+    activeCategory = link.dataset.category;
+
+    renderTabs();
+    renderProducts();
+
+});
+
 
 
 /* =====================================================
@@ -4958,14 +4975,17 @@ reservationForm.addEventListener(
    INIT
 ===================================================== */
 
-renderProducts(
-    "sushi",
-    false
-);
+renderTabs();
+
+renderProducts("hits");
+
+renderHits();
 
 renderCart();
 
 updateCartCounter();
+
+syncProductControls();
 
 </script>
 
