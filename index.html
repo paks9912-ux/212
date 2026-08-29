@@ -3033,6 +3033,177 @@ function getAttributionLine() {
 
 
 /* =====================================================
+   АНАЛИТИКА ПОСЕЩЕНИЙ
+   Считает, сколько человек зашло и на каком шаге отвалилось.
+   Данные уходят на свой сервер (server.js) и видны в /admin.
+   Пустой ANALYTICS_ENDPOINT полностью выключает сбор.
+===================================================== */
+
+const ANALYTICS_ENDPOINT = "/api/track";
+
+const funnel = (function(){
+
+    /* Шаги воронки. Считаем самый дальний, до которого гость дошёл —
+       по нему потом восстанавливаем причину ухода. */
+    const STAGES = {
+        landed:      0,
+        menu:        1,
+        add_to_cart: 2,
+        cart_open:   3,
+        checkout:    4,
+        purchase:    5
+    };
+
+    let sid;
+
+    try {
+        sid = sessionStorage.getItem("kyoto_sid");
+        if (!sid) {
+            sid = Date.now().toString(36) + Math.random().toString(36).slice(2,10);
+            sessionStorage.setItem("kyoto_sid", sid);
+        }
+    } catch (error) {
+        sid = "tmp" + Math.random().toString(36).slice(2,12);
+    }
+
+    const started = Date.now();
+    const categories = [];
+
+    let maxStage = 0;
+    let maxScroll = 0;
+    let closed = false;
+
+    function attribution(){
+        try {
+            const raw = localStorage.getItem("kyoto_utm");
+            if (raw) {
+                const utm = JSON.parse(raw);
+                if (Date.now() - (utm.ts || 0) < 30*24*60*60*1000) {
+                    return {
+                        source:   utm.utm_source || (utm.fbclid ? "meta" : null),
+                        campaign: utm.utm_campaign || null,
+                        creative: utm.utm_content || null
+                    };
+                }
+            }
+        } catch (error) {}
+        return { source:null, campaign:null, creative:null };
+    }
+
+    function send(type, payload, beacon){
+
+        if (!ANALYTICS_ENDPOINT) return;
+
+        const body = JSON.stringify(
+            Object.assign({ sid:sid, type:type }, payload)
+        );
+
+        try {
+            if (beacon && navigator.sendBeacon) {
+                navigator.sendBeacon(
+                    ANALYTICS_ENDPOINT,
+                    new Blob([body], { type:"application/json" })
+                );
+            } else {
+                fetch(ANALYTICS_ENDPOINT, {
+                    method:"POST",
+                    headers:{ "Content-Type":"application/json" },
+                    body:body,
+                    keepalive:true
+                }).catch(()=>{});
+            }
+        } catch (error) {}
+
+    }
+
+    window.addEventListener("scroll", ()=>{
+        const total =
+            document.documentElement.scrollHeight - window.innerHeight;
+        if (total > 0) {
+            const pct = Math.round(window.scrollY / total * 100);
+            if (pct > maxScroll) maxScroll = Math.min(100, pct);
+        }
+    }, { passive:true });
+
+    /* Отправляется один раз при уходе со страницы: докуда дошёл,
+       сколько пробыл, что осталось лежать в корзине. */
+    function finish(){
+
+        if (closed) return;
+        closed = true;
+
+        let cartValue = 0;
+        let cartItems = 0;
+        const cartNames = [];
+
+        try {
+            Object.values(cart).forEach(item=>{
+                cartValue += item.price * item.quantity;
+                cartItems += item.quantity;
+                cartNames.push(item.name);
+            });
+        } catch (error) {}
+
+        send("exit", {
+            stage:      maxStage,
+            duration:   Date.now() - started,
+            scroll:     maxScroll,
+            cart_value: cartValue,
+            cart_items: cartItems,
+            cart_names: cartNames.slice(0,10),
+            categories: categories.slice(0,10)
+        }, true);
+
+    }
+
+    window.addEventListener("pagehide", finish);
+
+    document.addEventListener("visibilitychange", ()=>{
+        if (document.visibilityState === "hidden") finish();
+    });
+
+    const attr = attribution();
+
+    send("visit", {
+        device:   window.matchMedia("(max-width: 760px)").matches ? "mobile" : "desktop",
+        width:    window.innerWidth,
+        referrer: (document.referrer || "").slice(0,200),
+        source:   attr.source,
+        campaign: attr.campaign,
+        creative: attr.creative,
+        hour:     new Date().getHours()
+    });
+
+    return {
+
+        stage(name){
+            const value = STAGES[name];
+            if (value === undefined || value <= maxStage) return;
+            maxStage = value;
+            send("stage", {
+                stage: value,
+                name:  name,
+                at:    Date.now() - started
+            });
+        },
+
+        category(name){
+            if (name && categories.indexOf(name) === -1) {
+                categories.push(name);
+            }
+        },
+
+        fail(where){
+            send("fail", { where:where, at:Date.now() - started });
+        }
+
+    };
+
+})();
+
+
+
+/* =====================================================
    HELPERS
 ===================================================== */
 
@@ -3914,6 +4085,8 @@ function addToCart(productId){
 
     showToast();
 
+    funnel.stage("add_to_cart");
+
     track("AddToCart", {
         content_type: "product",
         content_ids: [product.id],
@@ -4065,6 +4238,8 @@ function renderCart(){
 
 
 function openCart(){
+
+    funnel.stage("cart_open");
 
     cartOverlay.classList.add(
         "open"
@@ -4411,6 +4586,8 @@ document
                         "active"
                     );
 
+                    funnel.category(tab.dataset.category);
+
                     renderProducts(
                         tab.dataset.category,
                         true
@@ -4459,6 +4636,8 @@ document
             message += `\n<b>ИТОГО: ${formatPrice(orderTotal)}</b>`;
             message += `\n\n${getAttributionLine()}`;
 
+            funnel.stage("checkout");
+
             track("InitiateCheckout", {
                 value: orderTotal,
                 currency: "UZS",
@@ -4472,6 +4651,7 @@ document
             const sent = await sendTelegramMessage(message);
 
             if(sent) {
+                funnel.stage("purchase");
                 track("Purchase", {
                     value: orderTotal,
                     currency: "UZS",
@@ -4485,6 +4665,7 @@ document
                 closeCart();
                 showToast("ЗАКАЗ УСПЕШНО ОТПРАВЛЕН!");
             } else {
+                funnel.fail("order_send");
                 showToast("ОШИБКА ОТПРАВКИ ЗАКАЗА");
             }
 
@@ -4652,6 +4833,7 @@ reservationForm.addEventListener(
                 block:"center"
             });
         } else {
+            funnel.fail("reservation_send");
             showToast("ОШИБКА ОТПРАВКИ БРОНИ");
             submitBtn.disabled = false;
         }
@@ -4677,6 +4859,7 @@ reservationForm.addEventListener(
                     content_name: "menu",
                     content_type: "product_group"
                 });
+                funnel.stage("menu");
                 observer.disconnect();
             }
         });

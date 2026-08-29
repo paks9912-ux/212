@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KYOTO — посещения сайта</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0a0a; --panel:#121212; --panel-2:#1a1a1a;
+  --ink:#f2efe8; --ink-2:#a8a49b; --ink-3:#6f6c65;
+  --line:rgba(242,239,232,.10); --line-2:rgba(242,239,232,.06);
+  --red:#d94a43; --amber:#c8952f; --green:#4f9668; --blue:#5b8ca8;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:Manrope,system-ui,sans-serif; font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1080px;margin:0 auto;padding:32px 20px 80px;display:flex;flex-direction:column;gap:34px}
+
+header{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;justify-content:space-between;
+  padding-bottom:20px;border-bottom:1px solid var(--line)}
+.brand{font-size:13px;letter-spacing:.34em;text-transform:uppercase;color:var(--red);font-weight:600}
+h1{font-size:26px;font-weight:600;letter-spacing:-.02em;margin-top:6px}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select,button{
+  background:var(--panel-2); color:var(--ink); border:1px solid var(--line);
+  border-radius:4px; padding:8px 13px; font-family:inherit; font-size:14px; cursor:pointer;
+}
+button:hover,select:hover{border-color:var(--ink-3)}
+button:focus-visible,select:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+
+h2{font-size:12px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-3);
+  padding-bottom:11px;border-bottom:1px solid var(--line);margin-bottom:18px}
+section{display:block}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:1px;
+  background:var(--line);border:1px solid var(--line);border-radius:5px;overflow:hidden}
+.kpi{background:var(--panel);padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.kpi .v{font-size:29px;font-weight:700;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .k{font-size:13px;color:var(--ink-3);line-height:1.35}
+.kpi.red .v{color:var(--red)} .kpi.green .v{color:var(--green)} .kpi.amber .v{color:var(--amber)}
+
+.funnel{display:flex;flex-direction:column;gap:2px}
+.fstep{background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:13px 17px;
+  display:flex;align-items:center;gap:16px;position:relative;overflow:hidden}
+.fstep .fill{position:absolute;inset:0 auto 0 0;background:rgba(217,74,67,.13);z-index:0}
+.fstep > *{position:relative;z-index:1}
+.fstep .lbl{flex:1;font-size:14.5px}
+.fstep .cnt{font-weight:600;font-variant-numeric:tabular-nums}
+.fstep .pct{color:var(--ink-3);font-size:13px;min-width:44px;text-align:right;font-variant-numeric:tabular-nums}
+.drop{display:flex;align-items:center;gap:9px;padding:3px 17px;font-size:12.5px;color:var(--ink-3)}
+.drop b{color:var(--red);font-weight:600}
+.drop.worst b{color:var(--red)} .drop.worst{color:var(--ink-2)}
+
+.reasons{display:flex;flex-direction:column;gap:10px}
+.reason{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--accent,var(--ink-3));
+  border-radius:4px;padding:15px 18px;display:flex;flex-direction:column;gap:7px}
+.reason-top{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 14px}
+.reason-top .name{font-size:15.5px;font-weight:600;flex:1;min-width:200px}
+.reason-top .n{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;color:var(--accent,var(--ink))}
+.reason-top .sh{font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.reason .hint{font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.reason .money{font-size:13px;color:var(--amber);font-variant-numeric:tabular-nums}
+
+.t-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:5px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:440px}
+th,td{text-align:left;padding:10px 15px;border-bottom:1px solid var(--line-2);font-size:14px}
+th{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:500;background:var(--panel-2);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td.num{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.hours{display:grid;grid-template-columns:repeat(24,1fr);gap:3px;align-items:end;height:120px;
+  background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:16px 14px 8px;overflow-x:auto}
+.hbar{display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:4px;min-width:20px}
+.hbar .b{background:var(--panel-2);border-radius:2px 2px 0 0;min-height:2px}
+.hbar .b.has{background:var(--red)}
+.hbar .h{font-size:9px;color:var(--ink-3);text-align:center;font-family:"JetBrains Mono",monospace}
+
+.empty{background:var(--panel);border:1px dashed var(--line);border-radius:5px;padding:34px 24px;
+  text-align:center;color:var(--ink-2);display:flex;flex-direction:column;gap:8px}
+.empty b{color:var(--ink);font-weight:600}
+.note{font-size:13px;color:var(--ink-3);line-height:1.5;max-width:70ch}
+.err{background:rgba(217,74,67,.1);border:1px solid var(--red);border-radius:5px;padding:18px;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <div class="brand">KYOTO</div>
+    <h1>Посещения сайта</h1>
+  </div>
+  <div class="controls">
+    <select id="dateSel" aria-label="Дата"></select>
+    <button id="refresh" type="button">Обновить</button>
+  </div>
+</header>
+
+<div id="content"></div>
+
+</div>
+
+<script>
+const KEY = new URLSearchParams(location.search).get("key") || "";
+const content = document.getElementById("content");
+const dateSel = document.getElementById("dateSel");
+
+const sum = n => new Intl.NumberFormat("ru-RU").format(Math.round(n)) + " сум";
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+const ACCENT = {
+  checkout_failed:"var(--red)", cart_abandoned:"var(--amber)", added_forgot:"var(--amber)",
+  menu_no_pick:"var(--blue)", never_reached_menu:"var(--red)", instant_bounce:"var(--ink-3)"
+};
+
+async function load(date){
+  content.innerHTML = '<p class="note">Загружаю…</p>';
+  let data;
+  try {
+    const url = "/api/stats?key=" + encodeURIComponent(KEY) + (date ? "&date=" + date : "");
+    const res = await fetch(url);
+    data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Ошибка запроса");
+  } catch (error) {
+    content.innerHTML = '<div class="err">' + esc(error.message) +
+      '. Откройте админку со своим ключом: <span class="mono">/admin?key=ВАШ_КЛЮЧ</span></div>';
+    return;
+  }
+
+  if (dateSel.options.length === 0 && data.dates) {
+    dateSel.innerHTML = data.dates.map(d =>
+      '<option value="' + d + '">' + d + '</option>').join("") ||
+      '<option value="">нет данных</option>';
+    dateSel.value = data.date;
+  }
+
+  render(data);
+}
+
+function render(d){
+
+  if (!d.visitors) {
+    content.innerHTML =
+      '<div class="empty"><b>За ' + esc(d.date) + ' посещений не было</b>' +
+      '<span>Как только на сайт зайдёт первый человек, здесь появится воронка и разбор причин ухода.</span></div>';
+    return;
+  }
+
+  const parts = [];
+
+  /* KPI */
+  parts.push('<section><h2>Итог дня</h2><div class="kpis">' +
+    kpi(d.visitors, "человек зашло на сайт") +
+    kpi(d.orders, "оформили заказ", "green") +
+    kpi(d.conversion + "%", "конверсия в заказ") +
+    kpi(d.visitors - d.orders, "ушли не купив", "red") +
+    (d.lost_cart_value ? kpi(sum(d.lost_cart_value), "осталось в брошенных корзинах", "amber") : "") +
+    (d.failures ? kpi(d.failures, "сбоев отправки заказа", "red") : "") +
+    '</div></section>');
+
+  /* Воронка */
+  let f = '<section><h2>Путь до заказа</h2><div class="funnel">';
+  d.funnel.forEach((step, i) => {
+    if (i > 0) {
+      const lost = d.funnel[i-1].reached - step.reached;
+      const isWorst = d.worst && lost === d.worst.lost && lost > 0;
+      if (lost > 0) f += '<div class="drop' + (isWorst ? ' worst' : '') + '">↓ отвалилось <b>' +
+        lost + '</b>' + (isWorst ? ' — самая большая потеря дня' : '') + '</div>';
+    }
+    f += '<div class="fstep"><div class="fill" style="width:' + step.share + '%"></div>' +
+      '<span class="lbl">' + esc(step.label) + '</span>' +
+      '<span class="cnt mono">' + step.reached + '</span>' +
+      '<span class="pct mono">' + step.share + '%</span></div>';
+  });
+  parts.push(f + '</div></section>');
+
+  /* Причины ухода — главный блок */
+  if (d.reasons.length) {
+    let r = '<section><h2>Почему ушли не купив</h2><div class="reasons">';
+    d.reasons.forEach(x => {
+      const share = Math.round(x.count / d.visitors * 100);
+      r += '<div class="reason" style="--accent:' + (ACCENT[x.key] || "var(--ink-3)") + '">' +
+        '<div class="reason-top"><span class="name">' + esc(x.label) + '</span>' +
+        '<span class="n mono">' + x.count + '</span>' +
+        '<span class="sh mono">' + share + '% визитов</span></div>' +
+        '<div class="hint">' + esc(x.hint) + '</div>' +
+        (x.lost_value ? '<div class="money mono">В корзинах осталось ' + sum(x.lost_value) + '</div>' : '') +
+        '</div>';
+    });
+    parts.push(r + '</div></section>');
+  }
+
+  /* Кто не дошёл до меню */
+  if (d.never_scrolled.count) {
+    parts.push('<section><h2>Те, кто не дошёл до меню</h2>' +
+      '<div class="kpis">' +
+      kpi(d.never_scrolled.count, "человек") +
+      kpi(d.never_scrolled.avg_scroll + "%", "долистали в среднем") +
+      kpi(d.never_scrolled.avg_seconds + " сек", "провели на сайте") +
+      '</div><p class="note" style="margin-top:12px">Меню начинается после заставки длиной в шесть экранов. ' +
+      'Если средняя глубина прокрутки заметно меньше 100%, эти люди физически не увидели, что у вас можно заказать.</p></section>');
+  }
+
+  /* Брошенные корзины */
+  if (d.abandoned.length) {
+    let t = '<section><h2>Брошенные корзины</h2><div class="t-scroll"><table><thead><tr>' +
+      '<th>Сумма</th><th>Блюд</th><th>Что лежало</th><th>Дошёл до</th><th>Минут на сайте</th>' +
+      '</tr></thead><tbody>';
+    d.abandoned.forEach(a => {
+      t += '<tr><td class="num">' + sum(a.value) + '</td><td class="num">' + a.items + '</td>' +
+        '<td>' + esc(a.names.join(", ") || "—") + '</td>' +
+        '<td>' + esc(a.stage_label) + '</td><td class="num">' + a.minutes + '</td></tr>';
+    });
+    parts.push(t + '</tbody></table></div></section>');
+  }
+
+  /* Источники */
+  parts.push('<section><h2>Откуда пришли</h2>' + groupTable(d.sources, "Источник") + '</section>');
+  parts.push('<section><h2>С чего смотрели</h2>' + groupTable(d.devices, "Устройство") + '</section>');
+
+  /* Часы */
+  const peak = Math.max(...d.hours.map(h => h.visits), 1);
+  let h = '<section><h2>По часам</h2><div class="hours">';
+  d.hours.forEach(x => {
+    h += '<div class="hbar" title="' + x.hour + ':00 — ' + x.visits + ' визитов, ' + x.orders + ' заказов">' +
+      '<div class="b' + (x.visits ? ' has' : '') + '" style="height:' +
+      Math.round(x.visits / peak * 100) + '%"></div>' +
+      '<div class="h">' + x.hour + '</div></div>';
+  });
+  parts.push(h + '</div></section>');
+
+  content.innerHTML = parts.join("");
+}
+
+function kpi(value, label, tone){
+  return '<div class="kpi' + (tone ? " " + tone : "") + '">' +
+    '<span class="v">' + esc(value) + '</span><span class="k">' + esc(label) + '</span></div>';
+}
+
+function groupTable(rows, head){
+  if (!rows.length) return '<p class="note">Нет данных.</p>';
+  let t = '<div class="t-scroll"><table><thead><tr><th>' + head +
+    '</th><th>Визитов</th><th>Заказов</th><th>Конверсия</th></tr></thead><tbody>';
+  rows.forEach(r => {
+    const cr = r.visits ? Math.round(r.orders / r.visits * 1000) / 10 : 0;
+    t += '<tr><td>' + esc(r.name) + '</td><td class="num">' + r.visits +
+      '</td><td class="num">' + r.orders + '</td><td class="num">' + cr + '%</td></tr>';
+  });
+  return t + '</tbody></table></div>';
+}
+
+dateSel.addEventListener("change", () => load(dateSel.value));
+document.getElementById("refresh").addEventListener("click", () => load(dateSel.value));
+load();
+setInterval(() => load(dateSel.value), 120000);
+</script>
+</body>
+</html>
