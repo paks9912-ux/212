@@ -1,0 +1,4587 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>KYOTO — Japanese Dining</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --bg:#050505;
+    --bg2:#080808;
+    --card:#0c0c0c;
+    --white:#f2efe8;
+    --muted:rgba(242,239,232,.42);
+    --line:rgba(242,239,232,.12);
+    --red:#d94a43;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    background:var(--bg);
+    color:var(--white);
+    font-family:"Manrope",sans-serif;
+    overflow-x:hidden;
+}
+
+body.cart-open{
+    overflow:hidden;
+}
+
+button,
+input,
+select,
+textarea{
+    font-family:inherit;
+}
+
+a{
+    color:inherit;
+    text-decoration:none;
+}
+
+
+/* =====================================================
+   CURSOR
+===================================================== */
+
+.cursor-glow{
+    position:fixed;
+    left:0;
+    top:0;
+    width:420px;
+    height:420px;
+    border-radius:50%;
+    pointer-events:none;
+    z-index:9999;
+    opacity:0;
+    transform:translate3d(-50%,-50%,0);
+    background:
+        radial-gradient(
+            circle,
+            rgba(242,239,232,.075) 0%,
+            rgba(242,239,232,.035) 18%,
+            rgba(217,74,67,.025) 32%,
+            transparent 70%
+        );
+    filter:blur(2px);
+    mix-blend-mode:screen;
+    transition:opacity .6s ease;
+}
+
+.cursor-glow.visible{
+    opacity:1;
+}
+
+.cursor-dot{
+    position:fixed;
+    left:0;
+    top:0;
+    width:4px;
+    height:4px;
+    border-radius:50%;
+    pointer-events:none;
+    z-index:10000;
+    opacity:0;
+    transform:translate3d(-50%,-50%,0);
+    background:rgba(242,239,232,.9);
+    box-shadow:
+        0 0 12px rgba(242,239,232,.35),
+        0 0 30px rgba(217,74,67,.08);
+}
+
+.cursor-dot.visible{
+    opacity:1;
+}
+
+
+/* =====================================================
+   NAV
+===================================================== */
+
+.nav{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:90px;
+    padding:0 5vw;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    z-index:100;
+}
+
+.logo{
+    font-size:18px;
+    font-weight:500;
+    letter-spacing:.3em;
+}
+
+.nav-center{
+    font-size:8px;
+    letter-spacing:.24em;
+    text-transform:uppercase;
+    color:var(--muted);
+}
+
+.cart-button{
+    border:0;
+    background:none;
+    color:var(--white);
+    font-size:8px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:9px;
+}
+
+.cart-dot{
+    width:5px;
+    height:5px;
+    background:var(--white);
+    border-radius:50%;
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+.hero{
+    position:relative;
+    height:600vh;
+}
+
+.scene{
+    position:sticky;
+    top:0;
+    width:100%;
+    height:100vh;
+    overflow:hidden;
+    background:var(--bg);
+    perspective:1600px;
+}
+
+.geometry{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:5;
+    transform-style:preserve-3d;
+}
+
+.orbit{
+    position:absolute;
+    width:min(76vw,1050px);
+    height:min(76vw,1050px);
+    left:50%;
+    top:50%;
+    transform:
+        translate(-50%,-50%)
+        scale(.55)
+        rotate(-18deg);
+    border:1px solid var(--line);
+    border-radius:50%;
+    opacity:0;
+    transition:
+        opacity 1.2s ease,
+        transform 1.8s cubic-bezier(.16,1,.3,1);
+}
+
+.orbit-inner{
+    position:absolute;
+    width:54%;
+    height:54%;
+    left:50%;
+    top:50%;
+    transform:
+        translate(-50%,-50%)
+        scale(.3)
+        rotate(25deg);
+    border:1px solid rgba(242,239,232,.055);
+    border-radius:50%;
+    opacity:0;
+    transition:
+        opacity 1s ease .2s,
+        transform 1.5s cubic-bezier(.16,1,.3,1);
+}
+
+.cross-horizontal{
+    position:absolute;
+    left:0;
+    top:50%;
+    width:100%;
+    height:1px;
+    background:rgba(242,239,232,.055);
+    transform:scaleX(0);
+    opacity:0;
+}
+
+.cross-vertical{
+    position:absolute;
+    left:50%;
+    top:0;
+    width:1px;
+    height:100%;
+    background:rgba(242,239,232,.055);
+    transform:scaleY(0);
+    opacity:0;
+}
+
+.geo-square{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:110px;
+    height:110px;
+    transform:
+        translate(-50%,-50%)
+        rotate(15deg)
+        scale(.2);
+    border:1px solid rgba(242,239,232,.14);
+    opacity:0;
+}
+
+.center-point{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:5px;
+    height:5px;
+    transform:
+        translate(-50%,-50%)
+        scale(0);
+    border-radius:50%;
+    background:rgba(242,239,232,.8);
+    opacity:0;
+}
+
+.scene.opening-complete .orbit{
+    opacity:.85;
+    transform:
+        translate(-50%,-50%)
+        scale(1)
+        rotate(0deg);
+}
+
+.scene.opening-complete .orbit-inner{
+    opacity:.55;
+    transform:
+        translate(-50%,-50%)
+        scale(1)
+        rotate(0deg);
+}
+
+.scene.opening-complete .cross-horizontal{
+    opacity:.55;
+    transform:scaleX(1);
+}
+
+.scene.opening-complete .cross-vertical{
+    opacity:.55;
+    transform:scaleY(1);
+}
+
+.scene.opening-complete .geo-square{
+    opacity:.65;
+    transform:
+        translate(-50%,-50%)
+        rotate(45deg)
+        scale(1);
+}
+
+.scene.opening-complete .center-point{
+    opacity:.8;
+    transform:
+        translate(-50%,-50%)
+        scale(1);
+}
+
+
+/* =====================================================
+   HERO TYPOGRAPHY
+===================================================== */
+
+.type-stage{
+    position:absolute;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:20;
+    transform-style:preserve-3d;
+    pointer-events:none;
+}
+
+.word,
+.kyoto{
+    position:absolute;
+    left:50%;
+    top:50%;
+    display:flex;
+    white-space:nowrap;
+    font-size:clamp(95px,17vw,280px);
+    line-height:.78;
+    font-weight:300;
+    letter-spacing:-.085em;
+    transform-style:preserve-3d;
+}
+
+.word{
+    will-change:transform,opacity,filter;
+}
+
+.taste{
+    opacity:0;
+    transform:
+        translate(-50%,-68%)
+        translate3d(0,40px,-180px)
+        scale(.94);
+    filter:blur(14px);
+}
+
+.silence{
+    opacity:0;
+    transform:
+        translate(-50%,5%)
+        translate3d(0,25px,-120px)
+        scale(.98);
+    filter:blur(10px);
+    color:transparent;
+    -webkit-text-stroke:
+        1px rgba(242,239,232,.7);
+}
+
+.silence span{
+    display:inline-block;
+}
+
+.kyoto{
+    color:var(--white);
+    transform:translate(-50%,-50%);
+    opacity:0;
+    filter:blur(28px);
+}
+
+.kyoto span{
+    display:inline-block;
+    transform-style:preserve-3d;
+}
+
+.kyoto-subtitle{
+    position:absolute;
+    left:50%;
+    top:66%;
+    transform:
+        translateX(-50%)
+        translateY(20px);
+    opacity:0;
+    font-size:8px;
+    letter-spacing:.35em;
+    text-transform:uppercase;
+    color:var(--muted);
+    white-space:nowrap;
+    z-index:30;
+    transition:
+        opacity 1.2s ease,
+        transform 1.2s cubic-bezier(.16,1,.3,1);
+}
+
+.kyoto-subtitle.visible{
+    opacity:1;
+    transform:
+        translateX(-50%)
+        translateY(0);
+}
+
+.hero-cta{
+    position:absolute;
+    left:50%;
+    bottom:7vh;
+    transform:
+        translateX(-50%)
+        translateY(20px);
+    opacity:0;
+    z-index:50;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:8px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:var(--white);
+    white-space:nowrap;
+    cursor:pointer;
+    transition:
+        opacity 1.2s ease,
+        transform 1.2s cubic-bezier(.16,1,.3,1);
+}
+
+.hero-cta.visible{
+    opacity:.75;
+    transform:
+        translateX(-50%)
+        translateY(0);
+}
+
+.grain{
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    z-index:200;
+    opacity:.035;
+    background-image:url(
+        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"
+    );
+}
+
+
+/* =====================================================
+   COMMON
+===================================================== */
+
+.ritual,
+.menu-section,
+.omakase,
+.experience,
+.reservation{
+    position:relative;
+    min-height:100vh;
+    padding:7vh 5vw;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+}
+
+.ritual-top,
+.menu-header,
+.omakase-top,
+.experience-top,
+.reservation-top{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr;
+    font-size:8px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:rgba(242,239,232,.35);
+}
+
+.ritual-top span:nth-child(2),
+.menu-header span:nth-child(2),
+.omakase-top span:nth-child(2),
+.experience-top span:nth-child(2),
+.reservation-top span:nth-child(2){
+    text-align:center;
+}
+
+.ritual-top span:nth-child(3),
+.menu-header span:nth-child(3),
+.omakase-top span:nth-child(3),
+.experience-top span:nth-child(3),
+.reservation-top span:nth-child(3){
+    text-align:right;
+}
+
+
+/* =====================================================
+   PRECISION
+===================================================== */
+
+.ritual{
+    background:
+        radial-gradient(
+            circle at 15% 50%,
+            rgba(255,255,255,.025),
+            transparent 32%
+        ),
+        #080808;
+}
+
+.precision-axis{
+    position:absolute;
+    left:50%;
+    top:0;
+    width:1px;
+    height:100%;
+    background:rgba(242,239,232,.035);
+    pointer-events:none;
+}
+
+.precision-circle{
+    position:absolute;
+    width:min(48vw,700px);
+    height:min(48vw,700px);
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    border:1px solid rgba(242,239,232,.035);
+    border-radius:50%;
+    pointer-events:none;
+}
+
+.precision-circle::before{
+    content:"";
+    position:absolute;
+    width:62%;
+    height:62%;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    border:1px solid rgba(242,239,232,.025);
+    border-radius:50%;
+}
+
+.precision-point{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:var(--red);
+    transform:translate(-50%,-50%);
+    box-shadow:0 0 18px rgba(217,74,67,.25);
+    opacity:.75;
+}
+
+.precision-main{
+    position:relative;
+    z-index:2;
+    display:grid;
+    grid-template-columns:minmax(0,3fr) minmax(220px,1fr);
+    align-items:center;
+    gap:7vw;
+    width:100%;
+    max-width:1500px;
+    margin:0 auto;
+}
+
+.precision-mark{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:35px;
+    font-size:7px;
+    letter-spacing:.3em;
+    color:rgba(242,239,232,.28);
+    text-transform:uppercase;
+}
+
+.precision-mark::before{
+    content:"";
+    width:42px;
+    height:1px;
+    background:rgba(242,239,232,.28);
+}
+
+.precision-word{
+    font-size:clamp(80px,13vw,205px);
+    line-height:.78;
+    font-weight:300;
+    letter-spacing:-.085em;
+    white-space:nowrap;
+    color:var(--white);
+    transform:translateX(-.06em);
+}
+
+.precision-subtitle{
+    margin-top:28px;
+    padding-left:.08em;
+    font-size:clamp(30px,4.8vw,76px);
+    line-height:.9;
+    font-weight:300;
+    letter-spacing:-.055em;
+    color:rgba(242,239,232,.38);
+    white-space:nowrap;
+}
+
+.precision-side{
+    max-width:230px;
+    align-self:center;
+}
+
+.precision-line{
+    width:100%;
+    height:1px;
+    margin-bottom:30px;
+    background:rgba(242,239,232,.28);
+}
+
+.precision-text{
+    font-size:11px;
+    line-height:1.95;
+    color:rgba(242,239,232,.42);
+}
+
+.precision-index{
+    display:block;
+    margin-top:38px;
+    font-size:7px;
+    letter-spacing:.28em;
+    color:rgba(242,239,232,.23);
+}
+
+.ritual-bottom,
+.menu-bottom,
+.omakase-bottom{
+    display:flex;
+    justify-content:space-between;
+    font-size:8px;
+    letter-spacing:.2em;
+    color:rgba(242,239,232,.25);
+}
+
+
+/* =====================================================
+   MENU
+===================================================== */
+
+.menu-section{
+    background:#070707;
+    min-height:auto;
+    padding-bottom:12vh;
+}
+
+.menu-content{
+    position:relative;
+    width:100%;
+    max-width:1500px;
+    margin:0 auto;
+    padding-top:14vh;
+}
+
+.menu-intro{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:65px;
+}
+
+.menu-title-label{
+    font-size:8px;
+    letter-spacing:.3em;
+    color:rgba(242,239,232,.35);
+    margin-bottom:25px;
+}
+
+.menu-title{
+    font-size:clamp(70px,10vw,160px);
+    line-height:.8;
+    font-weight:300;
+    letter-spacing:-.08em;
+}
+
+.menu-description{
+    max-width:330px;
+    font-size:11px;
+    line-height:1.9;
+    color:rgba(242,239,232,.4);
+}
+
+.menu-tabs{
+    display:flex;
+    gap:35px;
+    border-bottom:1px solid rgba(242,239,232,.1);
+    margin-bottom:45px;
+}
+
+.menu-tab{
+    position:relative;
+    padding:0 0 18px;
+    background:none;
+    border:0;
+    color:rgba(242,239,232,.3);
+    font-size:8px;
+    letter-spacing:.25em;
+    cursor:pointer;
+    transition:color .4s ease;
+}
+
+.menu-tab::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:-1px;
+    width:0;
+    height:1px;
+    background:var(--red);
+    transition:
+        width .5s cubic-bezier(.16,1,.3,1);
+}
+
+.menu-tab:hover,
+.menu-tab.active{
+    color:var(--white);
+}
+
+.menu-tab.active::after{
+    width:100%;
+}
+
+.products{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:70px 25px;
+}
+
+.product-card{
+    position:relative;
+    transition:
+        opacity .6s ease,
+        transform .7s cubic-bezier(.16,1,.3,1);
+}
+
+.products.has-hover .product-card:not(.is-hovered){
+    opacity:.32;
+    transform:scale(.985);
+}
+
+.product-image{
+    position:relative;
+    width:100%;
+    aspect-ratio:4/4.7;
+    overflow:hidden;
+    background:#101010;
+    margin-bottom:22px;
+    cursor:pointer;
+    isolation:isolate;
+    transition:
+        transform 1s cubic-bezier(.16,1,.3,1);
+}
+
+.product-image::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:2;
+    pointer-events:none;
+    background:
+        radial-gradient(
+            circle at var(--mouse-x,50%) var(--mouse-y,50%),
+            rgba(255,255,255,.12),
+            transparent 25%
+        );
+    opacity:0;
+    transition:opacity .5s ease;
+}
+
+.product-image::after{
+    content:"";
+    position:absolute;
+    left:0;
+    bottom:0;
+    width:100%;
+    height:2px;
+    background:var(--red);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:
+        transform .7s cubic-bezier(.16,1,.3,1);
+    z-index:4;
+}
+
+.product-photo{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    display:block;
+    filter:
+        saturate(.72)
+        contrast(1.08)
+        brightness(.78);
+    transform:scale(1.015);
+    transition:
+        transform 1.2s cubic-bezier(.16,1,.3,1),
+        filter 1.2s ease;
+}
+
+.product-card.is-hovered .product-photo{
+    transform:scale(1.08);
+    filter:
+        saturate(.92)
+        contrast(1.05)
+        brightness(.9);
+}
+
+.product-card.is-hovered .product-image::before{
+    opacity:1;
+}
+
+.product-card.is-hovered .product-image::after{
+    transform:scaleX(1);
+}
+
+.product-overlay{
+    position:absolute;
+    inset:0;
+    z-index:3;
+    background:
+        linear-gradient(
+            to top,
+            rgba(0,0,0,.65),
+            rgba(0,0,0,.08) 55%,
+            rgba(0,0,0,.1)
+        );
+    pointer-events:none;
+}
+
+.product-label{
+    position:absolute;
+    left:20px;
+    bottom:18px;
+    z-index:5;
+    font-size:7px;
+    letter-spacing:.3em;
+    color:rgba(255,255,255,.7);
+}
+
+.product-meta{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+}
+
+.product-name{
+    font-size:12px;
+    font-weight:400;
+    letter-spacing:.04em;
+}
+
+.product-price{
+    font-size:11px;
+    white-space:nowrap;
+    color:rgba(242,239,232,.55);
+}
+
+.product-card.is-hovered .product-name{
+    color:#fff;
+    transform:translateX(3px);
+}
+
+.product-card.is-hovered .product-price{
+    color:var(--red);
+}
+
+.product-description{
+    margin-top:9px;
+    max-width:330px;
+    font-size:9px;
+    line-height:1.7;
+    color:rgba(242,239,232,.3);
+}
+
+
+/* =====================================================
+   ADD BUTTON
+===================================================== */
+
+.add-product{
+    position:relative;
+    width:100%;
+    margin-top:18px;
+    padding:14px 8px;
+    background:none;
+    border:1px solid rgba(242,239,232,.12);
+    color:rgba(242,239,232,.55);
+    font-size:7px;
+    letter-spacing:.22em;
+    cursor:pointer;
+    overflow:hidden;
+    transition:
+        color .4s ease,
+        border-color .4s ease,
+        background .4s ease,
+        transform .3s ease;
+}
+
+.add-product::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:var(--white);
+    transform:translateX(-101%);
+    transition:
+        transform .55s cubic-bezier(.16,1,.3,1);
+    z-index:-1;
+}
+
+.add-product:hover{
+    color:#050505;
+    border-color:var(--white);
+}
+
+.add-product:hover::before{
+    transform:translateX(0);
+}
+
+
+/*
+   СОСТОЯНИЕ:
+   товар уже добавлен
+*/
+
+.add-product.added{
+    background:rgba(217,74,67,.08);
+    border-color:rgba(217,74,67,.45);
+    color:var(--red);
+}
+
+.add-product.added:hover{
+    background:rgba(217,74,67,.15);
+    border-color:var(--red);
+    color:var(--red);
+}
+
+.add-product.added::before{
+    display:none;
+}
+
+.menu-bottom{
+    position:relative;
+    margin-top:80px;
+}
+
+
+/* =====================================================
+   OMAKASE
+===================================================== */
+
+.omakase{
+    background:#050505;
+}
+
+.omakase-content{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    align-items:center;
+    gap:8vw;
+    max-width:1500px;
+    width:100%;
+    margin:auto;
+}
+
+.omakase-copy{
+    max-width:650px;
+}
+
+.omakase-label{
+    font-size:8px;
+    letter-spacing:.3em;
+    color:rgba(242,239,232,.35);
+    margin-bottom:35px;
+}
+
+.omakase h2{
+    font-size:clamp(58px,7vw,110px);
+    font-weight:300;
+    line-height:.9;
+    letter-spacing:-.065em;
+    margin-bottom:45px;
+}
+
+.omakase p{
+    max-width:390px;
+    font-size:12px;
+    line-height:1.9;
+    color:rgba(242,239,232,.45);
+}
+
+.omakase-button{
+    margin-top:45px;
+    padding:16px 0;
+    background:none;
+    border:0;
+    border-bottom:1px solid rgba(242,239,232,.25);
+    color:var(--white);
+    font-size:8px;
+    letter-spacing:.25em;
+    cursor:pointer;
+    display:flex;
+    gap:30px;
+    transition:
+        gap .5s ease,
+        border-color .5s ease;
+}
+
+.omakase-button:hover{
+    gap:45px;
+    border-color:rgba(242,239,232,.7);
+}
+
+.omakase-button span{
+    font-size:13px;
+}
+
+.omakase-visual{
+    position:relative;
+    height:620px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.omakase-orbit{
+    position:absolute;
+    border-radius:50%;
+    border:1px solid rgba(242,239,232,.11);
+}
+
+.orbit-one{
+    width:440px;
+    height:440px;
+}
+
+.orbit-two{
+    width:320px;
+    height:320px;
+    border-color:rgba(242,239,232,.07);
+}
+
+.orbit-three{
+    width:170px;
+    height:170px;
+    border-color:rgba(242,239,232,.15);
+}
+
+.omakase-center{
+    width:110px;
+    height:110px;
+    border-radius:50%;
+    border:1px solid rgba(242,239,232,.2);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+}
+
+.omakase-center span{
+    font-size:21px;
+}
+
+.omakase-center small{
+    font-size:6px;
+    letter-spacing:.25em;
+    color:rgba(242,239,232,.35);
+}
+
+.omakase-line{
+    position:absolute;
+    width:500px;
+    height:1px;
+    background:rgba(242,239,232,.06);
+}
+
+.line-one{
+    transform:rotate(35deg);
+}
+
+.line-two{
+    transform:rotate(-35deg);
+}
+
+
+/* =====================================================
+   EXPERIENCE
+===================================================== */
+
+.experience{
+    background:
+        radial-gradient(
+            circle at 50% 50%,
+            #101010 0%,
+            #070707 45%,
+            #050505 100%
+        );
+}
+
+.experience-main{
+    position:relative;
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.experience-content{
+    position:relative;
+    z-index:3;
+    max-width:1000px;
+}
+
+.experience-label{
+    margin-bottom:38px;
+    font-size:8px;
+    letter-spacing:.35em;
+    color:rgba(242,239,232,.35);
+}
+
+.experience-title{
+    font-size:clamp(60px,9vw,145px);
+    line-height:.84;
+    letter-spacing:-.075em;
+    font-weight:300;
+}
+
+.experience-title span{
+    display:block;
+}
+
+.experience-title span:last-child{
+    color:rgba(242,239,232,.38);
+}
+
+.experience-description{
+    max-width:440px;
+    margin:48px auto 0;
+    font-size:12px;
+    line-height:2;
+    color:rgba(242,239,232,.42);
+}
+
+.experience-circle{
+    position:absolute;
+    width:min(52vw,700px);
+    height:min(52vw,700px);
+    border:1px solid rgba(242,239,232,.07);
+    border-radius:50%;
+}
+
+.experience-circle::before,
+.experience-circle::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:50%;
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    border:1px solid rgba(242,239,232,.05);
+}
+
+.experience-circle::before{
+    width:70%;
+    height:70%;
+}
+
+.experience-circle::after{
+    width:35%;
+    height:35%;
+}
+
+.experience-line{
+    position:absolute;
+    width:100vw;
+    height:1px;
+    background:rgba(242,239,232,.045);
+}
+
+.experience-bottom,
+.reservation-bottom{
+    display:flex;
+    justify-content:space-between;
+    font-size:8px;
+    letter-spacing:.2em;
+    color:rgba(242,239,232,.25);
+}
+
+
+/* =====================================================
+   RESERVATION
+===================================================== */
+
+.reservation{
+    background:#030303;
+}
+
+.reservation::before{
+    content:"";
+    position:absolute;
+    width:min(55vw,760px);
+    height:min(55vw,760px);
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    border:1px solid rgba(242,239,232,.035);
+    border-radius:50%;
+    pointer-events:none;
+}
+
+.reservation::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:0;
+    width:1px;
+    height:100%;
+    background:rgba(242,239,232,.025);
+    pointer-events:none;
+}
+
+.reservation-main{
+    position:relative;
+    z-index:3;
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+}
+
+.reservation-content{
+    width:100%;
+    max-width:1200px;
+}
+
+.reservation-intro{
+    display:grid;
+    grid-template-columns:minmax(0,1.3fr) minmax(300px,.7fr);
+    gap:8vw;
+    align-items:end;
+    margin-bottom:65px;
+}
+
+.reservation-label{
+    margin-bottom:28px;
+    font-size:8px;
+    letter-spacing:.35em;
+    color:rgba(242,239,232,.35);
+}
+
+.reservation-title{
+    font-size:clamp(60px,8vw,125px);
+    line-height:.82;
+    letter-spacing:-.075em;
+    font-weight:300;
+}
+
+.reservation-title span{
+    display:block;
+}
+
+.reservation-title span:last-child{
+    color:rgba(242,239,232,.38);
+}
+
+.reservation-description{
+    max-width:330px;
+    font-size:11px;
+    line-height:1.9;
+    color:rgba(242,239,232,.4);
+}
+
+.reservation-form{
+    width:100%;
+    border-top:1px solid rgba(242,239,232,.12);
+}
+
+.form-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border-bottom:1px solid rgba(242,239,232,.12);
+}
+
+.form-field{
+    position:relative;
+    min-height:82px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.form-row .form-field:first-child{
+    border-right:1px solid rgba(242,239,232,.12);
+    padding-right:40px;
+}
+
+.form-row .form-field:last-child{
+    padding-left:40px;
+}
+
+.form-field label{
+    position:absolute;
+    top:16px;
+    left:0;
+    font-size:7px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+    color:rgba(242,239,232,.28);
+    pointer-events:none;
+}
+
+.form-row .form-field:last-child label{
+    left:40px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea{
+    width:100%;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:var(--white);
+    font-size:12px;
+    font-weight:300;
+    letter-spacing:.03em;
+    padding:22px 0 0;
+}
+
+.form-field input::placeholder,
+.form-field textarea::placeholder{
+    color:transparent;
+}
+
+.form-field select{
+    appearance:none;
+    -webkit-appearance:none;
+    cursor:pointer;
+}
+
+.form-field select option{
+    background:#0a0a0a;
+    color:#f2efe8;
+}
+
+.form-field:focus-within label{
+    color:rgba(217,74,67,.8);
+}
+
+.select-field::after{
+    content:"↓";
+    position:absolute;
+    right:0;
+    bottom:25px;
+    font-size:12px;
+    color:rgba(242,239,232,.35);
+    pointer-events:none;
+}
+
+.form-field.full{
+    padding-left:0 !important;
+    padding-right:0 !important;
+}
+
+.form-field.full label{
+    left:0 !important;
+}
+
+.form-field textarea{
+    resize:none;
+    min-height:115px;
+    padding-top:25px;
+}
+
+.form-bottom{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-top:35px;
+    gap:30px;
+}
+
+.form-note{
+    max-width:330px;
+    font-size:8px;
+    line-height:1.8;
+    color:rgba(242,239,232,.25);
+}
+
+.reserve-submit{
+    position:relative;
+    min-width:260px;
+    padding:18px 25px;
+    border:1px solid rgba(242,239,232,.28);
+    background:transparent;
+    color:var(--white);
+    font-size:8px;
+    letter-spacing:.3em;
+    cursor:pointer;
+    overflow:hidden;
+    transition:
+        color .5s ease,
+        border-color .5s ease;
+}
+
+.reserve-submit::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:var(--white);
+    transform:translateX(-101%);
+    transition:
+        transform .6s cubic-bezier(.16,1,.3,1);
+    z-index:-1;
+}
+
+.reserve-submit:hover{
+    color:#050505;
+    border-color:var(--white);
+}
+
+.reserve-submit:hover::before{
+    transform:translateX(0);
+}
+
+.reserve-submit span{
+    margin-left:25px;
+    font-size:14px;
+}
+
+.reservation-success{
+    display:none;
+    text-align:center;
+    padding:80px 20px;
+}
+
+.reservation-success.active{
+    display:block;
+}
+
+.reservation-success-label{
+    margin-bottom:25px;
+    font-size:8px;
+    letter-spacing:.35em;
+    color:var(--red);
+}
+
+.reservation-success-title{
+    font-size:clamp(45px,6vw,90px);
+    font-weight:300;
+    letter-spacing:-.06em;
+    line-height:.9;
+}
+
+.reservation-success-text{
+    max-width:360px;
+    margin:30px auto 0;
+    font-size:11px;
+    line-height:1.9;
+    color:rgba(242,239,232,.4);
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+.footer{
+    min-height:45vh;
+    padding:8vh 5vw;
+    background:#020202;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    border-top:1px solid rgba(242,239,232,.08);
+}
+
+.footer-main{
+    display:grid;
+    grid-template-columns:2fr 1fr 1fr;
+    gap:5vw;
+}
+
+.footer-logo{
+    font-size:clamp(45px,7vw,100px);
+    font-weight:300;
+    letter-spacing:-.075em;
+}
+
+.footer-column{
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+}
+
+.footer-column span:first-child{
+    margin-bottom:10px;
+    font-size:7px;
+    letter-spacing:.3em;
+    color:rgba(242,239,232,.25);
+}
+
+.footer-column a,
+.footer-column span{
+    font-size:9px;
+    letter-spacing:.12em;
+    color:rgba(242,239,232,.5);
+}
+
+.footer-bottom{
+    display:flex;
+    justify-content:space-between;
+    padding-top:30px;
+    border-top:1px solid rgba(242,239,232,.07);
+    font-size:7px;
+    letter-spacing:.2em;
+    color:rgba(242,239,232,.22);
+}
+
+
+/* =====================================================
+   CART
+===================================================== */
+
+.cart-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.65);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    opacity:0;
+    visibility:hidden;
+    transition:
+        opacity .4s ease,
+        visibility .4s ease;
+    z-index:500;
+}
+
+.cart-overlay.open{
+    opacity:1;
+    visibility:visible;
+}
+
+.cart-panel{
+    position:absolute;
+    top:0;
+    right:0;
+    width:min(480px,100%);
+    height:100%;
+    background:#0a0a0a;
+    border-left:1px solid rgba(242,239,232,.1);
+    transform:translateX(100%);
+    transition:
+        transform .6s cubic-bezier(.16,1,.3,1);
+    display:flex;
+    flex-direction:column;
+}
+
+.cart-overlay.open .cart-panel{
+    transform:translateX(0);
+}
+
+.cart-head{
+    min-height:90px;
+    padding:0 30px;
+    border-bottom:1px solid rgba(242,239,232,.1);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.cart-head-title{
+    font-size:11px;
+    letter-spacing:.25em;
+    text-transform:uppercase;
+}
+
+.cart-close{
+    width:35px;
+    height:35px;
+    border:1px solid rgba(242,239,232,.15);
+    background:none;
+    color:var(--white);
+    border-radius:50%;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.cart-items{
+    flex:1;
+    overflow-y:auto;
+    padding:25px 30px;
+}
+
+.cart-empty{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.cart-empty-title{
+    font-size:24px;
+    font-weight:300;
+    margin-bottom:15px;
+}
+
+.cart-empty-text{
+    font-size:9px;
+    line-height:1.8;
+    color:rgba(242,239,232,.35);
+}
+
+.cart-item{
+    padding:20px 0;
+    border-bottom:1px solid rgba(242,239,232,.08);
+    display:grid;
+    grid-template-columns:1fr auto;
+    gap:15px;
+}
+
+.cart-item-name{
+    font-size:11px;
+}
+
+.cart-item-price{
+    margin-top:7px;
+    font-size:9px;
+    color:rgba(242,239,232,.4);
+}
+
+.cart-controls{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.qty-button{
+    width:25px;
+    height:25px;
+    border:1px solid rgba(242,239,232,.15);
+    background:none;
+    color:var(--white);
+    cursor:pointer;
+}
+
+.qty-number{
+    min-width:15px;
+    text-align:center;
+    font-size:9px;
+}
+
+.cart-footer{
+    padding:25px 30px 30px;
+    border-top:1px solid rgba(242,239,232,.1);
+}
+
+.cart-total{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:20px;
+}
+
+.cart-total-label{
+    font-size:8px;
+    letter-spacing:.2em;
+    color:rgba(242,239,232,.35);
+}
+
+.cart-total-price{
+    font-size:20px;
+    font-weight:300;
+}
+
+.checkout-button{
+    width:100%;
+    padding:17px;
+    border:1px solid var(--white);
+    background:var(--white);
+    color:#050505;
+    font-size:8px;
+    letter-spacing:.25em;
+    cursor:pointer;
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:30px;
+    transform:translate(-50%,30px);
+    background:rgba(242,239,232,.95);
+    color:#050505;
+    padding:13px 22px;
+    font-size:8px;
+    letter-spacing:.18em;
+    z-index:800;
+    opacity:0;
+    pointer-events:none;
+    transition:
+        opacity .35s ease,
+        transform .35s cubic-bezier(.16,1,.3,1);
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:700px){
+
+    .cursor-glow,
+    .cursor-dot{
+        display:none;
+    }
+
+    .nav{
+        height:70px;
+        padding:0 7vw;
+    }
+
+    .nav-center{
+        display:none;
+    }
+
+    .logo{
+        font-size:15px;
+    }
+
+    .word,
+    .kyoto{
+        font-size:clamp(58px,17vw,130px);
+    }
+
+    .orbit{
+        width:120vw;
+        height:120vw;
+    }
+
+    .ritual,
+    .menu-section,
+    .omakase,
+    .experience,
+    .reservation{
+        padding:6vh 7vw;
+    }
+
+    .ritual-top,
+    .menu-header,
+    .omakase-top,
+    .experience-top,
+    .reservation-top{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .ritual-top span:nth-child(3),
+    .menu-header span:nth-child(3),
+    .omakase-top span:nth-child(3),
+    .experience-top span:nth-child(3),
+    .reservation-top span:nth-child(3){
+        display:none;
+    }
+
+    .ritual-top span:nth-child(2),
+    .menu-header span:nth-child(2),
+    .omakase-top span:nth-child(2),
+    .experience-top span:nth-child(2),
+    .reservation-top span:nth-child(2){
+        text-align:right;
+    }
+
+
+    /* PRECISION */
+
+    .precision-main{
+        grid-template-columns:1fr;
+        gap:45px;
+    }
+
+    .precision-mark{
+        margin-bottom:24px;
+    }
+
+    .precision-word{
+        font-size:19vw;
+    }
+
+    .precision-subtitle{
+        margin-top:22px;
+        font-size:8vw;
+        white-space:normal;
+        max-width:90%;
+    }
+
+    .precision-side{
+        max-width:270px;
+        margin-left:auto;
+    }
+
+    .precision-text{
+        font-size:10px;
+        line-height:1.8;
+    }
+
+    .precision-circle{
+        width:110vw;
+        height:110vw;
+    }
+
+    .precision-point{
+        left:7vw;
+    }
+
+
+    /* MENU */
+
+    .menu-content{
+        padding-top:10vh;
+    }
+
+    .menu-intro{
+        display:block;
+        margin-bottom:45px;
+    }
+
+    .menu-title{
+        font-size:18vw;
+        margin-bottom:30px;
+    }
+
+    .menu-description{
+        max-width:280px;
+    }
+
+    .menu-tabs{
+        gap:20px;
+        overflow-x:auto;
+        scrollbar-width:none;
+    }
+
+    .menu-tabs::-webkit-scrollbar{
+        display:none;
+    }
+
+    .menu-tab{
+        flex:none;
+        font-size:7px;
+    }
+
+    .products{
+        grid-template-columns:1fr 1fr;
+        gap:45px 12px;
+    }
+
+    .products.has-hover .product-card:not(.is-hovered){
+        opacity:1;
+        transform:none;
+    }
+
+    .product-meta{
+        display:block;
+    }
+
+    .product-name{
+        font-size:10px;
+    }
+
+    .product-price{
+        display:block;
+        margin-top:6px;
+        font-size:9px;
+    }
+
+    .product-description{
+        font-size:8px;
+    }
+
+    .add-product{
+        font-size:5.5px;
+        letter-spacing:.12em;
+        padding:12px 3px;
+    }
+
+    .menu-bottom{
+        margin-top:60px;
+        gap:20px;
+        line-height:1.6;
+    }
+
+
+    /* OMAKASE */
+
+    .omakase-content{
+        grid-template-columns:1fr;
+        gap:5vh;
+    }
+
+    .omakase h2{
+        font-size:17vw;
+    }
+
+    .omakase-visual{
+        height:400px;
+    }
+
+    .orbit-one{
+        width:300px;
+        height:300px;
+    }
+
+    .orbit-two{
+        width:220px;
+        height:220px;
+    }
+
+    .orbit-three{
+        width:120px;
+        height:120px;
+    }
+
+    .omakase-line{
+        width:330px;
+    }
+
+
+    /* EXPERIENCE */
+
+    .experience-title{
+        font-size:18vw;
+    }
+
+    .experience-description{
+        font-size:11px;
+        max-width:300px;
+    }
+
+    .experience-circle{
+        width:105vw;
+        height:105vw;
+    }
+
+
+    /* RESERVATION */
+
+    .reservation::before{
+        width:120vw;
+        height:120vw;
+    }
+
+    .reservation-main{
+        padding:12vh 0 10vh;
+    }
+
+    .reservation-intro{
+        display:block;
+        margin-bottom:50px;
+    }
+
+    .reservation-title{
+        font-size:18vw;
+    }
+
+    .reservation-description{
+        margin-top:35px;
+        max-width:280px;
+        font-size:10px;
+    }
+
+    .form-row{
+        grid-template-columns:1fr;
+    }
+
+    .form-row .form-field:first-child{
+        border-right:0;
+        border-bottom:1px solid rgba(242,239,232,.12);
+        padding-right:0;
+    }
+
+    .form-row .form-field:last-child{
+        padding-left:0;
+    }
+
+    .form-row .form-field:last-child label{
+        left:0;
+    }
+
+    .form-bottom{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .form-note{
+        max-width:280px;
+    }
+
+    .reserve-submit{
+        width:100%;
+    }
+
+
+    /* FOOTER */
+
+    .footer{
+        padding:7vh 7vw;
+        min-height:60vh;
+    }
+
+    .footer-main{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .footer-logo{
+        grid-column:1/-1;
+        margin-bottom:25px;
+    }
+
+    .footer-bottom{
+        flex-direction:column;
+        gap:15px;
+    }
+
+    .cart-panel{
+        width:100%;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="cursor-glow" id="cursorGlow"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+
+<section class="hero">
+
+<div class="scene" id="scene">
+
+<nav class="nav">
+
+<a href="#" class="logo">
+KYOTO
+</a>
+
+<div class="nav-center">
+Japanese dining experience
+</div>
+
+<button class="cart-button" id="openCart">
+
+<span class="cart-dot"></span>
+
+CART
+
+<span id="cartCount">0</span>
+
+</button>
+
+</nav>
+
+
+<div class="geometry">
+
+<div class="orbit"></div>
+<div class="orbit-inner"></div>
+<div class="cross-horizontal"></div>
+<div class="cross-vertical"></div>
+<div class="geo-square"></div>
+<div class="center-point"></div>
+
+</div>
+
+
+<div class="type-stage">
+
+<div class="word taste" id="taste">
+<span>T</span>
+<span>A</span>
+<span>S</span>
+<span>T</span>
+<span>E</span>
+</div>
+
+<div class="word silence" id="silence">
+
+<span>S</span>
+<span>I</span>
+<span>L</span>
+<span>E</span>
+<span>N</span>
+<span>C</span>
+<span>E</span>
+
+</div>
+
+
+<div class="kyoto" id="kyoto">
+
+<span>K</span>
+<span>Y</span>
+<span>O</span>
+<span>T</span>
+<span>O</span>
+
+</div>
+
+</div>
+
+
+<div class="kyoto-subtitle" id="kyotoSubtitle">
+Japanese dining experience
+</div>
+
+
+<div class="hero-cta" id="heroCta">
+
+<span>Discover the ritual</span>
+<span>↓</span>
+
+</div>
+
+
+<div class="grain"></div>
+
+</div>
+
+</section>
+
+
+<section class="ritual" id="ritual">
+
+<div class="precision-circle"></div>
+<div class="precision-point"></div>
+<div class="precision-axis"></div>
+
+<div class="ritual-top">
+
+<span>01</span>
+<span>THE RITUAL</span>
+<span>KYOTO · JAPAN</span>
+
+</div>
+
+
+<div class="precision-main">
+
+<div class="precision-title">
+
+<div class="precision-mark">
+THE ART OF JAPANESE DINING
+</div>
+
+<div class="precision-word">
+ТОЧНОСТЬ
+</div>
+
+<div class="precision-subtitle">
+в каждом движении.
+</div>
+
+</div>
+
+
+<div class="precision-side">
+
+<div class="precision-line"></div>
+
+<p class="precision-text">
+
+Японская кухня,
+основанная на точности,
+балансе и уважении
+к каждому ингредиенту.
+
+</p>
+
+<span class="precision-index">
+01 / 05
+</span>
+
+</div>
+
+</div>
+
+
+<div class="ritual-bottom">
+
+<span>
+Тихий подход к японской гастрономии.
+</span>
+
+<span>
+SCROLL TO DISCOVER
+</span>
+
+</div>
+
+</section>
+
+
+<section class="menu-section" id="menu">
+
+<div class="menu-header">
+
+<span>02</span>
+<span>MENU</span>
+<span>KYOTO · JAPAN</span>
+
+</div>
+
+
+<div class="menu-content">
+
+<div class="menu-intro">
+
+<div>
+
+<div class="menu-title-label">
+KYOTO MENU
+</div>
+
+<h2 class="menu-title">
+MENU
+</h2>
+
+</div>
+
+
+<p class="menu-description">
+
+От классических суши
+до авторских сетов.
+Выберите то, что
+соответствует вашему
+настроению.
+
+</p>
+
+</div>
+
+
+<div class="menu-tabs">
+
+<button class="menu-tab active" data-category="sushi">
+SUSHI
+</button>
+
+<button class="menu-tab" data-category="rolls">
+ROLLS
+</button>
+
+<button class="menu-tab" data-category="sets">
+SETS
+</button>
+
+<button class="menu-tab" data-category="sake">
+SAKE
+</button>
+
+</div>
+
+
+<div class="products" id="products"></div>
+
+</div>
+
+
+<div class="menu-bottom">
+
+<span>
+Выберите блюдо и добавьте его в заказ.
+</span>
+
+<span>
+02 / 05
+</span>
+
+</div>
+
+</section>
+
+
+<section class="omakase" id="omakase">
+
+<div class="omakase-top">
+
+<span>03</span>
+<span>OMAKASE</span>
+<span>KYOTO · JAPAN</span>
+
+</div>
+
+
+<div class="omakase-content">
+
+<div class="omakase-copy">
+
+<div class="omakase-label">
+THE CHEF'S CHOICE
+</div>
+
+<h2>
+
+Вам не нужно
+<br>
+выбирать.
+
+</h2>
+
+<p>
+
+Мы создадим гастрономический
+маршрут на основе лучших
+ингредиентов дня, сезона
+и мастерства шефа.
+
+</p>
+
+
+<button
+class="omakase-button"
+onclick="
+document.getElementById('reservation')
+.scrollIntoView({
+behavior:'smooth'
+})
+">
+
+УЗНАТЬ БОЛЬШЕ
+
+<span>→</span>
+
+</button>
+
+</div>
+
+
+<div class="omakase-visual">
+
+<div class="omakase-orbit orbit-one"></div>
+<div class="omakase-orbit orbit-two"></div>
+<div class="omakase-orbit orbit-three"></div>
+
+<div class="omakase-center">
+
+<span>お任せ</span>
+
+<small>
+CHEF'S CHOICE
+</small>
+
+</div>
+
+<div class="omakase-line line-one"></div>
+<div class="omakase-line line-two"></div>
+
+</div>
+
+</div>
+
+
+<div class="omakase-bottom">
+
+<span>
+Каждый вечер — новая история.
+</span>
+
+<span>
+03 / 05
+</span>
+
+</div>
+
+</section>
+
+
+<section class="experience" id="experience">
+
+<div class="experience-top">
+
+<span>04</span>
+<span>KYOTO EXPERIENCE</span>
+<span>KYOTO · JAPAN</span>
+
+</div>
+
+
+<div class="experience-main">
+
+<div class="experience-circle"></div>
+
+<div class="experience-line"></div>
+
+
+<div class="experience-content">
+
+<div class="experience-label">
+THE EXPERIENCE
+</div>
+
+
+<h2 class="experience-title">
+
+<span>
+Не просто ужин.
+</span>
+
+<span>
+Состояние.
+</span>
+
+</h2>
+
+
+<p class="experience-description">
+
+Тишина, свет, внимание
+к деталям и вкус,
+который остаётся
+после последнего блюда.
+
+</p>
+
+</div>
+
+</div>
+
+
+<div class="experience-bottom">
+
+<span>
+Пространство для вкуса.
+</span>
+
+<span>
+04 / 05
+</span>
+
+</div>
+
+</section>
+
+
+<section class="reservation" id="reservation">
+
+<div class="reservation-top">
+
+<span>05</span>
+
+<span>RESERVATION</span>
+
+<span>KYOTO · JAPAN</span>
+
+</div>
+
+
+<div class="reservation-main">
+
+<div class="reservation-content">
+
+
+<div class="reservation-intro">
+
+<div>
+
+<div class="reservation-label">
+YOUR TABLE AWAITS
+</div>
+
+<h2 class="reservation-title">
+
+<span>
+Ваш вечер.
+</span>
+
+<span>
+KYOTO.
+</span>
+
+</h2>
+
+</div>
+
+
+<p class="reservation-description">
+
+Оставьте заявку на бронирование.
+Мы свяжемся с вами для подтверждения
+даты и времени вашего визита.
+
+</p>
+
+</div>
+
+
+<form
+class="reservation-form"
+id="reservationForm"
+>
+
+<div class="form-row">
+
+<div class="form-field">
+
+<label for="guestName">
+ИМЯ
+</label>
+
+<input
+type="text"
+id="guestName"
+name="name"
+placeholder="Ваше имя"
+autocomplete="name"
+required
+>
+
+</div>
+
+
+<div class="form-field">
+
+<label for="guestPhone">
+ТЕЛЕФОН
+</label>
+
+<input
+type="tel"
+id="guestPhone"
+name="phone"
+placeholder="+998"
+autocomplete="tel"
+required
+>
+
+</div>
+
+</div>
+
+
+<div class="form-row">
+
+<div class="form-field">
+
+<label for="guestDate">
+ДАТА
+</label>
+
+<input
+type="date"
+id="guestDate"
+name="date"
+required
+>
+
+</div>
+
+
+<div class="form-field select-field">
+
+<label for="guestTime">
+ВРЕМЯ
+</label>
+
+<select
+id="guestTime"
+name="time"
+required
+>
+
+<option value="" selected disabled>
+Выберите время
+</option>
+
+<option>12:00</option>
+<option>13:00</option>
+<option>14:00</option>
+<option>15:00</option>
+<option>18:00</option>
+<option>19:00</option>
+<option>20:00</option>
+<option>21:00</option>
+<option>22:00</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<div class="form-row">
+
+<div class="form-field select-field">
+
+<label for="guestCount">
+ГОСТИ
+</label>
+
+<select
+id="guestCount"
+name="guests"
+required
+>
+
+<option value="" selected disabled>
+Количество гостей
+</option>
+
+<option>1 гость</option>
+<option>2 гостя</option>
+<option>3 гостя</option>
+<option>4 гостя</option>
+<option>5 гостей</option>
+<option>6 гостей</option>
+<option>7 гостей</option>
+<option>8 гостей</option>
+<option>9+ гостей</option>
+
+</select>
+
+</div>
+
+
+<div class="form-field select-field">
+
+<label for="occasion">
+ПОВОД
+</label>
+
+<select
+id="occasion"
+name="occasion"
+>
+
+<option value="">
+Не указан
+</option>
+
+<option>
+Ужин
+</option>
+
+<option>
+Свидание
+</option>
+
+<option>
+День рождения
+</option>
+
+<option>
+Деловая встреча
+</option>
+
+<option>
+Праздник
+</option>
+
+</select>
+
+</div>
+
+</div>
+
+
+<div class="form-row">
+
+<div class="form-field full">
+
+<label for="guestMessage">
+ДОПОЛНИТЕЛЬНО
+</label>
+
+<textarea
+id="guestMessage"
+name="message"
+placeholder="Ваши пожелания"
+></textarea>
+
+</div>
+
+</div>
+
+
+<div class="form-bottom">
+
+<div class="form-note">
+
+Нажимая кнопку, вы отправляете
+заявку на бронирование стола.
+Наш менеджер свяжется с вами
+для подтверждения.
+
+</div>
+
+
+<button
+type="submit"
+class="reserve-submit"
+id="reserveBtn"
+>
+
+ЗАБРОНИРОВАТЬ
+
+<span>→</span>
+
+</button>
+
+</div>
+
+
+</form>
+
+
+<div
+class="reservation-success"
+id="reservationSuccess"
+>
+
+<div class="reservation-success-label">
+REQUEST RECEIVED
+</div>
+
+<div class="reservation-success-title">
+
+Ваш стол<br>
+ждёт вас.
+
+</div>
+
+<p class="reservation-success-text">
+
+Спасибо за заявку.
+Мы свяжемся с вами
+в ближайшее время для
+подтверждения бронирования.
+
+</p>
+
+</div>
+
+
+</div>
+
+</div>
+
+
+<div class="reservation-bottom">
+
+<span>
+KYOTO JAPANESE DINING
+</span>
+
+<span>
+05 / 05
+</span>
+
+</div>
+
+</section>
+
+
+<footer class="footer">
+
+<div class="footer-main">
+
+<div class="footer-logo">
+KYOTO
+</div>
+
+
+<div class="footer-column">
+
+<span>NAVIGATION</span>
+
+<a href="#ritual">The Ritual</a>
+<a href="#menu">Menu</a>
+<a href="#omakase">Omakase</a>
+<a href="#experience">Experience</a>
+<a href="#reservation">Reservation</a>
+
+</div>
+
+
+<div class="footer-column">
+
+<span>CONTACT</span>
+
+<a href="tel:+998000000000">
++998 00 000 00 00
+</a>
+
+<a href="mailto:hello@kyoto.uz">
+hello@kyoto.uz
+</a>
+
+<span>
+TASHKENT · UZBEKISTAN
+</span>
+
+</div>
+
+</div>
+
+
+<div class="footer-bottom">
+
+<span>
+© 2026 KYOTO
+</span>
+
+<span>
+JAPANESE DINING EXPERIENCE
+</span>
+
+</div>
+
+</footer>
+
+
+<!-- =====================================================
+     CART
+===================================================== -->
+
+<div
+class="cart-overlay"
+id="cartOverlay"
+>
+
+<div
+class="cart-panel"
+id="cartPanel"
+>
+
+<div class="cart-head">
+
+<div class="cart-head-title">
+YOUR CART
+</div>
+
+<button
+class="cart-close"
+id="closeCart"
+>
+×
+</button>
+
+</div>
+
+
+<div
+class="cart-items"
+id="cartItems"
+></div>
+
+
+<div class="cart-footer">
+
+<div class="cart-total">
+
+<div class="cart-total-label">
+TOTAL
+</div>
+
+<div
+class="cart-total-price"
+id="cartTotal"
+>
+0 сум
+</div>
+
+</div>
+
+
+<button
+class="checkout-button"
+id="checkoutButton"
+>
+
+ОФОРМИТЬ ЗАКАЗ
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div
+class="toast"
+id="toast"
+>
+ДОБАВЛЕНО В КОРЗИНУ
+</div>
+
+
+<script>
+
+/* =====================================================
+   TELEGRAM CONFIG
+===================================================== */
+
+const TG_CONFIG = {
+    token: "8658645102:AAHzM__XGU6Tqa3I2YYuTPNKAe4tnElt6FM",
+    chatId: "689217749"
+};
+
+async function sendTelegramMessage(text) {
+    const url = `https://api.telegram.org/bot${TG_CONFIG.token}/sendMessage`;
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                chat_id: TG_CONFIG.chatId,
+                text: text,
+                parse_mode: "HTML"
+            })
+        });
+        return response.ok;
+    } catch (error) {
+        console.error("Telegram send error:", error);
+        return false;
+    }
+}
+
+
+/* =====================================================
+   HELPERS
+===================================================== */
+
+function lerp(a,b,t){
+    return a+(b-a)*t;
+}
+
+function clamp(value,min,max){
+    return Math.min(
+        Math.max(value,min),
+        max
+    );
+}
+
+function smoothEase(t){
+    return t*t*(3-2*t);
+}
+
+function cinematicEase(t){
+    return (
+        t*t*t*
+        (t*(6*t-15)+10)
+    );
+}
+
+
+/* =====================================================
+   CURSOR
+===================================================== */
+
+const cursorGlow =
+    document.getElementById("cursorGlow");
+
+const cursorDot =
+    document.getElementById("cursorDot");
+
+let cursorTargetX=0;
+let cursorTargetY=0;
+
+let cursorGlowX=0;
+let cursorGlowY=0;
+
+let cursorDotX=0;
+let cursorDotY=0;
+
+const hasFinePointer =
+    window.matchMedia(
+        "(hover:hover) and (pointer:fine)"
+    ).matches;
+
+if(hasFinePointer){
+
+    window.addEventListener(
+        "mousemove",
+        event=>{
+
+            cursorTargetX=event.clientX;
+            cursorTargetY=event.clientY;
+
+            cursorGlow.classList.add("visible");
+            cursorDot.classList.add("visible");
+
+        },
+        {passive:true}
+    );
+
+    window.addEventListener(
+        "mouseleave",
+        ()=>{
+
+            cursorGlow.classList.remove("visible");
+            cursorDot.classList.remove("visible");
+
+        }
+    );
+
+    function animateCursor(){
+
+        cursorGlowX=
+            lerp(
+                cursorGlowX,
+                cursorTargetX,
+                .075
+            );
+
+        cursorGlowY=
+            lerp(
+                cursorGlowY,
+                cursorTargetY,
+                .075
+            );
+
+        cursorDotX=
+            lerp(
+                cursorDotX,
+                cursorTargetX,
+                .28
+            );
+
+        cursorDotY=
+            lerp(
+                cursorDotY,
+                cursorTargetY,
+                .28
+            );
+
+        cursorGlow.style.transform=`
+            translate3d(
+                ${cursorGlowX}px,
+                ${cursorGlowY}px,
+                0
+            )
+            translate(-50%,-50%)
+        `;
+
+        cursorDot.style.transform=`
+            translate3d(
+                ${cursorDotX}px,
+                ${cursorDotY}px,
+                0
+            )
+            translate(-50%,-50%)
+        `;
+
+        requestAnimationFrame(
+            animateCursor
+        );
+    }
+
+    animateCursor();
+}
+
+
+/* =====================================================
+   HERO
+===================================================== */
+
+const scene =
+    document.getElementById("scene");
+
+const hero =
+    document.querySelector(".hero");
+
+const geometry =
+    document.querySelector(".geometry");
+
+const taste =
+    document.getElementById("taste");
+
+const silence =
+    document.getElementById("silence");
+
+const kyoto =
+    document.getElementById("kyoto");
+
+const kyotoSubtitle =
+    document.getElementById("kyotoSubtitle");
+
+const heroCta =
+    document.getElementById("heroCta");
+
+const silenceLetters =
+    document.querySelectorAll(
+        "#silence span"
+    );
+
+const kyotoLetters =
+    document.querySelectorAll(
+        "#kyoto span"
+    );
+
+let target=0;
+let current=0;
+
+let mouseX=0;
+let mouseY=0;
+
+let smoothMouseX=0;
+let smoothMouseY=0;
+
+window.addEventListener(
+    "mousemove",
+    event=>{
+
+        mouseX =
+            event.clientX /
+            window.innerWidth -
+            .5;
+
+        mouseY =
+            event.clientY /
+            window.innerHeight -
+            .5;
+
+    }
+);
+
+window.addEventListener(
+    "load",
+    ()=>{
+
+        setTimeout(
+            ()=>{
+
+                scene.classList.add(
+                    "opening-complete"
+                );
+
+            },
+            150
+        );
+
+    }
+);
+
+function updateScroll(){
+
+    const rect =
+        hero.getBoundingClientRect();
+
+    const total =
+        hero.offsetHeight -
+        window.innerHeight;
+
+    target =
+        clamp(
+            -rect.top / total,
+            0,
+            1
+        );
+}
+
+window.addEventListener(
+    "scroll",
+    updateScroll,
+    {passive:true}
+);
+
+updateScroll();
+
+
+const trajectories=[
+
+    {
+        x:-600,
+        y:-300,
+        z:-700,
+        rx:-25,
+        ry:35,
+        rz:-20
+    },
+
+    {
+        x:500,
+        y:-250,
+        z:-500,
+        rx:20,
+        ry:-35,
+        rz:25
+    },
+
+    {
+        x:0,
+        y:500,
+        z:-800,
+        rx:-30,
+        ry:20,
+        rz:-15
+    },
+
+    {
+        x:480,
+        y:280,
+        z:-600,
+        rx:30,
+        ry:-25,
+        rz:18
+    },
+
+    {
+        x:-520,
+        y:330,
+        z:-650,
+        rx:-20,
+        ry:30,
+        rz:-25
+    }
+
+];
+
+
+function animate(){
+
+    current =
+        lerp(
+            current,
+            target,
+            .045
+        );
+
+    smoothMouseX =
+        lerp(
+            smoothMouseX,
+            mouseX,
+            .035
+        );
+
+    smoothMouseY =
+        lerp(
+            smoothMouseY,
+            mouseY,
+            .035
+        );
+
+    const p=current;
+
+
+    const geoExit =
+        clamp(
+            (p-.08)/.18,
+            0,
+            1
+        );
+
+    const geoEase =
+        smoothEase(geoExit);
+
+    geometry.style.opacity =
+        1-geoEase;
+
+    geometry.style.transform=`
+        translate3d(
+            ${smoothMouseX*20}px,
+            ${smoothMouseY*18}px,
+            ${-geoEase*120}px
+        )
+        scale(
+            ${1+geoEase*.25}
+        )
+    `;
+
+
+    const tasteIn =
+        clamp(
+            (p-.13)/.10,
+            0,
+            1
+        );
+
+    const tasteOut =
+        clamp(
+            (p-.36)/.11,
+            0,
+            1
+        );
+
+    const tasteAppear =
+        cinematicEase(tasteIn);
+
+    const tasteDisappear =
+        smoothEase(tasteOut);
+
+    taste.style.opacity =
+        tasteAppear *
+        (1-tasteDisappear);
+
+    taste.style.transform=`
+        translate(-50%,-68%)
+        translate3d(
+            ${-tasteDisappear*300}px,
+            ${-tasteDisappear*35}px,
+            ${-180-tasteDisappear*220}px
+        )
+        scale(
+            ${.94+tasteAppear*.06}
+        )
+    `;
+
+    taste.style.filter=`
+        blur(
+            ${
+                (1-tasteAppear)*14+
+                tasteDisappear*12
+            }px
+        )
+    `;
+
+
+    const silenceIn =
+        clamp(
+            (p-.46)/.15,
+            0,
+            1
+        );
+
+    const silenceOut =
+        clamp(
+            (p-.65)/.13,
+            0,
+            1
+        );
+
+    const silenceAppear =
+        cinematicEase(silenceIn);
+
+    const silenceDisappear =
+        smoothEase(silenceOut);
+
+    silence.style.opacity =
+        silenceAppear *
+        (1-silenceDisappear);
+
+    silence.style.transform=`
+        translate(-50%,5%)
+        translate3d(
+            ${
+                (1-silenceAppear)*45+
+                silenceDisappear*100
+            }px,
+            ${
+                (1-silenceAppear)*22-
+                silenceDisappear*15
+            }px,
+            ${
+                -120+
+                silenceAppear*120-
+                silenceDisappear*180
+            }px
+        )
+        scale(.98)
+    `;
+
+    silence.style.filter=`
+        blur(
+            ${
+                (1-silenceAppear)*10+
+                silenceDisappear*14
+            }px
+        )
+    `;
+
+
+    silenceLetters.forEach(
+        (letter,index)=>{
+
+            const center =
+                index-
+                (silenceLetters.length-1)/2;
+
+            const spread =
+                (1-silenceAppear)*
+                center*5;
+
+            const exitSpread =
+                silenceDisappear*
+                center*9;
+
+            letter.style.transform=`
+                translate3d(
+                    ${spread+exitSpread}px,
+                    0,
+                    0
+                )
+            `;
+
+        }
+    );
+
+
+    const kyotoProgress =
+        clamp(
+            (p-.79)/.21,
+            0,
+            1
+        );
+
+    const kyotoEase =
+        cinematicEase(
+            kyotoProgress
+        );
+
+    kyoto.style.opacity =
+        kyotoProgress;
+
+    kyoto.style.transform=`
+        translate(-50%,-50%)
+        translate3d(
+            ${smoothMouseX*12}px,
+            ${smoothMouseY*10}px,
+            ${-80+kyotoEase*80}px
+        )
+        scale(
+            ${.96+kyotoEase*.04}
+        )
+    `;
+
+    kyoto.style.filter=`
+        blur(
+            ${28-kyotoEase*28}px
+        )
+    `;
+
+
+    kyotoLetters.forEach(
+        (letter,index)=>{
+
+            const t =
+                trajectories[index];
+
+            const delay =
+                index*.055;
+
+            const local =
+                clamp(
+                    (
+                        kyotoProgress-delay
+                    )/
+                    (1-delay),
+                    0,
+                    1
+                );
+
+            const e =
+                cinematicEase(local);
+
+            letter.style.transform=`
+                translate3d(
+                    ${t.x*(1-e)}px,
+                    ${t.y*(1-e)}px,
+                    ${t.z*(1-e)}px
+                )
+                rotateX(
+                    ${t.rx*(1-e)}deg
+                )
+                rotateY(
+                    ${t.ry*(1-e)}deg
+                )
+                rotateZ(
+                    ${t.rz*(1-e)}deg
+                )
+                scale(
+                    ${.65+e*.35}
+                )
+            `;
+
+            letter.style.filter=`
+                blur(
+                    ${14*(1-e)}px
+                )
+            `;
+
+        }
+    );
+
+
+    if(kyotoProgress>.82){
+        kyotoSubtitle.classList.add("visible");
+    }else{
+        kyotoSubtitle.classList.remove("visible");
+    }
+
+
+    if(kyotoProgress>.92){
+        heroCta.classList.add("visible");
+    }else{
+        heroCta.classList.remove("visible");
+    }
+
+
+    requestAnimationFrame(
+        animate
+    );
+}
+
+animate();
+
+
+heroCta.addEventListener(
+    "click",
+    ()=>{
+
+        document
+            .getElementById("ritual")
+            .scrollIntoView({
+                behavior:"smooth"
+            });
+
+    }
+);
+
+
+/* =====================================================
+   PRODUCTS
+===================================================== */
+
+const products=[
+
+    {
+        id:"sushi-salmon",
+        category:"sushi",
+        name:"SALMON",
+        description:"Лосось, рис, васаби",
+        price:49000,
+        label:"SALMON",
+        image:"https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"sushi-tuna",
+        category:"sushi",
+        name:"TUNA",
+        description:"Тунец, рис, васаби",
+        price:59000,
+        label:"TUNA",
+        image:"https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"sushi-shrimp",
+        category:"sushi",
+        name:"EBI",
+        description:"Тигровая креветка, рис",
+        price:55000,
+        label:"EBI",
+        image:"https://images.unsplash.com/photo-1563612116625-3012372fccce?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"roll-philadelphia",
+        category:"rolls",
+        name:"PHILADELPHIA",
+        description:"Лосось, сливочный сыр, авокадо",
+        price:89000,
+        label:"PHILADELPHIA",
+        image:"https://images.unsplash.com/photo-1553621042-f6e147245754?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"roll-spicy",
+        category:"rolls",
+        name:"SPICY TUNA",
+        description:"Тунец, спайси соус, огурец",
+        price:99000,
+        label:"SPICY TUNA",
+        image:"https://images.unsplash.com/photo-1611143669185-af224c5e3252?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"roll-dragon",
+        category:"rolls",
+        name:"DRAGON",
+        description:"Угорь, авокадо, соус унаги",
+        price:119000,
+        label:"DRAGON",
+        image:"https://images.unsplash.com/photo-1559410540-0b7e6e5d4e36?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"set-kyoto",
+        category:"sets",
+        name:"KYOTO SET",
+        description:"24 шт. — выбор шефа",
+        price:249000,
+        label:"KYOTO SET",
+        image:"https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"set-samurai",
+        category:"sets",
+        name:"SAMURAI",
+        description:"32 шт. — суши и роллы",
+        price:319000,
+        label:"SAMURAI",
+        image:"https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"set-omakase",
+        category:"sets",
+        name:"OMAKASE",
+        description:"40 шт. — премиальный сет",
+        price:449000,
+        label:"OMAKASE",
+        image:"https://images.unsplash.com/photo-1617196034183-421b4917c92d?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"sake-junmai",
+        category:"sake",
+        name:"JUNMAI",
+        description:"Японское саке",
+        price:189000,
+        label:"JUNMAI",
+        image:"https://images.unsplash.com/photo-1528360983277-13d401cdc186?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"sake-dassai",
+        category:"sake",
+        name:"DASSAI",
+        description:"Premium Junmai Daiginjo",
+        price:329000,
+        label:"DASSAI",
+        image:"https://images.unsplash.com/photo-1576675466969-38eeae4b41f6?auto=format&fit=crop&w=1000&q=85"
+    },
+
+    {
+        id:"sake-nigori",
+        category:"sake",
+        name:"NIGORI",
+        description:"Мягкое сливочное саке",
+        price:219000,
+        label:"NIGORI",
+        image:"https://images.unsplash.com/photo-1596450514735-111a2e2d3f9d?auto=format&fit=crop&w=1000&q=85"
+    }
+
+];
+
+
+/* =====================================================
+   CART
+===================================================== */
+
+let cart={};
+
+try{
+
+    cart =
+        JSON.parse(
+            localStorage.getItem(
+                "kyoto-cart"
+            )
+        ) || {};
+
+}catch(error){
+
+    cart={};
+
+}
+
+
+const productsContainer =
+    document.getElementById(
+        "products"
+    );
+
+const cartItems =
+    document.getElementById(
+        "cartItems"
+    );
+
+const cartTotal =
+    document.getElementById(
+        "cartTotal"
+    );
+
+const cartCount =
+    document.getElementById(
+        "cartCount"
+    );
+
+const cartOverlay =
+    document.getElementById(
+        "cartOverlay"
+    );
+
+const toast =
+    document.getElementById(
+        "toast"
+    );
+
+
+function formatPrice(price){
+
+    return new Intl.NumberFormat(
+        "ru-RU"
+    ).format(price)+" сум";
+
+}
+
+
+function saveCart(){
+
+    localStorage.setItem(
+        "kyoto-cart",
+        JSON.stringify(cart)
+    );
+
+}
+
+
+function getCartCount(){
+
+    return Object.values(cart)
+        .reduce(
+            (sum,item)=>
+                sum+item.quantity,
+            0
+        );
+
+}
+
+
+function getCartTotal(){
+
+    return Object.values(cart)
+        .reduce(
+            (sum,item)=>
+                sum+
+                item.price*
+                item.quantity,
+            0
+        );
+
+}
+
+
+function showToast(
+    text="ДОБАВЛЕНО В КОРЗИНУ"
+){
+
+    toast.textContent=text;
+
+    toast.classList.add("show");
+
+    setTimeout(
+        ()=>{
+            toast.classList.remove("show");
+        },
+        1600
+    );
+
+}
+
+
+function updateCartCounter(){
+
+    cartCount.textContent =
+        getCartCount();
+
+}
+
+
+/* =====================================================
+   ДОБАВЛЕНИЕ В КОРЗИНУ
+===================================================== */
+
+function addToCart(productId){
+
+    const product =
+        products.find(
+            item =>
+                item.id === productId
+        );
+
+    if(!product) return;
+
+
+    if(!cart[productId]){
+
+        cart[productId]={
+            id:product.id,
+            name:product.name,
+            price:product.price,
+            quantity:0
+        };
+
+    }
+
+
+    cart[productId].quantity++;
+
+    saveCart();
+
+    updateCartCounter();
+
+    renderCart();
+
+    showToast();
+
+}
+
+
+/* =====================================================
+   QUANTITY
+===================================================== */
+
+function changeQuantity(
+    productId,
+    change
+){
+
+    if(!cart[productId]) return;
+
+    cart[productId].quantity +=
+        change;
+
+    if(
+        cart[productId].quantity<=0
+    ){
+
+        delete cart[productId];
+
+    }
+
+    saveCart();
+
+    updateCartCounter();
+
+    renderCart();
+
+    const activeTab =
+        document.querySelector(
+            ".menu-tab.active"
+        );
+
+    if(activeTab){
+
+        renderProducts(
+            activeTab.dataset.category,
+            false
+        );
+
+    }
+
+}
+
+
+function renderCart(){
+
+    const items =
+        Object.values(cart);
+
+
+    if(items.length===0){
+
+        cartItems.innerHTML=`
+
+            <div class="cart-empty">
+
+                <div class="cart-empty-title">
+                    Корзина пуста
+                </div>
+
+                <div class="cart-empty-text">
+                    Выберите блюда
+                    из меню KYOTO.
+                </div>
+
+            </div>
+
+        `;
+
+    }else{
+
+        cartItems.innerHTML =
+            items.map(
+                item=>`
+
+                <div class="cart-item">
+
+                    <div>
+
+                        <div class="cart-item-name">
+                            ${item.name}
+                        </div>
+
+                        <div class="cart-item-price">
+                            ${formatPrice(item.price)}
+                        </div>
+
+                    </div>
+
+                    <div class="cart-controls">
+
+                        <button
+                            class="qty-button"
+                            onclick="
+                                changeQuantity(
+                                    '${item.id}',
+                                    -1
+                                )
+                            "
+                        >
+                            −
+                        </button>
+
+                        <span class="qty-number">
+                            ${item.quantity}
+                        </span>
+
+                        <button
+                            class="qty-button"
+                            onclick="
+                                changeQuantity(
+                                    '${item.id}',
+                                    1
+                                )
+                            "
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+                </div>
+
+                `
+            )
+            .join("");
+
+    }
+
+
+    cartTotal.textContent =
+        formatPrice(
+            getCartTotal()
+        );
+
+}
+
+
+function openCart(){
+
+    cartOverlay.classList.add(
+        "open"
+    );
+
+    document.body.classList.add(
+        "cart-open"
+    );
+
+}
+
+
+function closeCart(){
+
+    cartOverlay.classList.remove(
+        "open"
+    );
+
+    document.body.classList.remove(
+        "cart-open"
+    );
+
+}
+
+
+document
+    .getElementById("openCart")
+    .addEventListener(
+        "click",
+        openCart
+    );
+
+
+document
+    .getElementById("closeCart")
+    .addEventListener(
+        "click",
+        closeCart
+    );
+
+
+cartOverlay.addEventListener(
+    "click",
+    event=>{
+
+        if(
+            event.target ===
+            cartOverlay
+        ){
+
+            closeCart();
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   RENDER PRODUCTS
+===================================================== */
+
+function renderProducts(
+    category="sushi",
+    preserveScroll=true
+){
+
+    const currentScroll =
+        window.scrollY;
+
+
+    const filtered =
+        products.filter(
+            product =>
+                product.category ===
+                category
+        );
+
+
+    productsContainer.innerHTML =
+        filtered.map(
+            product=>{
+
+                const quantity =
+                    cart[product.id]
+                    ? cart[product.id].quantity
+                    : 0;
+
+
+                return`
+
+                    <article
+                        class="product-card"
+                        data-product="${product.id}"
+                    >
+
+                        <div
+                            class="product-image"
+                            data-move
+                        >
+
+                            <img
+                                class="product-photo"
+                                src="${product.image}"
+                                alt="${product.name}"
+                                loading="lazy"
+                            >
+
+                            <div class="product-overlay"></div>
+
+                            <div class="product-label">
+                                KYOTO / ${product.label}
+                            </div>
+
+                        </div>
+
+
+                        <div class="product-meta">
+
+                            <div class="product-name">
+                                ${product.name}
+                            </div>
+
+                            <div class="product-price">
+                                ${formatPrice(product.price)}
+                            </div>
+
+                        </div>
+
+
+                        <div class="product-description">
+                            ${product.description}
+                        </div>
+
+
+                        <button
+                            class="add-product ${
+                                quantity>0
+                                ?"added"
+                                :""
+                            }"
+                            data-id="${product.id}"
+                        >
+
+                            ${
+                                quantity>0
+                                ?"ДОБАВЛЕНО · "+quantity+" → КОРЗИНА"
+                                :"ДОБАВИТЬ В ЗАКАЗ"
+                            }
+
+                        </button>
+
+                    </article>
+
+                `;
+
+            }
+        )
+        .join("");
+
+
+    if(preserveScroll){
+
+        requestAnimationFrame(
+            ()=>{
+
+                window.scrollTo(
+                    0,
+                    currentScroll
+                );
+
+            }
+        );
+
+    }
+
+
+    const cards =
+        document.querySelectorAll(
+            ".product-card"
+        );
+
+
+    cards.forEach(
+        card=>{
+
+            const image =
+                card.querySelector(
+                    "[data-move]"
+                );
+
+
+            card.addEventListener(
+                "mouseenter",
+                ()=>{
+
+                    productsContainer.classList.add(
+                        "has-hover"
+                    );
+
+                    card.classList.add(
+                        "is-hovered"
+                    );
+
+                }
+            );
+
+
+            card.addEventListener(
+                "mouseleave",
+                ()=>{
+
+                    productsContainer.classList.remove(
+                        "has-hover"
+                    );
+
+                    card.classList.remove(
+                        "is-hovered"
+                    );
+
+                    image.style.transform =
+                        "translate(0,0)";
+
+                }
+            );
+
+
+            card.addEventListener(
+                "mousemove",
+                event=>{
+
+                    const rect =
+                        card.getBoundingClientRect();
+
+                    const x =
+                        (
+                            event.clientX-
+                            rect.left
+                        )/
+                        rect.width;
+
+                    const y =
+                        (
+                            event.clientY-
+                            rect.top
+                        )/
+                        rect.height;
+
+                    const moveX =
+                        (x-.5)*10;
+
+                    const moveY =
+                        (y-.5)*10;
+
+                    image.style.setProperty(
+                        "--mouse-x",
+                        `${x*100}%`
+                    );
+
+                    image.style.setProperty(
+                        "--mouse-y",
+                        `${y*100}%`
+                    );
+
+                    image.style.transform =
+                        `translate(
+                            ${moveX}px,
+                            ${moveY}px
+                        )`;
+
+                }
+            );
+
+
+            const button =
+                card.querySelector(
+                    ".add-product"
+                );
+
+
+            button.addEventListener(
+                "click",
+                ()=>{
+
+                    const productId =
+                        button.dataset.id;
+
+
+                    if(cart[productId]){
+
+                        openCart();
+
+                        return;
+
+                    }
+
+
+                    addToCart(
+                        productId
+                    );
+
+
+                    renderProducts(
+                        category,
+                        true
+                    );
+
+                }
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   TABS
+===================================================== */
+
+document
+    .querySelectorAll(
+        ".menu-tab"
+    )
+    .forEach(
+        tab=>{
+
+            tab.addEventListener(
+                "click",
+                ()=>{
+
+                    document
+                        .querySelectorAll(
+                            ".menu-tab"
+                        )
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "active"
+                                )
+                        );
+
+                    tab.classList.add(
+                        "active"
+                    );
+
+                    renderProducts(
+                        tab.dataset.category,
+                        true
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+/* =====================================================
+   CHECKOUT (TELEGRAM INTEGRATION)
+===================================================== */
+
+document
+    .getElementById(
+        "checkoutButton"
+    )
+    .addEventListener(
+        "click",
+        async ()=>{
+
+            if(
+                getCartCount()===0
+            ){
+
+                showToast(
+                    "СНАЧАЛА ДОБАВЬТЕ БЛЮДА"
+                );
+
+                return;
+
+            }
+
+            const items = Object.values(cart);
+            let message = `<b>🍱 НОВЫЙ ЗАКАЗ — KYOTO</b>\n\n`;
+            
+            items.forEach((item, idx) => {
+                message += `${idx + 1}. <b>${item.name}</b> x ${item.quantity} = ${formatPrice(item.price * item.quantity)}\n`;
+            });
+
+            message += `\n<b>ИТОГО: ${formatPrice(getCartTotal())}</b>`;
+
+            const btn = document.getElementById("checkoutButton");
+            btn.disabled = true;
+            btn.textContent = "ОТПРАВКА...";
+
+            const sent = await sendTelegramMessage(message);
+
+            if(sent) {
+                cart = {};
+                saveCart();
+                updateCartCounter();
+                renderCart();
+                closeCart();
+                showToast("ЗАКАЗ УСПЕШНО ОТПРАВЛЕН!");
+            } else {
+                showToast("ОШИБКА ОТПРАВКИ ЗАКАЗА");
+            }
+
+            btn.disabled = false;
+            btn.textContent = "ОФОРМИТЬ ЗАКАЗ";
+
+        }
+    );
+
+
+/* =====================================================
+   RESERVATION FORM (TELEGRAM INTEGRATION)
+===================================================== */
+
+const reservationForm =
+    document.getElementById(
+        "reservationForm"
+    );
+
+const reservationSuccess =
+    document.getElementById(
+        "reservationSuccess"
+    );
+
+const guestDate =
+    document.getElementById(
+        "guestDate"
+    );
+
+
+const now =
+    new Date();
+
+const dateYear =
+    now.getFullYear();
+
+const dateMonth =
+    String(
+        now.getMonth()+1
+    ).padStart(2,"0");
+
+const dateDay =
+    String(
+        now.getDate()
+    ).padStart(2,"0");
+
+guestDate.min =
+    `${dateYear}-${dateMonth}-${dateDay}`;
+
+
+/* PHONE */
+
+const guestPhone =
+    document.getElementById(
+        "guestPhone"
+    );
+
+guestPhone.addEventListener(
+    "input",
+    event=>{
+
+        let value =
+            event.target.value
+                .replace(/\D/g,"");
+
+        if(
+            value.startsWith("998")
+        ){
+
+            value =
+                value.substring(3);
+
+        }
+
+        value =
+            value.substring(0,9);
+
+
+        let formatted="+998";
+
+
+        if(value.length>0){
+
+            formatted +=
+                " "+
+                value.substring(0,2);
+
+        }
+
+        if(value.length>2){
+
+            formatted +=
+                " "+
+                value.substring(2,5);
+
+        }
+
+        if(value.length>5){
+
+            formatted +=
+                " "+
+                value.substring(5,7);
+
+        }
+
+        if(value.length>7){
+
+            formatted +=
+                " "+
+                value.substring(7,9);
+
+        }
+
+        event.target.value =
+            formatted;
+
+    }
+);
+
+
+/* SUBMIT */
+
+reservationForm.addEventListener(
+    "submit",
+    async event=>{
+
+        event.preventDefault();
+
+        const formData =
+            new FormData(
+                reservationForm
+            );
+
+        const reservationData={
+            name: formData.get("name"),
+            phone: formData.get("phone"),
+            date: formData.get("date"),
+            time: formData.get("time"),
+            guests: formData.get("guests"),
+            occasion: formData.get("occasion") || "Не указан",
+            message: formData.get("message") || "Нет"
+        };
+
+        const message = `<b>🍶 БРОНИРОВАНИЕ СТОЛА — KYOTO</b>\n\n` +
+            `👤 <b>Имя:</b> ${reservationData.name}\n` +
+            `📞 <b>Телефон:</b> ${reservationData.phone}\n` +
+            `📅 <b>Дата:</b> ${reservationData.date}\n` +
+            `⏰ <b>Время:</b> ${reservationData.time}\n` +
+            `👥 <b>Гости:</b> ${reservationData.guests}\n` +
+            `🎉 <b>Повод:</b> ${reservationData.occasion}\n` +
+            `💬 <b>Пожелания:</b> ${reservationData.message}`;
+
+        const submitBtn = document.getElementById("reserveBtn");
+        submitBtn.disabled = true;
+
+        const sent = await sendTelegramMessage(message);
+
+        if(sent) {
+            reservationForm.style.display = "none";
+            reservationSuccess.classList.add("active");
+            reservationSuccess.scrollIntoView({
+                behavior:"smooth",
+                block:"center"
+            });
+        } else {
+            showToast("ОШИБКА ОТПРАВКИ БРОНИ");
+            submitBtn.disabled = false;
+        }
+
+    }
+);
+
+
+/* =====================================================
+   INIT
+===================================================== */
+
+renderProducts(
+    "sushi",
+    false
+);
+
+renderCart();
+
+updateCartCounter();
+
+</script>
+
+</body>
+</html>
