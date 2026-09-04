@@ -1,65 +1,65 @@
-# AI CONSTRUCTION CONTROL — DEMO / MVP
+# AI CONSTRUCTION CONTROL — ДЕМО / MVP
 
-AI-powered construction project monitoring for a road-construction company.
+Мониторинг строительных объектов на базе AI для компании, строящей автомобильные дороги.
 
-> **Know what is happening on every project before the problem becomes expensive.**
+> **Знать, что происходит на каждом объекте, до того как проблема станет дорогой.**
 
-Open `index.html` in any browser. No build step, no dependencies, no backend.
-All content is clearly marked **DEMO DATA** — fictional projects, people, materials and equipment.
+Откройте `index.html` в любом браузере. Без сборки, без зависимостей, без бэкенда.
+Весь контент явно помечен как **ДЕМО-ДАННЫЕ** — вымышленные объекты, люди, материалы и техника.
 
-## The demo script (2 minutes)
+## Демо-сценарий (2 минуты)
 
-1. **Overview** — 5 objects, 1 critical, alerts panel on the right. The director sees the decision list first.
-2. **Reports → PROCESS REPORT** — a foreman's Telegram voice message (simulated) is turned into structured data:
-   `Analyzing report… → Extracting data… → Updating project… → Calculating forecast… → DONE`
-3. The report lands in **OBJECT №03**: progress goes to 67 %, rate 850 m²/day, forecast slips to **+13 days**.
-4. **Object detail** — plan vs fact, forecast card, "Why is the project delayed?", recommended actions
-   (`Mark as resolved` works), 14 days of daily reports (click one to expand).
-5. **SIMULATE NEW REPORT** — a worse day arrives: progress, average rate, forecast, risk, alerts and
-   AI insights all recompute, and a toast reports the movement (e.g. `+13 d → +14 d`).
-6. **Materials → CREATE PROCUREMENT REQUEST**, **Equipment**, **Team**, **AI Insights**.
-7. **View as** — Director / Foreman / Procurement / Equipment Manager change the navigation and the pages.
+1. **Обзор** — 5 объектов, 1 критический, панель «Требует внимания» справа. Директор сразу видит список решений.
+2. **Отчёты → ОБРАБОТАТЬ ОТЧЁТ** — голосовое сообщение прораба в Telegram (имитация) превращается в структурированные данные:
+   `Анализируем отчёт… → Извлекаем данные… → Обновляем объект… → Считаем прогноз… → ГОТОВО`
+3. Отчёт попадает в **ОБЪЕКТ №03**: факт становится 67 %, темп 850 м²/день, прогноз уезжает на **+13 дней**.
+4. **Карточка объекта** — план и факт, прогноз, «Почему объект отстаёт?», рекомендуемые действия
+   (кнопка «Отметить выполненным» работает), 14 дней ежедневных отчётов (нажмите на любой, чтобы раскрыть).
+5. **СМОДЕЛИРОВАТЬ ОТЧЁТ** — приходит худший день: прогресс, средняя производительность, прогноз, риск,
+   предупреждения и AI-аналитика пересчитываются, а всплывающее уведомление показывает движение (`+13 дн. → +14 дн.`).
+6. **Материалы → СОЗДАТЬ ЗАЯВКУ НА ПОСТАВКУ**, **Техника**, **Команда**, **AI-аналитика**.
+7. **Роль** — Директор / Прораб / Снабжение / Механизация меняют навигацию и содержимое страниц.
 
-## Where the logic lives (`index.html`, single file, sectioned)
+## Где лежит логика (`index.html`, один файл, разбит на секции)
 
-| Section | What it is |
+| Секция | Что это |
 | --- | --- |
 | `1. DATA MODEL` (`const DB`) | projects, dailyReports, materials, equipment, tasks, team, inbox, requests |
-| `2. FORECAST LOGIC` (`compute()`) | plan/fact, deviation, rates, forecast date, delay, risk — plain JavaScript, no "AI" |
-| `alerts()` / `insights()` | derived from the same data, never hard-coded |
-| `3. UI LAYER` | router + one function per page, re-renders from `DB` on every change |
+| `2. FORECAST LOGIC` (`compute()`) | план/факт, отклонение, темпы, прогнозная дата, отставание, риск — чистый JavaScript, без «AI» |
+| `alerts()` / `insights()` | выводятся из тех же данных, ничего не зашито текстом |
+| `3. UI LAYER` | роутер + по функции на страницу, перерисовка из `DB` при любом изменении |
 | `5. DEMO INTERACTIONS` | `processReport()`, `simulateNewReport()`, `createRequest()` |
 
-Forecast formula (also shown in **Settings**):
+Формула прогноза (продублирована в разделе **Настройки**):
 
 ```
-remainingVolume        = totalVolume − actualCompletedVolume
-averageDailyProduction = mean production of the last 7 daily reports
-forecastDays           = remainingVolume ÷ averageDailyProduction
-forecastCompletionDate = lastReportedDay + forecastDays
-delayDays              = forecastCompletionDate − plannedCompletionDate
-risk                   = normal ≤ 2 d < warning ≤ 7 d < critical
+остаток               = общий объём − выполненный объём
+средняя производительность = среднее по последним 7 ежедневным отчётам
+дней до конца         = остаток ÷ средняя производительность
+прогнозная дата       = день последнего отчёта + дней до конца
+отставание            = прогнозная дата − плановая дата
+риск                  = в графике ≤ 2 дн. < риск ≤ 7 дн. < критично
 ```
 
-## Where to plug in the real system later
+## Куда подключать реальную систему
 
-Every seam is marked in the code with a comment tag:
+Каждый шов помечен в коде комментарием-тегом:
 
-| Tag | Location | Replaces |
+| Тег | Где | Что заменит |
 | --- | --- | --- |
-| `[INTEGRATION:TELEGRAM]` | `DB.inbox`, `DB.dailyReports` | Telegram Bot API — incoming foreman messages |
-| `[INTEGRATION:STT]` | `DB.inbox` items | Speech-to-Text for voice messages |
-| `[INTEGRATION:CLAUDE]` | `processReport()`, `insights()`, "Why is the project delayed?" | Claude API — text → structured JSON, cause analysis, recommendations |
-| `[INTEGRATION:N8N]` | `processReport()`, `createRequest()` | n8n webhooks orchestrating the chain |
-| `[INTEGRATION:DB]` | `const DB`, `applyReport()`, task/request mutations | PostgreSQL / Supabase |
-| `[INTEGRATION:STORAGE]` | daily report records | site photo / file storage |
+| `[INTEGRATION:TELEGRAM]` | `DB.inbox`, `DB.dailyReports` | Telegram Bot API — входящие сообщения прорабов |
+| `[INTEGRATION:STT]` | элементы `DB.inbox` | Speech-to-Text для голосовых сообщений |
+| `[INTEGRATION:CLAUDE]` | `processReport()`, `insights()`, блок «Почему объект отстаёт?» | Claude API — текст → JSON, анализ причин, рекомендации |
+| `[INTEGRATION:N8N]` | `processReport()`, `createRequest()` | n8n webhooks, оркестрация цепочки |
+| `[INTEGRATION:DB]` | `const DB`, `applyReport()`, изменения задач и заявок | PostgreSQL / Supabase |
+| `[INTEGRATION:STORAGE]` | записи ежедневных отчётов | хранилище фото и файлов с объекта |
 
-The maths in `compute()` stays server-side JavaScript/SQL — AI is only used for parsing text and explaining causes.
+Математика в `compute()` остаётся обычным JavaScript/SQL на сервере — AI нужен только для разбора текста и объяснения причин.
 
-## Notes on the demo dataset
+## О демо-данных
 
-Object №03 is internally consistent: 120,000 m², 120-day plan (1,000 m²/day), start 10 Jun 2026,
-planned completion 08 Oct 2026, 14 days of daily reports whose sum reproduces the stated 67 % actual
-progress and the 850 m²/day 7-day average. Every other figure on screen is computed from those inputs.
+Объект №03 внутренне согласован: 120 000 м², план на 120 дней (1 000 м²/день), старт 10 июня 2026,
+плановое завершение 08 октября 2026, 14 дней ежедневных отчётов, сумма которых даёт заявленные 67 % факта
+и среднюю производительность 850 м²/день за 7 дней. Все остальные цифры на экране вычисляются из этих исходных.
 
-`kyoto.html` is an unrelated earlier page kept from the repository history.
+`kyoto.html` — не связанная с проектом страница, сохранённая из истории репозитория.

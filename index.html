@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Construction Control — Demo</title>
+<title>AI Construction Control — демо</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -248,20 +248,20 @@ tbody tr.clickable:hover{background:var(--bg-soft)}
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-mark"><span class="brand-dot"></span><span class="brand-name">AI CONSTRUCTION CONTROL</span></div>
-      <div class="brand-sub">AI-powered construction project monitoring</div>
-      <span class="demo-chip">DEMO DATA</span>
+      <div class="brand-sub">Мониторинг строительных объектов на базе AI</div>
+      <span class="demo-chip">ДЕМО-ДАННЫЕ</span>
     </div>
     <nav class="nav" id="nav"></nav>
-    <div class="sidebar-foot"><span class="status-dot"></span>System operational</div>
+    <div class="sidebar-foot"><span class="status-dot"></span>Система работает</div>
   </aside>
   <div class="main">
     <header class="topbar">
-      <button class="burger" id="burger" aria-label="Menu">☰</button>
-      <h1 id="topTitle">Overview</h1>
+      <button class="burger" id="burger" aria-label="Меню">☰</button>
+      <h1 id="topTitle">Обзор</h1>
       <div class="topbar-right">
         <div class="role-switch" id="roleSwitch"></div>
         <span class="date-pill" id="todayPill"></span>
-        <span class="small"><span class="status-dot"></span>System operational</span>
+        <span class="small"><span class="status-dot"></span>Система работает</span>
       </div>
     </header>
     <main class="content" id="view"></main>
@@ -296,30 +296,30 @@ const DB = {
   meta: { updatedAt: '08:42', demo: true },
 
   roles: [
-    { id:'director',  label:'Director',          nav:['overview','projects','reports','materials','equipment','team','insights','settings'] },
-    { id:'foreman',   label:'Foreman',           nav:['myproject','reports','settings'] },
-    { id:'procurement',label:'Procurement',      nav:['materials','requests','settings'] },
-    { id:'equipment', label:'Equipment Manager', nav:['equipment','settings'] }
+    { id:'director',  label:'Директор',          nav:['overview','projects','reports','materials','equipment','team','insights','settings'] },
+    { id:'foreman',   label:'Прораб',            nav:['myproject','reports','settings'] },
+    { id:'procurement',label:'Снабжение',        nav:['materials','requests','settings'] },
+    { id:'equipment', label:'Механизация',       nav:['equipment','settings'] }
   ],
 
   /* -------------------------------- projects ------------------------------ */
   projects: [
-    { id:'P01', code:'OBJECT №01', name:'Tashkent Road Section', lengthKm:12,
+    { id:'P01', code:'ОБЪЕКТ №01', name:'Ташкентский участок', lengthKm:12,
       totalVolume:45000, actualVolume:41400, startDate:'2026-05-20', plannedCompletion:'2026-09-20',
-      durationDays:123, recentRate:420, foreman:'Rustam Yuldashev' },
-    { id:'P02', code:'OBJECT №02', name:'Northern Bypass', lengthKm:18,
+      durationDays:123, recentRate:420, foreman:'Рустам Юлдашев' },
+    { id:'P02', code:'ОБЪЕКТ №02', name:'Северный обход', lengthKm:18,
       totalVolume:90000, actualVolume:72900, startDate:'2026-05-04', plannedCompletion:'2026-09-27',
-      durationDays:146, recentRate:630, foreman:'Dmitry Sokolov' },
-    { id:'P03', code:'OBJECT №03', name:'Samarkand Road Section', lengthKm:20,
-      title:'Construction of Road Section №03',
+      durationDays:146, recentRate:630, foreman:'Дмитрий Соколов' },
+    { id:'P03', code:'ОБЪЕКТ №03', name:'Самаркандский участок', lengthKm:20,
+      title:'Строительство участка автомобильной дороги №03',
       totalVolume:120000, actualVolume:80400, startDate:'2026-06-10', plannedCompletion:'2026-10-08',
-      durationDays:120, recentRate:null /* derived from dailyReports */, foreman:'Ivan Petrov' },
-    { id:'P04', code:'OBJECT №04', name:'Eastern Road Section', lengthKm:9,
+      durationDays:120, recentRate:null /* derived from dailyReports */, foreman:'Иван Петров' },
+    { id:'P04', code:'ОБЪЕКТ №04', name:'Восточный участок', lengthKm:9,
       totalVolume:30000, actualVolume:28800, startDate:'2026-04-19', plannedCompletion:'2026-09-14',
-      durationDays:148, recentRate:200, foreman:'Anvar Karimov' },
-    { id:'P05', code:'OBJECT №05', name:'Western Road Section', lengthKm:15,
+      durationDays:148, recentRate:200, foreman:'Анвар Каримов' },
+    { id:'P05', code:'ОБЪЕКТ №05', name:'Западный участок', lengthKm:15,
       totalVolume:60000, actualVolume:53400, startDate:'2026-04-14', plannedCompletion:'2026-09-29',
-      durationDays:168, recentRate:380, foreman:'Sergey Ivanov' }
+      durationDays:168, recentRate:380, foreman:'Сергей Иванов' }
   ],
 
   /* Volume completed on P03 BEFORE the 14-day reporting window below.
@@ -334,10 +334,10 @@ const DB = {
     { id:'R03', projectId:'P03', date:'2026-08-24', production:980,  workers:21, trucks:8, rollers:2, downtime:1,   aggregate:350, issue:null },
     { id:'R04', projectId:'P03', date:'2026-08-25', production:1010, workers:22, trucks:8, rollers:2, downtime:0,   aggregate:330, issue:null },
     { id:'R05', projectId:'P03', date:'2026-08-26', production:960,  workers:21, trucks:8, rollers:2, downtime:1,   aggregate:300, issue:null },
-    { id:'R06', projectId:'P03', date:'2026-08-27', production:950,  workers:21, trucks:7, rollers:2, downtime:1.5, aggregate:270, issue:'One dump truck reassigned to Object №02' },
+    { id:'R06', projectId:'P03', date:'2026-08-27', production:950,  workers:21, trucks:7, rollers:2, downtime:1.5, aggregate:270, issue:'Один самосвал переведён на объект №02' },
     { id:'R07', projectId:'P03', date:'2026-08-28', production:940,  workers:20, trucks:7, rollers:2, downtime:1.5, aggregate:250, issue:null },
-    { id:'R08', projectId:'P03', date:'2026-08-29', production:790,  workers:20, trucks:6, rollers:1, downtime:6,   aggregate:230, issue:'Roller №2 hydraulics failure' },
-    { id:'R09', projectId:'P03', date:'2026-08-30', production:760,  workers:19, trucks:6, rollers:1, downtime:5,   aggregate:200, issue:'Roller №2 still under repair' },
+    { id:'R08', projectId:'P03', date:'2026-08-29', production:790,  workers:20, trucks:6, rollers:1, downtime:6,   aggregate:230, issue:'Отказ гидравлики катка №2' },
+    { id:'R09', projectId:'P03', date:'2026-08-30', production:760,  workers:19, trucks:6, rollers:1, downtime:5,   aggregate:200, issue:'Каток №2 всё ещё в ремонте' },
     { id:'R10', projectId:'P03', date:'2026-08-31', production:780,  workers:20, trucks:6, rollers:2, downtime:3,   aggregate:180, issue:null },
     { id:'R11', projectId:'P03', date:'2026-09-01', production:980,  workers:21, trucks:8, rollers:2, downtime:0.5, aggregate:160, issue:null },
     { id:'R12', projectId:'P03', date:'2026-09-02', production:920,  workers:20, trucks:7, rollers:2, downtime:1,   aggregate:150, issue:null },
@@ -348,62 +348,62 @@ const DB = {
 
   /* -------------------------------- materials ----------------------------- */
   materials: [
-    { id:'M1', name:'Aggregate', projectId:'P03', stock:135, dailyUse:50, unit:'t' },
-    { id:'M2', name:'Cement',    projectId:'P02', stock:80,  dailyUse:10, unit:'t' },
-    { id:'M3', name:'Bitumen',   projectId:'P01', stock:150, dailyUse:30, unit:'t' },
-    { id:'M4', name:'Sand',      projectId:'P05', stock:400, dailyUse:35, unit:'t' }
+    { id:'M1', name:'Щебень', projectId:'P03', stock:135, dailyUse:50, unit:'т' },
+    { id:'M2', name:'Цемент', projectId:'P02', stock:80,  dailyUse:10, unit:'т' },
+    { id:'M3', name:'Битум',  projectId:'P01', stock:150, dailyUse:30, unit:'т' },
+    { id:'M4', name:'Песок',  projectId:'P05', stock:400, dailyUse:35, unit:'т' }
   ],
   procurementRequests: [],
 
   /* -------------------------------- equipment ----------------------------- */
   equipment: [
-    { id:'E1', name:'Roller №1',      projectId:'P03', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E2', name:'Roller №2',      projectId:'P03', status:'maintenance', downtimeWeek:11, downtimeToday:3 },
-    { id:'E3', name:'Dump Truck №17', projectId:'P03', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E4', name:'Dump Truck №18', projectId:'P03', status:'operational', downtimeWeek:1,  downtimeToday:0 },
-    { id:'E5', name:'Dump Truck №19', projectId:'P03', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E6', name:'Grader №4',      projectId:'P03', status:'operational', downtimeWeek:0.5,downtimeToday:0.5 },
-    { id:'E7', name:'Paver №1',       projectId:'P03', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E8', name:'Excavator №6',   projectId:'P02', status:'maintenance', downtimeWeek:6,  downtimeToday:2 },
-    { id:'E9', name:'Roller №5',      projectId:'P02', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E10',name:'Dump Truck №21', projectId:'P02', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E11',name:'Dump Truck №22', projectId:'P01', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E12',name:'Paver №2',       projectId:'P01', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E13',name:'Grader №1',      projectId:'P01', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E14',name:'Roller №6',      projectId:'P04', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E15',name:'Dump Truck №30', projectId:'P04', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E16',name:'Paver №3',       projectId:'P04', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E17',name:'Roller №7',      projectId:'P05', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E18',name:'Dump Truck №33', projectId:'P05', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E19',name:'Grader №9',      projectId:'P05', status:'operational', downtimeWeek:0,  downtimeToday:0 },
-    { id:'E20',name:'Excavator №2',   projectId:'P05', status:'operational', downtimeWeek:0,  downtimeToday:0 }
+    { id:'E1', name:'Каток №1',      projectId:'P03', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E2', name:'Каток №2',      projectId:'P03', status:'maintenance', downtimeWeek:11, downtimeToday:3 },
+    { id:'E3', name:'Самосвал №17', projectId:'P03', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E4', name:'Самосвал №18', projectId:'P03', status:'operational', downtimeWeek:1,  downtimeToday:0 },
+    { id:'E5', name:'Самосвал №19', projectId:'P03', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E6', name:'Грейдер №4',      projectId:'P03', status:'operational', downtimeWeek:0.5,downtimeToday:0.5 },
+    { id:'E7', name:'Асфальтоукладчик №1',       projectId:'P03', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E8', name:'Экскаватор №6',   projectId:'P02', status:'maintenance', downtimeWeek:6,  downtimeToday:2 },
+    { id:'E9', name:'Каток №5',      projectId:'P02', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E10',name:'Самосвал №21', projectId:'P02', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E11',name:'Самосвал №22', projectId:'P01', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E12',name:'Асфальтоукладчик №2',       projectId:'P01', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E13',name:'Грейдер №1',      projectId:'P01', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E14',name:'Каток №6',      projectId:'P04', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E15',name:'Самосвал №30', projectId:'P04', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E16',name:'Асфальтоукладчик №3',       projectId:'P04', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E17',name:'Каток №7',      projectId:'P05', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E18',name:'Самосвал №33', projectId:'P05', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E19',name:'Грейдер №9',      projectId:'P05', status:'operational', downtimeWeek:0,  downtimeToday:0 },
+    { id:'E20',name:'Экскаватор №2',   projectId:'P05', status:'operational', downtimeWeek:0,  downtimeToday:0 }
   ],
 
   /* ------------------------------ recommended actions --------------------- */
   tasks: [
-    { id:'T1', projectId:'P03', title:'Repair Roller №2',                        owner:'Equipment Department', priority:'critical', done:false },
-    { id:'T2', projectId:'P03', title:'Order 300 t aggregate',                   owner:'Procurement',          priority:'high',     done:false },
-    { id:'T3', projectId:'P03', title:'Restore dump truck availability to 8 units', owner:'Fleet Manager',     priority:'high',     done:false }
+    { id:'T1', projectId:'P03', title:'Отремонтировать каток №2',                 owner:'Служба механизации', priority:'critical', done:false },
+    { id:'T2', projectId:'P03', title:'Заказать 300 т щебня',                     owner:'Отдел снабжения',          priority:'high',     done:false },
+    { id:'T3', projectId:'P03', title:'Вернуть 8 самосвалов на объект',           owner:'Начальник автопарка',     priority:'high',     done:false }
   ],
 
   /* -------------------------------- team ---------------------------------- */
   team: [
-    { id:'U1', name:'Ivan Petrov',     role:'Site Foreman',       projectId:'P03', lastReport:'04 SEP 08:32', status:'Submitted' },
-    { id:'U2', name:'Rustam Yuldashev',role:'Site Foreman',       projectId:'P01', lastReport:'04 SEP 08:05', status:'Submitted' },
-    { id:'U3', name:'Dmitry Sokolov',  role:'Site Foreman',       projectId:'P02', lastReport:'03 SEP 19:40', status:'Pending' },
-    { id:'U4', name:'Olga Nazarova',   role:'Procurement Manager',projectId:null,  lastReport:'04 SEP 09:10', status:'Submitted' },
-    { id:'U5', name:'Timur Ashirov',   role:'Equipment Manager',  projectId:null,  lastReport:'04 SEP 08:55', status:'Submitted' },
-    { id:'U6', name:'A. Director',     role:'Director',           projectId:null,  lastReport:'—',            status:'—' }
+    { id:'U1', name:'Иван Петров',      role:'Прораб',                 projectId:'P03', lastReport:'04 СЕН 08:32', status:'Отправлен' },
+    { id:'U2', name:'Рустам Юлдашев',   role:'Прораб',                 projectId:'P01', lastReport:'04 СЕН 08:05', status:'Отправлен' },
+    { id:'U3', name:'Дмитрий Соколов',  role:'Прораб',                 projectId:'P02', lastReport:'03 СЕН 19:40', status:'Ожидается' },
+    { id:'U4', name:'Ольга Назарова',   role:'Менеджер по снабжению',  projectId:null,  lastReport:'04 СЕН 09:10', status:'Отправлен' },
+    { id:'U5', name:'Тимур Аширов',     role:'Начальник механизации',  projectId:null,  lastReport:'04 СЕН 08:55', status:'Отправлен' },
+    { id:'U6', name:'А. Рахимов',       role:'Директор',               projectId:null,  lastReport:'—',            status:'—' }
   ],
 
   /* --------------------------- inbox (simulated Telegram) ----------------- */
   /* [INTEGRATION:TELEGRAM] + [INTEGRATION:STT] + [INTEGRATION:CLAUDE]        */
   inbox: [
     {
-      id:'IN1', from:'Ivan Petrov', role:'Site Foreman', projectId:'P03',
-      time:'04 SEP 08:32', channel:'Telegram · voice message (simulated)',
+      id:'IN1', from:'Иван Петров', role:'Прораб', projectId:'P03',
+      time:'04 СЕН 08:32', channel:'Telegram · голосовое сообщение (имитация)',
       text:'Сегодня сделали 850 квадратов. Работало 18 человек. Пять самосвалов и два катка. Один каток стоял около трёх часов. Щебня осталось примерно 120 тонн.',
-      structured:{ date:'04.09.2026', production:850, workers:18, trucks:5, rollers:2, downtime:3, aggregate:120, issue:'Roller №2 downtime' },
+      structured:{ date:'04.09.2026', production:850, workers:18, trucks:5, rollers:2, downtime:3, aggregate:120, issue:'Простой катка №2' },
       processed:false
     }
   ]
@@ -418,11 +418,19 @@ const DAY = 86400000;
 const d = s => { const [y,m,dd] = s.split('-').map(Number); return new Date(y, m-1, dd); };
 const daysBetween = (a,b) => Math.round((b - a) / DAY);
 const addDays = (dt,n) => new Date(dt.getTime() + Math.round(n)*DAY);
-const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const MONTHS = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
 const fmtDate = dt => `${String(dt.getDate()).padStart(2,'0')} ${MONTHS[dt.getMonth()]} ${dt.getFullYear()}`;
 const fmtShort = dt => `${String(dt.getDate()).padStart(2,'0')} ${MONTHS[dt.getMonth()]}`;
-const n0 = v => Math.round(v).toLocaleString('en-US');
-const n1 = v => (Math.round(v*10)/10).toLocaleString('en-US');
+const n0 = v => Math.round(v).toLocaleString('ru-RU');
+const n1 = v => (Math.round(v*10)/10).toLocaleString('ru-RU');
+/** Русское склонение: plural(2,'каток','катка','катков') -> 'катка' */
+const plural = (n, one, few, many) => {
+  const a = Math.abs(n) % 100, b = a % 10;
+  if(a > 10 && a < 20) return many;
+  if(b > 1 && b < 5)   return few;
+  if(b === 1)          return one;
+  return many;
+};
 
 function reportsOf(projectId){
   return DB.dailyReports.filter(r => r.projectId === projectId)
@@ -490,7 +498,7 @@ function compute(p){
            risk, planned, start, ref, elapsed, daysToPlan };
 }
 
-const RISK_LABEL = { normal:'On track', warning:'At risk', critical:'Critical' };
+const RISK_LABEL = { normal:'В графике', warning:'Риск', critical:'Критично' };
 const RISK_CLASS = { normal:'green',    warning:'amber',   critical:'red' };
 const project = id => DB.projects.find(p => p.id === id);
 
@@ -529,8 +537,8 @@ function alerts(){
         level: c.risk === 'critical' ? 'red' : 'amber',
         title: p.code,
         text: moved
-          ? `Forecast delay increased from +${prev} to +${c.delayDays} days.`
-          : `Forecast completion is +${c.delayDays} days behind plan.`,
+          ? `Отставание по прогнозу выросло с +${prev} до +${c.delayDays} дн.`
+          : `Прогноз завершения на +${c.delayDays} дн. позже плана.`,
         go: () => go('project', p.id)
       });
     }
@@ -539,13 +547,13 @@ function alerts(){
     out.push({
       level: m.status === 'critical' ? 'red' : 'amber',
       title: project(m.projectId).code,
-      text: `${m.name} inventory below the ${m.status === 'critical' ? 4 : 6}-day operational buffer — ${n1(m.daysLeft)} days remaining.`,
+      text: `Запас «${m.name}» ниже ${m.status === 'critical' ? 4 : 6}-дневного буфера — осталось ${n1(m.daysLeft)} дн.`,
       go: () => go('materials')
     });
   });
   DB.equipment.filter(e => e.downtimeWeek >= 10).forEach(e => {
-    out.push({ level:'red', title:'EQUIPMENT',
-      text:`${e.name} downtime exceeded ${Math.floor(e.downtimeWeek)} hours this week.`,
+    out.push({ level:'red', title:'ТЕХНИКА',
+      text:`Простой «${e.name}» превысил ${Math.floor(e.downtimeWeek)} ч за неделю.`,
       go: () => go('equipment') });
   });
   return out;
@@ -563,29 +571,29 @@ function insights(){
   const lostVolume = Math.round(dtWeek / 8 * c.plannedRate);
   const agg = materialRows().find(m => m.id === 'M1');
   return [
-    { t:`${p.code} has been below planned production for ${belowStreak} consecutive day${belowStreak===1?'':'s'}.`,
-      d:`Plan is ${n0(c.plannedRate)} m²/day; the last ${belowStreak} reports average ${n0(rs.slice(-belowStreak).reduce((s,r)=>s+r.production,0)/Math.max(1,belowStreak))} m²/day.` },
-    { t:`Equipment downtime is currently the largest contributor to production loss.`,
-      d:`${n1(dtWeek)} h of recorded downtime over the last 7 days ≈ ${n0(lostVolume)} m² of lost output.` },
-    { t:`Aggregate inventory may become critical within ${Math.floor(agg.daysLeft)}–${Math.ceil(agg.daysLeft)} days.`,
-      d:`${n0(agg.stock)} t in stock against ${n0(agg.dailyUse)} t/day consumption on ${project(agg.projectId).code}.` },
-    { t:`At the current production rate, project completion is forecast ${c.delayDays} days later than planned.`,
-      d:`${n0(c.remaining)} m² remaining ÷ ${n0(c.rate)} m²/day = ${Math.round(c.forecastDays)} days → ${fmtDate(c.forecastDate)}.` }
+    { t:`${p.code} ${belowStreak} дн. подряд идёт ниже планового объёма.`,
+      d:`План — ${n0(c.plannedRate)} м²/день; последние ${belowStreak} отчётов в среднем ${n0(rs.slice(-belowStreak).reduce((s,r)=>s+r.production,0)/Math.max(1,belowStreak))} м²/день.` },
+    { t:`Простой техники — главный источник потери выработки.`,
+      d:`${n1(dtWeek)} ч простоя за последние 7 дней ≈ ${n0(lostVolume)} м² недовыполненного объёма.` },
+    { t:`Запас щебня может стать критическим в ближайшие ${Math.floor(agg.daysLeft)}–${Math.ceil(agg.daysLeft)} дн.`,
+      d:`${n0(agg.stock)} т на складе при расходе ${n0(agg.dailyUse)} т/день на ${project(agg.projectId).code}.` },
+    { t:`При текущем темпе объект будет завершён на ${c.delayDays} дн. позже плана.`,
+      d:`Остаток ${n0(c.remaining)} м² ÷ ${n0(c.rate)} м²/день = ${Math.round(c.forecastDays)} дн. → ${fmtDate(c.forecastDate)}.` }
   ];
 }
 
 /* ================================ 3. UI LAYER ============================== */
 const NAV = {
-  overview: { label:'Overview',    ico:'▦' },
-  projects: { label:'Projects',    ico:'▤' },
-  myproject:{ label:'My Object',   ico:'▤' },
-  reports:  { label:'Reports',     ico:'✉' },
-  materials:{ label:'Materials',   ico:'▥' },
-  requests: { label:'Requests',    ico:'▧' },
-  equipment:{ label:'Equipment',   ico:'⚙' },
-  team:     { label:'Team',        ico:'☺' },
-  insights: { label:'AI Insights', ico:'✦' },
-  settings: { label:'Settings',    ico:'⋯' }
+  overview: { label:'Обзор',       ico:'▦' },
+  projects: { label:'Объекты',     ico:'▤' },
+  myproject:{ label:'Мой объект',  ico:'▤' },
+  reports:  { label:'Отчёты',      ico:'✉' },
+  materials:{ label:'Материалы',   ico:'▥' },
+  requests: { label:'Заявки',      ico:'▧' },
+  equipment:{ label:'Техника',     ico:'⚙' },
+  team:     { label:'Команда',     ico:'☺' },
+  insights: { label:'AI-аналитика',ico:'✦' },
+  settings: { label:'Настройки',   ico:'⋯' }
 };
 
 const state = { role:'director', page:'overview', param:null, openReport:null };
@@ -613,7 +621,7 @@ function countUp(node){
   const t0 = performance.now(), dur = 650;
   (function step(now){
     const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
-    node.textContent = (to * e).toLocaleString('en-US',{minimumFractionDigits:dec, maximumFractionDigits:dec}) + suf;
+    node.textContent = (to * e).toLocaleString('ru-RU',{minimumFractionDigits:dec, maximumFractionDigits:dec}) + suf;
     if(k < 1) requestAnimationFrame(step);
   })(performance.now());
 }
@@ -630,7 +638,7 @@ function renderChrome(){
     </button>`).join('');
   el('nav').querySelectorAll('[data-nav]').forEach(b => b.onclick = () => go(b.dataset.nav));
 
-  el('roleSwitch').innerHTML = `<span class="small" style="padding:5px 8px">View as</span>` +
+  el('roleSwitch').innerHTML = `<span class="small" style="padding:5px 8px">Роль</span>` +
     DB.roles.map(r => `<button data-role="${r.id}" class="${state.role===r.id?'active':''}">${r.label}</button>`).join('');
   el('roleSwitch').querySelectorAll('[data-role]').forEach(b => b.onclick = () => {
     state.role = b.dataset.role;
@@ -647,46 +655,46 @@ function pageOverview(){
   return `
   <div class="page">
     <div class="page-head">
-      <h1>Good morning, Director</h1>
-      <div class="sub">Know what is happening on every project before the problem becomes expensive.</div>
+      <h1>Доброе утро, директор</h1>
+      <div class="sub">Знать, что происходит на каждом объекте, до того как проблема станет дорогой.</div>
     </div>
 
     <div class="grid g4">
-      <div class="kpi"><div class="mono-label">Projects</div><div class="v">${cnt(DB.projects.length)}</div><div class="foot">Active sites</div></div>
-      <div class="kpi"><div class="mono-label">On track</div><div class="v green">${cnt(f.onTrack)}</div><div class="foot">Within schedule</div></div>
-      <div class="kpi"><div class="mono-label">At risk</div><div class="v amber">${cnt(f.atRisk)}</div><div class="foot">3–7 days behind</div></div>
-      <div class="kpi"><div class="mono-label">Critical</div><div class="v red">${cnt(f.critical)}</div><div class="foot">More than 7 days behind</div></div>
+      <div class="kpi"><div class="mono-label">Объектов</div><div class="v">${cnt(DB.projects.length)}</div><div class="foot">В работе</div></div>
+      <div class="kpi"><div class="mono-label">В графике</div><div class="v green">${cnt(f.onTrack)}</div><div class="foot">Без отставания</div></div>
+      <div class="kpi"><div class="mono-label">Риск</div><div class="v amber">${cnt(f.atRisk)}</div><div class="foot">Отставание 3–7 дней</div></div>
+      <div class="kpi"><div class="mono-label">Критично</div><div class="v red">${cnt(f.critical)}</div><div class="foot">Отставание больше 7 дней</div></div>
     </div>
 
     <div class="card pad" style="margin-top:14px">
-      <div class="mono-label">Overall progress</div>
+      <div class="mono-label">Общий прогресс</div>
       <div style="display:flex;align-items:flex-end;gap:16px;margin-top:8px">
         <div style="font-size:34px;font-weight:600;letter-spacing:-.02em;line-height:1">${cnt(f.overall,0,'%')}</div>
-        <div class="small" style="padding-bottom:6px">${n0(f.rows.reduce((s,r)=>s+r.c.actualVol,0))} m² of ${n0(f.rows.reduce((s,r)=>s+r.p.totalVolume,0))} m² completed</div>
+        <div class="small" style="padding-bottom:6px">выполнено ${n0(f.rows.reduce((s,r)=>s+r.c.actualVol,0))} м² из ${n0(f.rows.reduce((s,r)=>s+r.p.totalVolume,0))} м²</div>
       </div>
       <div class="bar"><i style="width:${f.overall.toFixed(1)}%"></i></div>
-      <div class="foot small" style="margin-top:10px">Updated ${DB.meta.updatedAt} today · DEMO DATA</div>
+      <div class="foot small" style="margin-top:10px">Обновлено сегодня в ${DB.meta.updatedAt} · ДЕМО-ДАННЫЕ</div>
     </div>
 
     <div class="split section">
       <div>
-        <div class="section-head"><span class="mono-label">Project overview</span>
-          <span class="small">Click a project to open its detail page</span></div>
+        <div class="section-head"><span class="mono-label">Объекты</span>
+          <span class="small">Нажмите на объект, чтобы открыть карточку</span></div>
         <div class="card">
           <div class="tbl-wrap"><table class="responsive">
-            <thead><tr><th>Object</th><th>Name</th><th>Progress</th><th>Forecast</th><th>Status</th></tr></thead>
+            <thead><tr><th>Объект</th><th>Название</th><th>Прогресс</th><th>Прогноз</th><th>Статус</th></tr></thead>
             <tbody>
               ${f.rows.map(({p,c}) => `
                 <tr class="clickable" data-open="${p.id}">
-                  <td data-l="Object"><strong>${p.code}</strong></td>
-                  <td data-l="Name">${esc(p.name)}<div class="small">${p.lengthKm} km</div></td>
-                  <td data-l="Progress" style="min-width:150px">
+                  <td data-l="Объект" style="white-space:nowrap"><strong>${p.code}</strong></td>
+                  <td data-l="Название">${esc(p.name)}<div class="small">${p.lengthKm} км</div></td>
+                  <td data-l="Прогресс" style="min-width:150px">
                     <strong class="num">${Math.round(c.actualPct)}%</strong>
                     <div class="bar ${RISK_CLASS[c.risk]}"><i style="width:${c.actualPct.toFixed(1)}%"></i></div>
                   </td>
-                  <td data-l="Forecast" class="num">${fmtShort(c.forecastDate)}
-                    <div class="small">${c.delayDays > 0 ? '+' + c.delayDays + ' d' : c.delayDays + ' d'} vs plan</div></td>
-                  <td data-l="Status"><span class="pill ${RISK_CLASS[c.risk]}">${RISK_LABEL[c.risk]}</span></td>
+                  <td data-l="Прогноз" class="num" style="white-space:nowrap">${fmtShort(c.forecastDate)}
+                    <div class="small" style="white-space:nowrap">${c.delayDays > 0 ? '+' + c.delayDays : c.delayDays} дн. к плану</div></td>
+                  <td data-l="Статус"><span class="pill ${RISK_CLASS[c.risk]}">${RISK_LABEL[c.risk]}</span></td>
                 </tr>`).join('')}
             </tbody>
           </table></div>
@@ -694,20 +702,20 @@ function pageOverview(){
       </div>
 
       <div>
-        <div class="section-head"><span class="mono-label">Attention required</span></div>
+        <div class="section-head"><span class="mono-label">Требует внимания</span></div>
         <div class="card">
           ${al.length ? al.map((a,i) => `
             <div class="alert ${a.level}" data-alert="${i}" style="animation-delay:${i*45}ms">
               <span class="mark"></span>
               <div><div class="t">${esc(a.title)}</div><div class="d">${esc(a.text)}</div></div>
-            </div>`).join('') : `<div class="pad small">No open alerts.</div>`}
+            </div>`).join('') : `<div class="pad small">Открытых предупреждений нет.</div>`}
         </div>
         <div class="card pad" style="margin-top:14px">
-          <div class="mono-label">Demo controls</div>
-          <p class="small" style="margin:10px 0 14px">Simulate an incoming site report to see the whole chain react:
-             report → structured data → plan/fact → forecast → risk → alert.</p>
-          <button class="btn primary" data-sim style="width:100%">SIMULATE NEW REPORT</button>
-          <button class="btn" data-goinbox style="width:100%;margin-top:8px">Open report inbox</button>
+          <div class="mono-label">Демо-управление</div>
+          <p class="small" style="margin:10px 0 14px">Смоделируйте новый отчёт с объекта и посмотрите, как реагирует вся цепочка:
+             отчёт → структурированные данные → план/факт → прогноз → риск → предупреждение.</p>
+          <button class="btn primary" data-sim style="width:100%">СМОДЕЛИРОВАТЬ ОТЧЁТ</button>
+          <button class="btn" data-goinbox style="width:100%;margin-top:8px">Открыть входящие отчёты</button>
         </div>
       </div>
     </div>
@@ -742,22 +750,22 @@ function chart(p, c){
 
   return `
   <svg class="chart-svg" viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" role="img"
-       aria-label="Planned versus actual progress">
+       aria-label="План и факт по прогрессу">
     ${[0,25,50,75,100].map(v => `
       <line x1="${PL}" x2="${W-PR}" y1="${y(v)}" y2="${y(v)}" stroke="#e5e8eb" stroke-width="1"/>
       <text x="${PL-8}" y="${y(v)+4}" text-anchor="end" font-size="10" fill="#767e88">${v}%</text>`).join('')}
     ${[0,0.25,0.5,0.75,1].map(k => `
-      <text x="${x(days*k)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#767e88">${Math.round(days*k)}d</text>`).join('')}
+      <text x="${x(days*k)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#767e88">${Math.round(days*k)} дн</text>`).join('')}
     <line x1="${x(c.elapsed)}" x2="${x(c.elapsed)}" y1="${PT}" y2="${H-PB}" stroke="#0d0f12" stroke-width="1" stroke-dasharray="3 3" opacity=".35"/>
-    <text x="${x(c.elapsed)+5}" y="${PT+11}" font-size="10" fill="#0d0f12" opacity=".6">today</text>
+    <text x="${x(c.elapsed)+5}" y="${PT+11}" font-size="10" fill="#0d0f12" opacity=".6">сегодня</text>
     <path class="ln" d="${path(planPts)}" fill="none" stroke="#767e88" stroke-width="2"/>
     <path class="ln" d="${path(fc)}" fill="none" stroke="#c8322b" stroke-width="1.5" stroke-dasharray="5 4" opacity=".55"/>
     <path class="ln" d="${path(pts)}" fill="none" stroke="#c8322b" stroke-width="2.5" stroke-linejoin="round"/>
   </svg>
   <div class="legend">
-    <span><i style="background:#767e88"></i>Plan</span>
-    <span><i style="background:#c8322b"></i>Actual</span>
-    <span><i style="background:#c8322b;opacity:.5"></i>Forecast</span>
+    <span><i style="background:#767e88"></i>План</span>
+    <span><i style="background:#c8322b"></i>Факт</span>
+    <span><i style="background:#c8322b;opacity:.5"></i>Прогноз</span>
   </div>`;
 }
 
@@ -774,126 +782,126 @@ function pageProject(id, embedded){
 
   return `
   <div class="page">
-    ${state.role === 'director' && !embedded ? `<button class="backlink" data-back>← Back to overview</button>` : ''}
+    ${state.role === 'director' && !embedded ? `<button class="backlink" data-back>← Назад к обзору</button>` : ''}
     <div class="page-head" style="display:${embedded?'none':'flex'};align-items:flex-start;gap:18px;flex-wrap:wrap">
       <div>
         <div class="mono-label">${p.code}</div>
         <h1 style="margin-top:6px">${esc(p.title || p.name)}</h1>
-        <div class="sub">${esc(p.name)} · ${p.lengthKm} km · ${n0(p.totalVolume)} m² total · ${p.durationDays} days</div>
+        <div class="sub">${esc(p.name)} · ${p.lengthKm} км · общий объём ${n0(p.totalVolume)} м² · ${p.durationDays} дней</div>
       </div>
       <div style="margin-left:auto"><span class="pill ${RISK_CLASS[c.risk]}" style="font-size:13px;padding:6px 14px">
         ${RISK_LABEL[c.risk].toUpperCase()}</span></div>
     </div>
 
     <div class="grid g3">
-      <div class="stat"><div class="mono-label">Planned progress</div><div class="v">${cnt(c.plannedPct,0,'%')}</div>
+      <div class="stat"><div class="mono-label">План</div><div class="v">${cnt(c.plannedPct,0,'%')}</div>
         <div class="bar"><i style="width:${c.plannedPct.toFixed(1)}%"></i></div></div>
-      <div class="stat"><div class="mono-label">Actual progress</div><div class="v">${cnt(c.actualPct,0,'%')}</div>
+      <div class="stat"><div class="mono-label">Факт</div><div class="v">${cnt(c.actualPct,0,'%')}</div>
         <div class="bar ${RISK_CLASS[c.risk]}"><i style="width:${c.actualPct.toFixed(1)}%"></i></div></div>
-      <div class="stat"><div class="mono-label">Deviation</div>
+      <div class="stat"><div class="mono-label">Отклонение</div>
         <div class="v" style="color:${c.deviation<0?'var(--red)':'var(--green)'}">${c.deviation<0?'':'+'}${cnt(c.deviation,1,'%')}</div>
-        <div class="small" style="margin-top:12px">${n0(Math.abs(c.plannedVol-c.actualVol))} m² ${c.deviation<0?'behind':'ahead of'} plan</div></div>
+        <div class="small" style="margin-top:12px">${n0(Math.abs(c.plannedVol-c.actualVol))} м² ${c.deviation<0?'отставание от плана':'опережение плана'}</div></div>
     </div>
 
     <div class="grid g3" style="margin-top:14px">
-      <div class="stat"><div class="mono-label">Current production rate</div><div class="v">${cnt(c.rate,0)} m²/day</div>
-        <div class="small" style="margin-top:6px">7-day average</div></div>
-      <div class="stat"><div class="mono-label">Required production rate</div><div class="v">${cnt(c.requiredRate,0)} m²/day</div>
-        <div class="small" style="margin-top:6px">To finish by ${fmtShort(c.planned)}</div></div>
-      <div class="stat"><div class="mono-label">Remaining volume</div><div class="v">${cnt(c.remaining,0)} m²</div>
-        <div class="small" style="margin-top:6px">of ${n0(p.totalVolume)} m²</div></div>
+      <div class="stat"><div class="mono-label">Текущая производительность</div><div class="v">${cnt(c.rate,0)} м²/день</div>
+        <div class="small" style="margin-top:6px">среднее за 7 дней</div></div>
+      <div class="stat"><div class="mono-label">Требуемая производительность</div><div class="v">${cnt(c.requiredRate,0)} м²/день</div>
+        <div class="small" style="margin-top:6px">чтобы закончить к ${fmtShort(c.planned)}</div></div>
+      <div class="stat"><div class="mono-label">Остаток объёма</div><div class="v">${cnt(c.remaining,0)} м²</div>
+        <div class="small" style="margin-top:6px">из ${n0(p.totalVolume)} м²</div></div>
     </div>
 
     <div class="split section">
       <div>
         <div class="card pad">
-          <div class="section-head" style="margin-bottom:6px"><span class="mono-label">Planned vs actual progress</span></div>
+          <div class="section-head" style="margin-bottom:6px"><span class="mono-label">План и факт</span></div>
           ${chart(p,c)}
         </div>
       </div>
       <div class="forecast">
-        <div class="mono-label">Forecast completion</div>
+        <div class="mono-label">Прогноз завершения</div>
         <div class="big">${fmtDate(c.forecastDate)}</div>
         <div class="row">
-          <div><div class="mono-label">Planned completion</div><div class="v">${fmtDate(c.planned)}</div></div>
-          <div><div class="mono-label">Delay</div><div class="v"><span class="delay-badge">${c.delayDays>0?'+':''}${c.delayDays} DAYS</span></div></div>
+          <div><div class="mono-label">Плановое завершение</div><div class="v">${fmtDate(c.planned)}</div></div>
+          <div><div class="mono-label">Отставание</div><div class="v"><span class="delay-badge">${c.delayDays>0?'+':''}${c.delayDays} ДН.</span></div></div>
         </div>
-        <div class="overlay-note" style="color:rgba(255,255,255,.6)">Based on the current average production rate
-          (${n0(c.remaining)} m² ÷ ${n0(c.rate)} m²/day = ${Math.round(c.forecastDays)} days).</div>
+        <div class="overlay-note" style="color:rgba(255,255,255,.6)">Расчёт по текущей средней производительности
+          (${n0(c.remaining)} м² ÷ ${n0(c.rate)} м²/день = ${Math.round(c.forecastDays)} дн.).</div>
       </div>
     </div>
 
     <div class="split section">
       <div class="card pad">
-        <div class="section-head"><span class="mono-label">Why is the project delayed?</span>
-          <span class="pill gray">AI analysis · demo</span></div>
+        <div class="section-head"><span class="mono-label">Почему объект отстаёт?</span>
+          <span class="pill gray">AI-анализ · демо</span></div>
         <div class="reason"><div class="n">01</div><div>
-          <div class="h">Equipment downtime</div>
-          <div class="p">Roller №2 was unavailable for approximately ${n1(DB.equipment.find(e=>e.id==='E2').downtimeWeek)} hours during the last 7 days
-            (${n1(dtWeek)} h total downtime on this object).</div></div></div>
+          <div class="h">Простой техники</div>
+          <div class="p">Каток №2 был недоступен около ${n1(DB.equipment.find(e=>e.id==='E2').downtimeWeek)} ч за последние 7 дней
+            (всего ${n1(dtWeek)} ч простоя на объекте).</div></div></div>
         <div class="reason"><div class="n">02</div><div>
-          <div class="h">Material shortage</div>
-          <div class="p">Aggregate inventory dropped to ${agg ? n0(agg.stock)+' t' : 'a low level'} —
-            below the recommended operational buffer of 4 days.</div></div></div>
+          <div class="h">Нехватка материала</div>
+          <div class="p">Запас щебня опустился до ${agg ? n0(agg.stock)+' т' : 'низкого уровня'} —
+            ниже рекомендуемого рабочего буфера в 4 дня.</div></div></div>
         <div class="reason"><div class="n">03</div><div>
-          <div class="h">Reduced truck availability</div>
-          <div class="p">Average number of active dump trucks decreased from ${trucksBefore} to ${trucksNow}.</div></div></div>
+          <div class="h">Меньше самосвалов на объекте</div>
+          <div class="p">Среднее число работающих самосвалов снизилось с ${trucksBefore} до ${trucksNow}.</div></div></div>
         <div style="display:flex;align-items:center;gap:14px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)">
-          <span class="mono-label">AI confidence</span>
+          <span class="mono-label">Уверенность AI</span>
           <strong class="num">${conf}%</strong>
-          <span class="small" style="margin-left:auto">Interface demo — no live model is running.</span>
+          <span class="small" style="margin-left:auto">Демо-интерфейс — реальная модель не подключена.</span>
         </div>
       </div>
 
       <div class="card pad">
-        <div class="section-head"><span class="mono-label">Recommended actions</span></div>
+        <div class="section-head"><span class="mono-label">Рекомендуемые действия</span></div>
         ${tasks.map(t => `
           <div class="action ${t.done?'done':''}">
             <span class="mark" style="width:9px;height:9px;border-radius:50%;margin-top:6px;flex:none;
               background:${t.priority==='critical'?'var(--red)':'var(--amber)'}"></span>
             <div style="flex:1">
               <div class="h">${esc(t.title)}</div>
-              <div class="small">Responsible: ${esc(t.owner)} · Priority: ${t.priority==='critical'?'Critical':'High'}</div>
+              <div class="small">Ответственный: ${esc(t.owner)} · Приоритет: ${t.priority==='critical'?'критический':'высокий'}</div>
             </div>
-            <button class="btn sm" data-task="${t.id}" ${t.done?'disabled':''}>${t.done?'Resolved':'Mark as resolved'}</button>
+            <button class="btn sm" data-task="${t.id}" ${t.done?'disabled':''}>${t.done?'Выполнено':'Отметить выполненным'}</button>
           </div>`).join('')}
       </div>
     </div>
 
     <div class="section">
-      <div class="section-head"><span class="mono-label">Daily reports</span>
-        <span class="small">${reportsOf(p.id).length} reports · click to expand</span>
-        <button class="btn sm primary" data-sim style="margin-left:auto">SIMULATE NEW REPORT</button></div>
+      <div class="section-head"><span class="mono-label">Ежедневные отчёты</span>
+        <span class="small">${reportsOf(p.id).length} отчётов · нажмите, чтобы раскрыть</span>
+        <button class="btn sm primary" data-sim style="margin-left:auto">СМОДЕЛИРОВАТЬ ОТЧЁТ</button></div>
       <div class="card">
         ${rs.length ? rs.map(r => `
           <div class="report-row" data-report="${r.id}">
             <span class="date">${fmtShort(d(r.date))}</span>
-            <span class="num"><strong>${n0(r.production)}</strong> m²</span>
-            <span class="small">${r.workers} workers</span>
-            <span class="small">${r.trucks} trucks</span>
-            <span class="small">${r.rollers} rollers</span>
-            <span class="small">${n1(r.downtime)} h downtime</span>
-            <span style="margin-left:auto">${r.issue ? `<span class="pill red">Issue</span>` : `<span class="pill gray">OK</span>`}</span>
+            <span class="num"><strong>${n0(r.production)}</strong> м²</span>
+            <span class="small">${r.workers} чел.</span>
+            <span class="small">${r.trucks} самосв.</span>
+            <span class="small">${r.rollers} ${plural(r.rollers,'каток','катка','катков')}</span>
+            <span class="small">простой ${n1(r.downtime)} ч</span>
+            <span style="margin-left:auto">${r.issue ? `<span class="pill red">Проблема</span>` : `<span class="pill gray">Норма</span>`}</span>
           </div>
           ${state.openReport === r.id ? `
           <div class="report-detail">
             <div class="grid g2" style="padding-top:14px">
               <div>
-                <div class="kv"><span class="k">Date</span><span class="v">${r.date.split('-').reverse().join('.')}</span></div>
-                <div class="kv"><span class="k">Production</span><span class="v">${n0(r.production)} m²</span></div>
-                <div class="kv"><span class="k">Workers</span><span class="v">${r.workers}</span></div>
-                <div class="kv"><span class="k">Dump trucks</span><span class="v">${r.trucks}</span></div>
+                <div class="kv"><span class="k">Дата</span><span class="v">${r.date.split('-').reverse().join('.')}</span></div>
+                <div class="kv"><span class="k">Выработка</span><span class="v">${n0(r.production)} м²</span></div>
+                <div class="kv"><span class="k">Рабочих</span><span class="v">${r.workers}</span></div>
+                <div class="kv"><span class="k">Самосвалов</span><span class="v">${r.trucks}</span></div>
               </div>
               <div>
-                <div class="kv"><span class="k">Rollers</span><span class="v">${r.rollers}</span></div>
-                <div class="kv"><span class="k">Downtime</span><span class="v">${n1(r.downtime)} h</span></div>
-                <div class="kv"><span class="k">Aggregate on site</span><span class="v">${n0(r.aggregate)} t</span></div>
-                <div class="kv"><span class="k">Issue</span><span class="v">${r.issue ? esc(r.issue) : '—'}</span></div>
+                <div class="kv"><span class="k">Катков</span><span class="v">${r.rollers}</span></div>
+                <div class="kv"><span class="k">Простой</span><span class="v">${n1(r.downtime)} ч</span></div>
+                <div class="kv"><span class="k">Щебень на объекте</span><span class="v">${n0(r.aggregate)} т</span></div>
+                <div class="kv"><span class="k">Проблема</span><span class="v">${r.issue ? esc(r.issue) : '—'}</span></div>
               </div>
             </div>
-            <div class="small" style="margin-top:12px">Submitted by ${esc(p.foreman)} · Site Foreman · channel: Telegram (simulated)</div>
+            <div class="small" style="margin-top:12px">Отправил ${esc(p.foreman)} · прораб · канал: Telegram (имитация)</div>
           </div>` : ''}`).join('')
-        : `<div class="pad small">No daily reports captured for this object in the demo dataset.</div>`}
+        : `<div class="pad small">В демо-данных по этому объекту ежедневных отчётов нет.</div>`}
       </div>
     </div>
   </div>`;
@@ -903,24 +911,24 @@ function pageProjects(){
   const f = portfolio();
   return `
   <div class="page">
-    <div class="page-head"><h1>Projects</h1><div class="sub">All active road construction objects.</div></div>
+    <div class="page-head"><h1>Объекты</h1><div class="sub">Все действующие объекты дорожного строительства.</div></div>
     <div class="grid g2">
       ${f.rows.map(({p,c}) => `
         <div class="card pad clickable" data-open="${p.id}" style="cursor:pointer">
           <div style="display:flex;align-items:flex-start">
             <div><div class="mono-label">${p.code}</div><h3 style="margin-top:6px">${esc(p.name)}</h3>
-              <div class="small">${p.lengthKm} km · ${n0(p.totalVolume)} m²</div></div>
+              <div class="small">${p.lengthKm} км · ${n0(p.totalVolume)} м²</div></div>
             <span class="pill ${RISK_CLASS[c.risk]}" style="margin-left:auto">${RISK_LABEL[c.risk]}</span>
           </div>
           <div style="display:flex;align-items:baseline;gap:10px;margin-top:16px">
             <strong style="font-size:26px;font-weight:600" class="num">${Math.round(c.actualPct)}%</strong>
-            <span class="small">plan ${Math.round(c.plannedPct)}%</span>
+            <span class="small">план ${Math.round(c.plannedPct)}%</span>
           </div>
           <div class="bar ${RISK_CLASS[c.risk]}"><i style="width:${c.actualPct.toFixed(1)}%"></i></div>
           <div class="grid g3" style="margin-top:16px;gap:10px">
-            <div><div class="mono-label">Rate</div><div class="num" style="font-weight:600">${n0(c.rate)} m²/d</div></div>
-            <div><div class="mono-label">Forecast</div><div class="num" style="font-weight:600">${fmtShort(c.forecastDate)}</div></div>
-            <div><div class="mono-label">Delay</div><div class="num" style="font-weight:600;color:${c.delayDays>2?'var(--red)':'var(--green)'}">${c.delayDays>0?'+':''}${c.delayDays} d</div></div>
+            <div><div class="mono-label">Темп</div><div class="num" style="font-weight:600">${n0(c.rate)} м²/д</div></div>
+            <div><div class="mono-label">Прогноз</div><div class="num" style="font-weight:600">${fmtShort(c.forecastDate)}</div></div>
+            <div><div class="mono-label">Отставание</div><div class="num" style="font-weight:600;color:${c.delayDays>2?'var(--red)':'var(--green)'}">${c.delayDays>0?'+':''}${c.delayDays} дн.</div></div>
           </div>
         </div>`).join('')}
     </div>
@@ -932,13 +940,13 @@ function pageReports(){
   const items = DB.inbox.slice().reverse();
   return `
   <div class="page">
-    <div class="page-head"><h1>Report inbox</h1>
-      <div class="sub">Simulation of the future Telegram channel. A foreman sends a normal voice or text message —
-        the system turns it into structured project data.</div></div>
+    <div class="page-head"><h1>Входящие отчёты</h1>
+      <div class="sub">Имитация будущего канала Telegram. Прораб отправляет обычное голосовое или текстовое сообщение —
+        система превращает его в структурированные данные объекта.</div></div>
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
-      <button class="btn primary" data-sim>SIMULATE NEW REPORT</button>
-      <span class="pill gray" style="align-self:center">Telegram · n8n · Claude — not connected in this demo</span>
+      <button class="btn primary" data-sim>СМОДЕЛИРОВАТЬ ОТЧЁТ</button>
+      <span class="pill gray" style="align-self:center">Telegram · n8n · Claude — в демо не подключены</span>
     </div>
 
     ${items.map(m => `
@@ -956,18 +964,18 @@ function pageReports(){
             </div>
           </div>
           <div>
-            <div class="section-head" style="margin-bottom:8px"><span class="mono-label">AI structured data</span></div>
-            <div class="kv"><span class="k">Date</span><span class="v">${esc(m.structured.date)}</span></div>
-            <div class="kv"><span class="k">Production</span><span class="v">${n0(m.structured.production)} m²</span></div>
-            <div class="kv"><span class="k">Workers</span><span class="v">${m.structured.workers}</span></div>
-            <div class="kv"><span class="k">Dump trucks</span><span class="v">${m.structured.trucks}</span></div>
-            <div class="kv"><span class="k">Rollers</span><span class="v">${m.structured.rollers}</span></div>
-            <div class="kv"><span class="k">Downtime</span><span class="v">${n1(m.structured.downtime)} h</span></div>
-            <div class="kv"><span class="k">Aggregate</span><span class="v">${n0(m.structured.aggregate)} t</span></div>
-            <div class="kv"><span class="k">Issue</span><span class="v">${m.structured.issue ? esc(m.structured.issue) : '—'}</span></div>
+            <div class="section-head" style="margin-bottom:8px"><span class="mono-label">Структурированные данные</span></div>
+            <div class="kv"><span class="k">Дата</span><span class="v">${esc(m.structured.date)}</span></div>
+            <div class="kv"><span class="k">Выработка</span><span class="v">${n0(m.structured.production)} м²</span></div>
+            <div class="kv"><span class="k">Рабочих</span><span class="v">${m.structured.workers}</span></div>
+            <div class="kv"><span class="k">Самосвалов</span><span class="v">${m.structured.trucks}</span></div>
+            <div class="kv"><span class="k">Катков</span><span class="v">${m.structured.rollers}</span></div>
+            <div class="kv"><span class="k">Простой</span><span class="v">${n1(m.structured.downtime)} ч</span></div>
+            <div class="kv"><span class="k">Щебень</span><span class="v">${n0(m.structured.aggregate)} т</span></div>
+            <div class="kv"><span class="k">Проблема</span><span class="v">${m.structured.issue ? esc(m.structured.issue) : '—'}</span></div>
             <div id="proc-${m.id}" style="margin-top:14px"></div>
             <button class="btn primary" data-process="${m.id}" style="margin-top:12px;width:100%" ${m.processed?'disabled':''}>
-              ${m.processed ? 'REPORT PROCESSED' : 'PROCESS REPORT'}</button>
+              ${m.processed ? 'ОТЧЁТ ОБРАБОТАН' : 'ОБРАБОТАТЬ ОТЧЁТ'}</button>
           </div>
         </div>
       </div>`).join('')}
@@ -980,36 +988,36 @@ function pageMaterials(){
   return `
   <div class="page">
     <div class="page-head" style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
-      <div><h1>Materials</h1><div class="sub">Stock coverage against daily consumption.</div></div>
-      <button class="btn primary" data-req style="margin-left:auto">CREATE PROCUREMENT REQUEST</button>
+      <div><h1>Материалы</h1><div class="sub">Запас на складе относительно суточного расхода.</div></div>
+      <button class="btn primary" data-req style="margin-left:auto">СОЗДАТЬ ЗАЯВКУ НА ПОСТАВКУ</button>
     </div>
     <div class="card"><div class="tbl-wrap"><table class="responsive">
-      <thead><tr><th>Material</th><th>Project</th><th>Current stock</th><th>Daily consumption</th><th>Days remaining</th><th>Status</th></tr></thead>
+      <thead><tr><th>Материал</th><th>Объект</th><th>Остаток</th><th>Расход в сутки</th><th>Хватит на</th><th>Статус</th></tr></thead>
       <tbody>${rows.map(m => `
         <tr>
-          <td data-l="Material"><strong>${esc(m.name)}</strong></td>
-          <td data-l="Project">${project(m.projectId).code}</td>
-          <td data-l="Stock" class="num">${n0(m.stock)} ${m.unit}</td>
-          <td data-l="Consumption" class="num">${n0(m.dailyUse)} ${m.unit}/day</td>
-          <td data-l="Days remaining" class="num">${n1(m.daysLeft)} days</td>
-          <td data-l="Status"><span class="pill ${RISK_CLASS[m.status]}">${m.status==='critical'?'Critical':m.status==='warning'?'Warning':'Normal'}</span></td>
+          <td data-l="Материал"><strong>${esc(m.name)}</strong></td>
+          <td data-l="Объект">${project(m.projectId).code}</td>
+          <td data-l="Остаток" class="num">${n0(m.stock)} ${m.unit}</td>
+          <td data-l="Расход" class="num">${n0(m.dailyUse)} ${m.unit}/день</td>
+          <td data-l="Хватит на" class="num">${n1(m.daysLeft)} дн.</td>
+          <td data-l="Статус"><span class="pill ${RISK_CLASS[m.status]}">${m.status==='critical'?'Критично':m.status==='warning'?'Внимание':'Норма'}</span></td>
         </tr>`).join('')}</tbody>
     </table></div></div>
 
     <div class="section">
-      <div class="section-head"><span class="mono-label">Procurement requests</span></div>
+      <div class="section-head"><span class="mono-label">Заявки на поставку</span></div>
       <div class="card">
         ${DB.procurementRequests.length ? `<div class="tbl-wrap"><table class="responsive">
-          <thead><tr><th>Material</th><th>Project</th><th>Required</th><th>Priority</th><th>Created</th><th>Status</th></tr></thead>
+          <thead><tr><th>Материал</th><th>Объект</th><th>Требуется</th><th>Приоритет</th><th>Создана</th><th>Статус</th></tr></thead>
           <tbody>${DB.procurementRequests.map(r => `
-            <tr><td data-l="Material"><strong>${esc(r.material)}</strong></td>
-              <td data-l="Project">${project(r.projectId).code}</td>
-              <td data-l="Required" class="num">${n0(r.qty)} t</td>
-              <td data-l="Priority"><span class="pill amber">${esc(r.priority)}</span></td>
-              <td data-l="Created">${esc(r.created)}</td>
-              <td data-l="Status"><span class="pill gray">${esc(r.status)}</span></td></tr>`).join('')}
+            <tr><td data-l="Материал"><strong>${esc(r.material)}</strong></td>
+              <td data-l="Объект">${project(r.projectId).code}</td>
+              <td data-l="Требуется" class="num">${n0(r.qty)} т</td>
+              <td data-l="Приоритет"><span class="pill amber">${esc(r.priority)}</span></td>
+              <td data-l="Создана">${esc(r.created)}</td>
+              <td data-l="Статус"><span class="pill gray">${esc(r.status)}</span></td></tr>`).join('')}
           </tbody></table></div>`
-        : `<div class="pad small">No requests yet. Use “Create procurement request”.</div>`}
+        : `<div class="pad small">Заявок пока нет. Нажмите «Создать заявку на поставку».</div>`}
       </div>
     </div>
   </div>`;
@@ -1025,20 +1033,20 @@ function pageEquipment(){
   const dtToday = eq.reduce((s,e) => s + e.downtimeToday, 0);
   return `
   <div class="page">
-    <div class="page-head"><h1>Equipment</h1><div class="sub">Fleet availability and downtime across all objects.</div></div>
+    <div class="page-head"><h1>Техника</h1><div class="sub">Готовность парка и простои по всем объектам.</div></div>
     <div class="grid g3">
-      <div class="kpi"><div class="mono-label">Operational</div><div class="v green">${cnt(op)}</div></div>
-      <div class="kpi"><div class="mono-label">Maintenance</div><div class="v amber">${cnt(mt)}</div></div>
-      <div class="kpi"><div class="mono-label">Downtime today</div><div class="v ${dtToday>4?'red':''}">${cnt(dtToday,1,' h')}</div></div>
+      <div class="kpi"><div class="mono-label">Исправна</div><div class="v green">${cnt(op)}</div></div>
+      <div class="kpi"><div class="mono-label">В ремонте</div><div class="v amber">${cnt(mt)}</div></div>
+      <div class="kpi"><div class="mono-label">Простой сегодня</div><div class="v ${dtToday>4?'red':''}">${cnt(dtToday,1,' ч')}</div></div>
     </div>
     <div class="card section"><div class="tbl-wrap"><table class="responsive">
-      <thead><tr><th>Unit</th><th>Project</th><th>Status</th><th>Downtime today</th><th>Downtime this week</th></tr></thead>
+      <thead><tr><th>Единица техники</th><th>Объект</th><th>Статус</th><th>Простой сегодня</th><th>Простой за неделю</th></tr></thead>
       <tbody>${eq.map(e => `
-        <tr><td data-l="Unit"><strong>${esc(e.name)}</strong></td>
-          <td data-l="Project">${project(e.projectId).code}</td>
-          <td data-l="Status"><span class="pill ${e.status==='operational'?'green':'amber'}">${e.status==='operational'?'Operational':'Maintenance'}</span></td>
-          <td data-l="Downtime today" class="num">${e.downtimeToday ? n1(e.downtimeToday)+' h' : '—'}</td>
-          <td data-l="Downtime week" class="num" style="${e.downtimeWeek>=10?'color:var(--red);font-weight:600':''}">${e.downtimeWeek ? n1(e.downtimeWeek)+' h' : '—'}</td>
+        <tr><td data-l="Техника"><strong>${esc(e.name)}</strong></td>
+          <td data-l="Объект">${project(e.projectId).code}</td>
+          <td data-l="Статус"><span class="pill ${e.status==='operational'?'green':'amber'}">${e.status==='operational'?'Исправна':'В ремонте'}</span></td>
+          <td data-l="Простой сегодня" class="num">${e.downtimeToday ? n1(e.downtimeToday)+' ч' : '—'}</td>
+          <td data-l="Простой за неделю" class="num" style="${e.downtimeWeek>=10?'color:var(--red);font-weight:600':''}">${e.downtimeWeek ? n1(e.downtimeWeek)+' ч' : '—'}</td>
         </tr>`).join('')}</tbody>
     </table></div></div>
   </div>`;
@@ -1048,15 +1056,15 @@ function pageEquipment(){
 function pageTeam(){
   return `
   <div class="page">
-    <div class="page-head"><h1>Team</h1><div class="sub">Reporting structure. Roles define what each person sees and submits.</div></div>
+    <div class="page-head"><h1>Команда</h1><div class="sub">Структура отчётности. Роль определяет, что человек видит и что отправляет.</div></div>
     <div class="card"><div class="tbl-wrap"><table class="responsive">
-      <thead><tr><th>Name</th><th>Role</th><th>Object</th><th>Last report</th><th>Status</th></tr></thead>
+      <thead><tr><th>Имя</th><th>Роль</th><th>Объект</th><th>Последний отчёт</th><th>Статус</th></tr></thead>
       <tbody>${DB.team.map(u => `
-        <tr><td data-l="Name"><strong>${esc(u.name)}</strong></td>
-          <td data-l="Role">${esc(u.role)}</td>
-          <td data-l="Object">${u.projectId ? project(u.projectId).code : '—'}</td>
-          <td data-l="Last report" class="num">${esc(u.lastReport)}</td>
-          <td data-l="Status"><span class="pill ${u.status==='Submitted'?'green':u.status==='Pending'?'amber':'gray'}">${esc(u.status)}</span></td>
+        <tr><td data-l="Имя"><strong>${esc(u.name)}</strong></td>
+          <td data-l="Роль">${esc(u.role)}</td>
+          <td data-l="Объект">${u.projectId ? project(u.projectId).code : '—'}</td>
+          <td data-l="Последний отчёт" class="num">${esc(u.lastReport)}</td>
+          <td data-l="Статус"><span class="pill ${u.status==='Отправлен'?'green':u.status==='Ожидается'?'amber':'gray'}">${esc(u.status)}</span></td>
         </tr>`).join('')}</tbody>
     </table></div></div>
   </div>`;
@@ -1066,12 +1074,12 @@ function pageTeam(){
 function pageInsights(){
   return `
   <div class="page">
-    <div class="page-head"><h1>AI insights</h1>
-      <div class="sub">Observations generated from the current project data. Demo interface — no live model is running.</div></div>
+    <div class="page-head"><h1>AI-аналитика</h1>
+      <div class="sub">Наблюдения, построенные на текущих данных объектов. Демо-интерфейс — реальная модель не подключена.</div></div>
     <div class="grid g2">
       ${insights().map((i,k) => `
         <div class="card pad" style="animation:slideIn .35s ease both;animation-delay:${k*60}ms">
-          <div class="mono-label">Insight ${String(k+1).padStart(2,'0')}</div>
+          <div class="mono-label">Наблюдение ${String(k+1).padStart(2,'0')}</div>
           <div style="font-size:16px;font-weight:600;margin-top:10px;letter-spacing:-.01em">${esc(i.t)}</div>
           <div class="small" style="margin-top:8px;line-height:1.6">${esc(i.d)}</div>
         </div>`).join('')}
@@ -1083,35 +1091,35 @@ function pageInsights(){
 function pageSettings(){
   return `
   <div class="page">
-    <div class="page-head"><h1>Settings</h1><div class="sub">Demo build — integrations are prepared in code but not connected.</div></div>
+    <div class="page-head"><h1>Настройки</h1><div class="sub">Демо-сборка — интеграции подготовлены в коде, но не подключены.</div></div>
     <div class="grid g2">
       <div class="card pad">
-        <div class="mono-label">Integrations (planned)</div>
-        <div class="kv"><span class="k">Telegram Bot API</span><span class="pill gray">Not connected</span></div>
-        <div class="kv"><span class="k">Speech-to-Text</span><span class="pill gray">Not connected</span></div>
-        <div class="kv"><span class="k">Claude API</span><span class="pill gray">Not connected</span></div>
-        <div class="kv"><span class="k">n8n webhooks</span><span class="pill gray">Not connected</span></div>
-        <div class="kv"><span class="k">PostgreSQL / Supabase</span><span class="pill gray">Not connected</span></div>
-        <div class="kv"><span class="k">Photo / file storage</span><span class="pill gray">Not connected</span></div>
+        <div class="mono-label">Интеграции (планируются)</div>
+        <div class="kv"><span class="k">Telegram Bot API</span><span class="pill gray">Не подключено</span></div>
+        <div class="kv"><span class="k">Speech-to-Text</span><span class="pill gray">Не подключено</span></div>
+        <div class="kv"><span class="k">Claude API</span><span class="pill gray">Не подключено</span></div>
+        <div class="kv"><span class="k">n8n webhooks</span><span class="pill gray">Не подключено</span></div>
+        <div class="kv"><span class="k">PostgreSQL / Supabase</span><span class="pill gray">Не подключено</span></div>
+        <div class="kv"><span class="k">Хранилище фото и файлов</span><span class="pill gray">Не подключено</span></div>
       </div>
       <div class="card pad">
-        <div class="mono-label">Forecast model</div>
+        <div class="mono-label">Модель прогноза</div>
         <p class="small" style="margin-top:12px;line-height:1.7">
-          remainingVolume = totalVolume − actualCompletedVolume<br>
-          averageDailyProduction = mean of the last 7 daily reports<br>
-          forecastDays = remainingVolume ÷ averageDailyProduction<br>
-          forecastCompletionDate = today + forecastDays<br>
-          delayDays = forecastCompletionDate − plannedCompletionDate<br>
-          risk = normal ≤ 2 d &lt; warning ≤ 7 d &lt; critical
+          остаток = общий объём − выполненный объём<br>
+          средняя производительность = среднее по последним 7 отчётам<br>
+          дней до конца = остаток ÷ средняя производительность<br>
+          прогнозная дата = день последнего отчёта + дней до конца<br>
+          отставание = прогнозная дата − плановая дата<br>
+          риск: в графике ≤ 2 дн. &lt; риск ≤ 7 дн. &lt; критично
         </p>
-        <p class="small" style="margin-top:14px">All arithmetic is plain JavaScript (<code>compute()</code>). AI is reserved for
-          parsing free-text reports and explaining causes.</p>
+        <p class="small" style="margin-top:14px">Вся арифметика — обычный JavaScript (<code>compute()</code>). AI отвечает только за
+          разбор свободного текста и объяснение причин.</p>
       </div>
       <div class="card pad">
-        <div class="mono-label">Demo data</div>
-        <p class="small" style="margin-top:12px">All projects, people, materials and equipment in this build are fictional
-          and exist only to demonstrate the workflow. Reset restores the initial dataset.</p>
-        <button class="btn danger sm" data-reset style="margin-top:12px">Reset demo data</button>
+        <div class="mono-label">Демо-данные</div>
+        <p class="small" style="margin-top:12px">Все объекты, люди, материалы и техника в этой сборке вымышлены и нужны
+          только для демонстрации сценария. Сброс возвращает исходный набор данных.</p>
+        <button class="btn danger sm" data-reset style="margin-top:12px">Сбросить демо-данные</button>
       </div>
     </div>
   </div>`;
@@ -1122,18 +1130,18 @@ function pageMyProject(){
   const p = project('P03'), c = compute(p);
   return `
   <div class="page">
-    <div class="page-head"><div class="mono-label">${p.code} · Site Foreman view</div>
+    <div class="page-head"><div class="mono-label">${p.code} · вид прораба</div>
       <h1 style="margin-top:6px">${esc(p.title || p.name)}</h1>
-      <div class="sub">You see only your object and submit the daily report.</div></div>
+      <div class="sub">Вы видите только свой объект и отправляете ежедневный отчёт.</div></div>
     <div class="grid g3">
-      <div class="stat"><div class="mono-label">Today's target</div><div class="v">${n0(c.requiredRate)} m²</div></div>
-      <div class="stat"><div class="mono-label">Last reported</div><div class="v">${n0(reportsOf(p.id).slice(-1)[0].production)} m²</div></div>
-      <div class="stat"><div class="mono-label">7-day average</div><div class="v">${n0(c.rate)} m²/day</div></div>
+      <div class="stat"><div class="mono-label">Норма на сегодня</div><div class="v">${n0(c.requiredRate)} м²</div></div>
+      <div class="stat"><div class="mono-label">Последний отчёт</div><div class="v">${n0(reportsOf(p.id).slice(-1)[0].production)} м²</div></div>
+      <div class="stat"><div class="mono-label">Среднее за 7 дней</div><div class="v">${n0(c.rate)} м²/день</div></div>
     </div>
     <div class="card pad section">
-      <div class="section-head"><span class="mono-label">Submit daily report</span></div>
-      <p class="small">In production this arrives as a Telegram voice message. In this demo, one click generates the next report.</p>
-      <button class="btn primary" data-sim style="margin-top:14px">SIMULATE NEW REPORT</button>
+      <div class="section-head"><span class="mono-label">Отправить ежедневный отчёт</span></div>
+      <p class="small">В боевой системе это приходит голосовым сообщением в Telegram. В демо один клик формирует следующий отчёт.</p>
+      <button class="btn primary" data-sim style="margin-top:14px">СМОДЕЛИРОВАТЬ ОТЧЁТ</button>
     </div>
     ${pageProject('P03', true).replace('<div class="page">','<div>')}
   </div>`;
@@ -1150,7 +1158,7 @@ function render(){
   el('view').innerHTML = fn(state.param);
   el('topTitle').textContent = state.page === 'project'
     ? project(state.param || 'P03').code
-    : (NAV[state.page] ? NAV[state.page].label : 'Overview');
+    : (NAV[state.page] ? NAV[state.page].label : 'Обзор');
   el('view').querySelectorAll('[data-count]').forEach(countUp);
   bind();
 }
@@ -1170,7 +1178,7 @@ function bind(){
   v.querySelectorAll('[data-task]').forEach(n => n.onclick = () => {
     const t = DB.tasks.find(x => x.id === n.dataset.task);
     t.done = true;                       // [INTEGRATION:DB] persist task state
-    toast('Action resolved', `${t.title} — marked as resolved.`);
+    toast('Действие выполнено', `${t.title} — отмечено как выполненное.`);
     render();
   });
   v.querySelectorAll('[data-report]').forEach(n => n.onclick = () => {
@@ -1195,7 +1203,7 @@ function processReport(inboxId, btn){
   if(!msg || msg.processed) return;
   const box = el('proc-' + inboxId);
   LAST_DELAY[msg.projectId] = compute(project(msg.projectId)).delayDays;  // remember pre-update forecast
-  const steps = ['Analyzing report…','Extracting data…','Updating project…','Calculating forecast…'];
+  const steps = ['Анализируем отчёт…','Извлекаем данные…','Обновляем объект…','Считаем прогноз…'];
   btn.disabled = true; box.innerHTML = '';
   steps.forEach((s,i) => setTimeout(() => {
     box.insertAdjacentHTML('beforeend',
@@ -1207,10 +1215,10 @@ function processReport(inboxId, btn){
   }, i * 700));
 
   setTimeout(() => {
-    box.insertAdjacentHTML('beforeend', `<div class="proc-line done"><span class="tick">✓</span><strong>DONE</strong></div>`);
+    box.insertAdjacentHTML('beforeend', `<div class="proc-line done"><span class="tick">✓</span><strong>ГОТОВО</strong></div>`);
     msg.processed = true;
     applyReport(msg.structured, msg.projectId);
-    setTimeout(() => { render(); toast('Project updated', 'Report applied. Forecast and risk recalculated.'); }, 700);
+    setTimeout(() => { render(); toast('Объект обновлён', 'Отчёт учтён. Прогноз и уровень риска пересчитаны.'); }, 700);
   }, steps.length * 700 + 500);
 }
 
@@ -1222,7 +1230,7 @@ function applyReport(s, projectId){
   DB.dailyReports.push({ id:'R' + (DB.dailyReports.length + 1), projectId, date:iso,
     production:s.production, workers:s.workers, trucks:s.trucks, rollers:s.rollers,
     downtime:s.downtime, aggregate:s.aggregate, issue:s.issue });
-  const m = DB.materials.find(x => x.projectId === projectId && x.name === 'Aggregate');
+  const m = DB.materials.find(x => x.projectId === projectId && x.name === 'Щебень');
   if(m) m.stock = s.aggregate;                    // [INTEGRATION:DB] UPDATE materials
 }
 
@@ -1248,7 +1256,7 @@ function simulateNewReport(){
   DB.dailyReports.push({ id:'R' + (DB.dailyReports.length + 1), projectId:'P03', date:iso,
     production, workers:Math.max(14, last.workers - 1), trucks:Math.max(3, last.trucks - 1),
     rollers:last.rollers, downtime, aggregate,
-    issue:'Extended equipment downtime reported by site foreman' });
+    issue:'Прораб сообщил о длительном простое техники' });
 
   // Downstream state that a real backend would update in the same transaction.
   const agg = DB.materials.find(m => m.id === 'M1'); if(agg) agg.stock = aggregate;
@@ -1256,19 +1264,19 @@ function simulateNewReport(){
   roller.downtimeWeek += downtime; roller.downtimeToday = downtime;
 
   DB.inbox.push({
-    id:'IN' + (DB.inbox.length + 1), from:'Ivan Petrov', role:'Site Foreman', projectId:'P03',
-    time:`${fmtShort(next)} 08:2${DB.inbox.length}`, channel:'Telegram · voice message (simulated)',
+    id:'IN' + (DB.inbox.length + 1), from:'Иван Петров', role:'Прораб', projectId:'P03',
+    time:`${fmtShort(next)} 08:2${DB.inbox.length}`, channel:'Telegram · голосовое сообщение (имитация)',
     text:`Сегодня уложили ${production} квадратов. Каток №2 снова стоял, около ${downtime} часов. Щебня осталось примерно ${aggregate} тонн, нужен срочный завоз.`,
     structured:{ date:iso.split('-').reverse().join('.'), production, workers:Math.max(14,last.workers-1),
       trucks:Math.max(3,last.trucks-1), rollers:last.rollers, downtime, aggregate,
-      issue:'Extended equipment downtime' },
+      issue:'Длительный простой техники' },
     processed:true
   });
 
   const after = compute(p);
   render();
-  toast('New report processed',
-    `${p.code}: ${n0(production)} m² · rate ${n0(after.rate)} m²/day · forecast ${fmtShort(after.forecastDate)} (${after.delayDays>0?'+':''}${after.delayDays} d, was ${before.delayDays>0?'+':''}${before.delayDays} d).`);
+  toast('Новый отчёт обработан',
+    `${p.code}: ${n0(production)} м² · темп ${n0(after.rate)} м²/день · прогноз ${fmtShort(after.forecastDate)} (${after.delayDays>0?'+':''}${after.delayDays} дн., было ${before.delayDays>0?'+':''}${before.delayDays} дн.).`);
 }
 
 /** CREATE PROCUREMENT REQUEST — [INTEGRATION:DB] would INSERT + notify via n8n. */
@@ -1276,13 +1284,13 @@ function createRequest(){
   const critical = materialRows().sort((a,b) => a.daysLeft - b.daysLeft)[0];
   DB.procurementRequests.unshift({
     material:critical.name, projectId:critical.projectId,
-    qty: critical.name === 'Aggregate' ? 300 : Math.ceil(critical.dailyUse * 10),
-    priority: critical.status === 'critical' ? 'High' : 'Normal',
-    created: fmtShort(TODAY), status:'Submitted'
+    qty: critical.name === 'Щебень' ? 300 : Math.ceil(critical.dailyUse * 10),
+    priority: critical.status === 'critical' ? 'Высокий' : 'Обычный',
+    created: fmtShort(TODAY), status:'Отправлена'
   });
-  const t = DB.tasks.find(x => x.id === 'T2'); if(t && critical.name === 'Aggregate') t.done = true;
+  const t = DB.tasks.find(x => x.id === 'T2'); if(t && critical.name === 'Щебень') t.done = true;
   render();
-  toast('Procurement request created', `${critical.name} · ${project(critical.projectId).code} · request submitted.`);
+  toast('Заявка создана', `${critical.name} · ${project(critical.projectId).code} · заявка отправлена.`);
 }
 
 /* ================================= 6. BOOT ================================ */
@@ -1292,8 +1300,8 @@ document.addEventListener('click', e => {
      !e.target.closest('.sidebar') && !e.target.closest('#burger')) document.body.classList.remove('nav-open');
 });
 render();
-setTimeout(() => toast('Attention required',
-  `${alerts().filter(a=>a.level==='red').length} critical alerts need a decision today.`), 900);
+setTimeout(() => toast('Требует внимания',
+  `${alerts().filter(a=>a.level==='red').length} критических сигнала требуют решения сегодня.`), 900);
 </script>
 </body>
 </html>
