@@ -202,12 +202,12 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   box-shadow:var(--shadow);
 }
 .hero .lbl{font-size:13px;color:var(--text-2)}
-.hero .amt{font-size:38px;font-weight:700;letter-spacing:-1px;line-height:1.1;margin-top:3px}
+.hero .amt{font-size:clamp(26px,8.6vw,38px);font-weight:700;letter-spacing:-1px;line-height:1.1;margin-top:3px;overflow-wrap:anywhere}
 .hero .delta{font-size:13px;color:var(--text-2);margin-top:6px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .stat{background:var(--bg-elev);border-radius:var(--radius);padding:13px 14px;box-shadow:var(--shadow)}
 .stat .k{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:5px}
-.stat .v{font-size:21px;font-weight:650;letter-spacing:-.3px;margin-top:4px}
+.stat .v{font-size:clamp(16px,5vw,21px);font-weight:650;letter-spacing:-.3px;margin-top:4px;overflow-wrap:anywhere}
 .stat .v.sm{font-size:18px}
 .dot{width:7px;height:7px;border-radius:50%;flex:none}
 
@@ -368,7 +368,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 .kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:15px}
 .kv + .kv{border-top:.5px solid var(--line)}
 .kv .k{color:var(--text-2)}
-.kv .v{font-weight:600;text-align:right}
+.kv .v{font-weight:600;text-align:right;overflow-wrap:anywhere}
 .kv.big .v{font-size:19px}
 
 .tl{position:relative;padding-left:22px}
@@ -461,23 +461,30 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   var nf0 = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
   var nf2 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  /* U.money(1000) — в базовой валюте
+     U.money(1000, 'USD') — в указанной
+     U.money(1000, {cur:'USD', exact:true, noCur:true})                */
   U.money = function (v, opt) {
+    if (typeof opt === 'string') opt = { cur: opt };
     opt = opt || {};
-    var n = U.num(v);
-    var sign = n < 0 ? '−' : '';
-    var abs = Math.abs(n);
-    var body = opt.exact ? nf2.format(abs) : nf0.format(Math.round(abs));
-    var cur = opt.noCur ? '' : ' ' + (w.DB && DB.data ? DB.data.settings.currency : '₽');
-    return sign + body + cur;
+    var code = opt.cur || (w.FX ? FX.base() : 'UZS');
+    var info = w.FX ? FX.byCode(code) : { sym: '', dec: 0 };
+    var n = U.num(v), sign = n < 0 ? '−' : '', abs = Math.abs(n);
+    var frac = opt.exact || (info.dec === 2 && abs > 0 && abs < 1000 && Math.round(abs) !== abs);
+    var body = frac ? nf2.format(abs) : nf0.format(Math.round(abs));
+    return sign + body + (opt.noCur ? '' : ' ' + info.sym);
   };
-  U.moneyShort = function (v) {
+
+  U.moneyShort = function (v, cur) {
+    var code = cur || (w.FX ? FX.base() : 'UZS');
+    var sym = ' ' + (w.FX ? FX.sym(code) : '');
     var n = Math.abs(U.num(v)), s = U.num(v) < 0 ? '−' : '';
-    var cur = ' ' + (w.DB && DB.data ? DB.data.settings.currency : '₽');
-    if (n >= 1e9) return s + (n / 1e9).toFixed(n >= 1e10 ? 0 : 1).replace('.', ',') + ' млрд' + cur;
-    if (n >= 1e6) return s + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace('.', ',') + ' млн' + cur;
-    if (n >= 1e5) return s + Math.round(n / 1e3) + ' тыс' + cur;
-    return s + nf0.format(Math.round(n)) + cur;
+    if (n >= 1e9) return s + (n / 1e9).toFixed(n >= 1e10 ? 0 : 1).replace('.', ',') + ' млрд' + sym;
+    if (n >= 1e6) return s + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace('.', ',') + ' млн' + sym;
+    if (n >= 1e5) return s + nf0.format(Math.round(n / 1e3)) + ' тыс' + sym;
+    return s + nf0.format(Math.round(n)) + sym;
   };
+
   U.pct = function (v) {
     var n = U.num(v);
     return (Math.round(n * 100) / 100).toString().replace('.', ',') + '%';
@@ -603,6 +610,167 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   w.U = U;
 })(window);
 
+/* Валюты и курсы.
+   Курсы хранятся как «сколько единиц валюты за 1 доллар».
+   Пока курс не задан — приложение не выдумывает его, а считает
+   итоги отдельно по каждой валюте.                                  */
+(function (w) {
+  'use strict';
+
+  var FX = {};
+
+  FX.LIST = [
+    { code: 'UZS', sym: 'сум', name: 'Узбекский сум', dec: 0, step: 1000 },
+    { code: 'KGS', sym: 'сом', name: 'Киргизский сом', dec: 0, step: 100 },
+    { code: 'USD', sym: '$', name: 'Доллар США', dec: 2, step: 100 },
+    { code: 'RUB', sym: '₽', name: 'Российский рубль', dec: 0, step: 1000 },
+    { code: 'KZT', sym: '₸', name: 'Казахский тенге', dec: 0, step: 1000 },
+    { code: 'EUR', sym: '€', name: 'Евро', dec: 2, step: 100 }
+  ];
+
+  FX.byCode = function (c) {
+    for (var i = 0; i < FX.LIST.length; i++) if (FX.LIST[i].code === c) return FX.LIST[i];
+    return FX.LIST[0];
+  };
+  FX.sym = function (c) { return FX.byCode(c).sym; };
+  FX.base = function () { return (DB.data && DB.data.settings.currency) || 'UZS'; };
+
+  /* старые записи хранили символ валюты — переводим в код */
+  FX.fromSymbol = function (s) {
+    var map = { '₽': 'RUB', '$': 'USD', '€': 'EUR', '₸': 'KZT', 'сум': 'UZS', 'сом': 'KGS', '₴': 'UAH', '£': 'GBP' };
+    if (map[s]) return map[s];
+    for (var i = 0; i < FX.LIST.length; i++) if (FX.LIST[i].code === s) return s;
+    return 'UZS';
+  };
+
+  /* ---------- пересчёт ---------- */
+  FX.rate = function (code) {
+    var r = DB.data.settings.rates || {};
+    if (code === 'USD') return 1;
+    return U.num(r[code]) || 0;
+  };
+  FX.can = function (from, to) {
+    if (from === to) return true;
+    return FX.rate(from) > 0 && FX.rate(to) > 0;
+  };
+  FX.conv = function (amount, from, to) {
+    if (from === to) return amount;
+    var a = FX.rate(from), b = FX.rate(to);
+    if (!a || !b) return null;
+    return amount / a * b;
+  };
+
+  /* Собрать суммы по валютам в базовую, если это возможно.
+     Возвращает {ok:true, value} либо {ok:false, parts:{код:сумма}}      */
+  FX.total = function (parts, to) {
+    to = to || FX.base();
+    var sum = 0, ok = true, left = {};
+    for (var c in parts) {
+      if (!parts.hasOwnProperty(c) || !parts[c]) continue;
+      var v = FX.conv(parts[c], c, to);
+      if (v == null) { ok = false; left[c] = parts[c]; } else sum += v;
+    }
+    return ok ? { ok: true, value: sum } : { ok: false, parts: parts, partial: sum, missing: left };
+  };
+
+  /* ---------- обновление курсов из открытых источников ----------
+     Проверить эти запросы в среде разработки не удалось (нет выхода в сеть),
+     поэтому источники перебираются по очереди, а при любой неудаче остаётся
+     последний сохранённый или введённый вручную курс.                */
+  FX.SOURCES = {
+    cbu: {
+      name: 'ЦБ Узбекистана',
+      url: 'https://cbu.uz/ru/arkhiv-kursov-valyut/json/',
+      parse: function (text) {
+        var arr = JSON.parse(text);
+        if (!Array.isArray(arr) || !arr.length) throw new Error('пустой ответ');
+        var perUzs = {}, date = null;                 // сумов за 1 единицу валюты
+        arr.forEach(function (x) {
+          var code = x.Ccy || x.ccy, val = U.num(String(x.Rate || x.rate).replace(',', '.'));
+          var nom = U.num(x.Nominal || x.nominal) || 1;
+          if (code && val) perUzs[code] = val / nom;
+          if (!date && (x.Date || x.date)) date = String(x.Date || x.date);
+        });
+        if (!perUzs.USD) throw new Error('нет курса доллара');
+        var out = { USD: 1, UZS: perUzs.USD };        // сумов за доллар
+        FX.LIST.forEach(function (c) {
+          if (c.code === 'USD' || c.code === 'UZS') return;
+          if (perUzs[c.code]) out[c.code] = perUzs.USD / perUzs[c.code];
+        });
+        return { rates: out, date: date };
+      }
+    },
+    nbkr: {
+      name: 'Нацбанк Кыргызстана',
+      url: 'https://www.nbkr.kg/XML/daily.xml',
+      parse: function (text) {
+        var doc = new DOMParser().parseFromString(text, 'text/xml');
+        var nodes = doc.getElementsByTagName('Currency');
+        if (!nodes.length) throw new Error('пустой ответ');
+        var perKgs = {};                               // сомов за 1 единицу
+        for (var i = 0; i < nodes.length; i++) {
+          var code = nodes[i].getAttribute('ISOCode');
+          var vEl = nodes[i].getElementsByTagName('Value')[0];
+          var nEl = nodes[i].getElementsByTagName('Nominal')[0];
+          var val = vEl ? U.num(vEl.textContent.replace(',', '.')) : 0;
+          var nom = nEl ? U.num(nEl.textContent) || 1 : 1;
+          if (code && val) perKgs[code] = val / nom;
+        }
+        if (!perKgs.USD) throw new Error('нет курса доллара');
+        var out = { USD: 1, KGS: perKgs.USD };
+        FX.LIST.forEach(function (c) {
+          if (c.code === 'USD' || c.code === 'KGS') return;
+          if (perKgs[c.code]) out[c.code] = perKgs.USD / perKgs[c.code];
+        });
+        var d = doc.documentElement.getAttribute('Date');
+        return { rates: out, date: d };
+      }
+    },
+    world: {
+      name: 'Открытый справочник курсов',
+      url: 'https://open.er-api.com/v6/latest/USD',
+      parse: function (text) {
+        var j = JSON.parse(text);
+        if (!j || !j.rates || !j.rates.UZS) throw new Error('пустой ответ');
+        var out = { USD: 1 };
+        FX.LIST.forEach(function (c) { if (j.rates[c.code]) out[c.code] = j.rates[c.code]; });
+        return { rates: out, date: j.time_last_update_utc ? String(j.time_last_update_utc).slice(5, 16) : null };
+      }
+    }
+  };
+
+  /* pref: 'cbu' | 'nbkr' | 'world' | 'auto' */
+  FX.update = function (pref, cb) {
+    var order = pref && pref !== 'auto' ? [pref] : ['cbu', 'nbkr', 'world'];
+    if (pref && pref !== 'auto') {
+      ['cbu', 'nbkr', 'world'].forEach(function (k) { if (k !== pref) order.push(k); });
+    }
+    var i = 0;
+    (function next() {
+      if (i >= order.length) { cb(null, 'Не удалось получить курс ни из одного источника'); return; }
+      var key = order[i++], src = FX.SOURCES[key];
+      var done = false;
+      var to = setTimeout(function () { if (!done) { done = true; next(); } }, 9000);
+      fetch(src.url, { cache: 'no-store' })
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(function (t) {
+          if (done) return;
+          done = true; clearTimeout(to);
+          var res = src.parse(t);
+          var st = DB.data.settings;
+          st.rates = Object.assign({}, st.rates || {}, res.rates);
+          st.ratesDate = U.today();
+          st.ratesSource = src.name + (res.date ? ', курс на ' + res.date : '');
+          DB.save();
+          cb(res.rates, null, src.name);
+        })
+        .catch(function () { if (!done) { done = true; clearTimeout(to); next(); } });
+    })();
+  };
+
+  w.FX = FX;
+})(window);
+
 /* Хранилище: всё лежит на телефоне (localStorage), ничего не уходит в сеть */
 (function (w) {
   'use strict';
@@ -616,15 +784,20 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
     empty: function () {
       return {
-        version: 1,
+        version: 2,
         createdAt: U.today(),
         settings: {
-          currency: '₽',
+          currency: 'UZS',          // базовая валюта, код
           theme: 'auto',
           defaultRate: 10,
           defaultPeriod: 'month',
           defaultTerm: 30,
+          defaultPayMode: 'monthly',   // проценты платятся каждый месяц
           penaltyRate: 0,
+          rates: {},                   // сколько единиц валюты за 1 доллар
+          ratesDate: null,
+          ratesSource: null,
+          ratesPref: 'auto',
           pin: null,
           lastExport: null
         },
@@ -655,16 +828,24 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     migrate: function (d) {
       d = d || {};
       var base = this.empty();
-      d.version = 1;
+      var old = !d.version || d.version < 2;
       d.settings = Object.assign(base.settings, d.settings || {});
       d.isDemo = !!d.isDemo;
       d.clients = Array.isArray(d.clients) ? d.clients : [];
       d.loans = Array.isArray(d.loans) ? d.loans : [];
+
+      if (old) d.settings.currency = FX.fromSymbol(d.settings.currency);
+      d.settings.rates = d.settings.rates || {};
+
       d.loans.forEach(function (l) {
         l.payments = Array.isArray(l.payments) ? l.payments : [];
         if (!l.model) l.model = 'simple';
         if (!l.status) l.status = 'active';
+        if (!l.currency) l.currency = d.settings.currency;
+        /* у старых займов проценты отдавались в конце — сохраняем смысл */
+        if (!l.payMode) l.payMode = old ? 'end' : 'monthly';
       });
+      d.version = 2;
       return d;
     },
 
@@ -674,6 +855,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         localStorage.setItem(KEY, json);
         // страховочная копия на случай сбоя записи основной
         try { localStorage.setItem(BAK, json); } catch (e) { }
+        if (w.CALC) CALC.clearCache();
       } catch (e) {
         U.toast('Не удалось сохранить: нет места в памяти');
         return false;
@@ -686,29 +868,45 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
     /* ---------- демонстрационный набор ---------- */
     demo: function () {
-      var d = U.addDays, t = U.today();
+      var d = U.addDays, mm = U.addMonths, t = U.today();
       var db = this.empty();
       db.isDemo = true;
+      db.settings.currency = 'UZS';
+      db.settings.rates = { USD: 1, UZS: 12500, KGS: 89 };
+      db.settings.ratesSource = 'пример, впишите свой курс';
+      db.settings.ratesDate = t;
       db.clients = [
-        { id: 'd1', name: 'Иван Петров', phone: '+7 912 345-67-89', note: 'Таксист, платит вовремя', createdAt: d(t, -120) },
-        { id: 'd2', name: 'Мария Соколова', phone: '+7 903 111-22-33', note: '', createdAt: d(t, -90) },
-        { id: 'd3', name: 'Артём Ким', phone: '+7 999 888-77-66', note: 'Залог — ноутбук', createdAt: d(t, -60) },
-        { id: 'd4', name: 'Ольга Данилова', phone: '+7 921 444-55-66', note: '', createdAt: d(t, -30) }
+        { id: 'd1', name: 'Иван Петров', phone: '+998 90 123-45-67', note: 'Таксист, платит вовремя', createdAt: mm(t, -6) },
+        { id: 'd2', name: 'Мария Соколова', phone: '+998 91 111-22-33', note: '', createdAt: mm(t, -4) },
+        { id: 'd3', name: 'Артём Ким', phone: '+996 555 88-77-66', note: 'Залог — ноутбук', createdAt: mm(t, -3) },
+        { id: 'd4', name: 'Ольга Данилова', phone: '+998 93 444-55-66', note: '', createdAt: mm(t, -1) }
       ];
       db.loans = [
-        { id: 'e1', clientId: 'd1', principal: 150000, issuedAt: d(t, -45), model: 'simple', rate: 10,
-          ratePeriod: 'month', dueAt: d(t, 15), penaltyRate: 1, status: 'active', note: 'Под расписку',
-          payments: [{ id: 'q1', date: d(t, -15), amount: 20000, note: 'наличные' }] },
-        { id: 'e2', clientId: 'd2', principal: 80000, issuedAt: d(t, -70), model: 'simple', rate: 15,
-          ratePeriod: 'month', dueAt: d(t, -12), penaltyRate: 1, status: 'active', note: '', payments: [] },
-        { id: 'e3', clientId: 'd3', principal: 50000, returnAmount: 65000, issuedAt: d(t, -10), model: 'fixed',
-          dueAt: d(t, 20), penaltyRate: 0, status: 'active', note: 'Фиксированный возврат', payments: [] },
-        { id: 'e4', clientId: 'd1', principal: 30000, issuedAt: d(t, -120), model: 'simple', rate: 10,
-          ratePeriod: 'month', dueAt: d(t, -90), penaltyRate: 0, status: 'closed', closedAt: d(t, -88),
-          payments: [{ id: 'q2', date: d(t, -88), amount: 33200, note: 'закрыл полностью' }] },
-        { id: 'e5', clientId: 'd4', principal: 25000, issuedAt: d(t, -5), model: 'simple', rate: 2,
-          ratePeriod: 'week', dueAt: d(t, 2), penaltyRate: 0.5, status: 'active', note: '',
-          payments: [{ id: 'q3', date: d(t, -2), amount: 1000, note: 'проценты' }] }
+        /* платит проценты каждый месяц, всё вовремя */
+        { id: 'e1', clientId: 'd1', principal: 12000000, currency: 'UZS', issuedAt: mm(t, -3),
+          model: 'simple', rate: 10, ratePeriod: 'month', payMode: 'monthly', dueAt: mm(t, 6),
+          penaltyRate: 0, status: 'active', note: 'Под расписку',
+          payments: [1, 2, 3].map(function (i) {
+            return { id: 'q1' + i, date: mm(mm(t, -3), i), amount: 1200000, note: 'проценты' };
+          }) },
+        /* пропустил два месяца */
+        { id: 'e2', clientId: 'd2', principal: 8000000, currency: 'UZS', issuedAt: mm(t, -3),
+          model: 'simple', rate: 12, ratePeriod: 'month', payMode: 'monthly', dueAt: null,
+          penaltyRate: 0, status: 'active', note: 'Бессрочно, пока платит',
+          payments: [{ id: 'q21', date: mm(mm(t, -3), 1), amount: 960000, note: 'проценты' }] },
+        /* в долларах */
+        { id: 'e3', clientId: 'd3', principal: 2000, currency: 'USD', issuedAt: mm(t, -1),
+          model: 'simple', rate: 5, ratePeriod: 'month', payMode: 'monthly', dueAt: mm(t, 5),
+          penaltyRate: 0, status: 'active', note: '', payments: [] },
+        /* закрыт */
+        { id: 'e4', clientId: 'd1', principal: 3000000, currency: 'UZS', issuedAt: mm(t, -8),
+          model: 'simple', rate: 10, ratePeriod: 'month', payMode: 'end', dueAt: mm(t, -6),
+          penaltyRate: 0, status: 'closed', closedAt: mm(t, -6),
+          payments: [{ id: 'q4', date: mm(t, -6), amount: 3600000, note: 'закрыл полностью' }] },
+        /* короткий, проценты в конце */
+        { id: 'e5', clientId: 'd4', principal: 1500000, currency: 'UZS', issuedAt: d(t, -20),
+          model: 'simple', rate: 2, ratePeriod: 'week', payMode: 'end', dueAt: d(t, 4),
+          penaltyRate: 0.5, status: 'active', note: '', payments: [] }
       ];
       return db;
     },
@@ -843,8 +1041,10 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         var term = c[6] ? U.num(c[6]) : self.data.settings.defaultTerm;
         self.addLoan({
           clientId: cl.id, principal: principal, issuedAt: issued,
+          currency: self.data.settings.currency,
           model: 'simple', rate: rate, ratePeriod: pk,
-          dueAt: U.addDays(issued, term || 30),
+          payMode: self.data.settings.defaultPayMode || 'monthly',
+          dueAt: term ? U.addDays(issued, term) : null,
           penaltyRate: self.data.settings.penaltyRate || 0,
           note: c[7] || ''
         });
@@ -869,15 +1069,16 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
     exportCSV: function () {
       var self = this;
-      var rows = [['Клиент', 'Телефон', 'Сумма', 'Дата выдачи', 'Ставка', 'Период', 'Вернуть до', 'Выплачено', 'Остаток долга', 'Статус']];
+      var rows = [['Клиент', 'Телефон', 'Сумма', 'Валюта', 'Дата выдачи', 'Ставка', 'Период', 'Проценты', 'Вернуть до', 'Выплачено', 'Остаток долга', 'Статус']];
       this.data.loans.forEach(function (l) {
         var c = self.client(l.clientId) || { name: '—', phone: '' };
         var r = CALC.loan(l);
         rows.push([
-          c.name, c.phone || '', l.principal, l.issuedAt,
+          c.name, c.phone || '', l.principal, l.currency || DB.data.settings.currency, l.issuedAt,
           l.model === 'fixed' ? '' : l.rate,
           l.model === 'fixed' ? 'фикс' : CALC.PERIOD_NAME[l.ratePeriod],
-          l.dueAt || '', Math.round(r.paidTotal), Math.round(r.totalDue),
+          l.payMode === 'monthly' ? 'ежемесячно' : 'в конце срока',
+          l.dueAt || 'без срока', Math.round(r.paidTotal), Math.round(r.totalDue),
           l.status === 'closed' ? 'закрыт' : (r.isOverdue ? 'просрочка' : 'активен')
         ]);
       });
@@ -900,17 +1101,52 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   CALC.PERIOD_NAME = { day: 'в день', week: 'в неделю', month: 'в месяц', year: 'в год' };
   CALC.PERIOD_SHORT = { day: '/день', week: '/нед', month: '/мес', year: '/год' };
 
-  /* дневная ставка займа, доля от 1 */
+  /* Сколько месяцев прошло между двумя датами, если месяц отсчитывается
+     от даты выдачи. Полный месяц = 1,0 независимо от того, 28 в нём дней
+     или 31; неполный — по дням внутри этого месяца.
+     Так «10% в месяц» всегда означает ровно 10% за месяц.            */
+  CALC.monthFraction = function (anchor, from, to) {
+    if (from < anchor) from = anchor;
+    if (U.diffDays(from, to) <= 0) return 0;
+    var i = Math.max(0, Math.floor(U.diffDays(anchor, from) / 31) - 1);
+    while (U.addMonths(anchor, i + 1) <= from) i++;
+    var total = 0, cur = from, guard = 0;
+    while (cur < to && guard++ < 1200) {
+      var a = U.addMonths(anchor, i), b = U.addMonths(anchor, i + 1);
+      if (b <= cur) { i++; continue; }
+      var end = to < b ? to : b;
+      var len = U.diffDays(a, b) || 30;
+      total += U.diffDays(cur, end) / len;
+      cur = end; i++;
+    }
+    return total;
+  };
+
+  /* Проценты за отрезок [from; to) на остаток balance */
+  CALC.interestBetween = function (loan, from, to, balance) {
+    if (loan.model === 'fixed' || balance <= 0) return 0;
+    var rate = U.num(loan.rate) / 100;
+    if (!rate) return 0;
+    if (loan.ratePeriod === 'month') {
+      return balance * rate * CALC.monthFraction(loan.issuedAt, from, to);
+    }
+    var d = CALC.PERIOD_DAYS[loan.ratePeriod] || 30;
+    return balance * rate / d * U.diffDays(from, to);
+  };
+
+  /* Доля ставки за один сегодняшний день — только для показа «капает в день» */
   CALC.daily = function (loan) {
     if (loan.model === 'fixed') return 0;
-    var d = CALC.PERIOD_DAYS[loan.ratePeriod] || 30;
-    return U.num(loan.rate) / 100 / d;
+    if (loan.ratePeriod === 'month') {
+      var t = U.today();
+      return CALC.interestBetween(loan, t, U.addDays(t, 1), 1);
+    }
+    return U.num(loan.rate) / 100 / (CALC.PERIOD_DAYS[loan.ratePeriod] || 30);
   };
 
   /* начисление за отрезок [from; to) на остаток balance */
   function accrue(loan, from, to, balance, acc) {
     if (U.diffDays(from, to) <= 0 || balance <= 0) return;
-    var dr = CALC.daily(loan);
     var pen = U.num(loan.penaltyRate) / 100;
     var due = loan.dueAt || null;
     var pts = (due && due > from && due < to) ? [from, due, to] : [from, to];
@@ -918,7 +1154,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       var a = pts[i], b = pts[i + 1], d = U.diffDays(a, b);
       if (d <= 0) continue;
       var overdue = due ? a >= due : false;
-      if (!(overdue && loan.stopAccrual)) acc.interest += balance * dr * d;
+      if (!(overdue && loan.stopAccrual)) acc.interest += CALC.interestBetween(loan, a, b, balance);
       if (overdue && pen > 0) acc.penalty += balance * pen * d;
     }
   }
@@ -987,7 +1223,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       paidPrincipal: paidPrincipal,
       overpay: overpay,
       profit: paidInterest + paidPenalty,                 // деньги, уже полученные сверх тела
-      dailyAccrual: closed ? 0 : balance * CALC.daily(loan) +
+      dailyAccrual: closed ? 0 : CALC.interestBetween(loan, asOf, U.addDays(asOf, 1), balance) +
         (loan.dueAt && asOf >= loan.dueAt ? balance * U.num(loan.penaltyRate) / 100 : 0),
       isClosed: closed,
       isPaidOff: totalDue <= 0.49,
@@ -1000,13 +1236,78 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     };
   };
 
-  CALC.loan = function (loan) { return CALC.at(loan, U.today()); };
+  /* ---------- график ежемесячных выплат процентов ----------
+     Проценты отдаются каждый месяц от даты выдачи, независимо от срока
+     займа; тело возвращается в конце (или когда решит владелец денег).  */
+  CALC.schedule = function (loan, asOf) {
+    asOf = asOf || U.today();
+    if (loan.payMode !== 'monthly' || loan.model === 'fixed') return [];
+    var out = [], prev = loan.issuedAt;
+    var horizon = loan.dueAt || U.addMonths(asOf, 3);
+    for (var i = 1; i <= 240; i++) {
+      var d = U.addMonths(loan.issuedAt, i);
+      if (d > horizon) break;
+      var a = CALC.at(loan, prev), b = CALC.at(loan, d);
+      var due = (b.interestAccrued - a.interestAccrued) + (b.penaltyAccrued - a.penaltyAccrued);
+      var covered = (b.paidInterest + b.paidPenalty) >= (b.interestAccrued + b.penaltyAccrued) - 0.5;
+      out.push({
+        n: i, from: prev, date: d, due: due, paid: covered,
+        status: covered ? 'paid'
+          : d > asOf ? (U.diffDays(asOf, d) <= 7 ? 'soon' : 'future') : 'overdue'
+      });
+      prev = d;
+    }
+    return out;
+  };
+
+  /* Сколько процентов набегает за один месяц при текущем остатке */
+  CALC.perMonth = function (loan, balance) {
+    if (loan.model === 'fixed') return 0;
+    var b = balance != null ? balance : CALC.at(loan, U.today()).balance;
+    var rate = U.num(loan.rate) / 100;
+    if (loan.ratePeriod === 'month') return b * rate;
+    return b * rate * 30 / (CALC.PERIOD_DAYS[loan.ratePeriod] || 30);
+  };
+
+  /* ---------- состояние на сегодня (с кэшем на время отрисовки) ---------- */
+  CALC._c = {};
+  CALC.clearCache = function () { CALC._c = {}; };
+
+  CALC.loan = function (loan) {
+    var t = U.today();
+    var key = loan.id ? loan.id + '|' + t : null;
+    if (key && CALC._c[key]) return CALC._c[key];
+
+    var r = CALC.at(loan, t);
+    r.schedule = CALC.schedule(loan, t);
+    r.missed = 0;
+    r.nextPay = null;
+    if (r.schedule.length && !r.isClosed) {
+      for (var i = 0; i < r.schedule.length; i++) {
+        var p = r.schedule[i];
+        if (p.status === 'overdue') r.missed++;
+        if (!r.nextPay && !p.paid) r.nextPay = p;
+      }
+      if (r.missed > 0) r.isOverdue = true;
+    }
+    if (key) CALC._c[key] = r;
+    return r;
+  };
 
   /* Плановое состояние на дату возврата (сколько должно вернуться всего) */
   CALC.plan = function (loan) {
-    if (!loan.dueAt) return CALC.loan(loan);
     var t = U.today();
-    return CALC.at(loan, loan.dueAt > t ? loan.dueAt : t);
+    return CALC.at(loan, loan.dueAt && loan.dueAt > t ? loan.dueAt : t);
+  };
+
+  /* Ставка из суммы: «хочу 15 000 в месяц с 100 000» → 15% */
+  CALC.rateFromAmount = function (principal, amount, period) {
+    var p = U.num(principal);
+    if (!p) return 0;
+    return U.num(amount) / p * 100;
+  };
+  CALC.amountFromRate = function (principal, rate) {
+    return U.num(principal) * U.num(rate) / 100;
   };
 
   /* Сколько нужно заплатить, чтобы закрыть только проценты (и пеню) */
@@ -1015,46 +1316,83 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     return Math.round((r.interestDue + r.penaltyDue) * 100) / 100;
   };
 
-  /* Сводка по портфелю */
+  /* Сводка по портфелю. Суммы копятся по валютам и сводятся в базовую,
+     если курс задан; иначе показываются раздельно.                     */
   CALC.portfolio = function (loans) {
+    var cur = {
+      issued: {}, outstanding: {}, interestDue: {}, totalDue: {},
+      overdueSum: {}, profit: {}, expected: {}, daily: {}, monthDue: {}
+    };
+    function add(bag, c, v) { if (v) bag[c] = (bag[c] || 0) + v; }
+
     var s = {
       count: 0, activeCount: 0, overdueCount: 0, closedCount: 0,
-      issuedTotal: 0, outstanding: 0, interestDue: 0, penaltyDue: 0, totalDue: 0,
-      overdueSum: 0, profitRealized: 0, profitExpected: 0, dailyAccrual: 0,
-      dueSoon: [], overdue: []
+      dueSoon: [], overdue: [], cur: cur, mixed: false
     };
+    var mk = U.monthKey(U.today());
+
     loans.forEach(function (l) {
+      var c = l.currency || FX.base();
       var r = CALC.loan(l);
       s.count++;
-      s.issuedTotal += r.principal;
-      s.profitRealized += r.profit;
+      add(cur.issued, c, r.principal);
+      add(cur.profit, c, r.profit);
       if (r.isClosed) { s.closedCount++; return; }
       s.activeCount++;
-      s.outstanding += r.balance;
-      s.interestDue += r.interestDue;
-      s.penaltyDue += r.penaltyDue;
-      s.totalDue += r.totalDue;
-      s.dailyAccrual += r.dailyAccrual;
+      add(cur.outstanding, c, r.balance);
+      add(cur.interestDue, c, r.interestDue + r.penaltyDue);
+      add(cur.totalDue, c, r.totalDue);
+      add(cur.daily, c, r.dailyAccrual);
+
       var p = CALC.plan(l);
-      s.profitExpected += Math.max(0, p.interestDue + p.penaltyDue);
-      if (r.isOverdue) { s.overdueCount++; s.overdueSum += r.totalDue; s.overdue.push({ loan: l, r: r }); }
-      else if (r.daysLeft != null && r.daysLeft <= 7) s.dueSoon.push({ loan: l, r: r });
+      add(cur.expected, c, Math.max(0, p.interestDue + p.penaltyDue));
+
+      /* сколько процентов должно прийти в этом месяце по графику */
+      (r.schedule || []).forEach(function (x) {
+        if (!x.paid && U.monthKey(x.date) === mk) add(cur.monthDue, c, x.due);
+      });
+
+      if (r.isOverdue) {
+        s.overdueCount++;
+        add(cur.overdueSum, c, r.missed ? (r.interestDue + r.penaltyDue) : r.totalDue);
+        s.overdue.push({ loan: l, r: r });
+      } else {
+        var soonDays = null;
+        if (r.nextPay) soonDays = U.diffDays(U.today(), r.nextPay.date);
+        if (r.daysLeft != null && (soonDays == null || r.daysLeft < soonDays)) soonDays = r.daysLeft;
+        if (soonDays != null && soonDays <= 7) {
+          s.dueSoon.push({ loan: l, r: r, days: soonDays });
+        }
+      }
     });
-    s.overdue.sort(function (a, b) { return b.r.overdueDays - a.r.overdueDays; });
-    s.dueSoon.sort(function (a, b) { return a.r.daysLeft - b.r.daysLeft; });
+
+    s.overdue.sort(function (a, b) { return (b.r.overdueDays + b.r.missed * 30) - (a.r.overdueDays + a.r.missed * 30); });
+    s.dueSoon.sort(function (a, b) { return a.days - b.days; });
+
+    /* сведение в базовую валюту */
+    ['issued', 'outstanding', 'interestDue', 'totalDue', 'overdueSum', 'profit', 'expected', 'daily', 'monthDue']
+      .forEach(function (k) {
+        var t = FX.total(cur[k]);
+        s[k === 'issued' ? 'issuedTotal' : k === 'profit' ? 'profitRealized' : k === 'expected' ? 'profitExpected' :
+          k === 'daily' ? 'dailyAccrual' : k] = t.ok ? t.value : null;
+        if (!t.ok) s.mixed = true;
+      });
     return s;
   };
 
   /* Приход денег по месяцам: {'2026-09': {total, interest, principal}} */
   CALC.byMonth = function (loans) {
-    var m = {};
+    var m = {}, base = FX.base();
     loans.forEach(function (l) {
+      var c = l.currency || base;
       CALC.loan(l).alloc.forEach(function (a) {
         var k = U.monthKey(a.date);
-        if (!m[k]) m[k] = { total: 0, interest: 0, principal: 0 };
-        m[k].total += a.amount;
-        m[k].interest += a.int + a.pen;
-        m[k].principal += a.prin;
+        if (!m[k]) m[k] = { total: 0, interest: 0, principal: 0, exact: true };
+        var f = c === base ? 1 : FX.conv(1, c, base);
+        if (f == null) { m[k].exact = false; return; }
+        m[k].total += a.amount * f;
+        m[k].interest += (a.int + a.pen) * f;
+        m[k].principal += a.prin * f;
       });
     });
     return m;
@@ -1062,10 +1400,12 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
   /* Выдано по месяцам */
   CALC.issuedByMonth = function (loans) {
-    var m = {};
+    var m = {}, base = FX.base();
     loans.forEach(function (l) {
       var k = U.monthKey(l.issuedAt);
-      m[k] = (m[k] || 0) + U.num(l.principal);
+      var f = (l.currency || base) === base ? 1 : FX.conv(1, l.currency, base);
+      if (f == null) return;
+      m[k] = (m[k] || 0) + U.num(l.principal) * f;
     });
     return m;
   };
@@ -1107,30 +1447,55 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     return '<div class="avatar" style="background:' + U.color(name) + '">' + esc(U.initials(name)) + '</div>';
   };
 
+  /* Итог, который может не сводиться в базовую валюту */
+  V.sum = function (value, bag) {
+    if (value != null) return U.money(value);
+    var parts = [];
+    for (var c in bag) if (bag[c]) parts.push(U.money(bag[c], c));
+    return parts.length ? parts.join(' + ') : U.money(0);
+  };
+  V.hasMoney = function (value, bag) {
+    if (value != null) return value > 0.5;
+    for (var c in bag) if (bag[c] > 0.5) return true;
+    return false;
+  };
+
   V.badge = function (l, r) {
     if (r.isClosed) return '<span class="badge">Закрыт</span>';
     if (r.isPaidOff) return '<span class="badge ok">Погашен</span>';
+    if (r.missed) return '<span class="badge bad">Не заплатил ' + r.missed + ' ' +
+      U.plural(r.missed, 'месяц', 'месяца', 'месяцев') + '</span>';
     if (r.isOverdue) return '<span class="badge bad">Просрочка ' + U.days(r.overdueDays) + '</span>';
+    if (r.nextPay && U.diffDays(U.today(), r.nextPay.date) <= 3)
+      return '<span class="badge warn">Проценты ' + U.relDate(r.nextPay.date) + '</span>';
     if (r.daysLeft != null && r.daysLeft <= 3) return '<span class="badge warn">Возврат ' + U.relDate(l.dueAt) + '</span>';
     return '';
   };
 
-  V.rateText = function (l) {
-    if (l.model === 'fixed') return 'фикс. возврат ' + U.money(l.returnAmount);
-    return U.pct(l.rate) + CALC.PERIOD_SHORT[l.ratePeriod];
+  V.rateText = function (l, r) {
+    if (l.model === 'fixed') return 'фикс. возврат ' + U.money(l.returnAmount, l.currency);
+    var txt = U.pct(l.rate) + CALC.PERIOD_SHORT[l.ratePeriod];
+    if (l.payMode === 'monthly') {
+      var bal = r ? r.balance : U.num(l.principal);
+      txt += ' · ' + U.money(CALC.perMonth(l, bal), l.currency) + '/мес';
+    }
+    return txt;
   };
 
   V.loanRow = function (l) {
     var c = DB.client(l.clientId) || { name: 'Без клиента' };
     var r = CALC.loan(l);
     var b = V.badge(l, r);
-    var meta = V.rateText(l) + (l.dueAt && !r.isClosed ? ' · до ' + U.fmtDate(l.dueAt) : '');
+    var meta = V.rateText(l, r);
+    var v2 = r.isClosed ? 'закрыт'
+      : r.nextPay ? 'платёж ' + U.fmtDate(r.nextPay.date)
+        : l.dueAt ? 'до ' + U.fmtDate(l.dueAt) : 'без срока';
     return '<button class="row tap" data-act="loan" data-id="' + l.id + '">' +
       V.avatar(c.name) +
       '<span class="grow"><span class="ttl">' + esc(c.name) + '</span>' +
       '<span class="sub">' + (b ? b + ' ' : '') + esc(meta) + '</span></span>' +
-      '<span class="val"><span class="v1 num">' + U.money(r.isClosed ? r.principal : r.totalDue) + '</span>' +
-      '<span class="v2">' + (r.isClosed ? 'закрыт' : 'выдан ' + U.fmtDate(l.issuedAt)) + '</span></span>' +
+      '<span class="val"><span class="v1 num">' + U.money(r.isClosed ? r.principal : r.totalDue, l.currency) + '</span>' +
+      '<span class="v2">' + v2 + '</span></span>' +
       '<span class="chev">' + V.ICON.chev + '</span></button>';
   };
 
@@ -1144,8 +1509,8 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       V.avatar(c.name) +
       '<span class="grow"><span class="ttl">' + esc(c.name) + '</span><span class="sub">' + sub +
       (p.overdueCount ? ' · <b style="color:var(--red)">просрочка</b>' : '') + '</span></span>' +
-      '<span class="val"><span class="v1 num">' + U.money(p.totalDue) + '</span>' +
-      (p.profitRealized ? '<span class="v2">заработано ' + U.money(p.profitRealized) + '</span>' : '') +
+      '<span class="val"><span class="v1 num">' + V.sum(p.totalDue, p.cur.totalDue) + '</span>' +
+      (V.hasMoney(p.profitRealized, p.cur.profit) ? '<span class="v2">заработано ' + V.sum(p.profitRealized, p.cur.profit) + '</span>' : '') +
       '</span><span class="chev">' + V.ICON.chev + '</span></button>';
   };
 
@@ -1185,7 +1550,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
     if (!loans.length) {
       h += V.empty('💰', 'Пока нет ни одного займа',
-        'Добавьте первый заём — приложение само посчитает проценты, срок и остаток долга.',
+        'Добавьте первый заём — приложение само посчитает проценты, месячные платежи и просрочку.',
         '<div style="margin-top:18px"><button class="btn" data-act="new-loan">Выдать заём</button>' +
         '<button class="btn sec" style="margin-top:8px" data-act="go-import">Загрузить свою базу</button>' +
         '<button class="btn ghost" style="margin-top:8px" data-act="demo">Посмотреть на примере</button></div>');
@@ -1194,28 +1559,49 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
     h += '<div class="hero">' +
       '<div class="lbl">Должны вернуть</div>' +
-      '<div class="amt num">' + U.money(s.totalDue) + '</div>' +
-      '<div class="delta">тело ' + U.money(s.outstanding) + ' · проценты ' + U.money(s.interestDue + s.penaltyDue) + '</div>' +
-      (s.dailyAccrual > 0 ? '<div class="delta" style="color:var(--accent);font-weight:600">+' + U.money(s.dailyAccrual) + ' каждый день</div>' : '') +
+      '<div class="amt num">' + V.sum(s.totalDue, s.cur.totalDue) + '</div>' +
+      '<div class="delta">тело ' + V.sum(s.outstanding, s.cur.outstanding) +
+      ' · проценты ' + V.sum(s.interestDue, s.cur.interestDue) + '</div>' +
+      (V.hasMoney(s.dailyAccrual, s.cur.daily)
+        ? '<div class="delta" style="color:var(--accent);font-weight:600">+' + V.sum(s.dailyAccrual, s.cur.daily) + ' каждый день</div>' : '') +
       '</div>';
+
+    if (s.mixed) {
+      h += '<div class="card pad" style="margin-top:12px;background:var(--warn-soft)">' +
+        '<div style="font-weight:600;margin-bottom:3px">Займы в разных валютах</div>' +
+        '<div style="font-size:14px;color:var(--text-2);line-height:1.4">Чтобы видеть один общий итог, задайте курс валют — вручную или обновите из банка.</div>' +
+        '<button class="btn sec sm" style="margin-top:12px;width:100%" data-act="go-rates">Задать курс</button></div>';
+    }
+
+    /* главное для ежемесячных процентов */
+    var expects = V.hasMoney(s.monthDue, s.cur.monthDue);
+    if (expects || mProfit) {
+      h += '<h2 class="sec">Проценты за ' + U.monthName(mk).toLowerCase().replace(/ \d+$/, '') + '</h2>' +
+        '<div class="card pad">' +
+        '<div class="kv big"><span class="k">Уже получено</span><span class="v num" style="color:var(--accent)">' +
+        (mProfit ? U.money(mProfit) : '—') + '</span></div>' +
+        '<div class="kv big"><span class="k">Ещё ждём</span><span class="v num">' +
+        (expects ? V.sum(s.monthDue, s.cur.monthDue) : '—') + '</span></div>' +
+        '</div>';
+    }
 
     h += '<div class="stats">' +
       '<div class="stat"><div class="k"><span class="dot" style="background:var(--red)"></span>Просрочено</div>' +
       '<div class="v num" style="color:' + (s.overdueCount ? 'var(--red)' : 'inherit') + '">' +
-      (s.overdueCount ? U.money(s.overdueSum) : '—') + '</div>' +
+      (s.overdueCount ? V.sum(s.overdueSum, s.cur.overdueSum) : '—') + '</div>' +
       '<div class="k" style="margin-top:2px">' + (s.overdueCount ? s.overdueCount + ' ' + U.plural(s.overdueCount, 'заём', 'займа', 'займов') : 'всё по графику') + '</div></div>' +
 
-      '<div class="stat"><div class="k"><span class="dot" style="background:var(--accent)"></span>Прибыль за месяц</div>' +
-      '<div class="v num">' + (mProfit ? U.money(mProfit) : '—') + '</div>' +
-      '<div class="k" style="margin-top:2px">получено процентов</div></div>' +
+      '<div class="stat"><div class="k"><span class="dot" style="background:var(--violet)"></span>Ожидаю всего</div>' +
+      '<div class="v num">' + V.sum(s.profitExpected, s.cur.expected) + '</div>' +
+      '<div class="k" style="margin-top:2px">процентов по активным</div></div>' +
 
       '<div class="stat"><div class="k"><span class="dot" style="background:var(--blue)"></span>Выдано за месяц</div>' +
       '<div class="v num">' + (mIssued ? U.money(mIssued) : '—') + '</div>' +
       '<div class="k" style="margin-top:2px">' + U.monthName(mk) + '</div></div>' +
 
-      '<div class="stat"><div class="k"><span class="dot" style="background:var(--violet)"></span>Ожидаю прибыль</div>' +
-      '<div class="v num">' + U.money(s.profitExpected) + '</div>' +
-      '<div class="k" style="margin-top:2px">по активным займам</div></div>' +
+      '<div class="stat"><div class="k"><span class="dot" style="background:var(--accent)"></span>В работе</div>' +
+      '<div class="v num">' + V.sum(s.outstanding, s.cur.outstanding) + '</div>' +
+      '<div class="k" style="margin-top:2px">' + s.activeCount + ' ' + U.plural(s.activeCount, 'активный заём', 'активных займа', 'активных займов') + '</div></div>' +
       '</div>';
 
     h += '<div class="btn-row"><button class="btn" data-act="new-loan">＋ Выдать заём</button>' +
@@ -1223,16 +1609,15 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
     if (s.overdue.length) {
       h += '<h2 class="sec" style="color:var(--red)">Просрочено · ' + s.overdue.length + '</h2><div class="list">';
-      s.overdue.slice(0, 6).forEach(function (x) { h += V.loanRow(x.loan); });
+      s.overdue.slice(0, 8).forEach(function (x) { h += V.loanRow(x.loan); });
       h += '</div>';
     }
     if (s.dueSoon.length) {
-      h += '<h2 class="sec">Ближайшие возвраты</h2><div class="list">';
-      s.dueSoon.slice(0, 6).forEach(function (x) { h += V.loanRow(x.loan); });
+      h += '<h2 class="sec">Ближайшие платежи</h2><div class="list">';
+      s.dueSoon.slice(0, 8).forEach(function (x) { h += V.loanRow(x.loan); });
       h += '</div>';
     }
 
-    /* последние платежи */
     var recent = [];
     loans.forEach(function (l) {
       (l.payments || []).forEach(function (p) { recent.push({ l: l, p: p }); });
@@ -1245,7 +1630,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         h += '<button class="row tap" data-act="loan" data-id="' + x.l.id + '">' + V.avatar(c.name) +
           '<span class="grow"><span class="ttl">' + esc(c.name) + '</span>' +
           '<span class="sub">' + U.relDate(x.p.date) + (x.p.note ? ' · ' + esc(x.p.note) : '') + '</span></span>' +
-          '<span class="val"><span class="v1 num" style="color:var(--accent)">+' + U.money(x.p.amount) + '</span></span>' +
+          '<span class="val"><span class="v1 num" style="color:var(--accent)">+' + U.money(x.p.amount, x.l.currency) + '</span></span>' +
           '<span class="chev">' + V.ICON.chev + '</span></button>';
       });
       h += '</div>';
@@ -1366,9 +1751,9 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     h += '<div class="wrap"><h1 class="big">Ещё</h1>';
 
     h += '<div class="card pad">' +
-      '<div class="kv big"><span class="k">Выдано за всё время</span><span class="v num">' + U.money(s.issuedTotal) + '</span></div>' +
-      '<div class="kv big"><span class="k">Заработано процентов</span><span class="v num" style="color:var(--accent)">' + U.money(s.profitRealized) + '</span></div>' +
-      '<div class="kv"><span class="k">Сейчас в работе</span><span class="v num">' + U.money(s.outstanding) + '</span></div>' +
+      '<div class="kv big"><span class="k">Выдано за всё время</span><span class="v num">' + V.sum(s.issuedTotal, s.cur.issued) + '</span></div>' +
+      '<div class="kv big"><span class="k">Заработано процентов</span><span class="v num" style="color:var(--accent)">' + V.sum(s.profitRealized, s.cur.profit) + '</span></div>' +
+      '<div class="kv"><span class="k">Сейчас в работе</span><span class="v num">' + V.sum(s.outstanding, s.cur.outstanding) + '</span></div>' +
       '<div class="kv"><span class="k">Активных займов</span><span class="v num">' + s.activeCount + ' из ' + s.count + '</span></div>' +
       '</div>';
 
@@ -1382,25 +1767,57 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
           (got ? '+' + U.money(got) : '—') + '</span><span class="v2">процентов</span></span></div>';
       });
       h += '</div>';
+      if (s.mixed) h += '<div class="hint">Займы в валютах без курса в эти суммы не вошли.</div>';
     }
 
-    h += '<h2 class="sec">Настройки</h2><div class="list">';
-    h += '<div class="field"><label>Валюта</label><select data-act="set" data-k="currency">' +
-      ['₽', '₸', '₴', '$', '€', '£', 'сум', 'сом', '֏', '₾', '₼', 'zł'].map(function (c) {
-        return '<option value="' + c + '"' + (st.currency === c ? ' selected' : '') + '>' + c + '</option>';
+    h += '<h2 class="sec">Условия по умолчанию</h2><div class="list">';
+    h += '<div class="field"><label>Основная валюта</label><select data-act="set" data-k="currency">' +
+      FX.LIST.map(function (c) {
+        return '<option value="' + c.code + '"' + (st.currency === c.code ? ' selected' : '') + '>' + esc(c.name) + ' · ' + esc(c.sym) + '</option>';
       }).join('') + '</select></div>';
-    h += '<div class="field"><label>Оформление</label><select data-act="set" data-k="theme">' +
-      [['auto', 'Как в системе'], ['light', 'Светлое'], ['dark', 'Тёмное']].map(function (t) {
-        return '<option value="' + t[0] + '"' + (st.theme === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
-      }).join('') + '</select></div>';
-    h += '<div class="field"><label>Ставка по умолчанию</label><input type="number" inputmode="decimal" step="0.1" value="' + st.defaultRate + '" data-act="set" data-k="defaultRate"><span class="unit">%</span></div>';
+    h += '<div class="field"><label>Ставка</label><input type="number" inputmode="decimal" step="0.1" value="' + st.defaultRate + '" data-act="set" data-k="defaultRate"><span class="unit">%</span></div>';
     h += '<div class="field"><label>Период</label><select data-act="set" data-k="defaultPeriod">' +
       [['day', 'в день'], ['week', 'в неделю'], ['month', 'в месяц'], ['year', 'в год']].map(function (t) {
         return '<option value="' + t[0] + '"' + (st.defaultPeriod === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
       }).join('') + '</select></div>';
-    h += '<div class="field"><label>Срок по умолчанию</label><input type="number" inputmode="numeric" value="' + st.defaultTerm + '" data-act="set" data-k="defaultTerm"><span class="unit">дней</span></div>';
-    h += '<div class="field"><label>Пеня за просрочку</label><input type="number" inputmode="decimal" step="0.1" value="' + st.penaltyRate + '" data-act="set" data-k="penaltyRate"><span class="unit">% в день</span></div>';
-    h += '</div><div class="hint">Эти значения будут подставляться в новый заём — в каждом займе их можно поменять.</div>';
+    h += '<div class="field"><label>Проценты платят</label><select data-act="set" data-k="defaultPayMode">' +
+      [['monthly', 'каждый месяц'], ['end', 'в конце срока']].map(function (t) {
+        return '<option value="' + t[0] + '"' + (st.defaultPayMode === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
+      }).join('') + '</select></div>';
+    h += '<div class="field"><label>Срок</label><input type="number" inputmode="numeric" value="' + st.defaultTerm + '" data-act="set" data-k="defaultTerm"><span class="unit">дней</span></div>';
+    h += '<div class="field"><label>Пеня</label><input type="number" inputmode="decimal" step="0.1" value="' + st.penaltyRate + '" data-act="set" data-k="penaltyRate"><span class="unit">% в день</span></div>';
+    h += '<div class="field"><label>Оформление</label><select data-act="set" data-k="theme">' +
+      [['auto', 'Как в системе'], ['light', 'Светлое'], ['dark', 'Тёмное']].map(function (t) {
+        return '<option value="' + t[0] + '"' + (st.theme === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
+      }).join('') + '</select></div>';
+    h += '</div><div class="hint">Эти значения подставляются в новый заём — в каждом займе их можно поменять.</div>';
+
+    /* ---------- курсы ---------- */
+    var used = {};
+    loans.forEach(function (l) { used[l.currency || st.currency] = 1; });
+    used[st.currency] = 1;
+
+    h += '<h2 class="sec" id="rates">Курс валют</h2>';
+    h += '<div class="list">' +
+      '<div class="field"><label>Источник</label><select data-act="set" data-k="ratesPref">' +
+      [['auto', 'Любой доступный'], ['cbu', 'ЦБ Узбекистана'], ['nbkr', 'Нацбанк Кыргызстана'], ['world', 'Мировой справочник']]
+        .map(function (t) { return '<option value="' + t[0] + '"' + (st.ratesPref === t[0] ? ' selected' : '') + '>' + t[1] + '</option>'; }).join('') +
+      '</select></div>' +
+      '<button class="row tap" data-act="rates-update"><span class="grow">' +
+      '<span class="ttl" style="color:var(--accent)">Обновить курс из интернета</span>' +
+      '<span class="sub">' + (st.ratesDate ? esc(st.ratesSource || '') + ' · ' + U.fmtDate(st.ratesDate) : 'ещё не обновлялся') + '</span>' +
+      '</span></button></div>';
+
+    h += '<div class="list" style="margin-top:12px">';
+    FX.LIST.forEach(function (c) {
+      if (c.code === 'USD') return;
+      var v = (st.rates || {})[c.code];
+      h += '<div class="field"><label>1 $ =</label>' +
+        '<input type="text" inputmode="decimal" placeholder="не задан" value="' + (v ? String(v).replace('.', ',') : '') + '" ' +
+        'data-act="set-rate" data-c="' + c.code + '"><span class="unit">' + esc(c.sym) + '</span></div>';
+    });
+    h += '</div><div class="hint">Курс нужен, только если вы даёте деньги <b>в разных валютах</b> — чтобы свести всё в один итог. ' +
+      'Можно вписать вручную: так надёжнее всего, и интернет не нужен.</div>';
 
     h += '<h2 class="sec">Защита</h2><div class="list">' +
       '<button class="row tap" data-act="pin">' +
@@ -1422,7 +1839,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       '1. Откройте эту страницу в Safari.<br>2. Нажмите кнопку «Поделиться» (квадрат со стрелкой).<br>' +
       '3. Выберите «На экран «Домой»».<br>4. Запускайте с иконки — приложение работает без интернета.</div>';
 
-    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Капитал · версия 1.0</div>';
+    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Капитал · версия 1.1</div>';
     return h + '</div>';
 
     function rowBtn(act, t, sub) {
@@ -1445,6 +1862,8 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     if (!l) return V.topbarBack('Заём') + '<div class="wrap">' + V.empty('🤷', 'Заём не найден', 'Возможно, он был удалён.') + '</div>';
     var c = DB.client(l.clientId) || { name: 'Без клиента', phone: '' };
     var r = CALC.loan(l), plan = CALC.plan(l);
+    var cur = l.currency || FX.base(), base = FX.base();
+    var m = function (v, o) { o = o || {}; o.cur = cur; return U.money(v, o); };
 
     var h = V.topbarBack(c.name, '<button data-act="edit-loan" data-id="' + l.id + '">Изменить</button>');
     h += '<div class="wrap">';
@@ -1453,13 +1872,40 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       '<div style="min-width:0"><div style="font-size:22px;font-weight:700;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(c.name) + '</div>' +
       '<div style="font-size:13px;color:var(--text-2)">Заём от ' + U.fmtDateFull(l.issuedAt) + '</div></div></div>';
 
+    var alt = (cur !== base && FX.can(cur, base)) ? FX.conv(r.totalDue, cur, base) : null;
+    /* если ниже будет красная карточка про пропуски — бейдж в шапке не дублируем */
+    var missedCard = !r.isClosed && l.payMode === 'monthly' && l.model !== 'fixed' && r.missed > 0;
     h += '<div class="hero">' +
-      '<div class="lbl">' + (r.isClosed ? 'Заём закрыт' : r.isPaidOff ? 'Долг погашен' : 'К возврату сегодня') + '</div>' +
-      '<div class="amt num"' + (r.isOverdue ? ' style="color:var(--red)"' : '') + '>' + U.money(r.isClosed ? 0 : r.totalDue) + '</div>' +
-      '<div class="delta" style="margin-top:8px">' + (V.badge(l, r) || '<span class="badge ok">Активен</span>') +
-      (l.dueAt && !r.isClosed && !r.isOverdue ? ' <span class="badge">Вернуть ' + U.fmtDate(l.dueAt) + '</span>' : '') + '</div>' +
-      (!r.isClosed && r.dailyAccrual > 0 ? '<div class="delta">капает ' + U.money(r.dailyAccrual, { exact: r.dailyAccrual < 100 }) + ' в день</div>' : '') +
+      '<div class="lbl">' + (r.isClosed ? 'Заём закрыт' : r.isPaidOff ? 'Долг погашен' : 'Долг на сегодня') + '</div>' +
+      '<div class="amt num"' + (r.isOverdue ? ' style="color:var(--red)"' : '') + '>' + m(r.isClosed ? 0 : r.totalDue) + '</div>' +
+      (alt != null ? '<div class="delta">≈ ' + U.money(alt) + '</div>' : '') +
+      '<div class="delta" style="margin-top:8px">' +
+      (missedCard ? '<span class="badge bad">Просрочка</span>' : (V.badge(l, r) || '<span class="badge ok">Активен</span>')) + '</div>' +
+      (!r.isClosed && r.dailyAccrual > 0 ? '<div class="delta">капает ' + m(r.dailyAccrual, { exact: r.dailyAccrual < 100 }) + ' в день</div>' : '') +
       progress(r) + '</div>';
+
+    /* ---- ежемесячные проценты: главное на экране ---- */
+    if (!r.isClosed && l.payMode === 'monthly' && l.model !== 'fixed') {
+      var perM = CALC.perMonth(l, r.balance);
+      if (r.missed) {
+        h += '<div class="card pad" style="margin-top:12px;background:var(--danger-soft)">' +
+          '<div style="font-size:13px;color:var(--red);font-weight:600">Не заплатил за ' + r.missed + ' ' +
+          U.plural(r.missed, 'месяц', 'месяца', 'месяцев') + '</div>' +
+          '<div style="font-size:28px;font-weight:700;letter-spacing:-.5px;margin-top:3px" class="num">' +
+          m(r.interestDue + r.penaltyDue) + '</div>' +
+          '<div style="font-size:13px;color:var(--text-2);margin-top:2px">нужно получить, чтобы выйти в график</div></div>';
+      } else if (r.nextPay) {
+        h += '<div class="card pad" style="margin-top:12px">' +
+          '<div style="font-size:13px;color:var(--text-2)">Следующий платёж процентов</div>' +
+          '<div style="font-size:28px;font-weight:700;letter-spacing:-.5px;margin-top:3px" class="num">' + m(r.nextPay.due) + '</div>' +
+          '<div style="font-size:13px;color:var(--text-2);margin-top:2px">' +
+          U.fmtDateFull(r.nextPay.date) + ' · ' + U.relDate(r.nextPay.date) + '</div></div>';
+      }
+      h += '<div style="font-size:13px;color:var(--text-2);margin:8px 4px 0">' +
+        'Каждый месяц: <b style="color:var(--text)">' + m(perM) + '</b> процентами. ' +
+        (l.dueAt ? 'Тело ' + m(r.balance) + ' — до ' + U.fmtDate(l.dueAt) + '.' : 'Тело возвращается, когда договоритесь.') +
+        '</div>';
+    }
 
     if (!r.isClosed) {
       h += '<div class="btn-row"><button class="btn" data-act="pay" data-id="' + l.id + '">Принять платёж</button></div>';
@@ -1469,29 +1915,56 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         '<a class="btn sec" href="' + U.waHref(c.phone) + '" target="_blank" rel="noopener">WhatsApp</a></div>';
     }
 
+    /* ---- график ---- */
+    if (r.schedule && r.schedule.length) {
+      var shown = r.schedule.filter(function (p) { return p.status !== 'future'; });
+      var future = r.schedule.filter(function (p) { return p.status === 'future'; });
+      if (future.length) shown = shown.concat(future.slice(0, 3));
+      h += '<h2 class="sec">График процентов</h2><div class="list">';
+      shown.forEach(function (p) {
+        var mark = p.status === 'paid' ? '<span class="badge ok">оплачен</span>'
+          : p.status === 'overdue' ? '<span class="badge bad">не оплачен</span>'
+            : p.status === 'soon' ? '<span class="badge warn">' + U.relDate(p.date) + '</span>'
+              : '<span class="badge">' + U.relDate(p.date) + '</span>';
+        h += '<div class="row"><span class="grow"><span class="ttl">' + U.fmtDate(p.date, true) + '</span>' +
+          '<span class="sub">' + mark + ' месяц ' + p.n + '</span></span>' +
+          '<span class="val"><span class="v1 num"' + (p.status === 'overdue' ? ' style="color:var(--red)"' : p.status === 'paid' ? ' style="color:var(--text-3)"' : '') + '>' +
+          m(p.due) + '</span></span></div>';
+      });
+      if (l.dueAt) {
+        h += '<div class="row"><span class="grow"><span class="ttl">' + U.fmtDate(l.dueAt, true) + '</span>' +
+          '<span class="sub">возврат тела</span></span>' +
+          '<span class="val"><span class="v1 num">' + m(r.balance) + '</span></span></div>';
+      }
+      h += '</div>';
+      if (future.length > 3) h += '<div class="hint">Дальше — ещё ' + (future.length - 3) + ' ' +
+        U.plural(future.length - 3, 'платёж', 'платежа', 'платежей') + ' по такому же графику.</div>';
+    }
+
     h += '<h2 class="sec">Условия</h2><div class="card pad">' +
-      kv('Выдано на руки', U.money(l.principal)) +
+      kv('Выдано на руки', m(l.principal)) +
       (l.model === 'fixed'
-        ? kv('Фиксированный возврат', U.money(l.returnAmount))
-        : kv('Ставка', U.pct(l.rate) + ' ' + CALC.PERIOD_NAME[l.ratePeriod] +
-          '<span style="color:var(--text-2);font-weight:400"> · ' + U.money(U.num(l.principal) * CALC.daily(l), { exact: true }) + '/день</span>')) +
-      (l.dueAt ? kv('Вернуть до', U.fmtDateFull(l.dueAt) + '<span style="color:var(--text-2);font-weight:400"> · ' + U.relDate(l.dueAt) + '</span>') : '') +
+        ? kv('Фиксированный возврат', m(l.returnAmount))
+        : kv('Ставка', U.pct(l.rate) + ' ' + CALC.PERIOD_NAME[l.ratePeriod])) +
+      (l.model !== 'fixed' ? kv('Проценты платит', l.payMode === 'monthly' ? 'каждый месяц' : 'в конце срока') : '') +
+      kv('Валюта', esc(FX.byCode(cur).name)) +
+      kv('Вернуть тело', l.dueAt ? U.fmtDateFull(l.dueAt) + '<span style="color:var(--text-2);font-weight:400"> · ' + U.relDate(l.dueAt) + '</span>' : 'срок не назначен') +
       (U.num(l.penaltyRate) > 0 ? kv('Пеня за просрочку', U.pct(l.penaltyRate) + ' в день') : '') +
       (l.stopAccrual ? kv('После срока', 'проценты не растут') : '') +
       (l.note ? kv('Заметка', esc(l.note)) : '') +
       '</div>';
 
     h += '<h2 class="sec">Расчёт на сегодня</h2><div class="card pad">' +
-      kv('Остаток основного долга', U.money(r.balance)) +
-      kv('Начислено процентов', U.money(r.interestAccrued)) +
-      (r.penaltyAccrued > 0 ? kv('Пеня', '<span style="color:var(--red)">' + U.money(r.penaltyAccrued) + '</span>') : '') +
-      kv('Уже выплачено', U.money(r.paidTotal)) +
-      kv('Из них проценты', '<span style="color:var(--accent)">' + U.money(r.profit) + '</span>') +
-      (r.overpay > 0 ? kv('Переплата', U.money(r.overpay)) : '') +
-      '<div class="kv big"><span class="k">Итого к возврату</span><span class="v num">' + U.money(r.isClosed ? 0 : r.totalDue) + '</span></div>' +
+      kv('Остаток основного долга', m(r.balance)) +
+      kv('Начислено процентов', m(r.interestAccrued)) +
+      (r.penaltyAccrued > 0 ? kv('Пеня', '<span style="color:var(--red)">' + m(r.penaltyAccrued) + '</span>') : '') +
+      kv('Уже выплачено', m(r.paidTotal)) +
+      kv('Из них проценты', '<span style="color:var(--accent)">' + m(r.profit) + '</span>') +
+      (r.overpay > 0 ? kv('Переплата', m(r.overpay)) : '') +
+      '<div class="kv big"><span class="k">Итого к возврату</span><span class="v num">' + m(r.isClosed ? 0 : r.totalDue) + '</span></div>' +
       (!r.isClosed && l.dueAt && r.daysLeft > 0
-        ? '<div class="kv"><span class="k">Если вернёт день в день</span><span class="v num">' + U.money(plan.totalDue) +
-        '<span style="color:var(--accent);font-weight:400"> · доход ' + U.money(plan.interestDue + plan.penaltyDue + r.profit) + '</span></span></div>' : '') +
+        ? '<div class="kv"><span class="k">Всего заработаете к сроку</span><span class="v num" style="color:var(--accent)">' +
+        m(plan.interestDue + plan.penaltyDue + r.profit) + '</span></div>' : '') +
       '</div>';
 
     var pays = (l.payments || []).slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
@@ -1504,14 +1977,14 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       pays.forEach(function (p) {
         var a = amap[p.id], parts = [];
         if (a) {
-          if (a.pen > 0.5) parts.push('пеня ' + U.money(a.pen));
-          if (a.int > 0.5) parts.push('проценты ' + U.money(a.int));
-          if (a.prin > 0.5) parts.push('тело ' + U.money(a.prin));
+          if (a.pen > 0.5) parts.push('пеня ' + m(a.pen));
+          if (a.int > 0.5) parts.push('проценты ' + m(a.int));
+          if (a.prin > 0.5) parts.push('тело ' + m(a.prin));
         }
         h += '<button class="row tap" data-act="del-pay" data-id="' + l.id + '" data-pid="' + p.id + '">' +
           '<span class="grow"><span class="ttl">' + U.fmtDate(p.date, true) + '</span>' +
           '<span class="sub">' + (parts.join(' · ') || 'зачтено') + (p.note ? ' · ' + esc(p.note) : '') + '</span></span>' +
-          '<span class="val"><span class="v1 num" style="color:var(--accent)">+' + U.money(p.amount) + '</span></span></button>';
+          '<span class="val"><span class="v1 num" style="color:var(--accent)">+' + m(p.amount) + '</span></span></button>';
       });
       h += '</div><div class="hint">Нажмите на платёж, чтобы удалить его.</div>';
     }
@@ -1525,11 +1998,12 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
     function kv(k, v) { return '<div class="kv"><span class="k">' + k + '</span><span class="v num">' + v + '</span></div>'; }
     function progress(r) {
+      if (l.payMode === 'monthly' && !l.dueAt) return '';
       var total = r.principal + r.interestAccrued + r.penaltyAccrued;
       if (!total) return '';
       var pc = Math.max(0, Math.min(100, r.paidTotal / total * 100));
       return '<div class="bar"><i style="width:' + pc.toFixed(1) + '%"></i></div>' +
-        '<div class="delta">выплачено ' + Math.round(pc) + '% от ' + U.money(total) + '</div>';
+        '<div class="delta">выплачено ' + Math.round(pc) + '% от ' + m(total) + '</div>';
     }
   };
 
@@ -1584,7 +2058,9 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     var st = DB.data.settings;
     var d = l || {
       clientId: presetClient || (DB.clients()[0] ? DB.clients()[0].id : '__new'),
-      principal: '', model: 'simple', rate: st.defaultRate, ratePeriod: st.defaultPeriod,
+      principal: '', currency: st.currency, model: 'simple',
+      rate: st.defaultRate, ratePeriod: st.defaultPeriod, rateMode: 'percent',
+      payMode: st.defaultPayMode || 'monthly',
       issuedAt: U.today(), dueAt: U.addDays(U.today(), st.defaultTerm || 30),
       penaltyRate: st.penaltyRate || 0, stopAccrual: false, note: ''
     };
@@ -1598,35 +2074,55 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       '<option value="__new"' + (d.clientId === '__new' ? ' selected' : '') + '>＋ Новый клиент</option></select></div>' +
       '<div id="new-client-fields" style="display:none">' +
       '<div class="field"><label>Имя</label><input id="f-cname" placeholder="Иван Петров" autocomplete="off"></div>' +
-      '<div class="field"><label>Телефон</label><input id="f-cphone" type="tel" inputmode="tel" placeholder="+7 900 000-00-00"></div>' +
+      '<div class="field"><label>Телефон</label><input id="f-cphone" type="tel" inputmode="tel" placeholder="+998 90 000-00-00"></div>' +
       '</div></div>';
 
     h += '<h2 class="sec">Деньги</h2><div class="list">' +
-      '<div class="field"><label>Сумма</label><input id="f-principal" type="text" inputmode="decimal" placeholder="0" value="' + (d.principal || '') + '"><span class="unit">' + esc(st.currency) + '</span></div>' +
+      '<div class="field"><label>Сумма</label><input id="f-principal" type="text" inputmode="decimal" placeholder="0" value="' + (d.principal || '') + '"></div>' +
+      '<div class="field"><label>Валюта</label><select id="f-cur">' +
+      FX.LIST.map(function (c) {
+        return '<option value="' + c.code + '"' + ((d.currency || st.currency) === c.code ? ' selected' : '') + '>' + esc(c.name) + ' · ' + esc(c.sym) + '</option>';
+      }).join('') + '</select></div>' +
       '<div class="field"><label>Выдан</label><input id="f-issued" type="date" value="' + esc(d.issuedAt) + '"></div>' +
-      '<div class="field"><label>Вернуть до</label><input id="f-due" type="date" value="' + esc(d.dueAt || '') + '"></div>' +
+      '<div class="field"><label>Вернуть тело</label><input id="f-due" type="date" value="' + esc(d.dueAt || '') + '"></div>' +
       '</div>';
     h += '<div class="chips" style="border-radius:0 0 var(--radius) var(--radius);margin-top:-1px">' +
-      [7, 14, 30, 60, 90, 180].map(function (n) {
-        return '<button class="chip" data-term="' + n + '">' + n + ' дн</button>';
-      }).join('') + '</div>';
+      [30, 60, 90, 180, 365].map(function (n) {
+        return '<button class="chip" data-term="' + n + '">' + (n === 365 ? 'год' : n + ' дн') + '</button>';
+      }).join('') +
+      '<button class="chip' + (d.dueAt ? '' : ' on') + '" data-term="0">Без срока</button></div>';
+    h += '<div class="hint">«Без срока» — тело лежит у клиента, пока он платит проценты.</div>';
 
     h += '<h2 class="sec">Проценты</h2><div class="seg" id="f-model">' +
       '<button data-model="simple" class="' + (d.model === 'simple' ? 'on' : '') + '">На остаток долга</button>' +
       '<button data-model="fixed" class="' + (d.model === 'fixed' ? 'on' : '') + '">Фикс. сумма</button></div>';
 
-    h += '<div class="list" id="box-simple"' + (d.model === 'fixed' ? ' style="display:none"' : '') + '>' +
-      '<div class="field"><label>Ставка</label><input id="f-rate" type="text" inputmode="decimal" value="' + (d.rate != null ? d.rate : '') + '"><span class="unit">%</span></div>' +
-      '<div class="field"><label>Период</label><select id="f-period">' +
-      [['day', 'в день'], ['week', 'в неделю'], ['month', 'в месяц (30 дней)'], ['year', 'в год']].map(function (t) {
+    h += '<div id="box-simple"' + (d.model === 'fixed' ? ' style="display:none"' : '') + '>' +
+      '<div class="seg" id="f-ratemode">' +
+      '<button data-rm="percent" class="' + (d.rateMode !== 'amount' ? 'on' : '') + '">Ставкой в %</button>' +
+      '<button data-rm="amount" class="' + (d.rateMode === 'amount' ? 'on' : '') + '">Суммой в месяц</button></div>' +
+      '<div class="list">' +
+      '<div class="field" id="row-pct"><label>Ставка</label><input id="f-rate" type="text" inputmode="decimal" value="' + (d.rate != null ? d.rate : '') + '"><span class="unit">%</span></div>' +
+      '<div class="field" id="row-per"><label>Период</label><select id="f-period">' +
+      [['day', 'в день'], ['week', 'в неделю'], ['month', 'в месяц'], ['year', 'в год']].map(function (t) {
         return '<option value="' + t[0] + '"' + (d.ratePeriod === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
-      }).join('') + '</select></div></div>';
+      }).join('') + '</select></div>' +
+      '<div class="field" id="row-amt"><label>Платёж</label><input id="f-rateamt" type="text" inputmode="decimal" placeholder="0" value="' + (d.rateAmount || '') + '"><span class="unit" id="u-amt">в месяц</span></div>' +
+      '</div>' +
+      '<div class="chips" id="rate-chips">' + [2, 3, 5, 8, 10, 15, 20].map(function (n) {
+        return '<button class="chip" data-rate="' + n + '">' + n + '%</button>';
+      }).join('') + '</div>' +
+      '<h2 class="sec">Как платит проценты</h2>' +
+      '<div class="seg" id="f-paymode">' +
+      '<button data-pm="monthly" class="' + (d.payMode !== 'end' ? 'on' : '') + '">Каждый месяц</button>' +
+      '<button data-pm="end" class="' + (d.payMode === 'end' ? 'on' : '') + '">В конце срока</button></div>' +
+      '</div>';
 
     h += '<div class="list" id="box-fixed"' + (d.model !== 'fixed' ? ' style="display:none"' : '') + '>' +
-      '<div class="field"><label>Вернёт всего</label><input id="f-return" type="text" inputmode="decimal" placeholder="0" value="' + (d.returnAmount || '') + '"><span class="unit">' + esc(st.currency) + '</span></div></div>';
+      '<div class="field"><label>Вернёт всего</label><input id="f-return" type="text" inputmode="decimal" placeholder="0" value="' + (d.returnAmount || '') + '"></div></div>';
 
     h += '<div class="list" style="margin-top:12px">' +
-      '<div class="field"><label>Пеня</label><input id="f-penalty" type="text" inputmode="decimal" value="' + (d.penaltyRate || 0) + '"><span class="unit">% в день просрочки</span></div>' +
+      '<div class="field"><label>Пеня</label><input id="f-penalty" type="text" inputmode="decimal" value="' + (d.penaltyRate || 0) + '"><span class="unit">% в день</span></div>' +
       '<div class="field"><label style="min-width:auto;flex:1;font-size:16px">После срока проценты не растут</label>' +
       '<input id="f-stop" type="checkbox" style="flex:none;width:auto;-webkit-appearance:checkbox;appearance:checkbox;transform:scale(1.3)"' + (d.stopAccrual ? ' checked' : '') + '></div>' +
       '<div class="field col"><label>Заметка</label><textarea id="f-note" placeholder="Залог, поручитель, договорённости…">' + esc(d.note || '') + '</textarea></div>' +
@@ -1639,17 +2135,29 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       html: h,
       save: l ? 'Сохранить' : 'Выдать',
       onOpen: function (bd) {
-        var $ = function (s) { return bd.querySelector(s); };
-        function toggleNew() {
-          $('#new-client-fields').style.display = $('#f-client').value === '__new' ? '' : 'none';
-        }
-        function model() { var b = bd.querySelector('#f-model .on'); return b ? b.dataset.model : 'simple'; }
+        var $ = function (x) { return bd.querySelector(x); };
+        function seg(id) { var b = bd.querySelector('#' + id + ' .on'); return b ? b.dataset : {}; }
+        function model() { return seg('f-model').model || 'simple'; }
+        function rateMode() { return seg('f-ratemode').rm || 'percent'; }
+        function payMode() { return seg('f-paymode').pm || 'monthly'; }
+
         function draft() {
+          var principal = U.num($('#f-principal').value);
+          var rm = rateMode(), rate, period;
+          if (rm === 'amount') {
+            rate = CALC.rateFromAmount(principal, U.num($('#f-rateamt').value));
+            period = 'month';
+          } else {
+            rate = U.num($('#f-rate').value);
+            period = $('#f-period').value;
+          }
           return {
-            principal: U.num($('#f-principal').value),
+            principal: principal,
+            currency: $('#f-cur').value,
             model: model(),
-            rate: U.num($('#f-rate').value),
-            ratePeriod: $('#f-period').value,
+            rate: rate, ratePeriod: period, rateMode: rm,
+            rateAmount: U.num($('#f-rateamt').value),
+            payMode: payMode(),
             returnAmount: U.num($('#f-return').value),
             issuedAt: $('#f-issued').value || U.today(),
             dueAt: $('#f-due').value || null,
@@ -1658,46 +2166,103 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
             note: $('#f-note').value.trim()
           };
         }
-        function preview() {
-          var dr = draft(), p = CALC.preview(dr), box = $('#preview');
-          if (!dr.principal) { box.innerHTML = '<div style="color:var(--text-2);font-size:15px">Введите сумму — покажу доход и дату возврата.</div>'; return; }
-          var days = p.days;
-          box.innerHTML =
-            '<div class="kv"><span class="k">Выдаёте</span><span class="v num">' + U.money(dr.principal) + '</span></div>' +
-            (dr.model === 'simple'
-              ? '<div class="kv"><span class="k">Начисление</span><span class="v num">' + U.money(p.perDay, { exact: p.perDay < 100 }) + ' в день</span></div>' : '') +
-            '<div class="kv"><span class="k">Срок</span><span class="v num">' + (days > 0 ? U.days(days) : 'не указан') + '</span></div>' +
-            '<div class="kv big"><span class="k">Вернёт всего</span><span class="v num">' + U.money(p.total) + '</span></div>' +
-            '<div class="kv big"><span class="k">Ваш доход</span><span class="v num" style="color:var(--accent)">+' + U.money(p.profit) + '</span></div>';
+
+        function sync() {
+          $('#new-client-fields').style.display = $('#f-client').value === '__new' ? '' : 'none';
+          var am = rateMode() === 'amount';
+          $('#row-pct').style.display = am ? 'none' : '';
+          $('#row-per').style.display = am ? 'none' : '';
+          $('#row-amt').style.display = am ? '' : 'none';
+          $('#rate-chips').style.display = am ? 'none' : '';
+          $('#u-amt').textContent = FX.sym($('#f-cur').value) + ' в месяц';
         }
-        bd.addEventListener('input', preview);
-        bd.addEventListener('change', function (e) { toggleNew(); preview(); });
+
+        function preview() {
+          var dr = draft(), box = $('#preview'), cur = dr.currency;
+          var mm = function (v, o) { o = o || {}; o.cur = cur; return U.money(v, o); };
+          if (!dr.principal) { box.innerHTML = '<div style="color:var(--text-2);font-size:15px">Введите сумму — покажу платёж и доход.</div>'; return; }
+
+          if (dr.model === 'fixed') {
+            var pr = Math.max(0, dr.returnAmount - dr.principal);
+            box.innerHTML =
+              '<div class="kv"><span class="k">Выдаёте</span><span class="v num">' + mm(dr.principal) + '</span></div>' +
+              '<div class="kv big"><span class="k">Вернёт всего</span><span class="v num">' + mm(dr.returnAmount) + '</span></div>' +
+              '<div class="kv big"><span class="k">Ваш доход</span><span class="v num" style="color:var(--accent)">+' + mm(pr) + '</span></div>';
+            return;
+          }
+
+          var perM = CALC.perMonth(dr, dr.principal);
+          var days = dr.dueAt ? U.diffDays(dr.issuedAt, dr.dueAt) : 0;
+          var p = CALC.plan(Object.assign({ payments: [], status: 'active' }, dr));
+          var out = '<div class="kv"><span class="k">Выдаёте</span><span class="v num">' + mm(dr.principal) + '</span></div>';
+
+          if (dr.payMode === 'monthly') {
+            out += '<div class="kv big"><span class="k">Каждый месяц</span><span class="v num" style="color:var(--accent)">' + mm(perM) + '</span></div>' +
+              '<div class="kv"><span class="k">Тело вернёт</span><span class="v num">' +
+              (dr.dueAt ? U.fmtDate(dr.dueAt, true) : 'когда договоритесь') + '</span></div>';
+            if (days > 0) {
+              out += '<div class="kv big"><span class="k">Доход за ' + U.days(days) + '</span><span class="v num" style="color:var(--accent)">+' +
+                mm(p.interestDue + p.penaltyDue) + '</span></div>';
+            } else {
+              out += '<div class="kv"><span class="k">За год получится</span><span class="v num" style="color:var(--accent)">+' + mm(perM * 12) + '</span></div>';
+            }
+          } else {
+            out += '<div class="kv"><span class="k">Срок</span><span class="v num">' + (days > 0 ? U.days(days) : 'не указан') + '</span></div>' +
+              '<div class="kv big"><span class="k">Вернёт всего</span><span class="v num">' + mm(p.balance + p.interestDue + p.penaltyDue) + '</span></div>' +
+              '<div class="kv big"><span class="k">Ваш доход</span><span class="v num" style="color:var(--accent)">+' + mm(p.interestDue + p.penaltyDue) + '</span></div>';
+          }
+          if (rateMode() === 'amount' && dr.principal) {
+            out += '<div class="kv"><span class="k">Это ставка</span><span class="v num">' + U.pct(dr.rate) + ' в месяц</span></div>';
+          }
+          box.innerHTML = out;
+        }
+
+        bd.addEventListener('input', function () { sync(); preview(); });
+        bd.addEventListener('change', function () { sync(); preview(); });
         bd.addEventListener('click', function (e) {
           var t = e.target.closest('[data-term]');
           if (t) {
-            $('#f-due').value = U.addDays($('#f-issued').value || U.today(), +t.dataset.term);
-            U.$$('.chip', bd).forEach(function (c) { c.classList.remove('on'); });
+            var n = +t.dataset.term;
+            $('#f-due').value = n ? U.addDays($('#f-issued').value || U.today(), n) : '';
+            U.$$('[data-term]', bd).forEach(function (c) { c.classList.remove('on'); });
             t.classList.add('on'); preview(); return;
           }
-          var m = e.target.closest('[data-model]');
-          if (m) {
-            U.$$('#f-model button', bd).forEach(function (b) { b.classList.remove('on'); });
-            m.classList.add('on');
-            $('#box-simple').style.display = m.dataset.model === 'simple' ? '' : 'none';
-            $('#box-fixed').style.display = m.dataset.model === 'fixed' ? '' : 'none';
-            preview();
+          var rc = e.target.closest('[data-rate]');
+          if (rc) {
+            $('#f-rate').value = rc.dataset.rate;
+            U.$$('[data-rate]', bd).forEach(function (c) { c.classList.remove('on'); });
+            rc.classList.add('on'); preview(); return;
+          }
+          var g = e.target.closest('[data-model],[data-rm],[data-pm]');
+          if (g) {
+            var box = g.closest('.seg');
+            U.$$('button', box).forEach(function (b) { b.classList.remove('on'); });
+            g.classList.add('on');
+            if (g.dataset.model) {
+              $('#box-simple').style.display = g.dataset.model === 'simple' ? '' : 'none';
+              $('#box-fixed').style.display = g.dataset.model === 'fixed' ? '' : 'none';
+            }
+            sync(); preview();
           }
         });
-        toggleNew(); preview();
+        sync(); preview();
         if (!l) setTimeout(function () { $('#f-principal').focus(); }, 380);
       },
+
       onSave: function (bd) {
-        var $ = function (s) { return bd.querySelector(s); };
+        var $ = function (x) { return bd.querySelector(x); };
+        var segOn = function (id) { var b = bd.querySelector('#' + id + ' .on'); return b ? b.dataset : {}; };
+        var rm = segOn('f-ratemode').rm || 'percent';
+        var principal = U.num($('#f-principal').value);
         var dr = {
-          principal: U.num($('#f-principal').value),
-          model: bd.querySelector('#f-model .on').dataset.model,
-          rate: U.num($('#f-rate').value),
-          ratePeriod: $('#f-period').value,
+          principal: principal,
+          currency: $('#f-cur').value,
+          model: segOn('f-model').model || 'simple',
+          rate: rm === 'amount' ? CALC.rateFromAmount(principal, U.num($('#f-rateamt').value)) : U.num($('#f-rate').value),
+          ratePeriod: rm === 'amount' ? 'month' : $('#f-period').value,
+          rateMode: rm,
+          rateAmount: U.num($('#f-rateamt').value),
+          payMode: segOn('f-paymode').pm || 'monthly',
           returnAmount: U.num($('#f-return').value),
           issuedAt: $('#f-issued').value || U.today(),
           dueAt: $('#f-due').value || null,
@@ -1707,6 +2272,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         };
         if (!dr.principal || dr.principal <= 0) { U.toast('Укажите сумму займа'); return false; }
         if (dr.model === 'fixed' && dr.returnAmount < dr.principal) { U.toast('Сумма возврата меньше выданной'); return false; }
+        if (dr.model === 'simple' && rm === 'amount' && !U.num($('#f-rateamt').value)) { U.toast('Укажите месячный платёж'); return false; }
 
         var cid = $('#f-client').value;
         if (cid === '__new') {
@@ -1753,23 +2319,31 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     if (!l) return;
     var c = DB.client(l.clientId) || { name: '—' };
     var r = CALC.loan(l);
-    var only = Math.round(r.interestDue + r.penaltyDue);
+    var cur = l.currency || FX.base();
+    var m = function (v, o) { o = o || {}; o.cur = cur; return U.money(v, o); };
+
+    var perM = l.model === 'fixed' ? 0 : CALC.perMonth(l, r.balance);
+    var owed = Math.round(r.interestDue + r.penaltyDue);      // всё, что накопилось процентами
     var all = Math.round(r.totalDue);
 
     var h = '<div style="text-align:center;margin-bottom:14px">' +
       '<div style="font-size:13px;color:var(--text-2)">' + esc(c.name) + ' · долг на сегодня</div>' +
-      '<div style="font-size:30px;font-weight:700;letter-spacing:-.6px" class="num">' + U.money(r.totalDue) + '</div></div>';
+      '<div style="font-size:30px;font-weight:700;letter-spacing:-.6px" class="num">' + m(r.totalDue) + '</div>' +
+      (l.payMode === 'monthly' && r.missed
+        ? '<div style="font-size:13px;color:var(--red);font-weight:600;margin-top:3px">не платил ' + r.missed + ' ' +
+        U.plural(r.missed, 'месяц', 'месяца', 'месяцев') + '</div>' : '') +
+      '</div>';
 
     h += '<div class="list">' +
-      '<div class="field"><label>Сумма</label><input id="p-amount" type="text" inputmode="decimal" placeholder="0" style="font-size:22px;font-weight:600"><span class="unit">' + esc(DB.data.settings.currency) + '</span></div>' +
+      '<div class="field"><label>Сумма</label><input id="p-amount" type="text" inputmode="decimal" placeholder="0" style="font-size:22px;font-weight:600"><span class="unit">' + esc(FX.sym(cur)) + '</span></div>' +
       '<div class="field"><label>Дата</label><input id="p-date" type="date" value="' + U.today() + '"></div>' +
       '<div class="field col"><label>Заметка</label><textarea id="p-note" placeholder="Наличные, перевод…" style="min-height:44px"></textarea></div>' +
       '</div>';
 
     h += '<div class="chips" style="margin-top:12px;border-radius:var(--radius)">';
-    if (only > 0) h += '<button class="chip" data-amt="' + only + '">Только проценты · ' + U.money(only) + '</button>';
-    if (all > 0) h += '<button class="chip" data-amt="' + all + '">Весь долг · ' + U.money(all) + '</button>';
-    if (all > 1) h += '<button class="chip" data-amt="' + Math.round(all / 2) + '">Половина</button>';
+    if (perM > 0.5) h += '<button class="chip" data-amt="' + Math.round(perM) + '">Проценты за месяц · ' + m(perM) + '</button>';
+    if (owed > 0.5 && Math.abs(owed - Math.round(perM)) > 0.5) h += '<button class="chip" data-amt="' + owed + '">Все накопленные проценты · ' + m(owed) + '</button>';
+    if (all > 0.5) h += '<button class="chip" data-amt="' + all + '">Закрыть весь долг · ' + m(all) + '</button>';
     h += '</div>';
 
     h += '<div class="card pad" id="p-prev" style="margin-top:14px"></div>';
@@ -1786,12 +2360,12 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
           var prin = Math.min(left, r.balance); left -= prin;
           var rest = r.totalDue - (pen + int + prin);
           box.innerHTML =
-            (pen > 0.5 ? kvv('Погасит пеню', U.money(pen)) : '') +
-            kvv('Погасит проценты', U.money(int)) +
-            kvv('Уйдёт в тело долга', U.money(prin)) +
-            (left > 0.5 ? kvv('Переплата', U.money(left)) : '') +
+            (pen > 0.5 ? kvv('Погасит пеню', m(pen)) : '') +
+            kvv('Погасит проценты', m(int)) +
+            kvv('Уйдёт в тело долга', m(prin)) +
+            (left > 0.5 ? kvv('Переплата', m(left)) : '') +
             '<div class="kv big"><span class="k">Останется долга</span><span class="v num"' + (rest < 0.5 ? ' style="color:var(--accent)"' : '') + '>' +
-            (rest < 0.5 ? 'ноль — заём закроется' : U.money(rest)) + '</span></div>';
+            (rest < 0.5 ? 'ноль — заём закроется' : m(rest)) + '</span></div>';
         }
         bd.addEventListener('input', prev);
         bd.addEventListener('click', function (e) {
@@ -1810,7 +2384,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
           note: bd.querySelector('#p-note').value.trim()
         });
         var after = CALC.loan(DB.loan(l.id));
-        U.toast(after.isClosed ? 'Платёж принят, заём закрыт' : 'Платёж принят · осталось ' + U.money(after.totalDue));
+        U.toast(after.isClosed ? 'Платёж принят, заём закрыт' : 'Платёж принят · осталось ' + m(after.totalDue));
         App.render();
         return true;
       }
@@ -2150,6 +2724,26 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     'quick-pay': function () { F.quickPay(); },
     'go-import': function () { F.importSheet(); },
     import: function () { F.importSheet(); },
+    'go-rates': function () {
+      App.go('#/more');
+      setTimeout(function () {
+        var el = U.$('#rates');
+        if (el) w.scrollTo({ top: el.offsetTop - 60, behavior: 'smooth' });
+      }, 120);
+    },
+    'rates-update': function (d, btn) {
+      var sub = btn.querySelector('.sub');
+      if (sub) sub.textContent = 'запрашиваю курс…';
+      FX.update(DB.data.settings.ratesPref || 'auto', function (rates, err, src) {
+        if (err) {
+          U.toast('Курс получить не удалось — впишите вручную');
+          if (sub) sub.textContent = 'не удалось загрузить';
+          return;
+        }
+        U.toast('Курс обновлён: ' + src);
+        App.render();
+      });
+    },
     demo: function () {
       DB.data = DB.demo(); DB.save();
       U.toast('Загружен пример: 4 клиента, 5 займов');
@@ -2352,6 +2946,16 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     document.addEventListener('change', function (e) {
       if (e.target.closest('.sheet')) return;
       var t = e.target;
+      if (t.dataset && t.dataset.act === 'set-rate') {
+        var rr = DB.data.settings.rates || (DB.data.settings.rates = {});
+        var vv = U.num(t.value);
+        if (vv > 0) rr[t.dataset.c] = vv; else delete rr[t.dataset.c];
+        DB.data.settings.ratesSource = 'введён вручную';
+        DB.data.settings.ratesDate = U.today();
+        DB.save();
+        U.toast('Курс сохранён');
+        return;
+      }
       if (t.dataset && t.dataset.act === 'set') {
         var k = t.dataset.k;
         var v = ['defaultRate', 'defaultTerm', 'penaltyRate'].indexOf(k) >= 0 ? U.num(t.value) : t.value;

@@ -20,30 +20,55 @@
     return '<div class="avatar" style="background:' + U.color(name) + '">' + esc(U.initials(name)) + '</div>';
   };
 
+  /* Итог, который может не сводиться в базовую валюту */
+  V.sum = function (value, bag) {
+    if (value != null) return U.money(value);
+    var parts = [];
+    for (var c in bag) if (bag[c]) parts.push(U.money(bag[c], c));
+    return parts.length ? parts.join(' + ') : U.money(0);
+  };
+  V.hasMoney = function (value, bag) {
+    if (value != null) return value > 0.5;
+    for (var c in bag) if (bag[c] > 0.5) return true;
+    return false;
+  };
+
   V.badge = function (l, r) {
     if (r.isClosed) return '<span class="badge">Закрыт</span>';
     if (r.isPaidOff) return '<span class="badge ok">Погашен</span>';
+    if (r.missed) return '<span class="badge bad">Не заплатил ' + r.missed + ' ' +
+      U.plural(r.missed, 'месяц', 'месяца', 'месяцев') + '</span>';
     if (r.isOverdue) return '<span class="badge bad">Просрочка ' + U.days(r.overdueDays) + '</span>';
+    if (r.nextPay && U.diffDays(U.today(), r.nextPay.date) <= 3)
+      return '<span class="badge warn">Проценты ' + U.relDate(r.nextPay.date) + '</span>';
     if (r.daysLeft != null && r.daysLeft <= 3) return '<span class="badge warn">Возврат ' + U.relDate(l.dueAt) + '</span>';
     return '';
   };
 
-  V.rateText = function (l) {
-    if (l.model === 'fixed') return 'фикс. возврат ' + U.money(l.returnAmount);
-    return U.pct(l.rate) + CALC.PERIOD_SHORT[l.ratePeriod];
+  V.rateText = function (l, r) {
+    if (l.model === 'fixed') return 'фикс. возврат ' + U.money(l.returnAmount, l.currency);
+    var txt = U.pct(l.rate) + CALC.PERIOD_SHORT[l.ratePeriod];
+    if (l.payMode === 'monthly') {
+      var bal = r ? r.balance : U.num(l.principal);
+      txt += ' · ' + U.money(CALC.perMonth(l, bal), l.currency) + '/мес';
+    }
+    return txt;
   };
 
   V.loanRow = function (l) {
     var c = DB.client(l.clientId) || { name: 'Без клиента' };
     var r = CALC.loan(l);
     var b = V.badge(l, r);
-    var meta = V.rateText(l) + (l.dueAt && !r.isClosed ? ' · до ' + U.fmtDate(l.dueAt) : '');
+    var meta = V.rateText(l, r);
+    var v2 = r.isClosed ? 'закрыт'
+      : r.nextPay ? 'платёж ' + U.fmtDate(r.nextPay.date)
+        : l.dueAt ? 'до ' + U.fmtDate(l.dueAt) : 'без срока';
     return '<button class="row tap" data-act="loan" data-id="' + l.id + '">' +
       V.avatar(c.name) +
       '<span class="grow"><span class="ttl">' + esc(c.name) + '</span>' +
       '<span class="sub">' + (b ? b + ' ' : '') + esc(meta) + '</span></span>' +
-      '<span class="val"><span class="v1 num">' + U.money(r.isClosed ? r.principal : r.totalDue) + '</span>' +
-      '<span class="v2">' + (r.isClosed ? 'закрыт' : 'выдан ' + U.fmtDate(l.issuedAt)) + '</span></span>' +
+      '<span class="val"><span class="v1 num">' + U.money(r.isClosed ? r.principal : r.totalDue, l.currency) + '</span>' +
+      '<span class="v2">' + v2 + '</span></span>' +
       '<span class="chev">' + V.ICON.chev + '</span></button>';
   };
 
@@ -57,8 +82,8 @@
       V.avatar(c.name) +
       '<span class="grow"><span class="ttl">' + esc(c.name) + '</span><span class="sub">' + sub +
       (p.overdueCount ? ' · <b style="color:var(--red)">просрочка</b>' : '') + '</span></span>' +
-      '<span class="val"><span class="v1 num">' + U.money(p.totalDue) + '</span>' +
-      (p.profitRealized ? '<span class="v2">заработано ' + U.money(p.profitRealized) + '</span>' : '') +
+      '<span class="val"><span class="v1 num">' + V.sum(p.totalDue, p.cur.totalDue) + '</span>' +
+      (V.hasMoney(p.profitRealized, p.cur.profit) ? '<span class="v2">заработано ' + V.sum(p.profitRealized, p.cur.profit) + '</span>' : '') +
       '</span><span class="chev">' + V.ICON.chev + '</span></button>';
   };
 
@@ -98,7 +123,7 @@
 
     if (!loans.length) {
       h += V.empty('💰', 'Пока нет ни одного займа',
-        'Добавьте первый заём — приложение само посчитает проценты, срок и остаток долга.',
+        'Добавьте первый заём — приложение само посчитает проценты, месячные платежи и просрочку.',
         '<div style="margin-top:18px"><button class="btn" data-act="new-loan">Выдать заём</button>' +
         '<button class="btn sec" style="margin-top:8px" data-act="go-import">Загрузить свою базу</button>' +
         '<button class="btn ghost" style="margin-top:8px" data-act="demo">Посмотреть на примере</button></div>');
@@ -107,28 +132,49 @@
 
     h += '<div class="hero">' +
       '<div class="lbl">Должны вернуть</div>' +
-      '<div class="amt num">' + U.money(s.totalDue) + '</div>' +
-      '<div class="delta">тело ' + U.money(s.outstanding) + ' · проценты ' + U.money(s.interestDue + s.penaltyDue) + '</div>' +
-      (s.dailyAccrual > 0 ? '<div class="delta" style="color:var(--accent);font-weight:600">+' + U.money(s.dailyAccrual) + ' каждый день</div>' : '') +
+      '<div class="amt num">' + V.sum(s.totalDue, s.cur.totalDue) + '</div>' +
+      '<div class="delta">тело ' + V.sum(s.outstanding, s.cur.outstanding) +
+      ' · проценты ' + V.sum(s.interestDue, s.cur.interestDue) + '</div>' +
+      (V.hasMoney(s.dailyAccrual, s.cur.daily)
+        ? '<div class="delta" style="color:var(--accent);font-weight:600">+' + V.sum(s.dailyAccrual, s.cur.daily) + ' каждый день</div>' : '') +
       '</div>';
+
+    if (s.mixed) {
+      h += '<div class="card pad" style="margin-top:12px;background:var(--warn-soft)">' +
+        '<div style="font-weight:600;margin-bottom:3px">Займы в разных валютах</div>' +
+        '<div style="font-size:14px;color:var(--text-2);line-height:1.4">Чтобы видеть один общий итог, задайте курс валют — вручную или обновите из банка.</div>' +
+        '<button class="btn sec sm" style="margin-top:12px;width:100%" data-act="go-rates">Задать курс</button></div>';
+    }
+
+    /* главное для ежемесячных процентов */
+    var expects = V.hasMoney(s.monthDue, s.cur.monthDue);
+    if (expects || mProfit) {
+      h += '<h2 class="sec">Проценты за ' + U.monthName(mk).toLowerCase().replace(/ \d+$/, '') + '</h2>' +
+        '<div class="card pad">' +
+        '<div class="kv big"><span class="k">Уже получено</span><span class="v num" style="color:var(--accent)">' +
+        (mProfit ? U.money(mProfit) : '—') + '</span></div>' +
+        '<div class="kv big"><span class="k">Ещё ждём</span><span class="v num">' +
+        (expects ? V.sum(s.monthDue, s.cur.monthDue) : '—') + '</span></div>' +
+        '</div>';
+    }
 
     h += '<div class="stats">' +
       '<div class="stat"><div class="k"><span class="dot" style="background:var(--red)"></span>Просрочено</div>' +
       '<div class="v num" style="color:' + (s.overdueCount ? 'var(--red)' : 'inherit') + '">' +
-      (s.overdueCount ? U.money(s.overdueSum) : '—') + '</div>' +
+      (s.overdueCount ? V.sum(s.overdueSum, s.cur.overdueSum) : '—') + '</div>' +
       '<div class="k" style="margin-top:2px">' + (s.overdueCount ? s.overdueCount + ' ' + U.plural(s.overdueCount, 'заём', 'займа', 'займов') : 'всё по графику') + '</div></div>' +
 
-      '<div class="stat"><div class="k"><span class="dot" style="background:var(--accent)"></span>Прибыль за месяц</div>' +
-      '<div class="v num">' + (mProfit ? U.money(mProfit) : '—') + '</div>' +
-      '<div class="k" style="margin-top:2px">получено процентов</div></div>' +
+      '<div class="stat"><div class="k"><span class="dot" style="background:var(--violet)"></span>Ожидаю всего</div>' +
+      '<div class="v num">' + V.sum(s.profitExpected, s.cur.expected) + '</div>' +
+      '<div class="k" style="margin-top:2px">процентов по активным</div></div>' +
 
       '<div class="stat"><div class="k"><span class="dot" style="background:var(--blue)"></span>Выдано за месяц</div>' +
       '<div class="v num">' + (mIssued ? U.money(mIssued) : '—') + '</div>' +
       '<div class="k" style="margin-top:2px">' + U.monthName(mk) + '</div></div>' +
 
-      '<div class="stat"><div class="k"><span class="dot" style="background:var(--violet)"></span>Ожидаю прибыль</div>' +
-      '<div class="v num">' + U.money(s.profitExpected) + '</div>' +
-      '<div class="k" style="margin-top:2px">по активным займам</div></div>' +
+      '<div class="stat"><div class="k"><span class="dot" style="background:var(--accent)"></span>В работе</div>' +
+      '<div class="v num">' + V.sum(s.outstanding, s.cur.outstanding) + '</div>' +
+      '<div class="k" style="margin-top:2px">' + s.activeCount + ' ' + U.plural(s.activeCount, 'активный заём', 'активных займа', 'активных займов') + '</div></div>' +
       '</div>';
 
     h += '<div class="btn-row"><button class="btn" data-act="new-loan">＋ Выдать заём</button>' +
@@ -136,16 +182,15 @@
 
     if (s.overdue.length) {
       h += '<h2 class="sec" style="color:var(--red)">Просрочено · ' + s.overdue.length + '</h2><div class="list">';
-      s.overdue.slice(0, 6).forEach(function (x) { h += V.loanRow(x.loan); });
+      s.overdue.slice(0, 8).forEach(function (x) { h += V.loanRow(x.loan); });
       h += '</div>';
     }
     if (s.dueSoon.length) {
-      h += '<h2 class="sec">Ближайшие возвраты</h2><div class="list">';
-      s.dueSoon.slice(0, 6).forEach(function (x) { h += V.loanRow(x.loan); });
+      h += '<h2 class="sec">Ближайшие платежи</h2><div class="list">';
+      s.dueSoon.slice(0, 8).forEach(function (x) { h += V.loanRow(x.loan); });
       h += '</div>';
     }
 
-    /* последние платежи */
     var recent = [];
     loans.forEach(function (l) {
       (l.payments || []).forEach(function (p) { recent.push({ l: l, p: p }); });
@@ -158,7 +203,7 @@
         h += '<button class="row tap" data-act="loan" data-id="' + x.l.id + '">' + V.avatar(c.name) +
           '<span class="grow"><span class="ttl">' + esc(c.name) + '</span>' +
           '<span class="sub">' + U.relDate(x.p.date) + (x.p.note ? ' · ' + esc(x.p.note) : '') + '</span></span>' +
-          '<span class="val"><span class="v1 num" style="color:var(--accent)">+' + U.money(x.p.amount) + '</span></span>' +
+          '<span class="val"><span class="v1 num" style="color:var(--accent)">+' + U.money(x.p.amount, x.l.currency) + '</span></span>' +
           '<span class="chev">' + V.ICON.chev + '</span></button>';
       });
       h += '</div>';
@@ -279,9 +324,9 @@
     h += '<div class="wrap"><h1 class="big">Ещё</h1>';
 
     h += '<div class="card pad">' +
-      '<div class="kv big"><span class="k">Выдано за всё время</span><span class="v num">' + U.money(s.issuedTotal) + '</span></div>' +
-      '<div class="kv big"><span class="k">Заработано процентов</span><span class="v num" style="color:var(--accent)">' + U.money(s.profitRealized) + '</span></div>' +
-      '<div class="kv"><span class="k">Сейчас в работе</span><span class="v num">' + U.money(s.outstanding) + '</span></div>' +
+      '<div class="kv big"><span class="k">Выдано за всё время</span><span class="v num">' + V.sum(s.issuedTotal, s.cur.issued) + '</span></div>' +
+      '<div class="kv big"><span class="k">Заработано процентов</span><span class="v num" style="color:var(--accent)">' + V.sum(s.profitRealized, s.cur.profit) + '</span></div>' +
+      '<div class="kv"><span class="k">Сейчас в работе</span><span class="v num">' + V.sum(s.outstanding, s.cur.outstanding) + '</span></div>' +
       '<div class="kv"><span class="k">Активных займов</span><span class="v num">' + s.activeCount + ' из ' + s.count + '</span></div>' +
       '</div>';
 
@@ -295,25 +340,57 @@
           (got ? '+' + U.money(got) : '—') + '</span><span class="v2">процентов</span></span></div>';
       });
       h += '</div>';
+      if (s.mixed) h += '<div class="hint">Займы в валютах без курса в эти суммы не вошли.</div>';
     }
 
-    h += '<h2 class="sec">Настройки</h2><div class="list">';
-    h += '<div class="field"><label>Валюта</label><select data-act="set" data-k="currency">' +
-      ['₽', '₸', '₴', '$', '€', '£', 'сум', 'сом', '֏', '₾', '₼', 'zł'].map(function (c) {
-        return '<option value="' + c + '"' + (st.currency === c ? ' selected' : '') + '>' + c + '</option>';
+    h += '<h2 class="sec">Условия по умолчанию</h2><div class="list">';
+    h += '<div class="field"><label>Основная валюта</label><select data-act="set" data-k="currency">' +
+      FX.LIST.map(function (c) {
+        return '<option value="' + c.code + '"' + (st.currency === c.code ? ' selected' : '') + '>' + esc(c.name) + ' · ' + esc(c.sym) + '</option>';
       }).join('') + '</select></div>';
-    h += '<div class="field"><label>Оформление</label><select data-act="set" data-k="theme">' +
-      [['auto', 'Как в системе'], ['light', 'Светлое'], ['dark', 'Тёмное']].map(function (t) {
-        return '<option value="' + t[0] + '"' + (st.theme === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
-      }).join('') + '</select></div>';
-    h += '<div class="field"><label>Ставка по умолчанию</label><input type="number" inputmode="decimal" step="0.1" value="' + st.defaultRate + '" data-act="set" data-k="defaultRate"><span class="unit">%</span></div>';
+    h += '<div class="field"><label>Ставка</label><input type="number" inputmode="decimal" step="0.1" value="' + st.defaultRate + '" data-act="set" data-k="defaultRate"><span class="unit">%</span></div>';
     h += '<div class="field"><label>Период</label><select data-act="set" data-k="defaultPeriod">' +
       [['day', 'в день'], ['week', 'в неделю'], ['month', 'в месяц'], ['year', 'в год']].map(function (t) {
         return '<option value="' + t[0] + '"' + (st.defaultPeriod === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
       }).join('') + '</select></div>';
-    h += '<div class="field"><label>Срок по умолчанию</label><input type="number" inputmode="numeric" value="' + st.defaultTerm + '" data-act="set" data-k="defaultTerm"><span class="unit">дней</span></div>';
-    h += '<div class="field"><label>Пеня за просрочку</label><input type="number" inputmode="decimal" step="0.1" value="' + st.penaltyRate + '" data-act="set" data-k="penaltyRate"><span class="unit">% в день</span></div>';
-    h += '</div><div class="hint">Эти значения будут подставляться в новый заём — в каждом займе их можно поменять.</div>';
+    h += '<div class="field"><label>Проценты платят</label><select data-act="set" data-k="defaultPayMode">' +
+      [['monthly', 'каждый месяц'], ['end', 'в конце срока']].map(function (t) {
+        return '<option value="' + t[0] + '"' + (st.defaultPayMode === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
+      }).join('') + '</select></div>';
+    h += '<div class="field"><label>Срок</label><input type="number" inputmode="numeric" value="' + st.defaultTerm + '" data-act="set" data-k="defaultTerm"><span class="unit">дней</span></div>';
+    h += '<div class="field"><label>Пеня</label><input type="number" inputmode="decimal" step="0.1" value="' + st.penaltyRate + '" data-act="set" data-k="penaltyRate"><span class="unit">% в день</span></div>';
+    h += '<div class="field"><label>Оформление</label><select data-act="set" data-k="theme">' +
+      [['auto', 'Как в системе'], ['light', 'Светлое'], ['dark', 'Тёмное']].map(function (t) {
+        return '<option value="' + t[0] + '"' + (st.theme === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
+      }).join('') + '</select></div>';
+    h += '</div><div class="hint">Эти значения подставляются в новый заём — в каждом займе их можно поменять.</div>';
+
+    /* ---------- курсы ---------- */
+    var used = {};
+    loans.forEach(function (l) { used[l.currency || st.currency] = 1; });
+    used[st.currency] = 1;
+
+    h += '<h2 class="sec" id="rates">Курс валют</h2>';
+    h += '<div class="list">' +
+      '<div class="field"><label>Источник</label><select data-act="set" data-k="ratesPref">' +
+      [['auto', 'Любой доступный'], ['cbu', 'ЦБ Узбекистана'], ['nbkr', 'Нацбанк Кыргызстана'], ['world', 'Мировой справочник']]
+        .map(function (t) { return '<option value="' + t[0] + '"' + (st.ratesPref === t[0] ? ' selected' : '') + '>' + t[1] + '</option>'; }).join('') +
+      '</select></div>' +
+      '<button class="row tap" data-act="rates-update"><span class="grow">' +
+      '<span class="ttl" style="color:var(--accent)">Обновить курс из интернета</span>' +
+      '<span class="sub">' + (st.ratesDate ? esc(st.ratesSource || '') + ' · ' + U.fmtDate(st.ratesDate) : 'ещё не обновлялся') + '</span>' +
+      '</span></button></div>';
+
+    h += '<div class="list" style="margin-top:12px">';
+    FX.LIST.forEach(function (c) {
+      if (c.code === 'USD') return;
+      var v = (st.rates || {})[c.code];
+      h += '<div class="field"><label>1 $ =</label>' +
+        '<input type="text" inputmode="decimal" placeholder="не задан" value="' + (v ? String(v).replace('.', ',') : '') + '" ' +
+        'data-act="set-rate" data-c="' + c.code + '"><span class="unit">' + esc(c.sym) + '</span></div>';
+    });
+    h += '</div><div class="hint">Курс нужен, только если вы даёте деньги <b>в разных валютах</b> — чтобы свести всё в один итог. ' +
+      'Можно вписать вручную: так надёжнее всего, и интернет не нужен.</div>';
 
     h += '<h2 class="sec">Защита</h2><div class="list">' +
       '<button class="row tap" data-act="pin">' +
@@ -335,7 +412,7 @@
       '1. Откройте эту страницу в Safari.<br>2. Нажмите кнопку «Поделиться» (квадрат со стрелкой).<br>' +
       '3. Выберите «На экран «Домой»».<br>4. Запускайте с иконки — приложение работает без интернета.</div>';
 
-    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Капитал · версия 1.0</div>';
+    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Капитал · версия 1.1</div>';
     return h + '</div>';
 
     function rowBtn(act, t, sub) {

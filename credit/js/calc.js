@@ -8,17 +8,52 @@
   CALC.PERIOD_NAME = { day: 'в день', week: 'в неделю', month: 'в месяц', year: 'в год' };
   CALC.PERIOD_SHORT = { day: '/день', week: '/нед', month: '/мес', year: '/год' };
 
-  /* дневная ставка займа, доля от 1 */
+  /* Сколько месяцев прошло между двумя датами, если месяц отсчитывается
+     от даты выдачи. Полный месяц = 1,0 независимо от того, 28 в нём дней
+     или 31; неполный — по дням внутри этого месяца.
+     Так «10% в месяц» всегда означает ровно 10% за месяц.            */
+  CALC.monthFraction = function (anchor, from, to) {
+    if (from < anchor) from = anchor;
+    if (U.diffDays(from, to) <= 0) return 0;
+    var i = Math.max(0, Math.floor(U.diffDays(anchor, from) / 31) - 1);
+    while (U.addMonths(anchor, i + 1) <= from) i++;
+    var total = 0, cur = from, guard = 0;
+    while (cur < to && guard++ < 1200) {
+      var a = U.addMonths(anchor, i), b = U.addMonths(anchor, i + 1);
+      if (b <= cur) { i++; continue; }
+      var end = to < b ? to : b;
+      var len = U.diffDays(a, b) || 30;
+      total += U.diffDays(cur, end) / len;
+      cur = end; i++;
+    }
+    return total;
+  };
+
+  /* Проценты за отрезок [from; to) на остаток balance */
+  CALC.interestBetween = function (loan, from, to, balance) {
+    if (loan.model === 'fixed' || balance <= 0) return 0;
+    var rate = U.num(loan.rate) / 100;
+    if (!rate) return 0;
+    if (loan.ratePeriod === 'month') {
+      return balance * rate * CALC.monthFraction(loan.issuedAt, from, to);
+    }
+    var d = CALC.PERIOD_DAYS[loan.ratePeriod] || 30;
+    return balance * rate / d * U.diffDays(from, to);
+  };
+
+  /* Доля ставки за один сегодняшний день — только для показа «капает в день» */
   CALC.daily = function (loan) {
     if (loan.model === 'fixed') return 0;
-    var d = CALC.PERIOD_DAYS[loan.ratePeriod] || 30;
-    return U.num(loan.rate) / 100 / d;
+    if (loan.ratePeriod === 'month') {
+      var t = U.today();
+      return CALC.interestBetween(loan, t, U.addDays(t, 1), 1);
+    }
+    return U.num(loan.rate) / 100 / (CALC.PERIOD_DAYS[loan.ratePeriod] || 30);
   };
 
   /* начисление за отрезок [from; to) на остаток balance */
   function accrue(loan, from, to, balance, acc) {
     if (U.diffDays(from, to) <= 0 || balance <= 0) return;
-    var dr = CALC.daily(loan);
     var pen = U.num(loan.penaltyRate) / 100;
     var due = loan.dueAt || null;
     var pts = (due && due > from && due < to) ? [from, due, to] : [from, to];
@@ -26,7 +61,7 @@
       var a = pts[i], b = pts[i + 1], d = U.diffDays(a, b);
       if (d <= 0) continue;
       var overdue = due ? a >= due : false;
-      if (!(overdue && loan.stopAccrual)) acc.interest += balance * dr * d;
+      if (!(overdue && loan.stopAccrual)) acc.interest += CALC.interestBetween(loan, a, b, balance);
       if (overdue && pen > 0) acc.penalty += balance * pen * d;
     }
   }
@@ -95,7 +130,7 @@
       paidPrincipal: paidPrincipal,
       overpay: overpay,
       profit: paidInterest + paidPenalty,                 // деньги, уже полученные сверх тела
-      dailyAccrual: closed ? 0 : balance * CALC.daily(loan) +
+      dailyAccrual: closed ? 0 : CALC.interestBetween(loan, asOf, U.addDays(asOf, 1), balance) +
         (loan.dueAt && asOf >= loan.dueAt ? balance * U.num(loan.penaltyRate) / 100 : 0),
       isClosed: closed,
       isPaidOff: totalDue <= 0.49,
@@ -108,13 +143,78 @@
     };
   };
 
-  CALC.loan = function (loan) { return CALC.at(loan, U.today()); };
+  /* ---------- график ежемесячных выплат процентов ----------
+     Проценты отдаются каждый месяц от даты выдачи, независимо от срока
+     займа; тело возвращается в конце (или когда решит владелец денег).  */
+  CALC.schedule = function (loan, asOf) {
+    asOf = asOf || U.today();
+    if (loan.payMode !== 'monthly' || loan.model === 'fixed') return [];
+    var out = [], prev = loan.issuedAt;
+    var horizon = loan.dueAt || U.addMonths(asOf, 3);
+    for (var i = 1; i <= 240; i++) {
+      var d = U.addMonths(loan.issuedAt, i);
+      if (d > horizon) break;
+      var a = CALC.at(loan, prev), b = CALC.at(loan, d);
+      var due = (b.interestAccrued - a.interestAccrued) + (b.penaltyAccrued - a.penaltyAccrued);
+      var covered = (b.paidInterest + b.paidPenalty) >= (b.interestAccrued + b.penaltyAccrued) - 0.5;
+      out.push({
+        n: i, from: prev, date: d, due: due, paid: covered,
+        status: covered ? 'paid'
+          : d > asOf ? (U.diffDays(asOf, d) <= 7 ? 'soon' : 'future') : 'overdue'
+      });
+      prev = d;
+    }
+    return out;
+  };
+
+  /* Сколько процентов набегает за один месяц при текущем остатке */
+  CALC.perMonth = function (loan, balance) {
+    if (loan.model === 'fixed') return 0;
+    var b = balance != null ? balance : CALC.at(loan, U.today()).balance;
+    var rate = U.num(loan.rate) / 100;
+    if (loan.ratePeriod === 'month') return b * rate;
+    return b * rate * 30 / (CALC.PERIOD_DAYS[loan.ratePeriod] || 30);
+  };
+
+  /* ---------- состояние на сегодня (с кэшем на время отрисовки) ---------- */
+  CALC._c = {};
+  CALC.clearCache = function () { CALC._c = {}; };
+
+  CALC.loan = function (loan) {
+    var t = U.today();
+    var key = loan.id ? loan.id + '|' + t : null;
+    if (key && CALC._c[key]) return CALC._c[key];
+
+    var r = CALC.at(loan, t);
+    r.schedule = CALC.schedule(loan, t);
+    r.missed = 0;
+    r.nextPay = null;
+    if (r.schedule.length && !r.isClosed) {
+      for (var i = 0; i < r.schedule.length; i++) {
+        var p = r.schedule[i];
+        if (p.status === 'overdue') r.missed++;
+        if (!r.nextPay && !p.paid) r.nextPay = p;
+      }
+      if (r.missed > 0) r.isOverdue = true;
+    }
+    if (key) CALC._c[key] = r;
+    return r;
+  };
 
   /* Плановое состояние на дату возврата (сколько должно вернуться всего) */
   CALC.plan = function (loan) {
-    if (!loan.dueAt) return CALC.loan(loan);
     var t = U.today();
-    return CALC.at(loan, loan.dueAt > t ? loan.dueAt : t);
+    return CALC.at(loan, loan.dueAt && loan.dueAt > t ? loan.dueAt : t);
+  };
+
+  /* Ставка из суммы: «хочу 15 000 в месяц с 100 000» → 15% */
+  CALC.rateFromAmount = function (principal, amount, period) {
+    var p = U.num(principal);
+    if (!p) return 0;
+    return U.num(amount) / p * 100;
+  };
+  CALC.amountFromRate = function (principal, rate) {
+    return U.num(principal) * U.num(rate) / 100;
   };
 
   /* Сколько нужно заплатить, чтобы закрыть только проценты (и пеню) */
@@ -123,46 +223,83 @@
     return Math.round((r.interestDue + r.penaltyDue) * 100) / 100;
   };
 
-  /* Сводка по портфелю */
+  /* Сводка по портфелю. Суммы копятся по валютам и сводятся в базовую,
+     если курс задан; иначе показываются раздельно.                     */
   CALC.portfolio = function (loans) {
+    var cur = {
+      issued: {}, outstanding: {}, interestDue: {}, totalDue: {},
+      overdueSum: {}, profit: {}, expected: {}, daily: {}, monthDue: {}
+    };
+    function add(bag, c, v) { if (v) bag[c] = (bag[c] || 0) + v; }
+
     var s = {
       count: 0, activeCount: 0, overdueCount: 0, closedCount: 0,
-      issuedTotal: 0, outstanding: 0, interestDue: 0, penaltyDue: 0, totalDue: 0,
-      overdueSum: 0, profitRealized: 0, profitExpected: 0, dailyAccrual: 0,
-      dueSoon: [], overdue: []
+      dueSoon: [], overdue: [], cur: cur, mixed: false
     };
+    var mk = U.monthKey(U.today());
+
     loans.forEach(function (l) {
+      var c = l.currency || FX.base();
       var r = CALC.loan(l);
       s.count++;
-      s.issuedTotal += r.principal;
-      s.profitRealized += r.profit;
+      add(cur.issued, c, r.principal);
+      add(cur.profit, c, r.profit);
       if (r.isClosed) { s.closedCount++; return; }
       s.activeCount++;
-      s.outstanding += r.balance;
-      s.interestDue += r.interestDue;
-      s.penaltyDue += r.penaltyDue;
-      s.totalDue += r.totalDue;
-      s.dailyAccrual += r.dailyAccrual;
+      add(cur.outstanding, c, r.balance);
+      add(cur.interestDue, c, r.interestDue + r.penaltyDue);
+      add(cur.totalDue, c, r.totalDue);
+      add(cur.daily, c, r.dailyAccrual);
+
       var p = CALC.plan(l);
-      s.profitExpected += Math.max(0, p.interestDue + p.penaltyDue);
-      if (r.isOverdue) { s.overdueCount++; s.overdueSum += r.totalDue; s.overdue.push({ loan: l, r: r }); }
-      else if (r.daysLeft != null && r.daysLeft <= 7) s.dueSoon.push({ loan: l, r: r });
+      add(cur.expected, c, Math.max(0, p.interestDue + p.penaltyDue));
+
+      /* сколько процентов должно прийти в этом месяце по графику */
+      (r.schedule || []).forEach(function (x) {
+        if (!x.paid && U.monthKey(x.date) === mk) add(cur.monthDue, c, x.due);
+      });
+
+      if (r.isOverdue) {
+        s.overdueCount++;
+        add(cur.overdueSum, c, r.missed ? (r.interestDue + r.penaltyDue) : r.totalDue);
+        s.overdue.push({ loan: l, r: r });
+      } else {
+        var soonDays = null;
+        if (r.nextPay) soonDays = U.diffDays(U.today(), r.nextPay.date);
+        if (r.daysLeft != null && (soonDays == null || r.daysLeft < soonDays)) soonDays = r.daysLeft;
+        if (soonDays != null && soonDays <= 7) {
+          s.dueSoon.push({ loan: l, r: r, days: soonDays });
+        }
+      }
     });
-    s.overdue.sort(function (a, b) { return b.r.overdueDays - a.r.overdueDays; });
-    s.dueSoon.sort(function (a, b) { return a.r.daysLeft - b.r.daysLeft; });
+
+    s.overdue.sort(function (a, b) { return (b.r.overdueDays + b.r.missed * 30) - (a.r.overdueDays + a.r.missed * 30); });
+    s.dueSoon.sort(function (a, b) { return a.days - b.days; });
+
+    /* сведение в базовую валюту */
+    ['issued', 'outstanding', 'interestDue', 'totalDue', 'overdueSum', 'profit', 'expected', 'daily', 'monthDue']
+      .forEach(function (k) {
+        var t = FX.total(cur[k]);
+        s[k === 'issued' ? 'issuedTotal' : k === 'profit' ? 'profitRealized' : k === 'expected' ? 'profitExpected' :
+          k === 'daily' ? 'dailyAccrual' : k] = t.ok ? t.value : null;
+        if (!t.ok) s.mixed = true;
+      });
     return s;
   };
 
   /* Приход денег по месяцам: {'2026-09': {total, interest, principal}} */
   CALC.byMonth = function (loans) {
-    var m = {};
+    var m = {}, base = FX.base();
     loans.forEach(function (l) {
+      var c = l.currency || base;
       CALC.loan(l).alloc.forEach(function (a) {
         var k = U.monthKey(a.date);
-        if (!m[k]) m[k] = { total: 0, interest: 0, principal: 0 };
-        m[k].total += a.amount;
-        m[k].interest += a.int + a.pen;
-        m[k].principal += a.prin;
+        if (!m[k]) m[k] = { total: 0, interest: 0, principal: 0, exact: true };
+        var f = c === base ? 1 : FX.conv(1, c, base);
+        if (f == null) { m[k].exact = false; return; }
+        m[k].total += a.amount * f;
+        m[k].interest += (a.int + a.pen) * f;
+        m[k].principal += a.prin * f;
       });
     });
     return m;
@@ -170,10 +307,12 @@
 
   /* Выдано по месяцам */
   CALC.issuedByMonth = function (loans) {
-    var m = {};
+    var m = {}, base = FX.base();
     loans.forEach(function (l) {
       var k = U.monthKey(l.issuedAt);
-      m[k] = (m[k] || 0) + U.num(l.principal);
+      var f = (l.currency || base) === base ? 1 : FX.conv(1, l.currency, base);
+      if (f == null) return;
+      m[k] = (m[k] || 0) + U.num(l.principal) * f;
     });
     return m;
   };

@@ -27,23 +27,30 @@
   var nf0 = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
   var nf2 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  /* U.money(1000) — в базовой валюте
+     U.money(1000, 'USD') — в указанной
+     U.money(1000, {cur:'USD', exact:true, noCur:true})                */
   U.money = function (v, opt) {
+    if (typeof opt === 'string') opt = { cur: opt };
     opt = opt || {};
-    var n = U.num(v);
-    var sign = n < 0 ? '−' : '';
-    var abs = Math.abs(n);
-    var body = opt.exact ? nf2.format(abs) : nf0.format(Math.round(abs));
-    var cur = opt.noCur ? '' : ' ' + (w.DB && DB.data ? DB.data.settings.currency : '₽');
-    return sign + body + cur;
+    var code = opt.cur || (w.FX ? FX.base() : 'UZS');
+    var info = w.FX ? FX.byCode(code) : { sym: '', dec: 0 };
+    var n = U.num(v), sign = n < 0 ? '−' : '', abs = Math.abs(n);
+    var frac = opt.exact || (info.dec === 2 && abs > 0 && abs < 1000 && Math.round(abs) !== abs);
+    var body = frac ? nf2.format(abs) : nf0.format(Math.round(abs));
+    return sign + body + (opt.noCur ? '' : ' ' + info.sym);
   };
-  U.moneyShort = function (v) {
+
+  U.moneyShort = function (v, cur) {
+    var code = cur || (w.FX ? FX.base() : 'UZS');
+    var sym = ' ' + (w.FX ? FX.sym(code) : '');
     var n = Math.abs(U.num(v)), s = U.num(v) < 0 ? '−' : '';
-    var cur = ' ' + (w.DB && DB.data ? DB.data.settings.currency : '₽');
-    if (n >= 1e9) return s + (n / 1e9).toFixed(n >= 1e10 ? 0 : 1).replace('.', ',') + ' млрд' + cur;
-    if (n >= 1e6) return s + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace('.', ',') + ' млн' + cur;
-    if (n >= 1e5) return s + Math.round(n / 1e3) + ' тыс' + cur;
-    return s + nf0.format(Math.round(n)) + cur;
+    if (n >= 1e9) return s + (n / 1e9).toFixed(n >= 1e10 ? 0 : 1).replace('.', ',') + ' млрд' + sym;
+    if (n >= 1e6) return s + (n / 1e6).toFixed(n >= 1e7 ? 0 : 1).replace('.', ',') + ' млн' + sym;
+    if (n >= 1e5) return s + nf0.format(Math.round(n / 1e3)) + ' тыс' + sym;
+    return s + nf0.format(Math.round(n)) + sym;
   };
+
   U.pct = function (v) {
     var n = U.num(v);
     return (Math.round(n * 100) / 100).toString().replace('.', ',') + '%';

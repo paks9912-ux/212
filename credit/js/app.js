@@ -219,6 +219,26 @@
     'quick-pay': function () { F.quickPay(); },
     'go-import': function () { F.importSheet(); },
     import: function () { F.importSheet(); },
+    'go-rates': function () {
+      App.go('#/more');
+      setTimeout(function () {
+        var el = U.$('#rates');
+        if (el) w.scrollTo({ top: el.offsetTop - 60, behavior: 'smooth' });
+      }, 120);
+    },
+    'rates-update': function (d, btn) {
+      var sub = btn.querySelector('.sub');
+      if (sub) sub.textContent = 'запрашиваю курс…';
+      FX.update(DB.data.settings.ratesPref || 'auto', function (rates, err, src) {
+        if (err) {
+          U.toast('Курс получить не удалось — впишите вручную');
+          if (sub) sub.textContent = 'не удалось загрузить';
+          return;
+        }
+        U.toast('Курс обновлён: ' + src);
+        App.render();
+      });
+    },
     demo: function () {
       DB.data = DB.demo(); DB.save();
       U.toast('Загружен пример: 4 клиента, 5 займов');
@@ -421,6 +441,16 @@
     document.addEventListener('change', function (e) {
       if (e.target.closest('.sheet')) return;
       var t = e.target;
+      if (t.dataset && t.dataset.act === 'set-rate') {
+        var rr = DB.data.settings.rates || (DB.data.settings.rates = {});
+        var vv = U.num(t.value);
+        if (vv > 0) rr[t.dataset.c] = vv; else delete rr[t.dataset.c];
+        DB.data.settings.ratesSource = 'введён вручную';
+        DB.data.settings.ratesDate = U.today();
+        DB.save();
+        U.toast('Курс сохранён');
+        return;
+      }
       if (t.dataset && t.dataset.act === 'set') {
         var k = t.dataset.k;
         var v = ['defaultRate', 'defaultTerm', 'penaltyRate'].indexOf(k) >= 0 ? U.num(t.value) : t.value;

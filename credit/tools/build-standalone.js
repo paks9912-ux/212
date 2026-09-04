@@ -5,11 +5,11 @@ const fs = require('fs'), path = require('path');
 const root = path.join(__dirname, '..');
 const read = f => fs.readFileSync(path.join(root, f), 'utf8');
 
-const JS = ['util', 'store', 'calc', 'views', 'detail', 'app'].map(n => read('js/' + n + '.js'));
+const JS = ['util', 'fx', 'store', 'calc', 'views', 'detail', 'app'].map(n => read('js/' + n + '.js'));
 let css = read('css/app.css');
 
 // сервис-воркера в одном файле нет — регистрировать нечего
-JS[5] = JS[5].replace(
+JS[6] = JS[6].replace(
   /\s*\/\* офлайн-кэш \*\/[\s\S]*?navigator\.serviceWorker\.register\('sw\.js'\)\.catch\(function \(\) \{ \}\);\s*\}/,
   ''
 );

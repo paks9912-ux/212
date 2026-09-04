@@ -11,15 +11,20 @@
 
     empty: function () {
       return {
-        version: 1,
+        version: 2,
         createdAt: U.today(),
         settings: {
-          currency: '₽',
+          currency: 'UZS',          // базовая валюта, код
           theme: 'auto',
           defaultRate: 10,
           defaultPeriod: 'month',
           defaultTerm: 30,
+          defaultPayMode: 'monthly',   // проценты платятся каждый месяц
           penaltyRate: 0,
+          rates: {},                   // сколько единиц валюты за 1 доллар
+          ratesDate: null,
+          ratesSource: null,
+          ratesPref: 'auto',
           pin: null,
           lastExport: null
         },
@@ -50,16 +55,24 @@
     migrate: function (d) {
       d = d || {};
       var base = this.empty();
-      d.version = 1;
+      var old = !d.version || d.version < 2;
       d.settings = Object.assign(base.settings, d.settings || {});
       d.isDemo = !!d.isDemo;
       d.clients = Array.isArray(d.clients) ? d.clients : [];
       d.loans = Array.isArray(d.loans) ? d.loans : [];
+
+      if (old) d.settings.currency = FX.fromSymbol(d.settings.currency);
+      d.settings.rates = d.settings.rates || {};
+
       d.loans.forEach(function (l) {
         l.payments = Array.isArray(l.payments) ? l.payments : [];
         if (!l.model) l.model = 'simple';
         if (!l.status) l.status = 'active';
+        if (!l.currency) l.currency = d.settings.currency;
+        /* у старых займов проценты отдавались в конце — сохраняем смысл */
+        if (!l.payMode) l.payMode = old ? 'end' : 'monthly';
       });
+      d.version = 2;
       return d;
     },
 
@@ -69,6 +82,7 @@
         localStorage.setItem(KEY, json);
         // страховочная копия на случай сбоя записи основной
         try { localStorage.setItem(BAK, json); } catch (e) { }
+        if (w.CALC) CALC.clearCache();
       } catch (e) {
         U.toast('Не удалось сохранить: нет места в памяти');
         return false;
@@ -81,29 +95,45 @@
 
     /* ---------- демонстрационный набор ---------- */
     demo: function () {
-      var d = U.addDays, t = U.today();
+      var d = U.addDays, mm = U.addMonths, t = U.today();
       var db = this.empty();
       db.isDemo = true;
+      db.settings.currency = 'UZS';
+      db.settings.rates = { USD: 1, UZS: 12500, KGS: 89 };
+      db.settings.ratesSource = 'пример, впишите свой курс';
+      db.settings.ratesDate = t;
       db.clients = [
-        { id: 'd1', name: 'Иван Петров', phone: '+7 912 345-67-89', note: 'Таксист, платит вовремя', createdAt: d(t, -120) },
-        { id: 'd2', name: 'Мария Соколова', phone: '+7 903 111-22-33', note: '', createdAt: d(t, -90) },
-        { id: 'd3', name: 'Артём Ким', phone: '+7 999 888-77-66', note: 'Залог — ноутбук', createdAt: d(t, -60) },
-        { id: 'd4', name: 'Ольга Данилова', phone: '+7 921 444-55-66', note: '', createdAt: d(t, -30) }
+        { id: 'd1', name: 'Иван Петров', phone: '+998 90 123-45-67', note: 'Таксист, платит вовремя', createdAt: mm(t, -6) },
+        { id: 'd2', name: 'Мария Соколова', phone: '+998 91 111-22-33', note: '', createdAt: mm(t, -4) },
+        { id: 'd3', name: 'Артём Ким', phone: '+996 555 88-77-66', note: 'Залог — ноутбук', createdAt: mm(t, -3) },
+        { id: 'd4', name: 'Ольга Данилова', phone: '+998 93 444-55-66', note: '', createdAt: mm(t, -1) }
       ];
       db.loans = [
-        { id: 'e1', clientId: 'd1', principal: 150000, issuedAt: d(t, -45), model: 'simple', rate: 10,
-          ratePeriod: 'month', dueAt: d(t, 15), penaltyRate: 1, status: 'active', note: 'Под расписку',
-          payments: [{ id: 'q1', date: d(t, -15), amount: 20000, note: 'наличные' }] },
-        { id: 'e2', clientId: 'd2', principal: 80000, issuedAt: d(t, -70), model: 'simple', rate: 15,
-          ratePeriod: 'month', dueAt: d(t, -12), penaltyRate: 1, status: 'active', note: '', payments: [] },
-        { id: 'e3', clientId: 'd3', principal: 50000, returnAmount: 65000, issuedAt: d(t, -10), model: 'fixed',
-          dueAt: d(t, 20), penaltyRate: 0, status: 'active', note: 'Фиксированный возврат', payments: [] },
-        { id: 'e4', clientId: 'd1', principal: 30000, issuedAt: d(t, -120), model: 'simple', rate: 10,
-          ratePeriod: 'month', dueAt: d(t, -90), penaltyRate: 0, status: 'closed', closedAt: d(t, -88),
-          payments: [{ id: 'q2', date: d(t, -88), amount: 33200, note: 'закрыл полностью' }] },
-        { id: 'e5', clientId: 'd4', principal: 25000, issuedAt: d(t, -5), model: 'simple', rate: 2,
-          ratePeriod: 'week', dueAt: d(t, 2), penaltyRate: 0.5, status: 'active', note: '',
-          payments: [{ id: 'q3', date: d(t, -2), amount: 1000, note: 'проценты' }] }
+        /* платит проценты каждый месяц, всё вовремя */
+        { id: 'e1', clientId: 'd1', principal: 12000000, currency: 'UZS', issuedAt: mm(t, -3),
+          model: 'simple', rate: 10, ratePeriod: 'month', payMode: 'monthly', dueAt: mm(t, 6),
+          penaltyRate: 0, status: 'active', note: 'Под расписку',
+          payments: [1, 2, 3].map(function (i) {
+            return { id: 'q1' + i, date: mm(mm(t, -3), i), amount: 1200000, note: 'проценты' };
+          }) },
+        /* пропустил два месяца */
+        { id: 'e2', clientId: 'd2', principal: 8000000, currency: 'UZS', issuedAt: mm(t, -3),
+          model: 'simple', rate: 12, ratePeriod: 'month', payMode: 'monthly', dueAt: null,
+          penaltyRate: 0, status: 'active', note: 'Бессрочно, пока платит',
+          payments: [{ id: 'q21', date: mm(mm(t, -3), 1), amount: 960000, note: 'проценты' }] },
+        /* в долларах */
+        { id: 'e3', clientId: 'd3', principal: 2000, currency: 'USD', issuedAt: mm(t, -1),
+          model: 'simple', rate: 5, ratePeriod: 'month', payMode: 'monthly', dueAt: mm(t, 5),
+          penaltyRate: 0, status: 'active', note: '', payments: [] },
+        /* закрыт */
+        { id: 'e4', clientId: 'd1', principal: 3000000, currency: 'UZS', issuedAt: mm(t, -8),
+          model: 'simple', rate: 10, ratePeriod: 'month', payMode: 'end', dueAt: mm(t, -6),
+          penaltyRate: 0, status: 'closed', closedAt: mm(t, -6),
+          payments: [{ id: 'q4', date: mm(t, -6), amount: 3600000, note: 'закрыл полностью' }] },
+        /* короткий, проценты в конце */
+        { id: 'e5', clientId: 'd4', principal: 1500000, currency: 'UZS', issuedAt: d(t, -20),
+          model: 'simple', rate: 2, ratePeriod: 'week', payMode: 'end', dueAt: d(t, 4),
+          penaltyRate: 0.5, status: 'active', note: '', payments: [] }
       ];
       return db;
     },
@@ -238,8 +268,10 @@
         var term = c[6] ? U.num(c[6]) : self.data.settings.defaultTerm;
         self.addLoan({
           clientId: cl.id, principal: principal, issuedAt: issued,
+          currency: self.data.settings.currency,
           model: 'simple', rate: rate, ratePeriod: pk,
-          dueAt: U.addDays(issued, term || 30),
+          payMode: self.data.settings.defaultPayMode || 'monthly',
+          dueAt: term ? U.addDays(issued, term) : null,
           penaltyRate: self.data.settings.penaltyRate || 0,
           note: c[7] || ''
         });
@@ -264,15 +296,16 @@
 
     exportCSV: function () {
       var self = this;
-      var rows = [['Клиент', 'Телефон', 'Сумма', 'Дата выдачи', 'Ставка', 'Период', 'Вернуть до', 'Выплачено', 'Остаток долга', 'Статус']];
+      var rows = [['Клиент', 'Телефон', 'Сумма', 'Валюта', 'Дата выдачи', 'Ставка', 'Период', 'Проценты', 'Вернуть до', 'Выплачено', 'Остаток долга', 'Статус']];
       this.data.loans.forEach(function (l) {
         var c = self.client(l.clientId) || { name: '—', phone: '' };
         var r = CALC.loan(l);
         rows.push([
-          c.name, c.phone || '', l.principal, l.issuedAt,
+          c.name, c.phone || '', l.principal, l.currency || DB.data.settings.currency, l.issuedAt,
           l.model === 'fixed' ? '' : l.rate,
           l.model === 'fixed' ? 'фикс' : CALC.PERIOD_NAME[l.ratePeriod],
-          l.dueAt || '', Math.round(r.paidTotal), Math.round(r.totalDue),
+          l.payMode === 'monthly' ? 'ежемесячно' : 'в конце срока',
+          l.dueAt || 'без срока', Math.round(r.paidTotal), Math.round(r.totalDue),
           l.status === 'closed' ? 'закрыт' : (r.isOverdue ? 'просрочка' : 'активен')
         ]);
       });

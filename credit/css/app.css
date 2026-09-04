@@ -179,12 +179,12 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   box-shadow:var(--shadow);
 }
 .hero .lbl{font-size:13px;color:var(--text-2)}
-.hero .amt{font-size:38px;font-weight:700;letter-spacing:-1px;line-height:1.1;margin-top:3px}
+.hero .amt{font-size:clamp(26px,8.6vw,38px);font-weight:700;letter-spacing:-1px;line-height:1.1;margin-top:3px;overflow-wrap:anywhere}
 .hero .delta{font-size:13px;color:var(--text-2);margin-top:6px}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
 .stat{background:var(--bg-elev);border-radius:var(--radius);padding:13px 14px;box-shadow:var(--shadow)}
 .stat .k{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:5px}
-.stat .v{font-size:21px;font-weight:650;letter-spacing:-.3px;margin-top:4px}
+.stat .v{font-size:clamp(16px,5vw,21px);font-weight:650;letter-spacing:-.3px;margin-top:4px;overflow-wrap:anywhere}
 .stat .v.sm{font-size:18px}
 .dot{width:7px;height:7px;border-radius:50%;flex:none}
 
@@ -345,7 +345,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 .kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:15px}
 .kv + .kv{border-top:.5px solid var(--line)}
 .kv .k{color:var(--text-2)}
-.kv .v{font-weight:600;text-align:right}
+.kv .v{font-weight:600;text-align:right;overflow-wrap:anywhere}
 .kv.big .v{font-size:19px}
 
 .tl{position:relative;padding-left:22px}
