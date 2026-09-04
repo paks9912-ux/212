@@ -89,11 +89,19 @@
     var h = V.topbar('Обзор', '<button data-act="new-loan" style="font-size:26px;font-weight:300">＋</button>');
     h += '<div class="wrap"><h1 class="big">Обзор</h1>';
 
+    if (DB.data.isDemo && loans.length) {
+      h += '<div class="card pad" style="margin-bottom:12px;background:var(--warn-soft)">' +
+        '<div style="font-weight:600;margin-bottom:3px">Это демонстрационные данные</div>' +
+        '<div style="font-size:14px;color:var(--text-2);line-height:1.4">Вымышленные клиенты и займы, чтобы посмотреть, как всё работает. Очистите их перед тем, как заносить своё.</div>' +
+        '<button class="btn sec sm" style="margin-top:12px;width:100%" data-act="demo-off">Очистить и начать с нуля</button></div>';
+    }
+
     if (!loans.length) {
       h += V.empty('💰', 'Пока нет ни одного займа',
         'Добавьте первый заём — приложение само посчитает проценты, срок и остаток долга.',
         '<div style="margin-top:18px"><button class="btn" data-act="new-loan">Выдать заём</button>' +
-        '<button class="btn ghost" style="margin-top:8px" data-act="go-import">Загрузить свою базу</button></div>');
+        '<button class="btn sec" style="margin-top:8px" data-act="go-import">Загрузить свою базу</button>' +
+        '<button class="btn ghost" style="margin-top:8px" data-act="demo">Посмотреть на примере</button></div>');
       return h + '</div>';
     }
 

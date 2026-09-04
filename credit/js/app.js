@@ -101,17 +101,65 @@
     setTimeout(function () { s.bg.remove(); s.sh.remove(); }, 340);
   };
 
-  /* ---------- сохранение файла ---------- */
-  App.saveFile = function (name, text, mime) {
+  /* ---------- диалог подтверждения (вместо системного confirm) ---------- */
+  App.ask = function (opt) {
+    var bg = document.createElement('div');
+    bg.className = 'ask-bg';
+    bg.innerHTML = '<div class="ask"><div class="ask-t">' + U.esc(opt.title) + '</div>' +
+      (opt.text ? '<div class="ask-d">' + U.esc(opt.text) + '</div>' : '<div style="height:16px"></div>') +
+      '<div class="ask-btns"><button data-a="no">' + U.esc(opt.cancel || 'Отмена') + '</button>' +
+      '<button data-a="yes" class="' + (opt.danger ? 'danger' : '') + '">' + U.esc(opt.ok || 'Да') + '</button></div></div>';
+    document.body.appendChild(bg);
+    requestAnimationFrame(function () { bg.classList.add('in'); });
+
+    function close(yes) {
+      bg.classList.remove('in');
+      setTimeout(function () { bg.remove(); }, 220);
+      if (yes && opt.onOk) opt.onOk();
+      if (!yes && opt.onCancel) opt.onCancel();
+    }
+    bg.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-a]');
+      if (b) return close(b.dataset.a === 'yes');
+      if (e.target === bg) close(false);
+    });
+  };
+
+  /* ---------- сохранение файла ----------
+     Порядок попыток: среда Artifact (claude.use) → «Поделиться» на iOS →
+     обычное скачивание → показать текст для копирования вручную.     */
+  App.saveFile = function (name, text, mime, done) {
+    done = done || function () { };
+
+    /* 1. страница открыта внутри просмотрщика Artifact */
+    if (w.claude && typeof w.claude.use === 'function') {
+      App._dlp = App._dlp || w.claude.use('downloads');
+      App._dlp.then(function (dl) {
+        if (!dl) return App.copyFallback(name, text, done);
+        dl.save({ filename: name, data: text })
+          .then(function () { done(true); })
+          .catch(function (e) {
+            if (e && e.code === 'declined') { done(false); return; }
+            App.copyFallback(name, text, done);
+          });
+      }, function () { App.copyFallback(name, text, done); });
+      return;
+    }
+
+    /* 2. системное «Поделиться» — на iPhone кладёт файл в «Файлы» или мессенджер */
     try {
       if (w.File && navigator.canShare) {
         var f = new File([text], name, { type: mime });
         if (navigator.canShare({ files: [f] })) {
-          navigator.share({ files: [f], title: name }).catch(function () { });
-          return true;
+          navigator.share({ files: [f], title: name })
+            .then(function () { done(true); })
+            .catch(function () { done(false); });
+          return;
         }
       }
     } catch (e) { }
+
+    /* 3. обычное скачивание */
     try {
       var blob = new Blob([text], { type: mime });
       var url = URL.createObjectURL(blob);
@@ -119,11 +167,43 @@
       a.href = url; a.download = name;
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-      return true;
-    } catch (e) {
-      U.toast('Не удалось сохранить файл');
-      return false;
-    }
+      done(true);
+      return;
+    } catch (e) { }
+
+    /* 4. ничего не вышло — отдаём текст руками */
+    App.copyFallback(name, text, done);
+  };
+
+  /* Файл сохранить не удалось: показываем текст, чтобы скопировать и сохранить самому */
+  App.copyFallback = function (name, text, done) {
+    App.sheet({
+      title: 'Скопируйте копию',
+      save: null,
+      html: '<div class="hint" style="padding:0 4px 12px">Здесь сохранить файл нельзя. Скопируйте текст и вставьте его в заметку, письмо или мессенджер — из него база восстанавливается целиком через «Загрузить базу».</div>' +
+        '<button class="btn" id="cp">Скопировать всё</button>' +
+        '<div class="list" style="margin-top:12px"><div class="field col">' +
+        '<label>' + U.esc(name) + '</label>' +
+        '<textarea id="dump" readonly style="min-height:220px;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace"></textarea>' +
+        '</div></div>',
+      onOpen: function (bd) {
+        var ta = bd.querySelector('#dump');
+        ta.value = text;
+        bd.querySelector('#cp').addEventListener('click', function () {
+          ta.focus(); ta.setSelectionRange(0, ta.value.length);
+          var ok = false;
+          try { ok = document.execCommand('copy'); } catch (e) { }
+          if (ok) { U.toast('Скопировано'); done(true); return; }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text)
+              .then(function () { U.toast('Скопировано'); done(true); })
+              .catch(function () { U.toast('Скопируйте выделенный текст вручную'); });
+          } else {
+            U.toast('Скопируйте выделенный текст вручную');
+          }
+        });
+      }
+    });
   };
 
   /* ---------- действия ---------- */
@@ -139,59 +219,104 @@
     'quick-pay': function () { F.quickPay(); },
     'go-import': function () { F.importSheet(); },
     import: function () { F.importSheet(); },
+    demo: function () {
+      DB.data = DB.demo(); DB.save();
+      U.toast('Загружен пример: 4 клиента, 5 займов');
+      App.go('#/');
+    },
+    'demo-off': function () {
+      App.ask({
+        title: 'Очистить пример?',
+        text: 'Демонстрационные клиенты и займы будут удалены, приложение станет пустым.',
+        ok: 'Очистить',
+        onOk: function () { DB.data = DB.empty(); DB.save(); U.toast('Готово — можно заносить своё'); App.go('#/'); }
+      });
+    },
 
     'del-pay': function (d) {
       var l = DB.loan(d.id); if (!l) return;
       var p = l.payments.filter(function (x) { return x.id === d.pid; })[0];
       if (!p) return;
-      if (!confirm('Удалить платёж ' + U.money(p.amount) + ' от ' + U.fmtDate(p.date, true) + '?')) return;
-      DB.delPayment(d.id, d.pid); U.toast('Платёж удалён'); App.render();
+      App.ask({
+        title: 'Удалить платёж?',
+        text: U.money(p.amount) + ' от ' + U.fmtDate(p.date, true) + '. Долг пересчитается заново.',
+        ok: 'Удалить', danger: true,
+        onOk: function () { DB.delPayment(d.id, d.pid); U.toast('Платёж удалён'); App.render(); }
+      });
     },
     'close-loan': function (d) {
       var r = CALC.loan(DB.loan(d.id));
-      var msg = r.totalDue > 0.49
-        ? 'Долг ещё ' + U.money(r.totalDue) + '. Всё равно закрыть заём (простить остаток)?'
-        : 'Закрыть заём?';
-      if (!confirm(msg)) return;
-      DB.updLoan(d.id, { status: 'closed', closedAt: U.today() });
-      U.toast('Заём закрыт'); App.render();
+      App.ask({
+        title: 'Закрыть заём?',
+        text: r.totalDue > 0.49
+          ? 'Долг ещё ' + U.money(r.totalDue) + '. Остаток будет списан, заём уйдёт в закрытые.'
+          : 'Заём уйдёт в закрытые.',
+        ok: 'Закрыть',
+        onOk: function () {
+          DB.updLoan(d.id, { status: 'closed', closedAt: U.today() });
+          U.toast('Заём закрыт'); App.render();
+        }
+      });
     },
     'reopen-loan': function (d) {
       DB.updLoan(d.id, { status: 'active', closedAt: null });
       U.toast('Заём снова активен'); App.render();
     },
     'del-loan': function (d) {
-      if (!confirm('Удалить заём вместе со всеми платежами? Это нельзя отменить.')) return;
-      DB.delLoan(d.id); U.toast('Заём удалён'); App.go('#/loans');
+      App.ask({
+        title: 'Удалить заём?',
+        text: 'Вместе со всеми платежами по нему. Отменить это будет нельзя.',
+        ok: 'Удалить', danger: true,
+        onOk: function () { DB.delLoan(d.id); U.toast('Заём удалён'); App.go('#/loans'); }
+      });
     },
     'del-client': function (d) {
-      var n = DB.loansOf(d.id).length;
-      if (!confirm('Удалить клиента' + (n ? ' и его займы (' + n + ')' : '') + '? Это нельзя отменить.')) return;
-      DB.delClient(d.id); U.toast('Клиент удалён'); App.go('#/clients');
+      var c = DB.client(d.id), n = DB.loansOf(d.id).length;
+      App.ask({
+        title: 'Удалить ' + (c ? c.name : 'клиента') + '?',
+        text: n ? 'Вместе с займами (' + n + ') и всей историей платежей. Отменить это будет нельзя.'
+                : 'Отменить это будет нельзя.',
+        ok: 'Удалить', danger: true,
+        onOk: function () { DB.delClient(d.id); U.toast('Клиент удалён'); App.go('#/clients'); }
+      });
     },
     filter: function (d) { V.loansFilter = d.f; App.render(); },
 
     'export-json': function () {
       var name = 'kapital-' + U.today() + '.json';
-      if (App.saveFile(name, DB.exportJSON(), 'application/json')) {
+      App.saveFile(name, DB.exportJSON(), 'application/json', function (ok) {
+        if (!ok) return;
         DB.data.settings.lastExport = U.today(); DB.save();
         U.toast('Копия сохранена: ' + name);
         if (App.route === '#/more' || App.route === '#/') App.render();
-      }
+      });
     },
     'export-csv': function () {
-      var name = 'kapital-' + U.today() + '.csv';
-      if (App.saveFile(name, DB.exportCSV(), 'text/csv;charset=utf-8')) U.toast('Таблица сохранена');
+      App.saveFile('kapital-' + U.today() + '.csv', DB.exportCSV(), 'text/csv;charset=utf-8',
+        function (ok) { if (ok) U.toast('Таблица сохранена'); });
     },
     wipe: function () {
-      if (!confirm('Стереть ВСЕ данные — клиентов, займы и платежи? Восстановить можно будет только из резервной копии.')) return;
-      if (!confirm('Точно стереть? Последнее предупреждение.')) return;
-      DB.data = DB.empty(); DB.save(); U.toast('Все данные стёрты'); App.go('#/');
+      App.ask({
+        title: 'Стереть все данные?',
+        text: 'Клиенты, займы и платежи будут удалены. Восстановить их можно будет только из резервной копии.',
+        ok: 'Стереть', danger: true,
+        onOk: function () {
+          App.ask({
+            title: 'Точно стереть?', text: 'Последнее предупреждение.',
+            ok: 'Да, стереть', danger: true,
+            onOk: function () { DB.data = DB.empty(); DB.save(); U.toast('Все данные стёрты'); App.go('#/'); }
+          });
+        }
+      });
     },
     pin: function () { F.pinSheet(); },
     'pin-off': function () {
-      if (!confirm('Отключить код-пароль?')) return;
-      DB.data.settings.pin = null; DB.save(); U.toast('Код отключён'); App.render();
+      App.ask({
+        title: 'Отключить код-пароль?',
+        text: 'Приложение будет открываться без кода.',
+        ok: 'Отключить',
+        onOk: function () { DB.data.settings.pin = null; DB.save(); U.toast('Код отключён'); App.render(); }
+      });
     }
   };
 

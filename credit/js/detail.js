@@ -436,25 +436,34 @@
         var text = bd.querySelector('#paste').value.trim();
         if (!text) { U.toast('Не выбран файл и не вставлен текст'); return false; }
         var mode = bd.querySelector('#mode .on').dataset.m;
-        try {
-          if (text[0] === '{') {
-            if (mode === 'replace' && !confirm('Заменить всю текущую базу на загружаемую? Текущие данные будут стёрты.')) return false;
-            var res = DB.importJSON(text, mode);
-            U.toast('Загружено: ' + res.clients + ' клиентов, ' + res.loans + ' займов');
-          } else {
-            if (mode === 'replace') {
-              if (!confirm('Стереть текущую базу и загрузить таблицу?')) return false;
-              DB.data = DB.empty(); DB.save();
+
+        function run() {
+          try {
+            if (text[0] === '{') {
+              var res = DB.importJSON(text, mode);
+              U.toast('Загружено: ' + res.clients + ' клиентов, ' + res.loans + ' займов');
+            } else {
+              if (mode === 'replace') { DB.data = DB.empty(); DB.save(); }
+              var n = DB.importCSV(text);
+              U.toast(n ? 'Добавлено займов: ' + n : 'Ни одной строки не распознано');
             }
-            var n = DB.importCSV(text);
-            U.toast(n ? 'Добавлено займов: ' + n : 'Ни одной строки не распознано');
+            App.closeSheet();
+            App.go('#/');
+          } catch (err) {
+            U.toast('Ошибка: ' + err.message);
           }
-          App.go('#/');
-          return true;
-        } catch (err) {
-          U.toast('Ошибка: ' + err.message);
-          return false;
         }
+
+        if (mode === 'replace') {
+          App.ask({
+            title: 'Заменить всю базу?',
+            text: 'Текущие клиенты, займы и платежи будут стёрты и заменены загружаемыми.',
+            ok: 'Заменить', danger: true, onOk: run
+          });
+        } else {
+          run();
+        }
+        return false;   // лист закрывается внутри run()
       }
     });
   };

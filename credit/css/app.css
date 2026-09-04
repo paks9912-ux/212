@@ -380,3 +380,29 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 .fade{animation:fade .22s var(--ease)}
 @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
+
+/* ---------- диалог подтверждения ---------- */
+.ask-bg{
+  position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.4);
+  display:flex;align-items:center;justify-content:center;padding:28px;
+  opacity:0;transition:opacity .2s ease;
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+}
+.ask-bg.in{opacity:1}
+.ask{
+  width:100%;max-width:290px;background:var(--bg-elev);border-radius:15px;
+  overflow:hidden;text-align:center;
+  transform:scale(.92);transition:transform .22s var(--ease);
+  box-shadow:0 12px 44px rgba(0,0,0,.3);
+}
+.ask-bg.in .ask{transform:scale(1)}
+.ask .ask-t{font-size:17px;font-weight:600;padding:20px 18px 0}
+.ask .ask-d{font-size:13.5px;color:var(--text-2);line-height:1.4;padding:6px 18px 18px}
+.ask .ask-btns{display:flex;border-top:.5px solid var(--line)}
+.ask .ask-btns button{
+  flex:1;min-height:46px;font-size:17px;color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+}
+.ask .ask-btns button + button{border-left:.5px solid var(--line)}
+.ask .ask-btns button.danger{color:var(--red);font-weight:600}
+.ask .ask-btns button:active{background:var(--fill-2)}

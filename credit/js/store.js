@@ -52,6 +52,7 @@
       var base = this.empty();
       d.version = 1;
       d.settings = Object.assign(base.settings, d.settings || {});
+      d.isDemo = !!d.isDemo;
       d.clients = Array.isArray(d.clients) ? d.clients : [];
       d.loans = Array.isArray(d.loans) ? d.loans : [];
       d.loans.forEach(function (l) {
@@ -77,6 +78,35 @@
     },
 
     onChange: function (f) { this.listeners.push(f); },
+
+    /* ---------- демонстрационный набор ---------- */
+    demo: function () {
+      var d = U.addDays, t = U.today();
+      var db = this.empty();
+      db.isDemo = true;
+      db.clients = [
+        { id: 'd1', name: 'Иван Петров', phone: '+7 912 345-67-89', note: 'Таксист, платит вовремя', createdAt: d(t, -120) },
+        { id: 'd2', name: 'Мария Соколова', phone: '+7 903 111-22-33', note: '', createdAt: d(t, -90) },
+        { id: 'd3', name: 'Артём Ким', phone: '+7 999 888-77-66', note: 'Залог — ноутбук', createdAt: d(t, -60) },
+        { id: 'd4', name: 'Ольга Данилова', phone: '+7 921 444-55-66', note: '', createdAt: d(t, -30) }
+      ];
+      db.loans = [
+        { id: 'e1', clientId: 'd1', principal: 150000, issuedAt: d(t, -45), model: 'simple', rate: 10,
+          ratePeriod: 'month', dueAt: d(t, 15), penaltyRate: 1, status: 'active', note: 'Под расписку',
+          payments: [{ id: 'q1', date: d(t, -15), amount: 20000, note: 'наличные' }] },
+        { id: 'e2', clientId: 'd2', principal: 80000, issuedAt: d(t, -70), model: 'simple', rate: 15,
+          ratePeriod: 'month', dueAt: d(t, -12), penaltyRate: 1, status: 'active', note: '', payments: [] },
+        { id: 'e3', clientId: 'd3', principal: 50000, returnAmount: 65000, issuedAt: d(t, -10), model: 'fixed',
+          dueAt: d(t, 20), penaltyRate: 0, status: 'active', note: 'Фиксированный возврат', payments: [] },
+        { id: 'e4', clientId: 'd1', principal: 30000, issuedAt: d(t, -120), model: 'simple', rate: 10,
+          ratePeriod: 'month', dueAt: d(t, -90), penaltyRate: 0, status: 'closed', closedAt: d(t, -88),
+          payments: [{ id: 'q2', date: d(t, -88), amount: 33200, note: 'закрыл полностью' }] },
+        { id: 'e5', clientId: 'd4', principal: 25000, issuedAt: d(t, -5), model: 'simple', rate: 2,
+          ratePeriod: 'week', dueAt: d(t, 2), penaltyRate: 0.5, status: 'active', note: '',
+          payments: [{ id: 'q3', date: d(t, -2), amount: 1000, note: 'проценты' }] }
+      ];
+      return db;
+    },
 
     /* ---------- клиенты ---------- */
     clients: function () { return this.data.clients; },
