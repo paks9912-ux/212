@@ -205,6 +205,78 @@ tbody tr.clickable:hover{background:var(--bg-soft)}
 .legend{display:flex;gap:18px;font-size:12px;color:var(--muted);margin-top:10px}
 .legend i{display:inline-block;width:16px;height:2px;vertical-align:middle;margin-right:6px}
 
+
+/* ---------- Инструкции на странице ---------- */
+.howto{background:#fbfcfd;border:1px solid var(--line);border-left:3px solid var(--ink);border-radius:var(--radius);
+  padding:18px 20px;margin-bottom:22px}
+.howto h4{font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.howto .lead{font-size:13.5px;color:var(--graphite);margin-bottom:14px;line-height:1.6}
+.howto-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.howto-col .mono-label{margin-bottom:8px;display:block}
+.howto ol,.howto ul{margin:0;padding-left:18px}
+.howto li{font-size:13px;line-height:1.65;color:var(--graphite);margin-bottom:5px}
+.howto li strong{color:var(--ink)}
+.howto .tip{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--muted)}
+
+/* ---------- Раскрываемая расшифровка расчёта ---------- */
+details.calc{border:1px solid var(--line);border-radius:var(--radius);background:var(--surface);margin-top:14px}
+details.calc > summary{cursor:pointer;padding:13px 16px;font-size:13px;font-weight:600;list-style:none;
+  display:flex;align-items:center;gap:8px}
+details.calc > summary::-webkit-details-marker{display:none}
+details.calc > summary::before{content:"＋";font-size:13px;color:var(--muted);width:14px}
+details.calc[open] > summary::before{content:"−"}
+details.calc > summary:hover{background:var(--bg-soft)}
+.calc-body{padding:4px 16px 18px;border-top:1px solid var(--line)}
+.calc-step{display:flex;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line)}
+.calc-step:last-child{border-bottom:none}
+.calc-step .i{flex:0 0 22px;height:22px;border-radius:6px;background:var(--bg-soft);border:1px solid var(--line);
+  font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--graphite)}
+.calc-step .t{font-size:13px;line-height:1.55;min-width:0;font-weight:500}
+.calc-step .f{display:block;font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.5;
+  font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.calc-step .r{margin-left:auto;font-weight:600;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* ---------- Пошаговый гид ---------- */
+.guide{position:fixed;left:calc(var(--sidebar) + 24px);right:24px;bottom:20px;z-index:80;
+  background:#101318;color:#fff;border-radius:12px;box-shadow:0 18px 44px rgba(13,15,18,.3);
+  padding:18px 22px;display:flex;gap:22px;align-items:flex-start;animation:slideIn .3s ease both}
+.guide .g-num{flex:0 0 auto;font-size:11px;font-weight:700;letter-spacing:.09em;color:rgba(255,255,255,.5);
+  border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 10px;margin-top:2px}
+.guide .g-main{flex:1;min-width:0}
+.guide .g-title{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.guide .g-text{font-size:13.5px;color:rgba(255,255,255,.78);margin-top:6px;line-height:1.6}
+.guide .g-do{margin-top:10px;font-size:13px;background:rgba(255,255,255,.09);border-radius:8px;padding:9px 12px;
+  display:flex;gap:9px;align-items:flex-start}
+.guide .g-do b{color:#fff;font-weight:600}
+.guide .g-watch{margin-top:8px;font-size:12.5px;color:rgba(255,255,255,.6)}
+.guide .g-nav{display:flex;flex-direction:column;gap:8px;align-items:stretch;flex:0 0 auto}
+.guide .g-nav .btn{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2);color:#fff}
+.guide .g-nav .btn:hover{border-color:#fff}
+.guide .g-nav .btn.primary{background:#fff;color:#101318;border-color:#fff}
+.guide .g-close{position:absolute;top:10px;right:12px;font-size:16px;color:rgba(255,255,255,.5)}
+.guide .g-close:hover{color:#fff}
+.guide .g-bar{height:3px;background:rgba(255,255,255,.15);border-radius:99px;margin-top:14px;overflow:hidden}
+.guide .g-bar > i{display:block;height:100%;background:#fff;transition:width .35s ease}
+body.guide-on .content{padding-bottom:240px}
+body.guide-on #toasts{bottom:220px}
+.hl-target{outline:2px solid var(--red);outline-offset:4px;border-radius:8px;
+  animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{outline-color:rgba(200,50,43,.95)}50%{outline-color:rgba(200,50,43,.25)}}
+.guide-btn{border:1px solid var(--line-strong);border-radius:8px;padding:5px 11px;font-size:12px;font-weight:600;white-space:nowrap}
+.guide-btn.on{background:#101318;color:#fff;border-color:#101318}
+
+@media (max-width:860px){
+  .howto-cols{grid-template-columns:1fr;gap:14px}
+  .guide{left:12px;right:12px;bottom:12px;flex-direction:column;gap:14px;padding:16px}
+  .guide .g-nav{flex-direction:row}
+  .guide .g-nav .btn{flex:1}
+  body.guide-on .content{padding-bottom:360px}
+  /* на узком экране панель гида занимает низ — уведомления уходят наверх */
+  body.guide-on #toasts{bottom:auto;top:118px;left:12px;right:12px;align-items:stretch;max-width:none}
+  .guide .g-nav .btn{white-space:nowrap}
+  .guide .g-num{align-self:flex-start}
+}
+
 @media (max-width:1100px){
   .split{grid-template-columns:1fr}
   .g4{grid-template-columns:repeat(2,1fr)}
@@ -259,6 +331,7 @@ tbody tr.clickable:hover{background:var(--bg-soft)}
       <button class="burger" id="burger" aria-label="Меню">☰</button>
       <h1 id="topTitle">Обзор</h1>
       <div class="topbar-right">
+        <button class="guide-btn" id="guideBtn">▶ Гид по демо</button>
         <div class="role-switch" id="roleSwitch"></div>
         <span class="date-pill" id="todayPill"></span>
         <span class="small"><span class="status-dot"></span>Система работает</span>
@@ -268,6 +341,7 @@ tbody tr.clickable:hover{background:var(--bg-soft)}
   </div>
 </div>
 <div id="toasts"></div>
+<div id="guide"></div>
 <script>
 /* =============================================================================
    AI CONSTRUCTION CONTROL — DEMO / MVP
@@ -348,10 +422,12 @@ const DB = {
 
   /* -------------------------------- materials ----------------------------- */
   materials: [
-    { id:'M1', name:'Щебень', projectId:'P03', stock:135, dailyUse:50, unit:'т' },
-    { id:'M2', name:'Цемент', projectId:'P02', stock:80,  dailyUse:10, unit:'т' },
-    { id:'M3', name:'Битум',  projectId:'P01', stock:150, dailyUse:30, unit:'т' },
-    { id:'M4', name:'Песок',  projectId:'P05', stock:400, dailyUse:35, unit:'т' }
+    /* leadTime — срок поставки в днях; buffer — целевой запас в днях.
+       Из них считаются «когда закончится», «когда нужно заказать» и объём заявки. */
+    { id:'M1', name:'Щебень', projectId:'P03', stock:135, dailyUse:50, unit:'т', leadTime:2, buffer:6, supplier:'Карьер «Зарафшан» (демо)' },
+    { id:'M2', name:'Цемент', projectId:'P02', stock:80,  dailyUse:10, unit:'т', leadTime:3, buffer:6, supplier:'Цемзавод №2 (демо)' },
+    { id:'M3', name:'Битум',  projectId:'P01', stock:150, dailyUse:30, unit:'т', leadTime:4, buffer:6, supplier:'НПЗ (демо)' },
+    { id:'M4', name:'Песок',  projectId:'P05', stock:400, dailyUse:35, unit:'т', leadTime:1, buffer:6, supplier:'Карьер «Сырдарья» (демо)' }
   ],
   procurementRequests: [],
 
@@ -381,9 +457,24 @@ const DB = {
 
   /* ------------------------------ recommended actions --------------------- */
   tasks: [
-    { id:'T1', projectId:'P03', title:'Отремонтировать каток №2',                 owner:'Служба механизации', priority:'critical', done:false },
-    { id:'T2', projectId:'P03', title:'Заказать 300 т щебня',                     owner:'Отдел снабжения',          priority:'high',     done:false },
-    { id:'T3', projectId:'P03', title:'Вернуть 8 самосвалов на объект',           owner:'Начальник автопарка',     priority:'high',     done:false }
+    { id:'T1', projectId:'P03', title:'Отремонтировать каток №2', owner:'Служба механизации', priority:'critical', done:false,
+      due:'06 СЕН', why:'Каток №2 дал 11 ч простоя за неделю — это главный источник потери выработки.',
+      how:['Заказать ремкомплект гидравлики (в наличии на складе МТС)',
+           'Вывести машину в ремонт в ночную смену, чтобы не терять рабочий день',
+           'На время ремонта перераспределить укатку на каток №1 с удлинением захватки'],
+      effect:'≈ +120 м²/день, минус 3–4 дня отставания' },
+    { id:'T2', projectId:'P03', material:'M1', title:'Заказать щебень', owner:'Отдел снабжения', priority:'high', done:false,
+      due:'05 СЕН', why:'Текущего запаса хватает менее чем на 3 дня при расходе 50 т/день, срок поставки — 2 дня.',
+      how:['Сформировать заявку на объём, закрывающий целевой запас (см. раздел «Материалы»)',
+           'Согласовать доставку до 08:00, чтобы не простаивать в первую смену',
+           'Поставить контрольную точку на приёмку и замер'],
+      effect:'Снимает риск остановки укладки из-за материала' },
+    { id:'T3', projectId:'P03', title:'Вернуть 8 самосвалов на объект', owner:'Начальник автопарка', priority:'high', done:false,
+      due:'07 СЕН', why:'Число активных самосвалов упало с 8 до 5 — плечо возки не закрывается.',
+      how:['Вернуть 2 машины с объекта №02, где сейчас опережение графика',
+           'Одну машину вывести из планового ТО раньше срока',
+           'Закрепить сменного водителя на вторую смену'],
+      effect:'≈ +150 м²/день по пропускной способности возки' }
   ],
 
   /* -------------------------------- team ---------------------------------- */
@@ -517,9 +608,11 @@ function portfolio(){
 
 function materialRows(){
   return DB.materials.map(m => {
-    const daysLeft = m.stock / m.dailyUse;
+    const daysLeft = m.stock / m.dailyUse;                     // на сколько дней хватит
+    const orderBy  = addDays(TODAY, daysLeft - m.leadTime);     // крайняя дата заявки
+    const orderQty = Math.max(0, Math.ceil((m.buffer * m.dailyUse - m.stock) / 10) * 10); // до целевого запаса
     const status = daysLeft < 4 ? 'critical' : daysLeft < 6 ? 'warning' : 'normal';
-    return { ...m, daysLeft, status };
+    return { ...m, daysLeft, status, orderBy, orderQty, runsOut: addDays(TODAY, daysLeft) };
   });
 }
 
@@ -596,7 +689,218 @@ const NAV = {
   settings: { label:'Настройки',   ico:'⋯' }
 };
 
-const state = { role:'director', page:'overview', param:null, openReport:null };
+
+/* ===================== 3a. ИНСТРУКЦИИ НА КАЖДОМ ЭКРАНЕ =====================
+   Каждый экран объясняет сам себя: что это, как читать, что сделать дальше.
+   Тексты статичные (это методика работы, а не данные), цифры в них не зашиты.
+=========================================================================== */
+const HOWTO = {
+  overview: {
+    title:'Экран 1 — Обзор: состояние компании за 30 секунд',
+    lead:'Это первый экран директора утром. Он отвечает на один вопрос: где сегодня нужно принять решение. Сверху — сводка, слева — объекты, справа — то, что требует вмешательства.',
+    what:['<strong>Четыре KPI</strong> — сколько объектов всего и как они распределены по риску.',
+          '<strong>Общий прогресс</strong> — доля выполненного объёма по всем объектам, а не среднее из процентов.',
+          '<strong>Таблица объектов</strong> — факт, прогнозная дата и отставание от плана.',
+          '<strong>Требует внимания</strong> — сигналы, которые система построила сама из данных.'],
+    read:['Красный статус = отставание больше 7 дней, жёлтый = 3–7 дней, зелёный = в графике.',
+          'В колонке «Прогноз» стоит дата, к которой объект реально закончится при текущем темпе.',
+          '«+14 дн. к плану» — на столько прогноз позже договорного срока.',
+          'Порядок чтения: сначала красное, потом жёлтое, детали — потом.'],
+    do:['Нажмите на <strong>ОБЪЕКТ №03</strong> в таблице — откроется карточка объекта.',
+        'Или нажмите на любой сигнал справа — система сама откроет нужный экран.',
+        'Кнопка <strong>СМОДЕЛИРОВАТЬ ОТЧЁТ</strong> добавляет новый день и пересчитывает всё на глазах.'],
+    tip:'Если на экране нет красного — сегодня решений от директора не требуется. Это и есть цель системы.'
+  },
+  projects: {
+    title:'Экран 2 — Объекты: сравнение всех строек между собой',
+    lead:'Тот же набор объектов, но карточками: удобно сравнивать темп и прогноз рядом, не проваливаясь в каждый объект.',
+    what:['<strong>Факт и план</strong> в процентах выполненного объёма.',
+          '<strong>Темп</strong> — средняя выработка за последние 7 дней.',
+          '<strong>Прогноз</strong> — расчётная дата завершения.',
+          '<strong>Отставание</strong> — разница между прогнозом и планом в днях.'],
+    read:['Отрицательное отставание (например −8 дн.) означает опережение графика.',
+          'Если факт выше плана, но темп низкий — объект «проедает» ранее созданный задел.',
+          'Сравнивайте темп с требуемым темпом внутри карточки объекта, а не между объектами: у них разные объёмы.'],
+    do:['Нажмите на любую карточку — откроется подробная страница объекта.',
+        'Начните с объекта в статусе «Критично» — там наибольшая цена промедления.'],
+    tip:'Объекты №04 и №05 идут с опережением — из них можно перебрасывать ресурсы на отстающий №03.'
+  },
+  project: {
+    title:'Экран 3 — Карточка объекта: план, факт, прогноз и причины',
+    lead:'Здесь собрана вся картина по одной стройке: сколько должно быть сделано, сколько сделано, когда объект закончится и почему он отстаёт.',
+    what:['<strong>План / Факт / Отклонение</strong> — три верхние плитки.',
+          '<strong>Производительность</strong> — текущая (что есть) и требуемая (что нужно, чтобы успеть в срок).',
+          '<strong>Прогноз завершения</strong> — чёрная карточка справа, главный вывод экрана.',
+          '<strong>Почему объект отстаёт</strong> — причины, собранные из отчётов, техники и материалов.',
+          '<strong>Рекомендуемые действия</strong> — что именно сделать и кто отвечает.'],
+    read:['Разрыв между текущей и требуемой производительностью — это и есть размер проблемы.',
+          'Красная линия на графике уходит ниже серой — факт отстаёт от плана; пунктир — прогноз.',
+          'Отставание в днях пересчитывается после каждого нового отчёта.'],
+    do:['Раскройте блок <strong>«Как посчитан прогноз»</strong> под чёрной карточкой — там весь расчёт по шагам с числами.',
+        'Раскройте любое <strong>рекомендуемое действие</strong> — внутри срок, порядок выполнения и ожидаемый эффект.',
+        'Нажмите на любой <strong>ежедневный отчёт</strong> внизу — раскроются все показатели дня.',
+        'Нажмите <strong>СМОДЕЛИРОВАТЬ ОТЧЁТ</strong> — прогноз и риск пересчитаются сразу.'],
+    tip:'Никаких «чёрных ящиков»: любое число на этом экране можно разложить до исходных отчётов.'
+  },
+  reports: {
+    title:'Экран 4 — Входящие отчёты: как отчёт с объекта превращается в данные',
+    lead:'Так работает будущая связка с Telegram. Прораб отправляет обычное голосовое сообщение своими словами — система распознаёт его и раскладывает по полям.',
+    what:['<strong>Слева</strong> — исходное сообщение прораба, как он его надиктовал.',
+          '<strong>Справа</strong> — те же данные, разложенные по полям: выработка, люди, техника, простой, материал.',
+          '<strong>Кнопка обработки</strong> — переносит отчёт в объект и запускает пересчёт.'],
+    read:['Прораб не заполняет форму и не считает проценты — он просто говорит, как привык.',
+          'Ошибки распознавания в боевой системе правит прораб или диспетчер до подтверждения.',
+          'После обработки отчёт становится частью истории объекта и влияет на прогноз.'],
+    do:['Нажмите <strong>ОБРАБОТАТЬ ОТЧЁТ</strong> и посмотрите на 4 шага обработки.',
+        'Затем перейдите в <strong>Обзор</strong> — прогноз по объекту №03 изменится.'],
+    tip:'В демо распознавание имитируется. Реальный разбор текста подключается через Claude API — место в коде помечено тегом [INTEGRATION:CLAUDE].'
+  },
+  materials: {
+    title:'Экран 5 — Материалы: на сколько дней хватит запаса',
+    lead:'Таблица отвечает не на вопрос «сколько лежит на складе», а на вопрос «когда встанет работа, если ничего не делать».',
+    what:['<strong>Остаток и суточный расход</strong> — исходные данные.',
+          '<strong>Хватит на</strong> — остаток ÷ расход, в днях.',
+          '<strong>Заказать до</strong> — крайняя дата заявки с учётом срока поставки.',
+          '<strong>Статус</strong> — критично (меньше 4 дней), внимание (меньше 6), норма.'],
+    read:['Смотрите не на тонны, а на дни: 150 т битума при расходе 30 т/день — это всего 5 дней.',
+          'Если «Заказать до» уже наступило — заявку надо было подать вчера.',
+          'Целевой запас — 6 дней работы, из этого считается рекомендуемый объём заявки.'],
+    do:['Нажмите <strong>СОЗДАТЬ ЗАЯВКУ НА ПОСТАВКУ</strong> — система сама возьмёт самую критичную позицию и рассчитает объём.',
+        'Проверьте, что созданная заявка появилась в таблице ниже.'],
+    tip:'Связанная рекомендация «Заказать щебень» на карточке объекта закроется автоматически после создания заявки.'
+  },
+  requests:{ ref:'materials' },
+  equipment: {
+    title:'Экран 6 — Техника: где теряются часы и метры',
+    lead:'Простой техники — самая частая причина отставания. Здесь видно, какая единица сколько стоит и во что это обходится объёму.',
+    what:['<strong>Три показателя сверху</strong> — исправно, в ремонте, простой за сегодня.',
+          '<strong>Таблица</strong> — простой по каждой единице за сегодня и за неделю.',
+          '<strong>Потери объёма</strong> — часы простоя, пересчитанные в недоделанные м².'],
+    read:['Красным выделены единицы с простоем от 10 часов за неделю — это уже системная проблема, а не случайность.',
+          'Простой в 11 ч за неделю ≈ полтора рабочих дня одной машины.',
+          'Сопоставляйте простой с падением выработки в ежедневных отчётах того же объекта.'],
+    do:['Найдите единицу с красным простоем и откройте объект, на котором она работает.',
+        'На карточке объекта посмотрите, как этот простой отражён в блоке причин.'],
+    tip:'В боевой системе часы простоя приходят из тех же отчётов прораба — двойного ввода нет.'
+  },
+  team: {
+    title:'Экран 7 — Команда: кто и когда отчитывается',
+    lead:'Структура отчётности, а не кадровый учёт. Задача экрана — показать, от кого зависят данные и кто сегодня ещё не отчитался.',
+    what:['<strong>Роль</strong> — определяет, что человек видит и что отправляет.',
+          '<strong>Последний отчёт</strong> — дата и время поступления.',
+          '<strong>Статус</strong> — отправлен или ожидается.'],
+    read:['Жёлтый статус «Ожидается» означает, что данные по объекту сегодня неполные, а прогноз построен на вчерашних цифрах.',
+          'Один прораб = один объект = один ежедневный отчёт.'],
+    do:['Переключите роль в шапке на <strong>Прораб</strong> — интерфейс сократится до одного объекта и кнопки отправки отчёта.',
+        'Затем верните роль <strong>Директор</strong>.'],
+    tip:'Роли в демо переключаются свободно. В боевой системе роль определяется учётной записью и Telegram-аккаунтом.'
+  },
+  insights: {
+    title:'Экран 8 — AI-аналитика: выводы вместо таблиц',
+    lead:'Каждое наблюдение — это короткий вывод и под ним расчёт, из которого он получен. Ни одно предложение здесь не написано заранее.',
+    what:['<strong>Заголовок</strong> — сам вывод одной фразой.',
+          '<strong>Подпись</strong> — числа, на которых он построен.'],
+    read:['Если после нового отчёта числа меняются — меняется и текст наблюдения.',
+          'Наблюдения отсортированы от причины к следствию: выработка → техника → материалы → срок.'],
+    do:['Сравните наблюдения до и после нажатия <strong>СМОДЕЛИРОВАТЬ ОТЧЁТ</strong> на любом экране.'],
+    tip:'Сейчас формулировки собираются шаблонами из посчитанных данных. Claude API подключается на это же место и даёт связный текст вместо шаблона.'
+  },
+  settings: {
+    title:'Экран 9 — Настройки: что под капотом и что подключается дальше',
+    lead:'Экран для честного разговора с заказчиком: что уже работает, что имитируется и куда подключается боевая инфраструктура.',
+    what:['<strong>Интеграции</strong> — список внешних систем и их текущий статус.',
+          '<strong>Модель прогноза</strong> — та самая формула, по которой считаются все даты.',
+          '<strong>Демо-данные</strong> — сброс к исходному состоянию.'],
+    read:['Все интеграции сейчас в статусе «Не подключено» — это демо, а не рабочая система.',
+          'Математика прогноза — обычный код, а не модель ИИ; ИИ отвечает только за текст и причины.'],
+    do:['Нажмите <strong>Сбросить демо-данные</strong>, чтобы прогнать сценарий заново с начала.'],
+    tip:'В коде каждое место подключения помечено тегом вида [INTEGRATION:TELEGRAM] — их видно поиском по файлу.'
+  },
+  myproject: {
+    title:'Экран прораба — один объект и одна кнопка',
+    lead:'Так систему видит прораб. Никаких чужих объектов, финансов и прогнозов по компании — только своя стройка и ежедневный отчёт.',
+    what:['<strong>Норма на сегодня</strong> — сколько нужно сделать, чтобы объект уложился в срок.',
+          '<strong>Последний отчёт</strong> и <strong>среднее за 7 дней</strong> — свой результат.',
+          'Ниже — та же карточка объекта, но без кнопок управления чужими ресурсами.'],
+    read:['Норма на сегодня растёт, если объект отстаёт: система честно показывает, что догонять придётся быстрее.',
+          'Прораб видит те же причины отставания, что и директор — разговор идёт на одних цифрах.'],
+    do:['Нажмите <strong>СМОДЕЛИРОВАТЬ ОТЧЁТ</strong> — это имитация отправки голосового сообщения из Telegram.'],
+    tip:'В боевой системе прораб вообще не заходит в интерфейс: он говорит в Telegram, а этот экран нужен для просмотра.'
+  }
+};
+
+function howto(key){
+  let h = HOWTO[key]; if(h && h.ref) h = HOWTO[h.ref];
+  if(!h) return '';
+  return `
+  <div class="howto">
+    <h4>${esc(h.title)}</h4>
+    <div class="lead">${h.lead}</div>
+    <div class="howto-cols">
+      <div class="howto-col"><span class="mono-label">Что на экране</span><ul>${h.what.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+      <div class="howto-col"><span class="mono-label">Как читать</span><ul>${h.read.map(x=>`<li>${x}</li>`).join('')}</ul></div>
+      <div class="howto-col"><span class="mono-label">Что сделать сейчас</span><ol>${h.do.map(x=>`<li>${x}</li>`).join('')}</ol></div>
+    </div>
+    ${h.tip ? `<div class="tip">Подсказка: ${h.tip}</div>` : ''}
+  </div>`;
+}
+
+/* ======================= 3b. ПОШАГОВЫЙ ГИД ПО ДЕМО =========================
+   Ведёт по сценарию: на каждом шаге — цель, что нажать и на что смотреть.
+   Гид только подсказывает и переключает экраны, данные он не меняет.
+=========================================================================== */
+const GUIDE = [
+  { page:'overview', title:'Шаг 1. Что видит директор утром',
+    text:'Открыт экран «Обзор». Пять объектов, один в критическом состоянии, один в зоне риска. Справа — список того, что требует решения именно сегодня.',
+    action:'Прочитайте панель «Требует внимания» справа и переходите к следующему шагу.',
+    watch:'Красная точка = решение нужно сегодня, жёлтая = на этой неделе.', sel:'[data-alert="0"]' },
+  { page:'reports', title:'Шаг 2. Прораб отправил обычное сообщение',
+    text:'Экран «Входящие отчёты». Слева — сообщение прораба своими словами, без формы и таблиц. Именно так отчёт придёт из Telegram.',
+    action:'Прочитайте текст сообщения слева и сравните его с полями справа.',
+    watch:'Система сама вытащила из фразы 7 показателей: объём, людей, технику, простой и остаток щебня.', sel:'.chat' },
+  { page:'reports', title:'Шаг 3. Превращаем текст в данные',
+    text:'Обработка проходит четыре шага: разбор сообщения, извлечение показателей, обновление объекта и пересчёт прогноза.',
+    action:'Нажмите кнопку ОБРАБОТАТЬ ОТЧЁТ и дождитесь надписи ГОТОВО.',
+    watch:'После обработки отчёт становится частью истории объекта №03.', sel:'[data-process]' },
+  { page:'project', param:'P03', title:'Шаг 4. План против факта',
+    text:'Карточка объекта №03. По плану должно быть выполнено 72 % объёма, фактически — 67 %. Отклонение −5 % это около 5 600 м².',
+    action:'Сравните три верхние плитки: План, Факт, Отклонение.',
+    watch:'Отклонение считается по объёмам, а не по «ощущению процентов».', sel:'[data-g="stats"]' },
+  { page:'project', param:'P03', title:'Шаг 5. Темп: что есть и что нужно',
+    text:'Текущая производительность — 850 м²/день, а чтобы уложиться в срок, нужно около 1 165 м²/день. Разрыв в 315 м² в день и есть проблема.',
+    action:'Посмотрите на вторую строку плиток: текущая и требуемая производительность.',
+    watch:'Требуемый темп растёт каждый день, пока отставание не устранено.', sel:'[data-g="rates"]' },
+  { page:'project', param:'P03', title:'Шаг 6. Прогноз срока',
+    text:'Остаток объёма делим на текущий темп и получаем дату завершения. Она позже договорной — система показывает, на сколько именно.',
+    action:'Раскройте блок «Как посчитан прогноз» под чёрной карточкой — там весь расчёт по шагам.',
+    watch:'Ни одного скрытого коэффициента: только объёмы, дни и деление.', sel:'details.calc' },
+  { page:'project', param:'P03', title:'Шаг 7. Почему объект отстаёт',
+    text:'Три причины собраны из данных: простой катка №2, падение запаса щебня и сокращение числа самосвалов с 8 до 5.',
+    action:'Прочитайте блок «Почему объект отстаёт?» и раскройте любое рекомендуемое действие справа.',
+    watch:'У каждого действия есть ответственный, срок и ожидаемый эффект в метрах и днях.', sel:'[data-g="reasons"]' },
+  { page:'project', param:'P03', title:'Шаг 8. Система реагирует на новые данные',
+    text:'Смоделируем ещё один плохой день: меньше выработка, больше простой, меньше щебня. Так проверяется, что система живая.',
+    action:'Нажмите СМОДЕЛИРОВАТЬ ОТЧЁТ и посмотрите на уведомление внизу справа.',
+    watch:'Прогноз, темп, риск и предупреждения пересчитаются мгновенно.', sel:'[data-sim]' },
+  { page:'materials', title:'Шаг 9. Материалы: когда встанет работа',
+    text:'Щебня осталось меньше чем на 3 дня при сроке поставки 2 дня. Это точка, после которой укладка остановится. Объём заявки система считает сама — до целевого запаса в 6 дней.',
+    action:'Нажмите СОЗДАТЬ ЗАЯВКУ НА ПОСТАВКУ — объём система посчитает сама.',
+    watch:'Заявка появится в таблице ниже, а связанная рекомендация на объекте закроется.', sel:'[data-req]' },
+  { page:'equipment', title:'Шаг 10. Техника: где теряются метры',
+    text:'Каток №2 дал 11 часов простоя за неделю. В пересчёте на объём это больше тысячи недоделанных квадратных метров.',
+    action:'Найдите строку с красным значением простоя за неделю.',
+    watch:'Часы простоя приходят из тех же ежедневных отчётов — отдельного учёта не нужно.', sel:'table' },
+  { page:'insights', title:'Шаг 11. Выводы вместо таблиц',
+    text:'Четыре наблюдения, каждое с расчётом под ним. Тексты пересобираются после каждого нового отчёта.',
+    action:'Прочитайте наблюдения и сверьте числа под ними с тем, что видели на карточке объекта.',
+    watch:'Это шаблоны на реальных числах. Claude API подключается сюда же и заменит шаблон связным текстом.', sel:'.grid.g2' },
+  { page:'overview', title:'Шаг 12. Итог: утро директора',
+    text:'Прораб отправил голосовое сообщение — система его разобрала, обновила объект, пересчитала прогноз, нашла причины и создала предупреждения. Директор утром видит только то, где нужно его решение.',
+    action:'Гид закончен. Можно пройти сценарий заново или закрыть подсказки.',
+    watch:'Весь путь занял 12 шагов и ни одной ручной таблицы.', sel:null }
+];
+
+const state = { role:'director', page:'overview', param:null, openReport:null, guide:false, step:0 };
 const el = id => document.getElementById(id);
 const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
@@ -658,6 +962,8 @@ function pageOverview(){
       <h1>Доброе утро, директор</h1>
       <div class="sub">Знать, что происходит на каждом объекте, до того как проблема станет дорогой.</div>
     </div>
+
+    ${howto('overview')}
 
     <div class="grid g4">
       <div class="kpi"><div class="mono-label">Объектов</div><div class="v">${cnt(DB.projects.length)}</div><div class="foot">В работе</div></div>
@@ -769,6 +1075,50 @@ function chart(p, c){
   </div>`;
 }
 
+
+/** Заголовок задачи: объём заказа подставляется из текущего расчёта по материалу. */
+function taskTitle(t){
+  if(!t.material) return t.title;
+  const m = materialRows().find(x => x.id === t.material);
+  return m ? `${t.title} — ${n0(m.orderQty)} ${m.unit}` : t.title;
+}
+
+/* ---- Полная расшифровка расчёта: каждое число раскладывается до исходных ---- */
+function calcBlock(p, c){
+  const rs = reportsOf(p.id), last7 = rs.slice(-7);
+  const step = (i, t, f, r) => `
+    <div class="calc-step"><span class="i">${i}</span>
+      <span class="t">${t}<span class="f">${f}</span></span><span class="r">${r}</span></div>`;
+  return `
+  <details class="calc">
+    <summary>Как посчитан прогноз — 6 шагов с числами</summary>
+    <div class="calc-body">
+      ${step(1,'Плановый темп по договору','общий объём ÷ срок = ' + n0(p.totalVolume) + ' м² ÷ ' + p.durationDays + ' дн.', n0(c.plannedRate) + ' м²/день')}
+      ${step(2,'Сколько должно быть сделано к сегодня','плановый темп × прошло дней = ' + n0(c.plannedRate) + ' × ' + c.elapsed, n0(c.plannedVol) + ' м²')}
+      ${step(3,'Сколько сделано фактически','сумма всех ежедневных отчётов', n0(c.actualVol) + ' м²')}
+      ${step(4,'Остаток объёма','общий объём − факт = ' + n0(p.totalVolume) + ' − ' + n0(c.actualVol), n0(c.remaining) + ' м²')}
+      ${step(5,'Средний темп за последние 7 дней', last7.map(r => n0(r.production)).join(' + ') + ' ÷ ' + last7.length, n0(c.rate) + ' м²/день')}
+      ${step(6,'Сколько дней осталось при таком темпе','остаток ÷ средний темп = ' + n0(c.remaining) + ' ÷ ' + n0(c.rate), Math.round(c.forecastDays) + ' дн.')}
+      <div class="calc-step" style="border-top:1px solid var(--line);margin-top:6px;padding-top:14px">
+        <span class="i">=</span>
+        <span class="t"><strong>Прогнозная дата завершения</strong>
+          <span class="f">день последнего отчёта (${fmtShort(c.ref)}) + ${Math.round(c.forecastDays)} дн.</span></span>
+        <span class="r">${fmtDate(c.forecastDate)}</span></div>
+      <div class="calc-step"><span class="i">Δ</span>
+        <span class="t"><strong>Отставание от плановой даты</strong>
+          <span class="f">${fmtDate(c.forecastDate)} − ${fmtDate(c.planned)}</span></span>
+        <span class="r" style="color:${c.delayDays > 2 ? 'var(--red)' : 'var(--green)'}">${c.delayDays > 0 ? '+' : ''}${c.delayDays} дн.</span></div>
+      <div class="calc-step"><span class="i">!</span>
+        <span class="t"><strong>Уровень риска</strong>
+          <span class="f">в графике ≤ 2 дн. &lt; риск ≤ 7 дн. &lt; критично</span></span>
+        <span class="r">${RISK_LABEL[c.risk]}</span></div>
+      <p class="small" style="margin-top:14px">Требуемый темп считается отдельно: остаток ${n0(c.remaining)} м² ÷ ${c.daysToPlan} дн.
+        до плановой даты = <strong>${n0(c.requiredRate)} м²/день</strong>. Разрыв с текущим темпом —
+        ${n0(Math.max(0, c.requiredRate - c.rate))} м² в день, это и есть размер проблемы.</p>
+    </div>
+  </details>`;
+}
+
 function pageProject(id, embedded){
   const p = project(id || 'P03'), c = compute(p), rs = reportsOf(p.id).slice().reverse();
   const tasks = DB.tasks.filter(t => t.projectId === p.id);
@@ -793,7 +1143,9 @@ function pageProject(id, embedded){
         ${RISK_LABEL[c.risk].toUpperCase()}</span></div>
     </div>
 
-    <div class="grid g3">
+    ${embedded ? '' : howto('project')}
+
+    <div class="grid g3" data-g="stats">
       <div class="stat"><div class="mono-label">План</div><div class="v">${cnt(c.plannedPct,0,'%')}</div>
         <div class="bar"><i style="width:${c.plannedPct.toFixed(1)}%"></i></div></div>
       <div class="stat"><div class="mono-label">Факт</div><div class="v">${cnt(c.actualPct,0,'%')}</div>
@@ -803,7 +1155,7 @@ function pageProject(id, embedded){
         <div class="small" style="margin-top:12px">${n0(Math.abs(c.plannedVol-c.actualVol))} м² ${c.deviation<0?'отставание от плана':'опережение плана'}</div></div>
     </div>
 
-    <div class="grid g3" style="margin-top:14px">
+    <div class="grid g3" style="margin-top:14px" data-g="rates">
       <div class="stat"><div class="mono-label">Текущая производительность</div><div class="v">${cnt(c.rate,0)} м²/день</div>
         <div class="small" style="margin-top:6px">среднее за 7 дней</div></div>
       <div class="stat"><div class="mono-label">Требуемая производительность</div><div class="v">${cnt(c.requiredRate,0)} м²/день</div>
@@ -819,7 +1171,7 @@ function pageProject(id, embedded){
           ${chart(p,c)}
         </div>
       </div>
-      <div class="forecast">
+      <div class="forecast" data-g="forecast">
         <div class="mono-label">Прогноз завершения</div>
         <div class="big">${fmtDate(c.forecastDate)}</div>
         <div class="row">
@@ -831,8 +1183,10 @@ function pageProject(id, embedded){
       </div>
     </div>
 
+    ${calcBlock(p, c)}
+
     <div class="split section">
-      <div class="card pad">
+      <div class="card pad" data-g="reasons">
         <div class="section-head"><span class="mono-label">Почему объект отстаёт?</span>
           <span class="pill gray">AI-анализ · демо</span></div>
         <div class="reason"><div class="n">01</div><div>
@@ -859,9 +1213,23 @@ function pageProject(id, embedded){
           <div class="action ${t.done?'done':''}">
             <span class="mark" style="width:9px;height:9px;border-radius:50%;margin-top:6px;flex:none;
               background:${t.priority==='critical'?'var(--red)':'var(--amber)'}"></span>
-            <div style="flex:1">
-              <div class="h">${esc(t.title)}</div>
-              <div class="small">Ответственный: ${esc(t.owner)} · Приоритет: ${t.priority==='critical'?'критический':'высокий'}</div>
+            <div style="flex:1;min-width:0">
+              <div class="h">${esc(taskTitle(t))}</div>
+              <div class="small">Ответственный: ${esc(t.owner)} · Приоритет: ${t.priority==='critical'?'критический':'высокий'} · Срок: ${esc(t.due||'—')}</div>
+              ${t.why ? `
+              <details class="calc" style="margin-top:10px">
+                <summary>Что именно сделать и зачем</summary>
+                <div class="calc-body">
+                  <p class="small" style="margin:12px 0 6px"><strong>Почему это важно.</strong> ${esc(t.why)}</p>
+                  <span class="mono-label" style="display:block;margin-top:12px">Порядок действий</span>
+                  <ol style="margin:8px 0 0;padding-left:18px">
+                    ${t.how.map(x => `<li style="font-size:13px;line-height:1.6;margin-bottom:4px">${esc(x)}</li>`).join('')}
+                  </ol>
+                  <div class="kv" style="margin-top:14px"><span class="k">Ожидаемый эффект</span><span class="v">${esc(t.effect)}</span></div>
+                  <div class="kv"><span class="k">Ответственный</span><span class="v">${esc(t.owner)}</span></div>
+                  <div class="kv"><span class="k">Срок</span><span class="v">${esc(t.due||'—')}</span></div>
+                </div>
+              </details>` : ''}
             </div>
             <button class="btn sm" data-task="${t.id}" ${t.done?'disabled':''}>${t.done?'Выполнено':'Отметить выполненным'}</button>
           </div>`).join('')}
@@ -912,6 +1280,7 @@ function pageProjects(){
   return `
   <div class="page">
     <div class="page-head"><h1>Объекты</h1><div class="sub">Все действующие объекты дорожного строительства.</div></div>
+    ${howto('projects')}
     <div class="grid g2">
       ${f.rows.map(({p,c}) => `
         <div class="card pad clickable" data-open="${p.id}" style="cursor:pointer">
@@ -943,6 +1312,8 @@ function pageReports(){
     <div class="page-head"><h1>Входящие отчёты</h1>
       <div class="sub">Имитация будущего канала Telegram. Прораб отправляет обычное голосовое или текстовое сообщение —
         система превращает его в структурированные данные объекта.</div></div>
+
+    ${howto('reports')}
 
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px">
       <button class="btn primary" data-sim>СМОДЕЛИРОВАТЬ ОТЧЁТ</button>
@@ -991,8 +1362,9 @@ function pageMaterials(){
       <div><h1>Материалы</h1><div class="sub">Запас на складе относительно суточного расхода.</div></div>
       <button class="btn primary" data-req style="margin-left:auto">СОЗДАТЬ ЗАЯВКУ НА ПОСТАВКУ</button>
     </div>
+    ${howto(state.page === 'requests' ? 'requests' : 'materials')}
     <div class="card"><div class="tbl-wrap"><table class="responsive">
-      <thead><tr><th>Материал</th><th>Объект</th><th>Остаток</th><th>Расход в сутки</th><th>Хватит на</th><th>Статус</th></tr></thead>
+      <thead><tr><th>Материал</th><th>Объект</th><th>Остаток</th><th>Расход в сутки</th><th>Хватит на</th><th>Закончится</th><th>Заказать до</th><th>Рекоменд. заказ</th><th>Статус</th></tr></thead>
       <tbody>${rows.map(m => `
         <tr>
           <td data-l="Материал"><strong>${esc(m.name)}</strong></td>
@@ -1000,6 +1372,11 @@ function pageMaterials(){
           <td data-l="Остаток" class="num">${n0(m.stock)} ${m.unit}</td>
           <td data-l="Расход" class="num">${n0(m.dailyUse)} ${m.unit}/день</td>
           <td data-l="Хватит на" class="num">${n1(m.daysLeft)} дн.</td>
+          <td data-l="Закончится" class="num" style="white-space:nowrap">${fmtShort(m.runsOut)}</td>
+          <td data-l="Заказать до" class="num" style="white-space:nowrap;${m.status==='critical'?'color:var(--red);font-weight:600':''}">${fmtShort(m.orderBy)}
+            <div class="small">срок поставки ${m.leadTime} дн.</div></td>
+          <td data-l="Рекоменд. заказ" class="num">${m.orderQty ? n0(m.orderQty) + ' ' + m.unit : '—'}
+            <div class="small">${m.orderQty ? 'до запаса на ' + m.buffer + ' дн.' : 'запаса достаточно'}</div></td>
           <td data-l="Статус"><span class="pill ${RISK_CLASS[m.status]}">${m.status==='critical'?'Критично':m.status==='warning'?'Внимание':'Норма'}</span></td>
         </tr>`).join('')}</tbody>
     </table></div></div>
@@ -1008,12 +1385,13 @@ function pageMaterials(){
       <div class="section-head"><span class="mono-label">Заявки на поставку</span></div>
       <div class="card">
         ${DB.procurementRequests.length ? `<div class="tbl-wrap"><table class="responsive">
-          <thead><tr><th>Материал</th><th>Объект</th><th>Требуется</th><th>Приоритет</th><th>Создана</th><th>Статус</th></tr></thead>
+          <thead><tr><th>Материал</th><th>Объект</th><th>Требуется</th><th>Приоритет</th><th>Поставщик</th><th>Создана</th><th>Статус</th></tr></thead>
           <tbody>${DB.procurementRequests.map(r => `
             <tr><td data-l="Материал"><strong>${esc(r.material)}</strong></td>
               <td data-l="Объект">${project(r.projectId).code}</td>
-              <td data-l="Требуется" class="num">${n0(r.qty)} т</td>
+              <td data-l="Требуется" class="num">${n0(r.qty)} т<div class="small">${esc(r.need||'')}</div></td>
               <td data-l="Приоритет"><span class="pill amber">${esc(r.priority)}</span></td>
+              <td data-l="Поставщик">${esc(r.supplier||'—')}</td>
               <td data-l="Создана">${esc(r.created)}</td>
               <td data-l="Статус"><span class="pill gray">${esc(r.status)}</span></td></tr>`).join('')}
           </tbody></table></div>`
@@ -1034,19 +1412,22 @@ function pageEquipment(){
   return `
   <div class="page">
     <div class="page-head"><h1>Техника</h1><div class="sub">Готовность парка и простои по всем объектам.</div></div>
+    ${howto('equipment')}
     <div class="grid g3">
       <div class="kpi"><div class="mono-label">Исправна</div><div class="v green">${cnt(op)}</div></div>
       <div class="kpi"><div class="mono-label">В ремонте</div><div class="v amber">${cnt(mt)}</div></div>
       <div class="kpi"><div class="mono-label">Простой сегодня</div><div class="v ${dtToday>4?'red':''}">${cnt(dtToday,1,' ч')}</div></div>
     </div>
     <div class="card section"><div class="tbl-wrap"><table class="responsive">
-      <thead><tr><th>Единица техники</th><th>Объект</th><th>Статус</th><th>Простой сегодня</th><th>Простой за неделю</th></tr></thead>
+      <thead><tr><th>Единица техники</th><th>Объект</th><th>Статус</th><th>Простой сегодня</th><th>Простой за неделю</th><th>Потери объёма</th></tr></thead>
       <tbody>${eq.map(e => `
         <tr><td data-l="Техника"><strong>${esc(e.name)}</strong></td>
           <td data-l="Объект">${project(e.projectId).code}</td>
           <td data-l="Статус"><span class="pill ${e.status==='operational'?'green':'amber'}">${e.status==='operational'?'Исправна':'В ремонте'}</span></td>
           <td data-l="Простой сегодня" class="num">${e.downtimeToday ? n1(e.downtimeToday)+' ч' : '—'}</td>
           <td data-l="Простой за неделю" class="num" style="${e.downtimeWeek>=10?'color:var(--red);font-weight:600':''}">${e.downtimeWeek ? n1(e.downtimeWeek)+' ч' : '—'}</td>
+          <td data-l="Потери объёма" class="num">${e.downtimeWeek ? '≈ ' + n0(e.downtimeWeek / 8 * compute(project(e.projectId)).plannedRate) + ' м²' : '—'}
+            ${e.downtimeWeek ? `<div class="small">${n1(e.downtimeWeek)} ч ÷ 8 ч × плановый темп</div>` : ''}</td>
         </tr>`).join('')}</tbody>
     </table></div></div>
   </div>`;
@@ -1057,6 +1438,7 @@ function pageTeam(){
   return `
   <div class="page">
     <div class="page-head"><h1>Команда</h1><div class="sub">Структура отчётности. Роль определяет, что человек видит и что отправляет.</div></div>
+    ${howto('team')}
     <div class="card"><div class="tbl-wrap"><table class="responsive">
       <thead><tr><th>Имя</th><th>Роль</th><th>Объект</th><th>Последний отчёт</th><th>Статус</th></tr></thead>
       <tbody>${DB.team.map(u => `
@@ -1076,6 +1458,7 @@ function pageInsights(){
   <div class="page">
     <div class="page-head"><h1>AI-аналитика</h1>
       <div class="sub">Наблюдения, построенные на текущих данных объектов. Демо-интерфейс — реальная модель не подключена.</div></div>
+    ${howto('insights')}
     <div class="grid g2">
       ${insights().map((i,k) => `
         <div class="card pad" style="animation:slideIn .35s ease both;animation-delay:${k*60}ms">
@@ -1092,6 +1475,7 @@ function pageSettings(){
   return `
   <div class="page">
     <div class="page-head"><h1>Настройки</h1><div class="sub">Демо-сборка — интеграции подготовлены в коде, но не подключены.</div></div>
+    ${howto('settings')}
     <div class="grid g2">
       <div class="card pad">
         <div class="mono-label">Интеграции (планируются)</div>
@@ -1133,6 +1517,7 @@ function pageMyProject(){
     <div class="page-head"><div class="mono-label">${p.code} · вид прораба</div>
       <h1 style="margin-top:6px">${esc(p.title || p.name)}</h1>
       <div class="sub">Вы видите только свой объект и отправляете ежедневный отчёт.</div></div>
+    ${howto('myproject')}
     <div class="grid g3">
       <div class="stat"><div class="mono-label">Норма на сегодня</div><div class="v">${n0(c.requiredRate)} м²</div></div>
       <div class="stat"><div class="mono-label">Последний отчёт</div><div class="v">${n0(reportsOf(p.id).slice(-1)[0].production)} м²</div></div>
@@ -1151,6 +1536,57 @@ const PAGES = { overview:pageOverview, projects:pageProjects, project:pageProjec
   materials:pageMaterials, requests:pageRequests, equipment:pageEquipment, team:pageTeam,
   insights:pageInsights, settings:pageSettings, myproject:pageMyProject };
 
+
+/* ---------------------- отрисовка и управление гидом ---------------------- */
+function renderGuide(){
+  const box = el('guide');
+  document.body.classList.toggle('guide-on', state.guide);
+  const gb = el('guideBtn');
+  if(gb){ gb.classList.toggle('on', state.guide); gb.textContent = state.guide ? '✕ Закрыть гид' : '▶ Гид по демо'; }
+  if(!state.guide){ box.innerHTML = ''; clearHighlight(); return; }
+
+  const g = GUIDE[state.step], last = state.step === GUIDE.length - 1;
+  box.innerHTML = `
+    <div class="guide" style="position:fixed">
+      <button class="g-close" data-gclose aria-label="Закрыть гид">✕</button>
+      <span class="g-num">ШАГ ${state.step + 1} / ${GUIDE.length}</span>
+      <div class="g-main">
+        <div class="g-title">${esc(g.title)}</div>
+        <div class="g-text">${esc(g.text)}</div>
+        <div class="g-do"><b>Что сделать:</b><span>${esc(g.action)}</span></div>
+        ${g.watch ? `<div class="g-watch">На что смотреть: ${esc(g.watch)}</div>` : ''}
+        <div class="g-bar"><i style="width:${(state.step + 1) / GUIDE.length * 100}%"></i></div>
+      </div>
+      <div class="g-nav">
+        <button class="btn sm primary" data-gnext>${last ? 'Пройти заново' : 'Далее →'}</button>
+        <button class="btn sm" data-gprev ${state.step === 0 ? 'disabled' : ''}>← Назад</button>
+        <button class="btn sm" data-gclose2>Закрыть</button>
+      </div>
+    </div>`;
+  box.querySelector('[data-gnext]').onclick = () => gotoStep(last ? 0 : state.step + 1);
+  box.querySelector('[data-gprev]').onclick = () => gotoStep(Math.max(0, state.step - 1));
+  box.querySelector('[data-gclose]').onclick  = stopGuide;
+  box.querySelector('[data-gclose2]').onclick = stopGuide;
+  highlight(g.sel);
+}
+function clearHighlight(){ document.querySelectorAll('.hl-target').forEach(n => n.classList.remove('hl-target')); }
+function highlight(sel){
+  clearHighlight();
+  if(!sel) return;
+  const n = el('view').querySelector(sel) || document.querySelector(sel);
+  if(n){ n.classList.add('hl-target'); n.scrollIntoView({ behavior:'smooth', block:'center' }); }
+}
+function gotoStep(i){
+  state.step = i;
+  const g = GUIDE[i];
+  if(state.page !== g.page || (g.param && state.param !== g.param)){
+    state.page = g.page; state.param = g.param || null; state.openReport = null;
+    render();
+  } else { renderGuide(); }
+}
+function startGuide(){ state.guide = true; state.role = 'director'; gotoStep(0); }
+function stopGuide(){ state.guide = false; state.step = 0; renderGuide(); }
+
 /* ================================ 4. RENDER =============================== */
 function render(){
   renderChrome();
@@ -1161,6 +1597,7 @@ function render(){
     : (NAV[state.page] ? NAV[state.page].label : 'Обзор');
   el('view').querySelectorAll('[data-count]').forEach(countUp);
   bind();
+  renderGuide();
 }
 
 function bind(){
@@ -1178,7 +1615,7 @@ function bind(){
   v.querySelectorAll('[data-task]').forEach(n => n.onclick = () => {
     const t = DB.tasks.find(x => x.id === n.dataset.task);
     t.done = true;                       // [INTEGRATION:DB] persist task state
-    toast('Действие выполнено', `${t.title} — отмечено как выполненное.`);
+    toast('Действие выполнено', `${taskTitle(t)} — отмечено как выполненное.`);
     render();
   });
   v.querySelectorAll('[data-report]').forEach(n => n.onclick = () => {
@@ -1284,16 +1721,20 @@ function createRequest(){
   const critical = materialRows().sort((a,b) => a.daysLeft - b.daysLeft)[0];
   DB.procurementRequests.unshift({
     material:critical.name, projectId:critical.projectId,
-    qty: critical.name === 'Щебень' ? 300 : Math.ceil(critical.dailyUse * 10),
+    qty: critical.orderQty,                       // до целевого запаса в buffer дней
     priority: critical.status === 'critical' ? 'Высокий' : 'Обычный',
-    created: fmtShort(TODAY), status:'Отправлена'
+    created: fmtShort(TODAY), status:'Отправлена',
+    need: `Хватает на ${n1(critical.daysLeft)} дн., срок поставки ${critical.leadTime} дн.`,
+    supplier: critical.supplier
   });
   const t = DB.tasks.find(x => x.id === 'T2'); if(t && critical.name === 'Щебень') t.done = true;
   render();
-  toast('Заявка создана', `${critical.name} · ${project(critical.projectId).code} · заявка отправлена.`);
+  toast('Заявка создана',
+    `${critical.name} · ${project(critical.projectId).code} · ${n0(critical.orderQty)} ${critical.unit} · до ${fmtShort(critical.orderBy)}.`);
 }
 
 /* ================================= 6. BOOT ================================ */
+el('guideBtn').onclick = () => state.guide ? stopGuide() : startGuide();
 el('burger').onclick = () => document.body.classList.toggle('nav-open');
 document.addEventListener('click', e => {
   if(document.body.classList.contains('nav-open') &&
