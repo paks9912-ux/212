@@ -1,0 +1,817 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0b0c">
+<title>CHAZOR AI — превью интерфейса</title>
+<style>
+:root{
+  --bg:#0a0b0c;
+  --surface:#131518;
+  --elevated:#1b1d20;
+  --hairline:rgba(255,255,255,.08);
+  --text:#ffffff;
+  --text-2:#8f949c;
+  --text-3:#61666d;
+  --accent:#e12128;
+  --normal:#5cc787;
+  --warning:#f5b040;
+  --critical:#e12128;
+  --ev:#5cc787;
+  --hev:#99a2ad;
+  --radius:18px;
+  --pad:20px;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Inter,system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:#000;color:var(--text);font-family:var(--font);
+  -webkit-font-smoothing:antialiased}
+body{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:0}
+
+/* ---------- device shell ---------- */
+.stage{width:100%;max-width:430px;height:100dvh;max-height:940px;position:relative;
+  background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+@media (min-width:900px){
+  body{background:radial-gradient(120% 80% at 50% 0%,#17191c 0%,#000 70%)}
+  .stage{height:min(92dvh,900px);border-radius:44px;border:1px solid rgba(255,255,255,.10);
+    box-shadow:0 40px 120px rgba(0,0,0,.8),0 0 0 10px #0d0e10}
+}
+.screen{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 var(--pad) 24px;
+  scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen[hidden]{display:none}
+
+/* ---------- header ---------- */
+.head{display:flex;align-items:center;gap:12px;padding:26px 0 14px}
+.head h1{margin:0;font-size:15px;font-weight:600;letter-spacing:.22em;text-transform:uppercase}
+.head .sub{margin-top:3px;font-size:11px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text-3)}
+.badge{margin-left:auto;display:inline-flex;align-items:center;gap:7px;padding:6px 10px;
+  border-radius:999px;background:rgba(255,255,255,.05);font-size:11px;font-weight:600;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--text-2);white-space:nowrap}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--normal);flex:none}
+
+/* ---------- primitives ---------- */
+.card{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);
+  padding:16px}
+.label{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text-2)}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.sec{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.sec .right{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--text-3)}
+
+/* ---------- speed ---------- */
+.speed{text-align:center;padding:14px 0 20px}
+.speed .v{font-size:108px;line-height:.95;font-weight:400;letter-spacing:-.04em}
+.speed .u{margin-top:2px;font-size:11px;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--text-2)}
+
+/* ---------- battery ---------- */
+.batt-top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.batt-pct{font-size:30px;font-weight:500;letter-spacing:-.01em}
+.chip{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  padding:4px 8px;border-radius:999px}
+.chip.ev{color:var(--ev);background:rgba(92,199,135,.14)}
+.chip.hev{color:var(--hev);background:rgba(153,162,173,.14)}
+.batt-range{margin-left:auto;font-size:14px;color:var(--text-2)}
+.track{margin-top:12px;height:6px;border-radius:999px;background:rgba(255,255,255,.07);
+  overflow:hidden}
+.track > i{display:block;height:100%;border-radius:999px;background:var(--ev);
+  transition:width .6s cubic-bezier(.22,.61,.36,1)}
+
+/* ---------- metric card ---------- */
+.metric .v{font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1.1}
+.metric .u{font-size:13px;font-weight:600;color:var(--text-2);margin-left:4px}
+.metric .top{display:flex;align-items:center;margin-bottom:8px}
+
+/* ---------- status ---------- */
+.status{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;
+  background:rgba(255,255,255,.05);font-size:11px;font-weight:600;letter-spacing:.1em;
+  color:var(--text-2)}
+.status .dot{background:var(--normal)}
+.status.warning{background:rgba(245,176,64,.14);color:var(--warning)}
+.status.warning .dot{background:var(--warning)}
+.status.critical{background:rgba(225,33,40,.14);color:var(--critical)}
+.status.critical .dot{background:var(--critical)}
+
+/* ---------- rows ---------- */
+.rows{background:var(--surface);border:1px solid var(--hairline);border-radius:var(--radius);
+  overflow:hidden}
+.row{display:flex;align-items:center;gap:12px;padding:14px 16px}
+.row + .row{border-top:1px solid var(--hairline)}
+.row .k{font-size:15px;color:var(--text-2)}
+.row .v{margin-left:auto;font-size:21px;font-weight:500}
+.row .u{font-size:13px;font-weight:600;color:var(--text-2);margin-left:3px}
+.row .sub{font-size:11px;color:var(--text-3);margin-top:3px}
+
+/* ---------- buttons ---------- */
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:64px;
+  border:0;border-radius:16px;background:var(--accent);color:#fff;font-family:inherit;
+  font-size:17px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;
+  transition:transform .12s ease,opacity .12s ease}
+.btn:active{transform:scale(.985);opacity:.85}
+.btn.neutral{background:var(--elevated)}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;height:40px;border:0;border-radius:12px;background:rgba(255,255,255,.03);
+  color:var(--text-2);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--elevated);color:#fff}
+.ask{width:100%;text-align:left;display:flex;align-items:center;gap:10px;min-height:56px;
+  padding:12px 16px;border:1px solid var(--hairline);border-radius:14px;background:var(--surface);
+  color:var(--text);font-family:inherit;font-size:15px;cursor:pointer}
+.ask:active{opacity:.8}
+.ask .arr{margin-left:auto;color:var(--text-3);font-size:13px}
+
+/* ---------- chart ---------- */
+.chart{width:100%;height:170px;display:block;overflow:visible}
+.chart .bar{fill:url(#barfill)}
+.chart text{font-size:10px;fill:var(--text-3);font-weight:500;
+  font-family:var(--font);font-variant-numeric:tabular-nums}
+.chart .grid{stroke:rgba(255,255,255,.08);stroke-width:1}
+
+/* ---------- split bar ---------- */
+.split{display:flex;gap:2px;height:8px;margin-bottom:8px}
+.split i{display:block;border-radius:999px;transition:width .6s cubic-bezier(.22,.61,.36,1)}
+.split .a{background:var(--ev)}
+.split .b{background:rgba(153,162,173,.55);flex:1}
+.legend{display:flex;gap:16px;font-size:12px;font-weight:500;color:var(--text-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+
+/* ---------- assistant ---------- */
+.answer{min-height:120px;padding:20px}
+.answer .h{font-size:24px;font-weight:500;line-height:1.3}
+.answer .d{margin-top:10px;font-size:15px;color:var(--text-2);line-height:1.45}
+.turns .t{display:flex;gap:10px;padding:10px 16px;font-size:15px}
+.turns .t i{width:5px;height:5px;border-radius:50%;background:var(--text-3);margin-top:8px;flex:none}
+.turns .t.a i{background:var(--accent)}
+.turns .t.q{color:var(--text-2)}
+
+/* ---------- tab bar ---------- */
+.tabs{display:flex;background:#0e0f11;border-top:1px solid var(--hairline);
+  padding:8px 0 max(8px,env(safe-area-inset-bottom))}
+.tabs button{flex:1;border:0;background:none;color:#767b82;font-family:inherit;font-size:10px;
+  font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding:6px 0}
+.tabs button[aria-selected="true"]{color:#fff}
+.tabs svg{width:22px;height:22px;fill:currentColor}
+
+.foot{font-size:11px;color:var(--text-3);text-align:center;padding-top:2px}
+.note{font-size:11px;color:var(--text-3);line-height:1.5}
+.banner{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-2);
+  padding:12px 16px;background:var(--surface);border:1px solid var(--hairline);
+  border-radius:var(--radius)}
+.banner a{color:var(--text);text-decoration:none;border-bottom:1px solid var(--hairline)}
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- ============ HOME ============ -->
+  <section class="screen" id="s-home">
+    <div class="head">
+      <div>
+        <h1>Chazor AI</h1>
+        <div class="sub">BYD Chazor</div>
+      </div>
+      <div class="badge"><i class="dot"></i><span id="conn">Demo</span></div>
+    </div>
+
+    <div class="stack">
+      <div class="speed">
+        <div class="v num" id="speed">68</div>
+        <div class="u">km/h</div>
+      </div>
+
+      <div class="card">
+        <div class="batt-top">
+          <span class="batt-pct num"><span id="soc">74</span>%</span>
+          <span class="chip ev" id="mode">EV</span>
+          <span class="batt-range num">Range <span id="range">82</span> km</span>
+        </div>
+        <div class="track"><i id="socbar" style="width:74%"></i></div>
+      </div>
+
+      <div class="grid2">
+        <div class="card metric">
+          <div class="top"><span class="label">Trip</span></div>
+          <div><span class="v num" id="trip">24,7</span><span class="u">km</span></div>
+        </div>
+        <div class="card metric">
+          <div class="top"><span class="label">Consumption</span></div>
+          <div><span class="v num" id="cons">4,3</span><span class="u">L/100 km</span></div>
+        </div>
+      </div>
+
+      <button class="btn" data-goto="ai">Ask Claude</button>
+      <p class="foot">Штатная приборная панель остаётся основным источником данных.</p>
+    </div>
+  </section>
+
+  <!-- ============ TRIPS ============ -->
+  <section class="screen" id="s-trips" hidden>
+    <div class="head"><div><h1>Trips</h1><div class="sub">Statistics</div></div></div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="sec"><span class="label">Current trip</span>
+          <span class="right" id="tripstate">In progress</span></div>
+        <div><span class="v num" style="font-size:56px;font-weight:400;letter-spacing:-.03em"
+          id="ctrip">24,7</span><span class="u" style="font-size:13px;font-weight:600;
+          color:var(--text-2);margin-left:5px">km</span></div>
+        <div class="grid2" style="grid-template-columns:1fr 1fr 1fr;margin-top:14px">
+          <div><div class="label">Avg speed</div>
+            <div class="num" style="font-size:21px;font-weight:500"><span id="cavg">39</span>
+            <span style="font-size:11px;color:var(--text-3)">km/h</span></div></div>
+          <div><div class="label">Consumption</div>
+            <div class="num" style="font-size:21px;font-weight:500"><span id="ccons">4,3</span>
+            <span style="font-size:11px;color:var(--text-3)">L/100</span></div></div>
+          <div><div class="label">Time</div>
+            <div class="num" style="font-size:21px;font-weight:500" id="ctime">38 мин</div></div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="split"><i class="a" id="csplit" style="width:71%"></i><i class="b"></i></div>
+          <div class="legend">
+            <span><i class="dot" style="background:var(--ev)"></i>EV <span class="num" id="cev">71</span>%</span>
+            <span><i class="dot" style="background:rgba(153,162,173,.55)"></i>HEV <span class="num" id="chev">29</span>%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="seg" id="periods">
+        <button aria-pressed="true" data-p="today">Today</button>
+        <button aria-pressed="false" data-p="yesterday">Yesterday</button>
+        <button aria-pressed="false" data-p="7">7 days</button>
+        <button aria-pressed="false" data-p="30">30 days</button>
+      </div>
+
+      <div class="grid2" id="summary"></div>
+
+      <div class="card">
+        <div class="sec"><span class="label">Distance</span><span class="right">km</span></div>
+        <svg class="chart" id="chart" preserveAspectRatio="none"></svg>
+      </div>
+
+      <div>
+        <div class="sec"><span class="label">Trips</span><span class="right" id="tripcount">0</span></div>
+        <div class="rows" id="triplist"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CAR ============ -->
+  <section class="screen" id="s-car" hidden>
+    <div class="head"><div><h1>Car</h1><div class="sub">Vehicle data</div></div>
+      <div class="badge"><i class="dot"></i>Demo</div></div>
+
+    <div class="stack">
+      <div>
+        <div class="sec"><span class="label">Parameters</span>
+          <span class="right" id="overall">NORMAL</span></div>
+        <div class="rows" id="params"></div>
+      </div>
+
+      <div>
+        <div class="sec"><span class="label">Maintenance</span></div>
+        <div class="rows" id="maint"></div>
+      </div>
+
+      <div class="banner">
+        <span>Демо-режим. В приложении здесь переключается источник: Demo, OBD-II, CAN.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AI ============ -->
+  <section class="screen" id="s-ai" hidden>
+    <div class="head"><div><h1>Claude</h1><div class="sub" id="aisvc">Offline</div></div></div>
+
+    <div class="stack">
+      <div class="card answer" id="answer">
+        <div class="h">Спросите про машину</div>
+        <div class="d">Расход, заряд, ТО, поездки — ответ будет коротким.</div>
+      </div>
+
+      <button class="btn" id="mic">Ask Claude</button>
+      <p class="note" style="text-align:center;margin:0">
+        В превью голосовой ввод отключён — в приложении это микрофон и озвучка ответа.</p>
+
+      <div>
+        <div class="sec"><span class="label">Вопросы</span></div>
+        <div class="stack" style="gap:8px" id="asks"></div>
+      </div>
+
+      <div id="turnswrap" hidden>
+        <div class="sec"><span class="label">История</span></div>
+        <div class="rows turns" id="turns"></div>
+      </div>
+
+      <p class="note">Модель получает только показатели автомобиля и статистику поездок.
+        VIN, местоположение и контакты не собираются.</p>
+    </div>
+  </section>
+
+  <!-- ============ TABS ============ -->
+  <nav class="tabs" id="tabs">
+    <button aria-selected="true" data-tab="home">
+      <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9h-2a7 7 0 1 1-7-7V3z"/><circle cx="12" cy="12" r="2"/></svg>
+      Home</button>
+    <button aria-selected="false" data-tab="trips">
+      <svg viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
+      Trips</button>
+    <button aria-selected="false" data-tab="car">
+      <svg viewBox="0 0 24 24"><path d="M5 11l1.5-4.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11h1a1 1 0 0 1 1 1v4a1 1 0 0 1-1 1h-1v1a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H8v1a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-1H4a1 1 0 0 1-1-1v-4a1 1 0 0 1 1-1h1zm2.1 0h9.8l-1.1-3.3H8.2L7.1 11zM7 13.5a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4zm10 0a1.2 1.2 0 1 0 0 2.4 1.2 1.2 0 0 0 0-2.4z"/></svg>
+      Car</button>
+    <button aria-selected="false" data-tab="ai">
+      <svg viewBox="0 0 24 24"><rect x="2" y="10" width="2" height="4" rx="1"/><rect x="6" y="7" width="2" height="10" rx="1"/><rect x="10" y="3" width="2" height="18" rx="1"/><rect x="14" y="7" width="2" height="10" rx="1"/><rect x="18" y="10" width="2" height="4" rx="1"/></svg>
+      AI</button>
+  </nav>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Порт логики Swift-прототипа: симулятор ездового цикла, расчёт статусов,
+   интервалы ТО и офлайн-ассистент. Формулы совпадают с ChazorAI/Domain.
+   ===================================================================== */
+
+const THIN = ' ';
+const nf = (v, d = 0, group = false) => {
+  const fixed = Math.abs(v).toFixed(d).replace('.', ',');
+  const sign = v < 0 ? '-' : '';
+  if (!group) return sign + fixed;
+  const [int, frac] = fixed.split(',');
+  return sign + int.replace(/\B(?=(\d{3})+(?!\d))/g, THIN) + (frac ? ',' + frac : '');
+};
+const km = (v, d) => nf(v, d === undefined ? (Math.abs(v) >= 100 ? 0 : 1) : d, true);
+/* Русские числительные: «82 километра», а не «82 километров» — ответ произносится вслух. */
+const plural = (n, one, few, many) => {
+  if (n !== Math.round(n)) return few;
+  const a = Math.abs(Math.round(n)), lastTwo = a % 100;
+  if (lastTwo >= 11 && lastTwo <= 14) return many;
+  const last = a % 10;
+  return last === 1 ? one : (last >= 2 && last <= 4 ? few : many);
+};
+const kmWord = n => plural(n, 'километр', 'километра', 'километров');
+const pctWord = n => plural(n, 'процент', 'процента', 'процентов');
+const dayWord = n => plural(n, 'день', 'дня', 'дней');
+const tripWord = n => plural(n, 'поездку', 'поездки', 'поездок');
+const duration = (sec) => {
+  const t = Math.max(0, Math.round(sec)), h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60);
+  if (h > 0) return h + ' ч ' + m + ' мин';
+  if (m > 0) return m + ' мин';
+  return t + ' с';
+};
+
+/* ---------- HealthRules ---------- */
+const Health = {
+  battery: s => s < 8 ? 'CRITICAL' : s < 15 ? 'WARNING' : 'NORMAL',
+  aux: v => v < 11.8 ? 'CRITICAL' : v < 12.2 ? 'WARNING' : v >= 15.2 ? 'CRITICAL' : v >= 14.9 ? 'WARNING' : 'NORMAL',
+  coolant: c => c >= 110 ? 'CRITICAL' : c >= 103 ? 'WARNING' : 'NORMAL',
+  errors: (n, mil) => mil ? 'CRITICAL' : n === 0 ? 'NORMAL' : 'WARNING',
+  serviceKm: r => r < 0 ? 'CRITICAL' : r < 1000 ? 'WARNING' : 'NORMAL',
+  serviceDays: r => r < 0 ? 'CRITICAL' : r < 30 ? 'WARNING' : 'NORMAL',
+  worst: list => list.reduce((a, b) =>
+    ['NORMAL', 'WARNING', 'CRITICAL'].indexOf(b) > ['NORMAL', 'WARNING', 'CRITICAL'].indexOf(a) ? b : a, 'NORMAL')
+};
+
+/* ---------- детерминированный генератор ---------- */
+function rng(seed) {
+  let s = seed >>> 0;
+  return () => { s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0; return s / 4294967296; };
+}
+
+/* ---------- симулятор ездового цикла ---------- */
+class DriveSimulator {
+  constructor() {
+    this.rand = rng(0xC4A20B55);
+    this.speed = 68; this.target = 68; this.phase = 25;
+    this.mode = 'EV'; this.coolant = 91; this.odometer = 84320;
+    this.soc = 74; this.aux = 12.6;
+    this.fullRange = 111;
+    this.tripKm = 24.7; this.tripEv = 24.7 * 0.71;
+    this.tripFuel = 24.7 * 4.3 / 100; this.tripSec = 38 * 60;
+  }
+  tick(dt) {
+    if (--this.phase <= 0) {
+      const stop = this.rand() < 0.28;
+      this.target = stop ? 0 : 32 + this.rand() * 64;
+      this.phase = 12 + Math.floor(this.rand() * 34);
+    }
+    const delta = this.target - this.speed;
+    const rate = delta < 0 ? 3.4 : 1.9;
+    this.speed = Math.max(0, this.speed + Math.max(-rate, Math.min(rate, delta * 0.35)));
+    if (this.speed < 0.6) this.speed = 0;
+
+    if (this.soc <= 14) this.mode = 'HEV';
+    else if (this.soc > 22 && this.mode === 'HEV' && this.speed < 60) this.mode = 'EV';
+
+    const d = this.speed * dt / 3600;
+    if (d > 0) {
+      if (this.mode === 'EV') {
+        this.soc = Math.max(0, this.soc - d * (100 / this.fullRange) * (0.82 + this.speed / 130 * 0.55));
+      } else {
+        this.tripFuel += (5.1 + (this.speed > 90 ? 1.4 : 0)) / 100 * d;
+        this.soc = Math.min(100, this.soc + d * 0.05);
+      }
+    }
+    this.coolant += ((this.mode === 'HEV' ? 92 : 74) - this.coolant) * 0.04;
+    this.aux += ((this.speed > 2 ? 13.9 : 12.6) - this.aux) * 0.08;
+
+    this.odometer += d; this.tripKm += d; this.tripSec += dt;
+    if (this.mode === 'EV') this.tripEv += d;
+  }
+  get frame() {
+    const ev = this.tripKm > 0 ? this.tripEv / this.tripKm * 100 : 100;
+    return {
+      speed: Math.round(this.speed), mode: this.mode,
+      coolant: Math.round(this.coolant), odometer: Math.round(this.odometer),
+      soc: Math.round(this.soc), range: Math.round(this.soc / 100 * this.fullRange),
+      aux: Math.round(this.aux * 10) / 10, errors: 0,
+      trip: {
+        km: Math.round(this.tripKm * 10) / 10, sec: this.tripSec,
+        avg: this.tripSec > 0 ? this.tripKm / (this.tripSec / 3600) : 0,
+        cons: this.tripKm > 0.05 ? Math.round(this.tripFuel / this.tripKm * 1000) / 10 : 0,
+        ev: Math.round(ev), hev: Math.round(100 - ev)
+      }
+    };
+  }
+}
+
+/* ---------- засев истории поездок (как SampleDataSeeder) ---------- */
+function seedTrips() {
+  const rand = rng(0x5EEDC4A2), trips = [];
+  const startOfDay = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+  for (let back = 0; back < 35; back++) {
+    const day = startOfDay(new Date(Date.now() - back * 864e5));
+    const weekend = [0, 6].includes(day.getDay());
+    let count = weekend ? Math.floor(rand() * 3) : 1 + Math.floor(rand() * 3);
+    if (back === 0) count = Math.max(1, count);   // сегодня всегда есть что показать
+    for (let i = 0; i < count; i++) {
+      const date = new Date(day);
+      date.setHours(weekend ? 10 + Math.floor(rand() * 10) : (i === 0 ? 8 : 18), Math.floor(rand() * 56));
+      if (date > new Date()) date.setTime(Date.now());   // не засеваем будущее
+      const distance = weekend ? 18 + rand() * 72 : 6 + rand() * 28;
+      const avg = 26 + rand() * 36;
+      const ev = Math.max(8, Math.min(100, 104 - distance * 1.15 + (rand() * 16 - 8)));
+      const cons = ev > 96 ? 0 : Math.max(0, (100 - ev) / 100 * (5.4 + rand() * 2.2));
+      trips.push({
+        date, distance: Math.round(distance * 10) / 10,
+        duration: distance / avg * 3600, avg: Math.round(avg * 10) / 10,
+        cons: Math.round(cons * 10) / 10, ev: Math.round(ev)
+      });
+    }
+  }
+  return trips.sort((a, b) => b.date - a.date);
+}
+
+/* ---------- обслуживание ---------- */
+const SERVICE_SPOKEN = {
+  'ENGINE OIL': 'замена масла', 'AIR FILTER': 'воздушный фильтр',
+  'BRAKE CHECK': 'проверка тормозов', 'SERVICE': 'плановое ТО'
+};
+const SERVICE_INTERVALS = {
+  'ENGINE OIL': { km: 10000, days: 365 },
+  'AIR FILTER': { km: 20000, days: null },
+  'BRAKE CHECK': { km: 15000, days: null },
+  'SERVICE': { km: 15000, days: 365 }
+};
+const SERVICE_HISTORY = {
+  'ENGINE OIL': { mileage: 84320 - 2800, daysAgo: 120 },
+  'AIR FILTER': { mileage: 84320 - 7600, daysAgo: 300 },
+  'BRAKE CHECK': { mileage: 84320 - 10000, daysAgo: 190 },
+  'SERVICE': { mileage: 84320 - 2800, daysAgo: 342 }
+};
+function maintenanceItems(odometer) {
+  return Object.keys(SERVICE_INTERVALS).map(name => {
+    const spec = SERVICE_INTERVALS[name], last = SERVICE_HISTORY[name];
+    const remKm = spec.km ? last.mileage + spec.km - odometer : null;
+    const remDays = spec.days ? spec.days - last.daysAgo : null;
+    const statuses = [];
+    if (remKm !== null) statuses.push(Health.serviceKm(remKm));
+    if (remDays !== null) statuses.push(Health.serviceDays(remDays));
+    const byTime = remDays === null ? Infinity : remDays * 40;
+    const byKm = remKm === null ? Infinity : remKm;
+    return {
+      name, remKm, remDays, status: Health.worst(statuses),
+      urgency: Math.min(byKm, byTime),
+      headline: byKm <= byTime ? km(Math.abs(remKm)) + ' km' : Math.abs(remDays) + ' days'
+    };
+  }).sort((a, b) => a.urgency - b.urgency);
+}
+
+/* ---------- агрегаты ---------- */
+function aggregate(trips) {
+  if (!trips.length) return { count: 0, km: 0, sec: 0, avg: 0, cons: 0, ev: 0, hev: 100 };
+  const distance = trips.reduce((s, t) => s + t.distance, 0);
+  const sec = trips.reduce((s, t) => s + t.duration, 0);
+  const litres = trips.reduce((s, t) => s + t.cons / 100 * t.distance, 0);
+  const evKm = trips.reduce((s, t) => s + t.distance * t.ev / 100, 0);
+  const ev = distance > 0 ? evKm / distance * 100 : 0;
+  return {
+    count: trips.length, km: distance, sec,
+    avg: sec > 0 ? distance / (sec / 3600) : 0,
+    cons: distance > 0 ? litres / distance * 100 : 0,
+    ev, hev: 100 - ev
+  };
+}
+function rangeFor(period) {
+  const start = new Date(); start.setHours(0, 0, 0, 0);
+  const end = new Date(start.getTime() + 864e5);
+  if (period === 'today') return [start, end];
+  if (period === 'yesterday') return [new Date(start.getTime() - 864e5), start];
+  const days = period === '7' ? 6 : 29;
+  return [new Date(start.getTime() - days * 864e5), end];
+}
+
+/* ---------- офлайн-ассистент ---------- */
+const SUGGESTIONS = ['Как состояние машины?', 'Какой расход сегодня?', 'Когда следующее ТО?',
+  'Сколько я проехал сегодня?', 'Сравни расход с прошлой неделей', 'Почему расход вырос?'];
+const INTENTS = [
+  ['control', ['открой', 'закрой', 'заведи', 'включи', 'выключи', 'разблокируй']],
+  ['compare', ['сравни', 'по сравнению', 'прошлой недел', 'прошлая недел']],
+  ['cause', ['почему', 'вырос', 'выросл']],
+  ['consumption', ['расход', 'литр', 'потребление']],
+  ['distance', ['проехал', 'километр', 'пробег за']],
+  ['service', ['то', 'обслуж', 'сервис', 'масло', 'фильтр']],
+  ['battery', ['батаре', 'заряд', 'запас хода', 'аккум']],
+  ['errors', ['ошиб', 'неисправ']],
+  ['health', ['состоян', 'как машина', 'в порядке']]
+];
+function intentFor(q) {
+  const text = q.toLowerCase();
+  const words = text.split(/[^0-9a-zа-яё]+/i);
+  for (const [name, keys] of INTENTS) {
+    if (keys.some(k => k.length <= 2 ? words.includes(k) : text.includes(k))) return name;
+  }
+  return 'health';
+}
+function offlineAnswer(question, ctx) {
+  const today = ctx.history.today, week = ctx.history.week;
+  switch (intentFor(question)) {
+    case 'control':
+      return ['Я не управляю машиной — только показываю данные.',
+        'Свет, двери и режимы движения остаются за штатными системами автомобиля.'];
+    case 'consumption':
+      if (!today.count) return ['Сегодня поездок ещё не было.', null];
+      return [`Сегодня ${nf(today.cons, 1)} литра на сто, ${km(today.km)} ${kmWord(today.km)}.`,
+        `На электротяге ${Math.round(today.ev)} ${pctWord(Math.round(today.ev))} пути.`];
+    case 'compare': {
+      if (!today.count || !week.count || week.cons < 0.05)
+        return ['Пока не с чем сравнивать — мало поездок.', null];
+      const change = (today.cons - week.cons) / week.cons * 100;
+      const magnitude = Math.round(Math.abs(change));
+      return [`Сегодня ${nf(today.cons, 1)} литра — на ${magnitude} ${pctWord(magnitude)} ` +
+        `${change >= 0 ? 'выше' : 'ниже'}, чем в среднем за неделю.`,
+        `За неделю ${nf(week.cons, 1)} литра на сто.`];
+    }
+    case 'cause': {
+      if (!today.count) return ['Данных за сегодня пока мало для сравнения.', null];
+      if (week.ev - today.ev > 8)
+        return [`Сегодня меньше электротяги: ${Math.round(today.ev)} ${pctWord(Math.round(today.ev))} против ` +
+          `${Math.round(week.ev)} за неделю.`,
+          'Когда батарея разряжается, включается двигатель и расход растёт.'];
+      if (today.avg - week.avg > 12)
+        return [`Сегодня выше средняя скорость: ${Math.round(today.avg)} против ` +
+          `${Math.round(week.avg)} километров в час.`, 'На трассе расход выше, чем в городе.'];
+      if (ctx.soc < 20)
+        return [`Батарея на ${ctx.soc} процентах, поэтому машина едет на двигателе.`,
+          'После зарядки расход вернётся к обычному.'];
+      return ['Заметной причины в данных не видно — расход близок к среднему за неделю.', null];
+    }
+    case 'distance':
+      if (!today.count) return ['Сегодня вы ещё не выезжали.', null];
+      return [`Сегодня ${km(today.km)} ${kmWord(today.km)} за ${today.count} ${tripWord(today.count)}.`,
+        `Средняя скорость ${Math.round(today.avg)} ${kmWord(Math.round(today.avg))} в час.`];
+    case 'service': {
+      const next = ctx.maintenance[0];
+      const name = SERVICE_SPOKEN[next.name] || next.name.toLowerCase();
+      const left = next.remKm !== null && next.headline.endsWith('km')
+        ? `${km(Math.abs(next.remKm))} ${kmWord(Math.abs(next.remKm))}`
+        : `${Math.abs(next.remDays)} ${dayWord(Math.abs(next.remDays))}`;
+      return [`Ближайшее — ${name} через ${left}.`, 'Полный список — на экране обслуживания.'];
+    }
+    case 'battery':
+      return [`Батарея ${ctx.soc} ${pctWord(ctx.soc)}, запас хода ${ctx.range} ${kmWord(ctx.range)}.`,
+        ctx.mode === 'EV' ? 'Сейчас едем на электротяге.' : 'Сейчас работает гибридный режим.'];
+    case 'errors':
+      return ctx.errors === 0 ? ['Ошибок нет, все системы в норме.', null]
+        : [`Есть ${ctx.errors} ${plural(ctx.errors, 'ошибка', 'ошибки', 'ошибок')}. Стоит заехать в сервис.`, null];
+    default: {
+      const problems = [];
+      if (Health.aux(ctx.aux) !== 'NORMAL') problems.push(`напряжение бортовой сети ${nf(ctx.aux, 1)} вольта`);
+      if (Health.coolant(ctx.coolant) !== 'NORMAL')
+        problems.push(`температура двигателя ${ctx.coolant} ${plural(ctx.coolant, 'градус', 'градуса', 'градусов')}`);
+      if (ctx.errors > 0)
+        problems.push(`${ctx.errors} ${plural(ctx.errors, 'ошибка', 'ошибки', 'ошибок')} в диагностике`);
+      const overdue = ctx.maintenance.find(m => m.status === 'CRITICAL');
+      if (overdue) problems.push(`просрочено обслуживание: ${SERVICE_SPOKEN[overdue.name] || overdue.name.toLowerCase()}`);
+      if (problems.length)
+        return [`Есть на что обратить внимание: ${problems.slice(0, 2).join(', ')}.`,
+          'Подробности — на экране «Car».'];
+      return [`Машина в порядке: батарея ${ctx.soc} ${pctWord(ctx.soc)}, ошибок нет.`,
+        `Двигатель ${ctx.coolant} ${plural(ctx.coolant, 'градус', 'градуса', 'градусов')}, ` +
+        `бортовая сеть ${nf(ctx.aux, 1)} вольта.`];
+    }
+  }
+}
+
+/* =====================================================================
+   Рендеринг
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const sim = new DriveSimulator();
+const TRIPS = seedTrips();
+let period = 'today';
+const turns = [];
+
+function statusChip(status) {
+  const cls = status === 'NORMAL' ? '' : ' ' + status.toLowerCase();
+  return `<span class="status${cls}"><i class="dot"></i>${status}</span>`;
+}
+
+function tripsIn(p) {
+  const [from, to] = rangeFor(p);
+  return TRIPS.filter(t => t.date >= from && t.date < to);
+}
+
+function renderHome(f) {
+  $('speed').textContent = f.speed;
+  $('soc').textContent = f.soc;
+  $('range').textContent = f.range;
+  $('trip').textContent = km(f.trip.km);
+  $('cons').textContent = nf(f.trip.cons, 1);
+  $('socbar').style.width = f.soc + '%';
+  const mode = $('mode');
+  mode.textContent = f.mode;
+  mode.className = 'chip ' + (f.mode === 'EV' ? 'ev' : 'hev');
+  $('socbar').style.background = f.mode === 'EV' ? 'var(--ev)' : 'var(--hev)';
+}
+
+function renderCurrentTrip(f) {
+  $('ctrip').textContent = km(f.trip.km);
+  $('cavg').textContent = Math.round(f.trip.avg);
+  $('ccons').textContent = nf(f.trip.cons, 1);
+  $('ctime').textContent = duration(f.trip.sec);
+  $('cev').textContent = f.trip.ev;
+  $('chev').textContent = f.trip.hev;
+  $('csplit').style.width = f.trip.ev + '%';
+  $('tripstate').textContent = f.speed > 3 ? 'In progress' : 'Parked';
+}
+
+function renderPeriod() {
+  const trips = tripsIn(period), s = aggregate(trips);
+  $('summary').innerHTML = [
+    ['Distance', km(s.km), 'km'], ['Avg speed', Math.round(s.avg), 'km/h'],
+    ['Consumption', nf(s.cons, 1), 'L/100 km'], ['Driving time', duration(s.sec), ''],
+    ['EV', Math.round(s.ev), '%'], ['HEV', Math.round(s.hev), '%']
+  ].map(([l, v, u]) => `<div class="card metric"><div class="top"><span class="label">${l}</span></div>
+      <div><span class="v num">${v}</span>${u ? `<span class="u">${u}</span>` : ''}</div></div>`).join('');
+
+  $('tripcount').textContent = trips.length;
+  $('triplist').innerHTML = trips.slice(0, 20).map(t => {
+    const time = t.date.toTimeString().slice(0, 5);
+    const date = t.date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    return `<div class="row"><div><div class="v num" style="font-size:21px">${time}</div>
+      <div class="sub">${date}</div></div>
+      <div style="margin-left:auto;text-align:right"><div class="v num" style="font-size:21px">${km(t.distance)} km</div>
+      <div class="sub">${nf(t.cons, 1)} L/100 · EV ${t.ev}%</div></div></div>`;
+  }).join('') || '<div class="row"><span class="k">За период поездок нет</span></div>';
+
+  renderChart(trips);
+}
+
+function renderChart(trips) {
+  const svg = $('chart');
+  const W = svg.clientWidth || 340, H = 170, padL = 34, padB = 20;
+  let points;
+  if (period === 'today' || period === 'yesterday') {
+    points = trips.slice().reverse().map(t => ({
+      label: t.date.toTimeString().slice(0, 5), value: t.distance, ev: t.ev }));
+  } else {
+    const [from] = rangeFor(period), days = period === '7' ? 7 : 30;
+    points = Array.from({ length: days }, (_, i) => {
+      const day = new Date(from.getTime() + i * 864e5);
+      const dayTrips = trips.filter(t => t.date.toDateString() === day.toDateString());
+      const s = aggregate(dayTrips);
+      return { label: day.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' }),
+        value: s.km, ev: s.ev };
+    });
+  }
+  if (!points.length) { svg.innerHTML = ''; return; }
+
+  const max = Math.max(10, ...points.map(p => p.value));
+  const plotW = W - padL - 6, plotH = H - padB - 8;
+  const step = plotW / points.length;
+  const barW = Math.max(3, Math.min(26, step * 0.62));
+  const every = points.length > 10 ? Math.ceil(points.length / 5) : 1;
+
+  const grid = [0, max / 2, max].map(v => {
+    const y = 8 + plotH - (v / max) * plotH;
+    return `<line class="grid" x1="${padL}" y1="${y}" x2="${W - 4}" y2="${y}"/>
+      <text x="${padL - 6}" y="${y + 3}" text-anchor="end">${km(v, 0)}</text>`;
+  }).join('');
+
+  const bars = points.map((p, i) => {
+    const h = Math.max(p.value > 0 ? 2 : 0, (p.value / max) * plotH);
+    const x = padL + i * step + (step - barW) / 2;
+    const y = 8 + plotH - h;
+    const share = Math.min(1, Math.max(0, p.ev / 100));
+    const fill = `rgba(${Math.round(92 + (153 - 92) * (1 - share))},${Math.round(199 - 37 * (1 - share))},${Math.round(135 + 38 * (1 - share))},${0.4 + 0.5 * share})`;
+    const label = i % every === 0
+      ? `<text x="${padL + i * step + step / 2}" y="${H - 4}" text-anchor="middle">${p.label}</text>` : '';
+    return `<rect x="${x}" y="${y}" width="${barW}" height="${h}" rx="3" fill="${fill}"/>${label}`;
+  }).join('');
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = grid + bars;
+}
+
+function renderCar(f) {
+  const items = maintenanceItems(f.odometer);
+  const rows = [
+    ['Vehicle', 'BYD Chazor', '', null],
+    ['Battery', f.soc, '%', Health.battery(f.soc)],
+    ['12V', nf(f.aux, 1), 'V', Health.aux(f.aux)],
+    ['Temperature', f.coolant, '°C', Health.coolant(f.coolant)],
+    ['Drive Mode', f.mode, '', null],
+    ['Errors', f.errors, '', Health.errors(f.errors, false)],
+    ['Mileage', km(f.odometer, 0), 'km', null],
+    ['Maintenance', items[0].headline, '', items[0].status]
+  ];
+  $('params').innerHTML = rows.map(([k, v, u, st]) =>
+    `<div class="row"><span class="k">${k}</span><span class="v num">${v}${u ? `<span class="u">${u}</span>` : ''}</span>
+     ${st ? statusChip(st) : ''}</div>`).join('');
+
+  $('overall').textContent = Health.worst([Health.battery(f.soc), Health.aux(f.aux),
+    Health.coolant(f.coolant), Health.errors(f.errors, false)]);
+
+  $('maint').innerHTML = items.map(m =>
+    `<div class="row"><div><div style="font-size:19px;font-weight:600">${m.name}</div>
+      <div class="sub">интервал ${SERVICE_INTERVALS[m.name].km ? km(SERVICE_INTERVALS[m.name].km, 0) + ' km' : ''}
+      ${SERVICE_INTERVALS[m.name].days ? '· ' + SERVICE_INTERVALS[m.name].days + ' дней' : ''}</div></div>
+      <div style="margin-left:auto;text-align:right"><div class="v num" style="font-size:21px">${m.headline}</div>
+      <div style="margin-top:5px">${statusChip(m.status)}</div></div></div>`).join('');
+}
+
+function context(f) {
+  return {
+    soc: f.soc, range: f.range, mode: f.mode, coolant: f.coolant, aux: f.aux, errors: f.errors,
+    maintenance: maintenanceItems(f.odometer),
+    history: { today: aggregate(tripsIn('today')), week: aggregate(tripsIn('7')) }
+  };
+}
+
+function ask(question) {
+  const [headline, detail] = offlineAnswer(question, context(sim.frame));
+  $('answer').innerHTML = `<div class="h">${headline}</div>` +
+    (detail ? `<div class="d">${detail}</div>` : '');
+  turns.push({ role: 'q', text: question });
+  turns.push({ role: 'a', text: headline });
+  $('turnswrap').hidden = false;
+  $('turns').innerHTML = turns.slice().reverse()
+    .map(t => `<div class="t ${t.role}"><i></i><span>${t.text}</span></div>`).join('');
+}
+
+/* ---------- навигация ---------- */
+const SCREENS = { home: 's-home', trips: 's-trips', car: 's-car', ai: 's-ai' };
+function show(tab) {
+  Object.entries(SCREENS).forEach(([name, id]) => { $(id).hidden = name !== tab; });
+  [...$('tabs').children].forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+  if (tab === 'trips') renderPeriod();
+}
+$('tabs').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (b) show(b.dataset.tab);
+});
+document.querySelectorAll('[data-goto]').forEach(b =>
+  b.addEventListener('click', () => show(b.dataset.goto)));
+$('periods').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  period = b.dataset.p;
+  [...$('periods').children].forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  renderPeriod();
+});
+$('asks').innerHTML = SUGGESTIONS.map(q =>
+  `<button class="ask" data-q="${q}"><span>${q}</span><span class="arr">↗</span></button>`).join('');
+$('asks').addEventListener('click', e => {
+  const b = e.target.closest('.ask'); if (b) ask(b.dataset.q);
+});
+$('mic').addEventListener('click', () => ask(SUGGESTIONS[Math.floor(Math.random() * SUGGESTIONS.length)]));
+
+/* ---------- цикл ---------- */
+function loop() {
+  sim.tick(1);
+  const f = sim.frame;
+  renderHome(f);
+  renderCurrentTrip(f);
+  renderCar(f);
+}
+loop();
+renderPeriod();
+setInterval(loop, 1000);
+window.addEventListener('resize', () => { if (!$('s-trips').hidden) renderPeriod(); });
+</script>
+</body>
+</html>

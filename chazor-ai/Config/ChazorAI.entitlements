@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  CarPlay: driving task.
+
+	  A vehicle-companion app that shows trip, battery and service information falls into
+	  Apple's "driving task" category. The entitlement has to be requested from Apple and
+	  granted against the App ID before a device build will sign.
+
+	  This file is NOT wired into the build settings on purpose, so that the project builds
+	  and runs out of the box for anyone who has not been granted the entitlement. To try
+	  CarPlay in the Simulator, set CODE_SIGN_ENTITLEMENTS = Config/ChazorAI.entitlements
+	  on the ChazorAI target — see Docs/CARPLAY.md.
+	-->
+	<key>com.apple.developer.carplay-driving-task</key>
+	<true/>
+</dict>
+</plist>
