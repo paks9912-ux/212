@@ -200,48 +200,64 @@ h1 em,h2 em{font-style:italic;font-weight:300;color:var(--accent)}
 .dir-aside figcaption{margin-top:12px;font-size:var(--t-xs);letter-spacing:.18em;text-transform:uppercase;color:var(--text-soft);font-weight:400}
 .dir-main{grid-column:6/13}
 .dir-main .sec-head{margin-bottom:clamp(28px,4vh,48px)}
-/* картотека: папки лежат стопкой, стопка расступается перед вытянутой */
-.dir-stack{position:relative;padding-top:44px}
-.dir-card{position:relative;background:var(--paper);border:1px solid var(--line-soft);border-radius:2px 14px 3px 3px;
-  padding:58px clamp(20px,2.2vw,32px) 26px;min-height:178px;outline-offset:5px;
-  /* стопка расступается медленнее, чем вытягивается сама папка: это её отклик, а не движение */
+/* картотека: стопка бумаги, у каждого листа свой язычок */
+.dir-stack{position:relative;padding-top:40px;padding-bottom:96px;--tstep:13%}
+.dir-card{--i:0;position:relative;background:var(--paper);border:1px solid var(--line-soft);border-radius:2px;
+  padding:52px clamp(22px,2.4vw,34px) 26px;min-height:172px;outline-offset:6px;
+  /* лист лежит на предыдущем и кладёт на него тень — отсюда ощущение стопки */
+  box-shadow:0 -7px 16px -10px rgba(30,28,26,.22);
   transition:transform .56s var(--ease-out) var(--dly,0ms),box-shadow .42s var(--ease-out)}
-.dir-card+.dir-card{margin-top:-122px}
-.dir-card:nth-child(2){--dly:14ms}
-.dir-card:nth-child(3){--dly:28ms}
-.dir-card:nth-child(4){--dly:42ms}
-.dir-card:nth-child(5){--dly:56ms}
-.dir-card:nth-child(6){--dly:70ms}
-.dir-tab{position:absolute;bottom:100%;margin-bottom:-1px;height:42px;display:inline-flex;align-items:center;
-  padding:0 clamp(16px,1.6vw,22px);max-width:min(82%,34ch);
-  background:var(--paper);border:1px solid var(--line-soft);border-bottom:0;border-radius:11px 11px 0 0;
-  font-family:var(--display);font-size:15px;font-weight:400;line-height:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+.dir-card+.dir-card{margin-top:-124px}
+.dir-card:nth-child(2){--i:1;--dly:14ms}
+.dir-card:nth-child(3){--i:2;--dly:28ms}
+.dir-card:nth-child(4){--i:3;--dly:42ms}
+.dir-card:nth-child(5){--i:4;--dly:56ms}
+.dir-card:nth-child(6){--i:5;--dly:70ms}
+/* язычки идут одной диагональю через всю ширину, а не зигзагом в три позиции */
+.dir-tab{position:absolute;bottom:100%;margin-bottom:-1px;left:calc(var(--i) * var(--tstep));
+  max-width:calc(100% - var(--i) * var(--tstep) - 10px);
+  height:38px;display:inline-flex;align-items:center;padding:0 clamp(15px,1.5vw,20px);
+  background:var(--paper);border:1px solid var(--line-soft);border-bottom:0;border-radius:8px 8px 0 0;
+  box-shadow:0 -6px 14px -10px rgba(30,28,26,.2);
+  font-family:var(--display);font-size:14.5px;font-weight:400;letter-spacing:.005em;line-height:1;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   transition:background .24s var(--ease-out),color .24s,border-color .24s}
-.dir-card:nth-child(3n+1) .dir-tab{left:0}
-.dir-card:nth-child(3n+2) .dir-tab{left:19%}
-.dir-card:nth-child(3n+3) .dir-tab{left:38%}
-.dir-card p{color:var(--text-soft);font-size:15.5px;max-width:46ch}
+.dir-card p{color:var(--text-soft);font-size:15.5px;max-width:44ch}
 /* заметка не проявляется, а прописывается слева направо — как от руки */
-.dir-note{display:inline-block;margin-top:18px;font-family:var(--hand);font-size:20px;line-height:1.15;color:var(--accent);
+.dir-note{display:inline-block;margin-top:16px;font-family:var(--hand);font-size:20px;line-height:1.15;color:var(--accent);
   transform:rotate(-2.5deg);transform-origin:left center;
   clip-path:inset(0 100% -20% 0);transition:clip-path .62s var(--ease-out) .22s}
 
 /* передняя папка — бордовая, как в референсе; она же передаёт эстафету тёмному блоку ниже */
 .dir-card:last-child,.dir-card:last-child .dir-tab{background:var(--accent);border-color:var(--accent);color:var(--dark-text)}
+.dir-card:last-child{box-shadow:0 -8px 20px -10px rgba(30,28,26,.34)}
 .dir-card:last-child p{color:#EBDFD5}
 .dir-card:last-child .dir-note{color:var(--clay);clip-path:inset(0 0 -20% 0)}
 
+@media (min-width:1025px){
+  /* приписка на полях: уравновешивает лист и не мешает читать описание */
+  .dir-note{position:absolute;right:clamp(22px,2.4vw,34px);bottom:24px;margin-top:0;
+    transform:rotate(-2.5deg);transform-origin:right center}
+}
+@media (max-width:1200px){ .dir-stack{--tstep:7%} }
+
 @media (hover:hover) and (pointer:fine){
-  .dir-stack{padding-bottom:140px}
-  /* папку вытягивают — коротко и с лёгким перелётом */
+  /* лист вытягивают — коротко и с лёгким перелётом */
   .dir-card:hover,.dir-card:focus-visible{
     transform:translateY(-14px);box-shadow:0 26px 46px -22px rgba(30,28,26,.42);
     transition:transform .34s cubic-bezier(.2,1.18,.36,1),box-shadow .34s var(--ease-out)}
-  /* остальные расступаются следом, каскадом сверху вниз */
-  .dir-card:hover~.dir-card,.dir-card:focus-visible~.dir-card{transform:translateY(134px)}
+  /* стопка расступается следом, каскадом сверху вниз */
+  .dir-card:hover~.dir-card,.dir-card:focus-visible~.dir-card{transform:translateY(138px)}
   .dir-card:hover .dir-tab,.dir-card:focus-visible .dir-tab{background:var(--accent);color:var(--dark-text);border-color:var(--accent)}
   .dir-card:last-child:hover .dir-tab,.dir-card:last-child:focus-visible .dir-tab{background:var(--paper);color:var(--accent);border-color:var(--paper)}
   .dir-card:hover .dir-note,.dir-card:focus-visible .dir-note{clip-path:inset(0 0 -20% 0)}
+}
+/* без наведения — листы просто лежат раскрытыми */
+@media (hover:none),(pointer:coarse){
+  .dir-stack{padding-bottom:0}
+  .dir-card{min-height:0;padding-top:30px;padding-bottom:24px}
+  .dir-card+.dir-card{margin-top:44px}
+  .dir-note{clip-path:inset(0 0 -20% 0)}
 }
 /* без наведения — папки просто лежат раскрытыми */
 @media (hover:none),(pointer:coarse){
