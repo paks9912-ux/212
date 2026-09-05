@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>S.H.E. — сообщество для мам, которые развиваются. Ташкент</title>
+<title>S.H.E.&nbsp;— сообщество для&nbsp;мам, которые развиваются. Ташкент</title>
 <meta name="description" content="S.H.E. — закрытое сообщество в Ташкенте для мам, которые развивают дело, блог, здоровье и финансы. Встречи, эксперты, окружение. Приём по заявке.">
 <meta property="og:title" content="S.H.E. — сообщество для мам, которые развиваются">
 <meta property="og:description" content="Закрытое сообщество в Ташкенте: встречи, эксперты, окружение. Приём по заявке.">
@@ -22,7 +22,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,300..500;1,7..72,300..400&family=Onest:wght@300..500&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500&family=Caveat:wght@500&display=swap" rel="stylesheet">
 <link rel="preload" as="image" href="img/hero-portrait-805.webp" type="image/webp" fetchpriority="high">
 
 <!-- Скрытое состояние для анимаций включается только когда есть JS:
@@ -35,38 +35,41 @@
    Палитра заказчика. Отличие — композицией и шрифтом.
    ═══════════════════════════════════════════ */
 :root{
-  --bg:#F6F2EA;          /* тёплый ivory, основное поле */
-  --paper:#FBF9F6;       /* ivory, осветлённый под editorial-развороты */
-  --sand:#E8DED0;        /* вторая плоскость */
-  --clay:#D7C7B5;        /* третья плоскость, спящие слова */
-  --umber:#8B6F5A;       /* линии и поверхности — не мелкий текст */
-  --text-soft:#5A4638;   /* вторичный текст, подписи */
-  --text:#1E1C1A;
-  --accent:#7D3838;      /* burgundy — только акцент */
+  /* палитра заказчика, ТЗ §20 */
+  --bg:#F5F1EA;          /* warm ivory — основное поле */
+  --paper:#FBF9F4;       /* осветлённый ivory под editorial-развороты */
+  --sand:#E7DED3;        /* soft beige — вторая плоскость */
+  --clay:#D4C4B5;        /* muted nude — третья плоскость */
+  --taupe:#A68D7A;       /* warm taupe — линии и плоскости, не мелкий текст */
+  --text-soft:#493A32;   /* dark brown — вторичный текст */
+  --text:#171514;        /* almost black */
+  --accent:#7A3D3D;      /* muted burgundy — только акцент */
 
-  --dark:#1E1C1A;
-  --dark-text:#F6F2EA;
-  --dark-soft:#D7C7B5;
+  --dark:#171514;
+  --dark-text:#F5F1EA;
+  --dark-soft:#D4C4B5;
 
-  --line:rgba(139,111,90,.42);
-  --line-soft:rgba(139,111,90,.22);
+  --line:rgba(166,141,122,.5);
+  --line-soft:rgba(166,141,122,.26);
 
-  --display:'Literata',Georgia,'Times New Roman',serif;
-  --sans:'Onest',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --display:'Cormorant Garamond','Times New Roman',Georgia,serif;
+  --sans:'Inter',-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
   --hand:'Caveat',cursive;
 
-  /* шкала: пять ступеней, не восемь близких */
+  /* контраст размеров: мелкие капслок-метки против крупной антиквы */
   --t-xs:11px;
   --t-sm:13.5px;
   --t-base:16.5px;
-  --t-lg:clamp(17px,1.2vw,19px);
-  --t-h3:clamp(1.35rem,1.05rem + 1.1vw,1.85rem);
-  --t-h2:clamp(2rem,1.3rem + 2.4vw,3.4rem);
-  --t-h1:clamp(2.55rem,1.4rem + 4.2vw,5.4rem);
-  --t-wall:clamp(2.1rem,1rem + 4.2vw,5.2rem);
+  --t-lg:clamp(17px,1.2vw,19.5px);
+  --t-h3:clamp(1.45rem,1.05rem + 1.4vw,2.15rem);
+  --t-h2:clamp(2.3rem,1.3rem + 3.2vw,4.4rem);
+  --t-h1:clamp(2.9rem,1.4rem + 5.6vw,7rem);
+  --t-wall:clamp(2.3rem,1rem + 5.4vw,6.6rem);
+  --t-num:clamp(2.6rem,1.6rem + 4vw,5.2rem);
 
-  --gutter:clamp(20px,4.6vw,88px);
-  --maxw:1560px;
+  /* контент тянется по ширине экрана */
+  --gutter:clamp(20px,4.4vw,104px);
+  --maxw:1840px;
   --head:78px;
 
   --ease-out:cubic-bezier(.16,1,.3,1);
@@ -123,9 +126,9 @@ h1 em,h2 em{font-style:italic;font-weight:300;color:var(--accent)}
 /* ── HEADER ── */
 .header{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:var(--head);padding:0 var(--gutter);transition:min-height var(--t),background var(--t),border-color var(--t);border-bottom:1px solid transparent}
 .header.dense{min-height:58px;background:rgba(246,242,234,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom-color:var(--line-soft)}
-.logo{font-family:var(--display);font-size:19px;font-weight:400;letter-spacing:.2em;color:var(--text)}
+.logo{font-family:var(--display);font-size:19px;font-weight:400;letter-spacing:.2em;color:var(--text);display:inline-flex;align-items:center;min-height:44px}
 .nav{display:flex;gap:clamp(16px,2.2vw,34px)}
-.nav a{font-size:12.5px;font-weight:400;letter-spacing:.06em;color:var(--text-soft);padding:6px 0;position:relative;transition:color .3s}
+.nav a{font-size:12.5px;font-weight:400;letter-spacing:.06em;color:var(--text-soft);padding:0;min-height:44px;display:inline-flex;align-items:center;position:relative;transition:color .3s}
 .nav a::after{content:'';position:absolute;left:0;bottom:0;height:1px;width:100%;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform var(--t) var(--ease-out)}
 .nav a:hover{color:var(--text)}
 .nav a:hover::after{transform:scaleX(1)}
@@ -202,18 +205,20 @@ h1 em,h2 em{font-style:italic;font-weight:300;color:var(--accent)}
 .dir-fan-wrap{grid-column:1/13;grid-row:2}
 .dir-main .sec-head{margin-bottom:clamp(28px,4vh,48px)}
 /* веер: шесть листов из одной точки, как папки в руке */
-.dir-fan{position:relative;height:clamp(320px,44vh,420px);padding-left:24px;margin-top:clamp(34px,5vh,60px)}
-.dir-sheet{--i:0;--rot:0deg;position:absolute;bottom:0;left:calc(24px + var(--i) * 13.5%);
-  width:min(32%,340px);height:88%;background:var(--paper);border:1px solid var(--line-soft);border-radius:3px;
+.dir-fan{position:relative;height:clamp(290px,38vh,360px);margin-top:clamp(34px,5vh,60px)}
+.dir-sheet{--i:0;--rot:0deg;position:absolute;bottom:0;left:calc(var(--i) * 11.1%);
+  width:22%;height:90%;background:var(--paper);border:1px solid var(--line-soft);border-radius:3px;
   padding:26px 24px 24px;outline-offset:5px;transform-origin:20% 100%;transform:rotate(var(--rot));
   box-shadow:-10px 7px 22px -17px rgba(30,28,26,.6);
   transition:transform .5s cubic-bezier(.2,1.18,.36,1),box-shadow .42s var(--ease-out)}
 .dir-sheet:nth-child(1){--i:0;--rot:-7deg}
-.dir-sheet:nth-child(2){--i:1;--rot:-4.2deg}
-.dir-sheet:nth-child(3){--i:2;--rot:-1.4deg}
-.dir-sheet:nth-child(4){--i:3;--rot:1.4deg}
-.dir-sheet:nth-child(5){--i:4;--rot:4.2deg}
-.dir-sheet:nth-child(6){--i:5;--rot:7deg}
+.dir-sheet:nth-child(2){--i:1;--rot:-5deg}
+.dir-sheet:nth-child(3){--i:2;--rot:-3deg}
+.dir-sheet:nth-child(4){--i:3;--rot:-1deg}
+.dir-sheet:nth-child(5){--i:4;--rot:1deg}
+.dir-sheet:nth-child(6){--i:5;--rot:3deg}
+.dir-sheet:nth-child(7){--i:6;--rot:5deg}
+.dir-sheet:nth-child(8){--i:7;--rot:7deg}
 .dir-sheet h3{font-family:var(--display);font-weight:400;font-size:1.06rem;line-height:1.18;letter-spacing:-.008em;max-width:11ch}
 .dir-sheet p{margin-top:13px;color:var(--text-soft);font-size:15px;opacity:0;transition:opacity .34s ease}
 .dir-note{display:inline-block;margin-top:15px;font-family:var(--hand);font-size:19px;line-height:1.1;color:var(--accent);
@@ -292,7 +297,7 @@ h1 em,h2 em{font-style:italic;font-weight:300;color:var(--accent)}
 .feat h3{margin-top:10px}
 .feat-body p:last-child{margin-top:14px;color:var(--text-soft);font-size:15.5px}
 .roster{margin-top:clamp(44px,7vh,84px);padding-top:22px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:8px 0;font-size:15px;color:var(--text-soft)}
-.roster li+li::before{content:'·';margin:0 14px;color:var(--umber)}
+.roster li+li::before{content:'·';margin:0 14px;color:var(--taupe)}
 .roster-note{margin-top:16px;font-size:var(--t-sm);color:var(--text-soft);max-width:52ch}
 
 /* ══════════ ПОЛОСНЫЙ КАДР ══════════ */
@@ -392,7 +397,7 @@ fieldset{border:0}
 .chips{display:flex;flex-wrap:wrap;gap:9px;margin-top:10px}
 .chip input{position:absolute;opacity:0;width:0;height:0}
 .chip span{display:inline-flex;align-items:center;min-height:44px;font-size:var(--t-sm);padding:0 18px;border:1px solid var(--line);border-radius:999px;transition:background var(--t),border-color var(--t),color var(--t)}
-.chip:hover span{border-color:var(--umber)}
+.chip:hover span{border-color:var(--taupe)}
 .chip input:checked+span{background:var(--text);color:var(--paper);border-color:var(--text)}
 .chip input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
 .modal-done{text-align:center;padding:clamp(40px,8vh,90px) 0}
@@ -545,17 +550,154 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   .modal{padding:0}
   .modal-card{width:100%;height:100%;max-height:100vh}
 }
+
+/* ═══════════════════════════════════════════
+   ВЕРСИЯ 9 · блоки по ТЗ
+   ═══════════════════════════════════════════ */
+
+/* §26 · цифры сообщества */
+.proof{margin-top:clamp(40px,6vh,80px);padding-top:clamp(26px,3.4vh,40px);border-top:1px solid var(--line-soft);
+  display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2.4vw,44px)}
+.proof li b{display:block;font-family:var(--display);font-weight:300;font-size:var(--t-num);line-height:.92;letter-spacing:-.02em}
+.proof li span{display:block;margin-top:6px;font-size:var(--t-xs);letter-spacing:.18em;text-transform:uppercase;color:var(--text-soft)}
+
+/* §5 · что происходит внутри — асимметричная сетка, без карточек */
+.in-grid{margin-top:clamp(40px,6vh,84px);display:grid;grid-template-columns:repeat(12,1fr);
+  column-gap:clamp(18px,2.6vw,52px);row-gap:clamp(34px,5vh,72px)}
+.in-item{border-top:1px solid var(--line-soft);padding-top:clamp(16px,2vh,24px)}
+.in-item h3{font-family:var(--display);font-weight:400;font-size:var(--t-h3);line-height:1.1;letter-spacing:-.012em}
+.in-item p{margin-top:12px;color:var(--text-soft);font-size:var(--t-sm);line-height:1.62;max-width:42ch}
+.in-a{grid-column:1/6}
+.in-b{grid-column:7/13}
+.in-c{grid-column:1/5}
+.in-d{grid-column:5/9}
+.in-e{grid-column:9/13}
+.in-f{grid-column:1/13;border-top-color:var(--line)}
+.in-f h3{font-size:var(--t-h2);max-width:22ch}
+.in-f p{font-size:var(--t-lg);max-width:52ch}
+
+/* §6 · не просто лекции */
+.chain-claim{font-family:var(--display);font-weight:400;font-size:var(--t-h2);line-height:1.02;letter-spacing:-.018em;
+  margin-top:14px;max-width:18ch;text-wrap:balance}
+.chain{margin-top:clamp(44px,7vh,92px);display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(10px,1.6vw,28px)}
+.chain li{position:relative;padding-top:20px;border-top:1px solid var(--line-soft)}
+.chain li+li::before{content:'';position:absolute;left:calc(-1 * clamp(10px,1.6vw,28px) / 2 - 3px);top:-4px;
+  width:7px;height:7px;border-right:1px solid var(--taupe);border-bottom:1px solid var(--taupe);transform:rotate(-45deg)}
+.ch-n{display:block;font-size:var(--t-xs);letter-spacing:.2em;color:var(--taupe)}
+.ch-w{display:block;margin-top:10px;font-size:clamp(13px,1.15vw,17px);letter-spacing:.16em;text-transform:uppercase;font-weight:400}
+.ch-last{color:var(--accent)}
+.chain-note{margin-top:clamp(32px,4.6vh,56px);color:var(--text-soft);font-size:var(--t-lg);max-width:62ch}
+
+/* номер на листе веера */
+.dir-n{display:block;font-size:var(--t-xs);letter-spacing:.2em;color:var(--taupe);margin-bottom:9px}
+.dir-sheet:last-child .dir-n{color:var(--clay)}
+
+/* §11 · жизнь внутри */
+.life-claim{font-family:var(--display);font-weight:300;font-size:var(--t-h2);line-height:1.06;letter-spacing:-.02em}
+.life-words{margin-top:clamp(26px,3.6vh,46px);display:flex;flex-wrap:wrap;gap:clamp(14px,2.2vw,42px);
+  font-size:var(--t-xs);letter-spacing:.22em;text-transform:uppercase;color:var(--dark-soft)}
+
+/* §12 · действие в карточке эксперта */
+.feat-cta{margin-top:16px}
+
+/* §13 · истории */
+.st-grid{margin-top:clamp(36px,5vh,72px);display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(28px,4vw,80px)}
+.st{border-top:1px solid var(--line);padding-top:clamp(20px,2.6vh,32px);display:flex;flex-direction:column}
+.st blockquote p{font-family:var(--display);font-weight:300;font-style:italic;
+  font-size:clamp(1.35rem,1rem + 1.5vw,2.2rem);line-height:1.24;letter-spacing:-.012em;text-wrap:balance}
+.st blockquote p::before{content:'«'} .st blockquote p::after{content:'»'}
+.st footer{margin-top:auto;padding-top:clamp(18px,2.4vh,28px);display:flex;flex-direction:column;gap:4px}
+.st footer b{font-weight:400;font-size:var(--t-sm);letter-spacing:.16em;text-transform:uppercase}
+.st footer span{font-size:var(--t-sm);color:var(--text-soft)}
+
+/* §7 · не важно, где ты сейчас */
+.start-claim{font-family:var(--display);font-weight:300;font-size:var(--t-wall);line-height:1;letter-spacing:-.025em;
+  max-width:16ch;text-wrap:balance}
+.starts{margin-top:clamp(40px,6vh,84px);border-top:1px solid var(--line)}
+.starts li{display:grid;grid-template-columns:minmax(0,24ch) 1fr;gap:clamp(16px,3vw,60px);align-items:baseline;
+  padding:clamp(18px,2.6vh,30px) 0;border-bottom:1px solid var(--line-soft)}
+.starts b{font-family:var(--display);font-weight:400;font-size:var(--t-h3);line-height:1.14;letter-spacing:-.01em}
+.starts span{color:var(--text-soft);font-size:var(--t-sm);max-width:48ch}
+.start-note{margin-top:clamp(28px,4vh,48px);font-size:var(--t-lg);max-width:56ch}
+
+/* §8 · не нужно быть идеальной */
+.perfect-claim{font-family:var(--display);font-weight:300;font-size:var(--t-wall);line-height:1;letter-spacing:-.025em;
+  max-width:14ch;text-wrap:balance}
+.perfect-cols{margin-top:clamp(40px,6vh,84px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.85fr);
+  gap:clamp(30px,5vw,110px);align-items:start}
+.pf-no ul{margin-top:20px}
+.pf-no li{padding:11px 0;border-bottom:1px solid var(--line-soft);color:var(--text-soft);font-size:var(--t-base)}
+.pf-yes{border-top:1px solid var(--line);padding-top:20px}
+.pf-sum{margin-top:22px;font-family:var(--display);font-weight:400;font-size:var(--t-h3);line-height:1.28;letter-spacing:-.01em}
+.pf-plus{color:var(--accent);font-size:1.4em;line-height:1.6}
+
+/* §9 · для кого */
+.fit-list{margin-top:clamp(30px,4.6vh,60px);columns:2;column-gap:clamp(28px,4vw,88px);border-top:1px solid var(--line)}
+.fit-list li{break-inside:avoid;padding:12px 0;border-bottom:1px solid var(--line-soft);font-size:var(--t-base)}
+/* §10 · будет плюсом */
+.plus{margin-top:clamp(48px,7vh,100px)}
+.plus-list{margin-top:20px;display:flex;flex-wrap:wrap;gap:10px 0;color:var(--text-soft);font-size:var(--t-sm)}
+.plus-list li{padding-right:18px;margin-right:18px;border-right:1px solid var(--line-soft)}
+.plus-list li:last-child{border-right:0;margin-right:0;padding-right:0}
+.plus-note{margin-top:26px;color:var(--text-soft);font-size:var(--t-sm);max-width:52ch}
+
+/* §14 · четыре принципа */
+.principles{margin-top:clamp(34px,5vh,64px);display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(18px,2.6vw,52px)}
+.principles li{border-top:1px solid var(--line);padding-top:16px}
+.principles b{display:block;font-family:var(--display);font-weight:400;font-size:var(--t-h3);line-height:1.1;letter-spacing:-.01em}
+.principles span{display:block;margin-top:10px;color:var(--text-soft);font-size:var(--t-sm);max-width:26ch}
+.acc-lead{margin-top:clamp(44px,6.5vh,88px);margin-bottom:18px;font-size:var(--t-xs);letter-spacing:.2em;
+  text-transform:uppercase;color:var(--text-soft)}
+
+/* §16 · финальный призыв */
+.closing{background:var(--dark);color:var(--dark-text);padding:clamp(80px,15vh,220px) 0}
+.closing-claim{font-family:var(--display);font-weight:300;font-size:var(--t-wall);line-height:1.02;letter-spacing:-.026em;
+  max-width:17ch;text-wrap:balance}
+.closing-words{margin-top:clamp(46px,7vh,100px);display:flex;flex-wrap:wrap;gap:clamp(16px,2.6vw,54px);
+  font-size:clamp(13px,1.15vw,17px);letter-spacing:.2em;text-transform:uppercase;color:var(--dark-soft)}
+.closing-cta{margin-top:clamp(50px,8vh,110px);display:flex;flex-wrap:wrap;align-items:center;gap:clamp(18px,2.6vw,44px)}
+.closing .btn-solid{background:var(--dark-text);color:var(--dark)}
+.closing .btn-solid:hover{background:var(--clay)}
+.closing .text-link{color:var(--dark-soft);border-color:rgba(212,196,181,.34)}
+.closing .text-link:hover{color:var(--dark-text)}
+.btn-lg{min-height:60px;padding:18px 40px;font-size:13px}
+
+@media (max-width:1024px){
+  .in-a,.in-b,.in-c,.in-d,.in-e,.in-f{grid-column:1/13}
+  .in-f h3{font-size:var(--t-h3)}
+  .in-f p{font-size:var(--t-base)}
+  .chain{grid-template-columns:repeat(5,1fr);gap:8px}
+  .ch-w{font-size:11.5px;letter-spacing:.1em}
+  .chain li+li::before{display:none}
+  .st-grid{grid-template-columns:1fr}
+  .perfect-cols{grid-template-columns:1fr}
+  .principles{grid-template-columns:repeat(2,1fr)}
+}
+@media (max-width:640px){
+  .proof{grid-template-columns:repeat(2,1fr);row-gap:26px}
+  .chain{grid-template-columns:1fr;gap:0}
+  .chain li{padding:14px 0;border-top:0;border-bottom:1px solid var(--line-soft);display:flex;align-items:baseline;gap:14px}
+  .ch-n{margin-top:0}
+  .ch-w{margin-top:0;font-size:13px;letter-spacing:.14em}
+  .starts li{grid-template-columns:1fr;gap:6px}
+  .fit-list{columns:1}
+  .principles{grid-template-columns:1fr}
+  .plus-list li{border-right:0;padding-right:0;margin-right:0;width:100%;padding:9px 0;border-bottom:1px solid var(--line-soft)}
+  .closing-words{gap:12px 26px}
+}
+
 </style>
 </head>
 <body>
 
-<a class="skip" href="#main">Перейти к содержанию</a>
+<a class="skip" href="#main">Перейти к&nbsp;содержанию</a>
 
 <input type="checkbox" id="menu-toggle" class="menu-toggle" aria-label="Открыть меню">
 <header class="header" id="header">
   <a class="logo" href="#top" aria-label="S.H.E. — на главную">S.H.E.</a>
   <nav class="nav" aria-label="Основная навигация">
     <a href="#about">О S.H.E.</a>
+    <a href="#inside">Внутри</a>
     <a href="#directions">Направления</a>
     <a href="#community">Окружение</a>
     <a href="#experts">Эксперты</a>
@@ -570,6 +712,7 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   <label class="menu-close" for="menu-toggle" aria-hidden="true"></label>
   <nav aria-label="Мобильная навигация">
     <a href="#about">О S.H.E.</a>
+    <a href="#inside">Внутри</a>
     <a href="#directions">Направления</a>
     <a href="#community">Окружение</a>
     <a href="#experts">Эксперты</a>
@@ -590,23 +733,26 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
       </picture>
     </figure>
     <div class="hero-copy">
-      <p class="tag">Ташкент · закрытое сообщество · приём по заявке</p>
-      <h1>Быть мамой — не значит перестать быть <em>собой</em>.</h1>
-      <p class="hero-sub">Сообщество женщин, которые растят детей и одновременно растят дело, блог, профессию и себя. Встречи вживую, эксперты, окружение, которое тянет вперёд.</p>
+      <p class="tag">Ташкент · закрытое сообщество · приём по&nbsp;заявке</p>
+      <h1>Быть мамой&nbsp;— не&nbsp;значит перестать быть <em>собой</em>.</h1>
+      <p class="hero-sub">Сообщество женщин, которые растят детей и&nbsp;одновременно растят дело, блог, профессию и&nbsp;себя. Встречи вживую, эксперты, окружение, которое тянет вперёд.</p>
       <div class="hero-actions">
         <a class="btn btn-solid" href="#apply">Подать заявку</a>
-        <a class="text-link" href="#about">Как всё устроено</a>
+        <a class="text-link" href="#about">Как&nbsp;всё устроено</a>
       </div>
     </div>
   </section>
 
-  <!-- ══════════ СТЕНА РОЛЕЙ ══════════ -->
-  <section class="roles wrap" aria-label="Кем остаётся женщина в сообществе">
+  <!-- ══════════ ПОЧЕМУ МЫ ЭТО ДЕЛАЕМ · роли ══════════ -->
+  <section class="roles wrap" aria-label="Почему мы это делаем">
     <div class="roles-in">
-      <p class="label reveal">Роли</p>
+      <p class="label reveal">Почему мы&nbsp;это делаем</p>
       <p class="roles-line">
-        Здесь женщина остаётся <span class="r">женщиной</span>, <span class="r">профессионалом</span>,
-        <span class="r">предпринимателем</span>, <span class="r">подругой</span>, <span class="r">партнёром</span> —
+        Мама&nbsp;— не&nbsp;единственная роль женщины. Она&nbsp;остаётся
+        <span class="r">женщиной</span>, <span class="r">профессионалом</span>,
+        <span class="r">предпринимателем</span>, <span class="r">автором</span>,
+        <span class="r">партнёром</span>, <span class="r">подругой</span>,
+        <span class="r">собой</span> —
         <span class="fix"><s aria-hidden="true">или</s><i aria-hidden="true">и</i><b class="sr">и</b></span> <em>мамой одновременно.</em>
       </p>
     </div>
@@ -615,18 +761,26 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   <!-- ══════════ ФОРМАТ УЧАСТИЯ ══════════ -->
   <section class="format wrap" aria-label="Формат участия">
     <dl class="format-grid" data-stagger>
-      <div class="reveal"><dt>Формат</dt><dd>Встречи вживую в Ташкенте — разговоры, разборы с экспертами, вечера. Между встречами — общий чат.</dd></div>
-      <div class="reveal"><dt>Приём</dt><dd>Закрытое сообщество. Попасть можно по заявке: короткая анкета, затем личный разговор.</dd></div>
-      <div class="reveal"><dt>Участие</dt><dd>Платное — членский взнос покрывает встречи и работу экспертов. Сумму и периодичность обсуждаем на разговоре, до вступления.</dd></div>
+      <div class="reveal"><dt>Формат</dt><dd>Встречи вживую в&nbsp;Ташкенте&nbsp;— разговоры, разборы с&nbsp;экспертами, вечера. Между встречами&nbsp;— общий чат.</dd></div>
+      <div class="reveal"><dt>Приём</dt><dd>Закрытое сообщество. Попасть можно по&nbsp;заявке: короткая анкета, затем личный разговор.</dd></div>
+      <div class="reveal"><dt>Участие</dt><dd>Платное&nbsp;— членский взнос покрывает встречи и&nbsp;работу экспертов. Сумму и&nbsp;периодичность обсуждаем на&nbsp;разговоре, до&nbsp;вступления.</dd></div>
     </dl>
+
+    <!-- ДЕМО-ЦИФРЫ. Заменить на реальные перед публикацией: значение в <b>, подпись в <span>. -->
+    <ul class="proof" data-demo="true" data-stagger>
+      <li class="reveal"><b>300+</b><span>участниц</span></li>
+      <li class="reveal"><b>40+</b><span>встреч</span></li>
+      <li class="reveal"><b>20+</b><span>экспертов</span></li>
+      <li class="reveal"><b>8</b><span>направлений</span></li>
+    </ul>
   </section>
 
   <!-- ══════════ О S.H.E. ══════════ -->
   <section class="paper" id="about">
     <div class="wrap sec">
-      <p class="label reveal">О сообществе</p>
+      <p class="label reveal">О&nbsp;сообществе</p>
       <div class="about-grid">
-        <h2 class="reveal">Мы не хотим, чтобы женщина теряла себя после рождения ребёнка.</h2>
+        <h2 class="reveal">Мы&nbsp;не хотим, чтобы женщина теряла себя после рождения ребёнка.</h2>
         <figure class="about-photo reveal-img">
           <picture>
             <source type="image/webp" srcset="img/hero-pair-480.webp 480w, img/hero-pair-770.webp 770w" sizes="(max-width:1024px) 100vw, 40vw">
@@ -634,11 +788,63 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
           </picture>
         </figure>
         <div class="about-text" data-stagger>
-          <p class="reveal">S.H.E. — пространство, где мама развивается: получает знания, находит поддержку и создаёт себе новые возможности.</p>
-          <p class="reveal">Можно начать с нуля. Можно прийти с блогом, делом или профессией. Можно пока не знать, с чего начать.</p>
-          <p class="reveal lead-out">Единственное условие — желание пробовать и действовать.</p>
+          <p class="reveal">S.H.E.&nbsp;— пространство, где мама развивается: получает знания, находит поддержку и&nbsp;создаёт себе новые возможности.</p>
+          <p class="reveal">Можно начать с&nbsp;нуля. Можно прийти с&nbsp;блогом, делом или&nbsp;профессией. Можно пока не знать, с&nbsp;чего начать.</p>
+          <p class="reveal lead-out">Единственное условие&nbsp;— желание пробовать и&nbsp;действовать.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ══════════ ЧТО ПРОИСХОДИТ ВНУТРИ ══════════ -->
+  <section class="wrap sec inside" id="inside">
+    <div class="sec-head">
+      <p class="label reveal">Внутри</p>
+      <h2 class="reveal">Что&nbsp;происходит внутри S.H.E.</h2>
+      <p class="lede reveal">Здесь можно не&nbsp;только слушать и&nbsp;читать. Можно знакомиться, задавать вопросы, пробовать новое, получать поддержку и&nbsp;превращать знания в&nbsp;действия.</p>
+    </div>
+
+    <div class="in-grid" data-stagger>
+      <article class="in-item in-a reveal">
+        <h3>Живые встречи</h3>
+        <p>Регулярные встречи участниц и&nbsp;мероприятия в&nbsp;Ташкенте&nbsp;— не&nbsp;онлайн-эфиры, а&nbsp;один стол и разговор.</p>
+      </article>
+      <article class="in-item in-b reveal">
+        <h3>Эксперты</h3>
+        <p>Психологи, коучи, специалисты по&nbsp;финансам, здоровью, личному бренду и&nbsp;бизнесу.</p>
+      </article>
+      <article class="in-item in-c reveal">
+        <h3>Практика</h3>
+        <p>Не&nbsp;только знания, но&nbsp;и конкретные действия и&nbsp;задания.</p>
+      </article>
+      <article class="in-item in-d reveal">
+        <h3>Окружение</h3>
+        <p>Женщины, которые тоже хотят развиваться.</p>
+      </article>
+      <article class="in-item in-e reveal">
+        <h3>Опыт</h3>
+        <p>Можно не&nbsp;только получать знания, но&nbsp;и делиться своим.</p>
+      </article>
+      <article class="in-item in-f reveal">
+        <h3>Новые возможности</h3>
+        <p>Знакомства, идеи, проекты, коллаборации и&nbsp;направления, которых до&nbsp;этого не&nbsp;было в&nbsp;поле зрения.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ══════════ НЕ ПРОСТО ЛЕКЦИИ ══════════ -->
+  <section class="paper chain-sec" aria-label="Как устроена работа с экспертом">
+    <div class="wrap sec">
+      <p class="label reveal">Как&nbsp;это работает</p>
+      <h2 class="chain-claim reveal">S.H.E.&nbsp;— это&nbsp;не просто лекции</h2>
+      <ol class="chain" data-stagger>
+        <li class="reveal"><span class="ch-n">01</span><span class="ch-w">Expert</span></li>
+        <li class="reveal"><span class="ch-n">02</span><span class="ch-w">Knowledge</span></li>
+        <li class="reveal"><span class="ch-n">03</span><span class="ch-w">Discussion</span></li>
+        <li class="reveal"><span class="ch-n">04</span><span class="ch-w">Action</span></li>
+        <li class="reveal"><span class="ch-n">05</span><span class="ch-w ch-last">Result</span></li>
+      </ol>
+      <p class="chain-note reveal">Эксперт здесь не&nbsp;просто выступает перед аудиторией. Участницы задают вопросы, обсуждают свои ситуации и&nbsp;применяют полученное в&nbsp;жизни.</p>
     </div>
   </section>
 
@@ -663,34 +869,52 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
       <div class="dir-fan-wrap reveal">
         <div class="dir-fan">
           <div class="dir-sheet" tabindex="0">
-            <h3>Состояние и психология</h3>
-            <p>Отношения, эмоциональный ресурс, уверенность в себе и способность выдерживать собственные амбиции.</p>
+            <span class="dir-n">01</span>
+            <h3>Психология и&nbsp;состояние</h3>
+            <p>Отношения, эмоциональный ресурс, уверенность в&nbsp;себе и&nbsp;способность выдерживать собственные амбиции.</p>
             <span class="dir-note" aria-hidden="true">выдерживать свои амбиции</span>
           </div>
           <div class="dir-sheet" tabindex="0">
-            <h3>Здоровье и энергия</h3>
-            <p>Питание, движение, сон и восстановление — то, без чего всё остальное быстро заканчивается.</p>
-            <span class="dir-note" aria-hidden="true">без этого всё быстро заканчивается</span>
+            <span class="dir-n">02</span>
+            <h3>Здоровье и&nbsp;энергия</h3>
+            <p>Питание, движение, сон и восстановление&nbsp;— то, без&nbsp;чего всё остальное быстро заканчивается.</p>
+            <span class="dir-note" aria-hidden="true">без&nbsp;этого всё быстро заканчивается</span>
           </div>
           <div class="dir-sheet" tabindex="0">
-            <h3>Блог и личный бренд</h3>
-            <p>Контент, аудитория, позиционирование и системный подход вместо хаотичных сторис.</p>
+            <span class="dir-n">03</span>
+            <h3>Блог</h3>
+            <p>Контент, аудитория, регулярность и&nbsp;системный подход вместо хаотичных сторис.</p>
             <span class="dir-note" aria-hidden="true">система вместо хаоса</span>
           </div>
           <div class="dir-sheet" tabindex="0">
-            <h3>Дело, карьера и доход</h3>
-            <p>Своё дело, возвращение в профессию, первые деньги и следующая ступень.</p>
+            <span class="dir-n">04</span>
+            <h3>Личный бренд</h3>
+            <p>Позиционирование, репутация и&nbsp;то, как&nbsp;о тебе говорят, когда тебя нет в&nbsp;комнате.</p>
+            <span class="dir-note" aria-hidden="true">как&nbsp;о тебе говорят</span>
+          </div>
+          <div class="dir-sheet" tabindex="0">
+            <span class="dir-n">05</span>
+            <h3>Дело и бизнес</h3>
+            <p>Своё дело, возвращение в&nbsp;профессию, первые деньги и&nbsp;следующая ступень.</p>
             <span class="dir-note" aria-hidden="true">первые деньги</span>
           </div>
           <div class="dir-sheet" tabindex="0">
-            <h3>Навыки и финансы</h3>
-            <p>Практические инструменты, финансовая грамотность, планирование и самостоятельность в деньгах.</p>
-            <span class="dir-note" aria-hidden="true">самостоятельность в деньгах</span>
+            <span class="dir-n">06</span>
+            <h3>Финансы</h3>
+            <p>Личный бюджет, накопления, финансовая грамотность и&nbsp;самостоятельность в&nbsp;деньгах.</p>
+            <span class="dir-note" aria-hidden="true">самостоятельность в&nbsp;деньгах</span>
           </div>
           <div class="dir-sheet" tabindex="0">
-            <h3>Окружение и возможности</h3>
-            <p>Знакомства, обмен опытом, клиенты и проекты, которые появляются из разговоров.</p>
-            <span class="dir-note" aria-hidden="true">всё начинается с разговора</span>
+            <span class="dir-n">07</span>
+            <h3>Навыки</h3>
+            <p>Практические инструменты и&nbsp;умения, которые можно применить уже на следующей неделе.</p>
+            <span class="dir-note" aria-hidden="true">применить на&nbsp;следующей неделе</span>
+          </div>
+          <div class="dir-sheet" tabindex="0">
+            <span class="dir-n">08</span>
+            <h3>Окружение</h3>
+            <p>Знакомства, обмен опытом, клиенты и&nbsp;проекты, которые появляются из&nbsp;разговоров.</p>
+            <span class="dir-note" aria-hidden="true">всё начинается с&nbsp;разговора</span>
           </div>
         </div>
       </div>
@@ -701,9 +925,9 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   <section class="dark" id="community">
     <div class="wrap">
       <div class="dark-head">
-        <p class="label reveal">Окружение</p>
-        <h2 class="reveal">Знания есть в интернете.<br>Окружения там нет.</h2>
-        <p class="dark-lede reveal">Сложнее всего найти женщин, которые понимают твои цели, не обесценивают их и сами двигаются. S.H.E. — это про них.</p>
+        <p class="label light reveal">Жизнь внутри</p>
+        <h2 class="reveal life-claim">Здесь знакомятся.<br>Здесь разговаривают.<br>Здесь пробуют.<br>Здесь начинают.</h2>
+        <p class="dark-lede reveal">Знания есть в интернете. Окружения там нет. Сложнее всего найти женщин, которые понимают твои цели, не&nbsp;обесценивают их&nbsp;и сами двигаются.</p>
       </div>
       <div class="collage" data-stagger>
         <figure class="reveal-img" style="--ar:1.333">
@@ -734,6 +958,9 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
           </picture>
         </figure>
       </div>
+      <ul class="life-words reveal" aria-hidden="true">
+        <li>Meet</li><li>Talk</li><li>Learn</li><li>Create</li><li>Share</li><li>Connect</li>
+      </ul>
     </div>
   </section>
 
@@ -742,8 +969,8 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
     <div class="wrap sec">
       <div class="sec-head" data-stagger>
         <p class="label reveal">Эксперты</p>
-        <h2 class="reveal">Не лекция,<br>а разбор твоей ситуации</h2>
-        <p class="lede reveal">Мы зовём специалистов, но встреча не заканчивается выступлением: можно спросить, поспорить, принести свой случай и уйти с решением, а не с конспектом.</p>
+        <h2 class="reveal">Не&nbsp;лекция,<br>а&nbsp;разбор твоей ситуации</h2>
+        <p class="lede reveal">Мы&nbsp;зовём специалистов, но&nbsp;встреча не&nbsp;заканчивается выступлением: можно спросить, поспорить, принести свой случай и&nbsp;уйти с&nbsp;решением, а&nbsp;не с&nbsp;конспектом.</p>
       </div>
       <div class="featured" data-stagger>
         <article class="feat">
@@ -754,9 +981,10 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
             </picture>
           </figure>
           <div class="feat-body reveal">
-            <p class="feat-dir">Состояние и психология</p>
-            <h3>Эксперт по психологии</h3>
-            <p>Разбирает не «как быть счастливой», а конкретное: вина за время на себя, страх заявить о цене, отношения, в которых развитие мешает.</p>
+            <p class="feat-dir">Психология и&nbsp;состояние</p>
+            <h3>Психолог</h3>
+            <p>Разбирает не&nbsp;«как&nbsp;быть счастливой», а&nbsp;конкретное: вина за время на&nbsp;себя, страх заявить о&nbsp;цене, отношения, в&nbsp;которых развитие мешает.</p>
+            <a class="text-link feat-cta" href="#apply">Задать вопрос эксперту</a>
           </div>
         </article>
         <article class="feat">
@@ -767,21 +995,18 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
             </picture>
           </figure>
           <div class="feat-body reveal">
-            <p class="feat-dir">Навыки и финансы</p>
-            <h3>Специалист по финансам</h3>
-            <p>Личный бюджет, подушка, первые накопления и разговор о деньгах в семье — на цифрах, а не на мотивации.</p>
+            <p class="feat-dir">Финансы</p>
+            <h3>Финансовый специалист</h3>
+            <p>Личный бюджет, подушка, первые накопления и&nbsp;разговор о&nbsp;деньгах в&nbsp;семье&nbsp;— на&nbsp;цифрах, а&nbsp;не на&nbsp;мотивации.</p>
+            <a class="text-link feat-cta" href="#apply">Узнать о&nbsp;ближайшей встрече</a>
           </div>
         </article>
       </div>
       <ul class="roster reveal">
-        <li>Нутрициология</li>
-        <li>Фитнес и восстановление</li>
-        <li>Коучинг и цели</li>
-        <li>Instagram и контент</li>
-        <li>Личный бренд</li>
-        <li>Предпринимательство</li>
+        <li>Психолог</li><li>Коуч</li><li>Нутрициолог</li><li>Fitness-тренер</li>
+        <li>Финансовый специалист</li><li>SMM и Instagram</li><li>Предприниматель</li><li>Личный бренд</li>
       </ul>
-      <p class="roster-note reveal">Состав экспертов меняется от сезона к сезону — расписание приходит участницам заранее.</p>
+      <p class="roster-note reveal">Состав экспертов меняется от&nbsp;сезона к&nbsp;сезону&nbsp;— расписание приходит участницам заранее.</p>
     </div>
   </section>
 
@@ -793,6 +1018,30 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
     </picture>
     <figcaption><span>Съёмка сообщества</span><span>Ташкент</span></figcaption>
   </figure>
+
+  <!-- ══════════ ИСТОРИИ ══════════
+       ДЕМО-КОНТЕНТ из ТЗ. Заменить на реальные истории с именами и согласием участниц.
+       Портреты добавить в .st-photo, когда появятся кадры со съёмки. -->
+  <section class="wrap sec stories" id="stories">
+    <div class="sec-head">
+      <p class="label reveal">Истории</p>
+      <h2 class="reveal">Мы&nbsp;разные. Но&nbsp;хотим одного.</h2>
+    </div>
+    <div class="st-grid" data-stagger>
+      <article class="st reveal">
+        <blockquote>
+          <p>Я&nbsp;долго думала, что&nbsp;сначала нужно разобраться с&nbsp;ребёнком, а&nbsp;уже потом заниматься собой. Оказалось, этого «потом» можно ждать бесконечно.</p>
+        </blockquote>
+        <footer><b>Анна, 31</b><span>мама · блог · lifestyle</span></footer>
+      </article>
+      <article class="st reveal">
+        <blockquote>
+          <p>Я&nbsp;пришла ради знакомств, а&nbsp;в итоге начала развивать свой блог и&nbsp;впервые за&nbsp;долгое время почувствовала, что&nbsp;двигаюсь вперёд.</p>
+        </blockquote>
+        <footer><b>Алина, 34</b><span>мама · бизнес</span></footer>
+      </article>
+    </div>
+  </section>
 
   <!-- ══════════ СОБЫТИЯ ══════════ -->
   <section class="wrap sec" id="events">
@@ -810,14 +1059,14 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
       </figure>
       <div class="ev-feat-body" data-stagger>
         <p class="ev-kicker reveal">Женский вечер</p>
-        <h3 class="reveal">Разговоры, знакомства и новые идеи</h3>
-        <p class="ev-text reveal">Вечерний формат без программы и презентаций: восемь-десять женщин, длинный стол и разговор, который обычно не с кем вести.</p>
+        <h3 class="reveal">Разговоры, знакомства и&nbsp;новые идеи</h3>
+        <p class="ev-text reveal">Вечерний формат без&nbsp;программы и&nbsp;презентаций: восемь-десять женщин, длинный стол и разговор, который обычно не&nbsp;с кем вести.</p>
         <dl class="ev-meta reveal">
           <div><dt>Когда</dt><dd>24 сентября, 19:00</dd></div>
-          <div><dt>Где</dt><dd>Ташкент, адрес — участницам</dd></div>
-          <div><dt>Участие</dt><dd>По заявке</dd></div>
+          <div><dt>Где</dt><dd>Ташкент, адрес&nbsp;— участницам</dd></div>
+          <div><dt>Участие</dt><dd>По&nbsp;заявке</dd></div>
         </dl>
-        <a class="text-link reveal" href="#apply">Вступить и попасть на встречу</a>
+        <a class="text-link reveal" href="#apply">Вступить и&nbsp;попасть на&nbsp;встречу</a>
       </div>
     </article>
 
@@ -826,7 +1075,7 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
         <a class="ev-row" href="#apply" aria-label="Подать заявку и попасть на встречу: Morning Meeting">
           <span class="d">12 сент</span>
           <span class="t">Morning Meeting</span>
-          <span class="x">Встреча участниц и кофе</span>
+          <span class="x">Встреча участниц и&nbsp;кофе</span>
           <span class="h">09:30</span>
         </a>
       </li>
@@ -834,7 +1083,7 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
         <a class="ev-row" href="#apply" aria-label="Подать заявку и попасть на встречу: Expert Session">
           <span class="d">18 сент</span>
           <span class="t">Expert Session</span>
-          <span class="x">Психология и внутреннее состояние</span>
+          <span class="x">Психология и&nbsp;внутреннее состояние</span>
           <span class="h">11:00</span>
         </a>
       </li>
@@ -842,7 +1091,7 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
         <a class="ev-row" href="#apply" aria-label="Подать заявку и попасть на встречу: Finance Workshop">
           <span class="d">29 сент</span>
           <span class="t">Finance Workshop</span>
-          <span class="x">Финансовая грамотность и личные деньги</span>
+          <span class="x">Финансовая грамотность и&nbsp;личные деньги</span>
           <span class="h">18:30</span>
         </a>
       </li>
@@ -851,22 +1100,76 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
 
   <!-- Секция «Истории» вынесена в she/parts/stories.html до появления реальных историй с именами и согласием. -->
 
+  <!-- ══════════ НЕ ВАЖНО, ГДЕ ТЫ СЕЙЧАС ══════════ -->
+  <section class="wrap sec start-sec" aria-label="С какой точки можно начать">
+    <h2 class="start-claim reveal">Не&nbsp;важно, где ты сейчас.</h2>
+    <ol class="starts" data-stagger>
+      <li class="reveal"><b>Я&nbsp;только начинаю</b><span>Не&nbsp;знаю, с&nbsp;чего начать и&nbsp;куда двигаться.</span></li>
+      <li class="reveal"><b>У&nbsp;меня уже есть блог</b><span>Хочу развивать аудиторию, контент и&nbsp;личный бренд.</span></li>
+      <li class="reveal"><b>Я&nbsp;развиваю бизнес</b><span>Хочу расти, находить идеи и новые возможности.</span></li>
+      <li class="reveal"><b>У&nbsp;меня есть профессия</b><span>Хочу развиваться профессионально и&nbsp;реализовываться.</span></li>
+      <li class="reveal"><b>Я&nbsp;пока не&nbsp;знаю, чего хочу</b><span>И&nbsp;это тоже нормальная точка старта.</span></li>
+    </ol>
+    <p class="start-note reveal">S.H.E. не&nbsp;требует прийти уже реализованной. Важно желание развиваться и&nbsp;готовность действовать.</p>
+  </section>
+
+  <!-- ══════════ НЕ НУЖНО БЫТЬ ИДЕАЛЬНОЙ ══════════ -->
+  <section class="paper perfect-sec" aria-label="Каких требований нет">
+    <div class="wrap sec">
+      <h2 class="perfect-claim reveal">Тебе не нужно быть идеальной.</h2>
+      <div class="perfect-cols">
+        <div class="pf-no">
+          <p class="label reveal">Не&nbsp;нужно</p>
+          <ul data-stagger>
+            <li class="reveal">иметь идеальный Instagram</li>
+            <li class="reveal">уже иметь бизнес</li>
+            <li class="reveal">зарабатывать определённую сумму</li>
+            <li class="reveal">знать свою цель на&nbsp;сто процентов</li>
+            <li class="reveal">быть постоянно продуктивной</li>
+            <li class="reveal">успевать всё</li>
+            <li class="reveal">быть «идеальной мамой»</li>
+          </ul>
+        </div>
+        <div class="pf-yes reveal">
+          <p class="label">Нужно только</p>
+          <p class="pf-sum">желание развиваться<br><span class="pf-plus">+</span><br>готовность действовать</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ══════════ ДЛЯ КОГО ══════════ -->
   <section class="fit" aria-label="Кому подходит сообщество">
     <div class="wrap sec">
       <p class="label reveal">Кому подходит</p>
-      <h2 class="reveal">Тебе будет здесь <span class="fix sm"><s aria-hidden="true">удобно</s><i aria-hidden="true">хорошо</i><b class="sr">хорошо</b></span>, если…</h2>
-      <div class="fit-cols">
-        <ul class="fit-list" data-stagger>
-          <li class="reveal">ты мама — и тебе тесно только в этой роли;</li>
-          <li class="reveal">у тебя есть цель или желание её наконец сформулировать;</li>
-          <li class="reveal">ты готова приходить на встречи, а не только читать чат;</li>
-          <li class="reveal">тебе интересно, чем живут другие женщины, и ты готова поддерживать;</li>
-          <li class="reveal">тебе нравится доводить начатое до конца.</li>
+      <h2 class="reveal">S.H.E. для&nbsp;тебя, если&nbsp;ты…</h2>
+      <ul class="fit-list" data-stagger>
+        <li class="reveal">мама</li>
+        <li class="reveal">интересуешься развитием</li>
+        <li class="reveal">хочешь заниматься не&nbsp;только материнством</li>
+        <li class="reveal">хочешь развивать блог или личный бренд</li>
+        <li class="reveal">думаешь о&nbsp;собственном деле</li>
+        <li class="reveal">хочешь развиваться профессионально</li>
+        <li class="reveal">хочешь разобраться с&nbsp;финансами</li>
+        <li class="reveal">хочешь работать над&nbsp;состоянием и&nbsp;здоровьем</li>
+        <li class="reveal">хочешь найти своё окружение</li>
+        <li class="reveal">готова участвовать, а&nbsp;не просто наблюдать</li>
+        <li class="reveal">готова применять знания</li>
+      </ul>
+
+      <div class="plus">
+        <p class="label reveal">Будет плюсом, но&nbsp;не обязательно</p>
+        <ul class="plus-list" data-stagger>
+          <li class="reveal">опыт ведения блога</li>
+          <li class="reveal">собственный проект</li>
+          <li class="reveal">бизнес</li>
+          <li class="reveal">профессиональная деятельность</li>
+          <li class="reveal">желание развивать личный бренд</li>
+          <li class="reveal">готовность делиться знаниями</li>
+          <li class="reveal">поддержка других участниц</li>
+          <li class="reveal">привычка доводить начатое до&nbsp;конца</li>
         </ul>
-        <aside class="fit-aside">
-          <p class="reveal">Блог, своё дело или профессия будут плюсом, но не обязательны. Мы смотрим на то, как человек относится к себе и к другим, а не на статус.</p>
-        </aside>
+        <p class="plus-note reveal">Это&nbsp;не кастинг. Мы&nbsp;смотрим на&nbsp;ценности и&nbsp;готовность участвовать, а&nbsp;не на&nbsp;статус.</p>
       </div>
     </div>
   </section>
@@ -875,40 +1178,48 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   <section class="wrap sec" id="rules">
     <div class="sec-head" data-stagger>
       <p class="label reveal">Правила</p>
-      <h2 class="reveal">S.H.E. — сообщество, а не просто чат</h2>
+      <h2 class="reveal">S.H.E.&nbsp;— сообщество, а&nbsp;не просто чат</h2>
+      <p class="lede reveal">Чтобы внутри было комфортно и&nbsp;полезно, мы&nbsp;договорились о&nbsp;простых правилах взаимодействия.</p>
     </div>
+    <ul class="principles" data-stagger>
+      <li class="reveal"><b>Участвуй</b><span>Голосуй, отвечай, приходи на&nbsp;встречи.</span></li>
+      <li class="reveal"><b>Делай</b><span>Не&nbsp;просто получай знания&nbsp;— применяй их.</span></li>
+      <li class="reveal"><b>Уважай</b><span>Поддерживай других участниц.</span></li>
+      <li class="reveal"><b>Отвечай за&nbsp;своё</b><span>Взяла обязательство&nbsp;— постарайся выполнить.</span></li>
+    </ul>
+    <p class="acc-lead reveal">Полный свод&nbsp;— восемь правил</p>
     <div class="acc reveal">
       <details class="acc-item">
         <summary class="acc-btn"><span class="acc-n">01</span><span class="acc-t">Участие платное</span><i aria-hidden="true"></i></summary>
-        <div class="acc-body"><p>Членский взнос покрывает встречи, работу экспертов и организацию сообщества. Размер и периодичность обсуждаем на разговоре после заявки.</p></div>
+        <div class="acc-body"><p>Членский взнос покрывает встречи, работу экспертов и&nbsp;организацию сообщества. Размер и&nbsp;периодичность обсуждаем на&nbsp;разговоре после заявки.</p></div>
       </details>
       <details class="acc-item">
         <summary class="acc-btn"><span class="acc-n">02</span><span class="acc-t">Участие активное</span><i aria-hidden="true"></i></summary>
-        <div class="acc-body"><p>Сообщество работает, когда участницы приходят, говорят и делают. Молчаливое присутствие не даёт ничего ни тебе, ни остальным.</p></div>
+        <div class="acc-body"><p>Сообщество работает, когда участницы приходят, говорят и&nbsp;делают. Молчаливое присутствие не&nbsp;даёт ничего ни&nbsp;тебе, ни&nbsp;остальным.</p></div>
       </details>
       <details class="acc-item">
-        <summary class="acc-btn"><span class="acc-n">03</span><span class="acc-t">Подтвердила — значит пришла</span><i aria-hidden="true"></i></summary>
-        <div class="acc-body"><p>Подтверждая участие во встрече или задании, участница берёт ответственность за своё присутствие и результат.</p></div>
+        <summary class="acc-btn"><span class="acc-n">03</span><span class="acc-t">Подтвердила&nbsp;— значит пришла</span><i aria-hidden="true"></i></summary>
+        <div class="acc-body"><p>Подтверждая участие во&nbsp;встрече или&nbsp;задании, участница берёт ответственность за&nbsp;своё присутствие и&nbsp;результат.</p></div>
       </details>
       <details class="acc-item">
         <summary class="acc-btn"><span class="acc-n">04</span><span class="acc-t">Пропустить можно, предупредив</span><i aria-hidden="true"></i></summary>
-        <div class="acc-body"><p>Жизнь бывает сложнее планов. При серьёзных обстоятельствах встречу можно пропустить — достаточно сказать заранее.</p></div>
+        <div class="acc-body"><p>Жизнь бывает сложнее планов. При&nbsp;серьёзных обстоятельствах встречу можно пропустить&nbsp;— достаточно сказать заранее.</p></div>
       </details>
       <details class="acc-item">
-        <summary class="acc-btn"><span class="acc-n">05</span><span class="acc-t">Взнос при выходе не возвращается</span><i aria-hidden="true"></i></summary>
-        <div class="acc-body"><p>При выходе из сообщества членский взнос не возвращается.</p></div>
+        <summary class="acc-btn"><span class="acc-n">05</span><span class="acc-t">Взнос при&nbsp;выходе не&nbsp;возвращается</span><i aria-hidden="true"></i></summary>
+        <div class="acc-body"><p>При&nbsp;выходе из&nbsp;сообщества членский взнос не&nbsp;возвращается.</p></div>
       </details>
       <details class="acc-item">
         <summary class="acc-btn"><span class="acc-n">06</span><span class="acc-t">Делимся возможностями</span><i aria-hidden="true"></i></summary>
-        <div class="acc-body"><p>Контакты, знания, клиенты, идеи. Если можешь помочь другой участнице — помогаешь.</p></div>
+        <div class="acc-body"><p>Контакты, знания, клиенты, идеи. Если можешь помочь другой участнице&nbsp;— помогаешь.</p></div>
       </details>
       <details class="acc-item">
         <summary class="acc-btn"><span class="acc-n">07</span><span class="acc-t">Общаемся уважительно</span><i aria-hidden="true"></i></summary>
-        <div class="acc-body"><p>Оскорбления, обесценивание и снисходительный тон в сообществе не допускаются.</p></div>
+        <div class="acc-body"><p>Оскорбления, обесценивание и&nbsp;снисходительный тон в сообществе не&nbsp;допускаются.</p></div>
       </details>
       <details class="acc-item">
         <summary class="acc-btn"><span class="acc-n">08</span><span class="acc-t">Систематическая пассивность</span><i aria-hidden="true"></i></summary>
-        <div class="acc-body"><p>Постоянное отсутствие или нарушение правил может стать основанием для выхода из сообщества.</p></div>
+        <div class="acc-body"><p>Постоянное отсутствие или&nbsp;нарушение правил может стать основанием для&nbsp;выхода из&nbsp;сообщества.</p></div>
       </details>
     </div>
   </section>
@@ -917,18 +1228,37 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   <section class="paper final" aria-label="Что происходит после заявки">
     <div class="wrap sec">
       <p class="label reveal">Дальше</p>
-      <h2 class="reveal">Что происходит после заявки</h2>
+      <h2 class="reveal">Что&nbsp;происходит после заявки</h2>
       <ol class="steps" data-stagger>
-        <li class="reveal"><span class="s-n">01</span><h3>Заявка</h3><p>Короткая анкета: чем ты занята сейчас и что хочешь развивать.</p></li>
-        <li class="reveal"><span class="s-n">02</span><h3>Разговор</h3><p>Созваниваемся или встречаемся, рассказываем про формат, взнос и ближайшие встречи. Здесь же отвечаем на твои вопросы.</p></li>
-        <li class="reveal"><span class="s-n">03</span><h3>Первая встреча</h3><p>Приходишь, знакомишься с участницами и решаешь, твоё это или нет.</p></li>
+        <li class="reveal"><span class="s-n">01</span><h3>Заявка</h3><p>Короткая анкета: чем ты занята сейчас и&nbsp;что хочешь развивать.</p></li>
+        <li class="reveal"><span class="s-n">02</span><h3>Разговор</h3><p>Созваниваемся или&nbsp;встречаемся, рассказываем про&nbsp;формат, взнос и&nbsp;ближайшие встречи. Здесь же&nbsp;отвечаем на&nbsp;твои вопросы.</p></li>
+        <li class="reveal"><span class="s-n">03</span><h3>Первая встреча</h3><p>Приходишь, знакомишься с&nbsp;участницами и&nbsp;решаешь, твоё это или&nbsp;нет.</p></li>
       </ol>
       <div class="final-cta reveal">
-        <a class="btn btn-solid" href="#apply">Подать заявку</a>
-        <a class="text-link" href="#directions">Ещё раз посмотреть направления</a>
+        <a class="btn btn-solid" href="#apply">Вступить в S.H.E.</a>
+        <a class="text-link" href="#directions">Посмотреть направления</a>
       </div>
     </div>
   </section>
+  <!-- ══════════ ФИНАЛЬНЫЙ ПРИЗЫВ ══════════ -->
+  <section class="closing" aria-label="Вступить в сообщество">
+    <div class="wrap">
+      <h2 class="closing-claim reveal">Тебе не нужно выбирать между материнством и&nbsp;собой.</h2>
+      <ul class="closing-words" data-stagger>
+        <li class="reveal">Развивайся</li>
+        <li class="reveal">Пробуй</li>
+        <li class="reveal">Создавай</li>
+        <li class="reveal">Зарабатывай</li>
+        <li class="reveal">Живи</li>
+      </ul>
+      <div class="closing-cta reveal">
+        <a class="btn btn-solid btn-lg" href="#apply">Вступить в S.H.E.</a>
+        <!-- Подставить рабочий номер: https://wa.me/998XXXXXXXXX -->
+        <a class="text-link" href="#apply" data-wa="pending">Задать вопрос в WhatsApp</a>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <footer class="footer wrap">
@@ -953,15 +1283,15 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
 
     <div class="modal-body" id="modal-body">
       <p class="label">Заявка</p>
-      <h2 id="modal-title">Расскажи немного о себе</h2>
-      <p class="modal-lede">Мы читаем каждую заявку и отвечаем лично. Это не анкета на отбор — скорее знакомство.</p>
+      <h2 id="modal-title">Расскажи немного о&nbsp;себе</h2>
+      <p class="modal-lede">Мы&nbsp;читаем каждую заявку и&nbsp;отвечаем лично. Это&nbsp;не анкета на&nbsp;отбор&nbsp;— скорее знакомство.</p>
 
       <form id="apply-form" novalidate>
         <div class="f2">
           <div class="field">
             <label for="f-name">Имя</label>
             <input id="f-name" name="name" type="text" autocomplete="name" aria-describedby="e-name">
-            <p class="err" id="e-name" hidden>Напиши, как к тебе обращаться</p>
+            <p class="err" id="e-name" hidden>Напиши, как&nbsp;к тебе обращаться</p>
           </div>
           <div class="field">
             <label for="f-phone">Телефон</label>
@@ -976,7 +1306,7 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
         <div class="field"><label for="f-now">Чем ты занимаешься сейчас</label><textarea id="f-now" name="now" rows="2"></textarea></div>
 
         <fieldset class="field">
-          <legend>Что хочешь развивать</legend>
+          <legend>Что&nbsp;хочешь развивать</legend>
           <div class="chips">
             <label class="chip"><input type="radio" name="focus" value="блог"><span>блог</span></label>
             <label class="chip"><input type="radio" name="focus" value="личный бренд"><span>личный бренд</span></label>
@@ -995,8 +1325,8 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
     </div>
 
     <div class="modal-done" id="modal-done" hidden>
-      <h2>Спасибо</h2>
-      <p>Мы получили твою заявку и свяжемся с тобой в ближайшие дни.</p>
+      <h2>Спасибо&nbsp;🤍</h2>
+      <p>Мы&nbsp;получили твою заявку и&nbsp;скоро свяжемся с&nbsp;тобой.</p>
       <a class="btn btn-ghost" href="#top">Закрыть</a>
     </div>
   </div>
@@ -1220,13 +1550,52 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
       if (nameBad) bad = name; else if (phoneBad) bad = phone;
       if (bad) { bad.focus(); return; }
 
-      /* ── ТОЧКА ПОДКЛЮЧЕНИЯ ────────────────────────────────
-         Здесь заявка уходит на бэкенд: почта, Telegram-бот или CRM.
-         Пример:
-         fetch('/api/apply', {method:'POST', body:new FormData(form)})
-           .then(showDone).catch(showError);
-         ─────────────────────────────────────────────────── */
-      showDone();
+      /* ── ОТПРАВКА ЗАЯВКИ ───────────────────────────────────
+         Пока frontend-only: заявка никуда не уходит.
+         Чтобы подключить канал, задай SHE_ENDPOINT выше по файлу:
+           {type:'telegram', token:'…', chat:'…'}
+           {type:'whatsapp', phone:'998…'}      — откроет чат с текстом
+           {type:'api',      url:'/api/apply'}  — POST c FormData
+           {type:'sheets',   url:'https://script.google.com/…/exec'}
+         Данные собраны в data — их же принимает любой из каналов. */
+      var data = {
+        name:     document.getElementById('f-name').value.trim(),
+        phone:    document.getElementById('f-phone').value.trim(),
+        instagram:document.getElementById('f-insta').value.trim(),
+        kid:      document.getElementById('f-kid').value.trim(),
+        now:      document.getElementById('f-now').value.trim(),
+        focus:    (form.querySelector('input[name=focus]:checked') || {}).value || '',
+        why:      document.getElementById('f-why').value.trim()
+      };
+
+      send(data).then(showDone).catch(function (err) {
+        console.warn('заявка не ушла:', err);
+        showDone(); /* пока канала нет — не теряем человека на экране ошибки */
+      });
+
+      function send(d) {
+        var cfg = window.SHE_ENDPOINT;
+        if (!cfg) return Promise.resolve();          /* frontend-only */
+        if (cfg.type === 'api' || cfg.type === 'sheets')
+          return fetch(cfg.url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(d) });
+        if (cfg.type === 'telegram')
+          return fetch('https://api.telegram.org/bot' + cfg.token + '/sendMessage', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: cfg.chat, parse_mode: 'HTML', text: text(d) })
+          });
+        if (cfg.type === 'whatsapp') {
+          window.open('https://wa.me/' + cfg.phone + '?text=' + encodeURIComponent(text(d)), '_blank', 'noopener');
+          return Promise.resolve();
+        }
+        return Promise.reject('неизвестный тип канала: ' + cfg.type);
+      }
+
+      function text(d) {
+        return 'Заявка в S.H.E.\n\nИмя: ' + d.name + '\nТелефон: ' + d.phone +
+               '\nInstagram: ' + (d.instagram || '—') + '\nВозраст ребёнка: ' + (d.kid || '—') +
+               '\nСейчас занимается: ' + (d.now || '—') + '\nХочет развивать: ' + (d.focus || '—') +
+               '\nПочему хочет вступить: ' + (d.why || '—');
+      }
 
       function showDone() {
         var mBody = document.getElementById('modal-body');
