@@ -604,6 +604,20 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
 
 /* §12 · действие в карточке эксперта */
 .feat-cta{margin-top:16px}
+
+/* участницы: портрет или плашка слева, должность, имя и слова — справа */
+.mem-grid{margin-top:clamp(36px,5vh,72px);display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(28px,4vw,80px)}
+.mem{display:grid;grid-template-columns:minmax(0,42%) 1fr;gap:clamp(18px,2.4vw,36px);align-items:end}
+.mem-photo{overflow:hidden;background:var(--sand)}
+.mem-photo img{width:100%;aspect-ratio:4/5;object-fit:cover}
+.mem-plate{display:grid;place-items:center;aspect-ratio:4/5;background:var(--sand);padding:18px;
+  font-family:var(--display);font-weight:300;font-style:italic;font-size:clamp(1.05rem,.8vw + .6rem,1.4rem);
+  line-height:1.16;text-align:center;color:var(--text-soft)}
+.mem-role{font-size:var(--t-xs);letter-spacing:.18em;text-transform:uppercase;color:var(--text-soft)}
+.mem h3{margin-top:10px;font-family:var(--display);font-weight:400;font-size:var(--t-h3);line-height:1.12;letter-spacing:-.012em}
+.mem blockquote p{margin-top:14px;font-family:var(--display);font-weight:300;font-style:italic;
+  font-size:clamp(1.05rem,.75vw + .72rem,1.35rem);line-height:1.34;color:var(--text-soft)}
+.mem blockquote p::before{content:'«'} .mem blockquote p::after{content:'»'}
 .featured.more{margin-top:clamp(44px,6.5vh,88px);grid-template-columns:repeat(3,1fr);
   padding-top:clamp(34px,4.6vh,60px);border-top:1px solid var(--line-soft)}
 /* второй ярус — карточка вертикальная: плашка сверху, текст под ней */
@@ -616,10 +630,6 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   line-height:1.16;text-align:center;color:var(--text-soft)}
 
 
-/* §13 · истории */
-.st-grid{margin-top:clamp(36px,5vh,72px);display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(28px,4vw,80px)}
-.st{border-top:1px solid var(--line);padding-top:clamp(20px,2.6vh,32px);display:flex;flex-direction:column}
-.st blockquote p{font-family:var(--display);font-weight:300;font-style:italic;
   font-size:clamp(1.35rem,1rem + 1.5vw,2.2rem);line-height:1.24;letter-spacing:-.012em;text-wrap:balance}
 .st blockquote p::before{content:'«'} .st blockquote p::after{content:'»'}
 .st footer{margin-top:auto;padding-top:clamp(18px,2.4vh,28px);display:flex;flex-direction:column;gap:4px}
@@ -680,6 +690,7 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
 
 @media (max-width:1024px){
   .featured.more{grid-template-columns:repeat(2,1fr)}
+  .mem-grid{grid-template-columns:1fr}
   .in-photo{grid-column:1/13;grid-row:auto}
   .in-lead,.in-lead:nth-of-type(1),.in-lead:nth-of-type(2){grid-column:1/13;grid-row:auto;align-self:auto}
   .in-grid .in-item:not(.in-lead){grid-row:auto}
@@ -688,12 +699,13 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   .chain{grid-template-columns:repeat(5,1fr);gap:8px}
   .ch-w{font-size:11.5px;letter-spacing:.1em}
   .chain li+li::before{display:none}
-  .st-grid{grid-template-columns:1fr}
   .perfect-cols{grid-template-columns:1fr}
   .principles{grid-template-columns:repeat(2,1fr)}
 }
 @media (max-width:640px){
   .featured.more{grid-template-columns:1fr}
+  .mem{grid-template-columns:1fr;gap:18px}
+  .mem-plate{aspect-ratio:16/9}
   .featured.more .feat-plate{aspect-ratio:16/9}
   .in-grid .in-item:not(.in-lead){grid-column:1/13!important}
   .in-photo img{aspect-ratio:4/3}
@@ -942,6 +954,40 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   </section>
 
   <!-- ══════════ ОКРУЖЕНИЕ — тёмное поле ══════════ -->
+
+  <!-- ══════════ УЧАСТНИЦЫ ══════════
+       Чтобы добавить участницу — скопируй <article class="mem">.
+       Портрет: заменить <div class="mem-plate"> на
+       <figure class="mem-photo reveal-img"> с picture внутри, как у экспертов.
+       Имена и цитаты — от заказчика; публиковать только с согласия участницы. -->
+  <section class="wrap sec members" id="members">
+    <div class="sec-head">
+      <p class="label reveal">Участницы</p>
+      <h2 class="reveal">Кто здесь</h2>
+      <p class="lede reveal">Разные профессии, разный возраст детей, разная точка старта. Общее одно: каждая пришла, чтобы двигаться, а не наблюдать.</p>
+    </div>
+
+    <div class="mem-grid" data-stagger>
+      <article class="mem">
+        <div class="mem-plate reveal-img"><span>Блог<br>и lifestyle</span></div>
+        <div class="mem-body reveal">
+          <p class="mem-role">Мама · блог · lifestyle</p>
+          <h3>Анастасия, 23</h3>
+          <blockquote><p>Я&nbsp;искала поддержку, а&nbsp;нашла здесь людей, с&nbsp;которыми можно развиваться и&nbsp;достигать новых целей.</p></blockquote>
+        </div>
+      </article>
+
+      <article class="mem">
+        <div class="mem-plate reveal-img"><span>Своё<br>дело</span></div>
+        <div class="mem-body reveal">
+          <p class="mem-role">Мама · бизнес</p>
+          <h3>Алёна, 30</h3>
+          <blockquote><p>Я&nbsp;пришла ради знакомств, а&nbsp;в итоге начала развивать свой блог и&nbsp;впервые за&nbsp;долгое время почувствовала, что&nbsp;двигаюсь вперёд.</p></blockquote>
+        </div>
+      </article>
+    </div>
+  </section>
+
   <section class="dark" id="community">
     <div class="wrap">
       <div class="dark-head">
@@ -1061,30 +1107,6 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   </section>
 
   <!-- ══════════ ПОЛОСНЫЙ КАДР ══════════ -->
-
-  <!-- ══════════ ИСТОРИИ ══════════
-       ДЕМО-КОНТЕНТ из ТЗ. Заменить на реальные истории с именами и согласием участниц.
-       Портреты добавить в .st-photo, когда появятся кадры со съёмки. -->
-  <section class="wrap sec stories" id="stories">
-    <div class="sec-head">
-      <p class="label reveal">Истории</p>
-      <h2 class="reveal">Мы&nbsp;разные. Но&nbsp;хотим одного.</h2>
-    </div>
-    <div class="st-grid" data-stagger>
-      <article class="st reveal">
-        <blockquote>
-          <p>Я&nbsp;искала поддержку, а&nbsp;нашла здесь людей, с&nbsp;которыми можно развиваться и&nbsp;достигать новых целей.</p>
-        </blockquote>
-        <footer><b>Анастасия, 23</b><span>мама · блог · lifestyle</span></footer>
-      </article>
-      <article class="st reveal">
-        <blockquote>
-          <p>Я&nbsp;пришла ради знакомств, а&nbsp;в итоге начала развивать свой блог и&nbsp;впервые за&nbsp;долгое время почувствовала, что&nbsp;двигаюсь вперёд.</p>
-        </blockquote>
-        <footer><b>Алёна, 30</b><span>мама · бизнес</span></footer>
-      </article>
-    </div>
-  </section>
 
   <!-- ══════════ СОБЫТИЯ ══════════ -->
   <section class="wrap sec" id="events">
