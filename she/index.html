@@ -194,63 +194,49 @@ h1 em,h2 em{font-style:italic;font-weight:300;color:var(--accent)}
 
 /* ══════════ НАПРАВЛЕНИЯ — липкое фото + ровный список ══════════ */
 .dir-grid{display:grid;grid-template-columns:repeat(12,1fr);column-gap:clamp(18px,2.4vw,40px);align-items:start}
-.dir-aside{grid-column:1/5;position:sticky;top:calc(var(--head) + 16px)}
+.dir-aside{grid-column:7/13;grid-row:1}
 .dir-aside picture{overflow:hidden;background:var(--sand)}
-.dir-aside img{width:100%;aspect-ratio:4/5;object-fit:cover}
+.dir-aside img{width:100%;aspect-ratio:3/2;object-fit:cover;object-position:50% 22%}
 .dir-aside figcaption{margin-top:12px;font-size:var(--t-xs);letter-spacing:.18em;text-transform:uppercase;color:var(--text-soft);font-weight:400}
-.dir-main{grid-column:6/13}
+.dir-main{grid-column:1/6;grid-row:1;align-self:center}
+.dir-fan-wrap{grid-column:1/13;grid-row:2}
 .dir-main .sec-head{margin-bottom:clamp(28px,4vh,48px)}
-/* картотека: стопка бумаги, у каждого листа свой язычок */
-.dir-stack{position:relative;padding-top:40px;padding-bottom:96px;--tstep:13%}
-.dir-card{--i:0;position:relative;background:var(--paper);border:1px solid var(--line-soft);border-radius:2px;
-  padding:52px clamp(22px,2.4vw,34px) 26px;min-height:172px;outline-offset:6px;
-  /* лист лежит на предыдущем и кладёт на него тень — отсюда ощущение стопки */
-  box-shadow:0 -7px 16px -10px rgba(30,28,26,.22);
-  transition:transform .56s var(--ease-out) var(--dly,0ms),box-shadow .42s var(--ease-out)}
-.dir-card+.dir-card{margin-top:-124px}
-.dir-card:nth-child(2){--i:1;--dly:14ms}
-.dir-card:nth-child(3){--i:2;--dly:28ms}
-.dir-card:nth-child(4){--i:3;--dly:42ms}
-.dir-card:nth-child(5){--i:4;--dly:56ms}
-.dir-card:nth-child(6){--i:5;--dly:70ms}
-/* язычки идут одной диагональю через всю ширину, а не зигзагом в три позиции */
-.dir-tab{position:absolute;bottom:100%;margin-bottom:-1px;left:calc(var(--i) * var(--tstep));
-  max-width:calc(100% - var(--i) * var(--tstep) - 10px);
-  height:38px;display:inline-flex;align-items:center;padding:0 clamp(15px,1.5vw,20px);
-  background:var(--paper);border:1px solid var(--line-soft);border-bottom:0;border-radius:8px 8px 0 0;
-  box-shadow:0 -6px 14px -10px rgba(30,28,26,.2);
-  font-family:var(--display);font-size:14.5px;font-weight:400;letter-spacing:.005em;line-height:1;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  transition:background .24s var(--ease-out),color .24s,border-color .24s}
-.dir-card p{color:var(--text-soft);font-size:15.5px;max-width:44ch}
-/* заметка не проявляется, а прописывается слева направо — как от руки */
-.dir-note{display:inline-block;margin-top:16px;font-family:var(--hand);font-size:20px;line-height:1.15;color:var(--accent);
-  transform:rotate(-2.5deg);transform-origin:left center;
-  clip-path:inset(0 100% -20% 0);transition:clip-path .62s var(--ease-out) .22s}
-
-/* передняя папка — бордовая, как в референсе; она же передаёт эстафету тёмному блоку ниже */
-.dir-card:last-child,.dir-card:last-child .dir-tab{background:var(--accent);border-color:var(--accent);color:var(--dark-text)}
-.dir-card:last-child{box-shadow:0 -8px 20px -10px rgba(30,28,26,.34)}
-.dir-card:last-child p{color:#EBDFD5}
-.dir-card:last-child .dir-note{color:var(--clay);clip-path:inset(0 0 -20% 0)}
-
-@media (min-width:1025px){
-  /* приписка на полях: уравновешивает лист и не мешает читать описание */
-  .dir-note{position:absolute;right:clamp(22px,2.4vw,34px);bottom:24px;margin-top:0;
-    transform:rotate(-2.5deg);transform-origin:right center}
-}
-@media (max-width:1200px){ .dir-stack{--tstep:7%} }
+/* веер: шесть листов из одной точки, как папки в руке */
+.dir-fan{position:relative;height:clamp(320px,44vh,420px);padding-left:24px;margin-top:clamp(34px,5vh,60px)}
+.dir-sheet{--i:0;--rot:0deg;position:absolute;bottom:0;left:calc(24px + var(--i) * 13.5%);
+  width:min(32%,340px);height:88%;background:var(--paper);border:1px solid var(--line-soft);border-radius:3px;
+  padding:26px 24px 24px;outline-offset:5px;transform-origin:20% 100%;transform:rotate(var(--rot));
+  box-shadow:-10px 7px 22px -17px rgba(30,28,26,.6);
+  transition:transform .5s cubic-bezier(.2,1.18,.36,1),box-shadow .42s var(--ease-out)}
+.dir-sheet:nth-child(1){--i:0;--rot:-7deg}
+.dir-sheet:nth-child(2){--i:1;--rot:-4.2deg}
+.dir-sheet:nth-child(3){--i:2;--rot:-1.4deg}
+.dir-sheet:nth-child(4){--i:3;--rot:1.4deg}
+.dir-sheet:nth-child(5){--i:4;--rot:4.2deg}
+.dir-sheet:nth-child(6){--i:5;--rot:7deg}
+.dir-sheet h3{font-family:var(--display);font-weight:400;font-size:1.06rem;line-height:1.18;letter-spacing:-.008em;max-width:11ch}
+.dir-sheet p{margin-top:13px;color:var(--text-soft);font-size:15px;opacity:0;transition:opacity .34s ease}
+.dir-note{display:inline-block;margin-top:15px;font-family:var(--hand);font-size:19px;line-height:1.1;color:var(--accent);
+  transform:rotate(-2.5deg);transform-origin:left center;opacity:0;transition:opacity .34s ease}
+/* передний лист бордовый — он же передаёт эстафету тёмному блоку ниже */
+.dir-sheet:last-child{background:var(--accent);border-color:var(--accent)}
+.dir-sheet:last-child h3{color:var(--dark-text)}
+.dir-sheet:last-child p{color:#EBDFD5}
+.dir-sheet:last-child .dir-note{color:var(--clay)}
 
 @media (hover:hover) and (pointer:fine){
-  /* лист вытягивают — коротко и с лёгким перелётом */
-  .dir-card:hover,.dir-card:focus-visible{
-    transform:translateY(-14px);box-shadow:0 26px 46px -22px rgba(30,28,26,.42);
-    transition:transform .34s cubic-bezier(.2,1.18,.36,1),box-shadow .34s var(--ease-out)}
-  /* стопка расступается следом, каскадом сверху вниз */
-  .dir-card:hover~.dir-card,.dir-card:focus-visible~.dir-card{transform:translateY(138px)}
-  .dir-card:hover .dir-tab,.dir-card:focus-visible .dir-tab{background:var(--accent);color:var(--dark-text);border-color:var(--accent)}
-  .dir-card:last-child:hover .dir-tab,.dir-card:last-child:focus-visible .dir-tab{background:var(--paper);color:var(--accent);border-color:var(--paper)}
-  .dir-card:hover .dir-note,.dir-card:focus-visible .dir-note{clip-path:inset(0 0 -20% 0)}
+  /* лист выпрямляется и выходит вперёд; текст приходит следом, когда место уже открылось */
+  .dir-sheet:hover,.dir-sheet:focus-visible{transform:rotate(0) translateY(-14px);z-index:9;
+    box-shadow:0 30px 52px -24px rgba(30,28,26,.55)}
+  .dir-sheet:hover p,.dir-sheet:focus-visible p,
+  .dir-sheet:hover .dir-note,.dir-sheet:focus-visible .dir-note{opacity:1;transition-delay:.14s}
+}
+/* без наведения веер не работает — листы просто лежат раскрытыми */
+@media (hover:none),(pointer:coarse),(max-width:1024px){
+  .dir-fan{position:static;height:auto;padding-left:0;display:flex;flex-direction:column;gap:14px}
+  .dir-sheet{position:static;width:100%;height:auto;transform:none!important;box-shadow:none;padding:22px}
+  .dir-sheet h3{font-size:1.12rem;max-width:none}
+  .dir-sheet p,.dir-sheet .dir-note{opacity:1}
 }
 /* без наведения — листы просто лежат раскрытыми */
 @media (hover:none),(pointer:coarse){
@@ -465,8 +451,9 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
 @media (max-width:1240px){
   .hero-photo{grid-column:1/6}
   .hero-copy{grid-column:6/13}
-  .dir-aside{grid-column:1/5}
-  .dir-main{grid-column:5/13}
+  .dir-aside{grid-column:7/13;grid-row:1}
+  .dir-main{grid-column:1/6;grid-row:1}
+  .dir-fan-wrap{grid-column:1/13;grid-row:2}
   .featured{gap:32px}
 }
 
@@ -499,9 +486,10 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   .about-text{max-width:none}
 
   .dir-grid{grid-template-columns:1fr;row-gap:34px}
-  .dir-aside{grid-column:1/-1;position:static}
+  .dir-aside{grid-column:1/-1;grid-row:auto;position:static}
   .dir-aside img{aspect-ratio:3/2;object-position:50% 22%}
-  .dir-main{grid-column:1/-1}
+  .dir-main{grid-column:1/-1;grid-row:auto}
+  .dir-fan-wrap{grid-column:1/-1;grid-row:auto}
 
   .dir-card{min-height:0}
   .dir-card+.dir-card{margin-top:46px}
@@ -671,38 +659,40 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
           <p class="label reveal">Направления</p>
           <h2 class="reveal">Развиваемся вместе</h2>
         </div>
-        <ul class="dir-stack reveal">
-          <li class="dir-card" tabindex="0">
-            <h3 class="dir-tab">Состояние и психология</h3>
+      </div>
+      <div class="dir-fan-wrap reveal">
+        <div class="dir-fan">
+          <div class="dir-sheet" tabindex="0">
+            <h3>Состояние и психология</h3>
             <p>Отношения, эмоциональный ресурс, уверенность в себе и способность выдерживать собственные амбиции.</p>
             <span class="dir-note" aria-hidden="true">выдерживать свои амбиции</span>
-          </li>
-          <li class="dir-card" tabindex="0">
-            <h3 class="dir-tab">Здоровье и энергия</h3>
+          </div>
+          <div class="dir-sheet" tabindex="0">
+            <h3>Здоровье и энергия</h3>
             <p>Питание, движение, сон и восстановление — то, без чего всё остальное быстро заканчивается.</p>
             <span class="dir-note" aria-hidden="true">без этого всё быстро заканчивается</span>
-          </li>
-          <li class="dir-card" tabindex="0">
-            <h3 class="dir-tab">Блог и личный бренд</h3>
+          </div>
+          <div class="dir-sheet" tabindex="0">
+            <h3>Блог и личный бренд</h3>
             <p>Контент, аудитория, позиционирование и системный подход вместо хаотичных сторис.</p>
             <span class="dir-note" aria-hidden="true">система вместо хаоса</span>
-          </li>
-          <li class="dir-card" tabindex="0">
-            <h3 class="dir-tab">Дело, карьера и доход</h3>
+          </div>
+          <div class="dir-sheet" tabindex="0">
+            <h3>Дело, карьера и доход</h3>
             <p>Своё дело, возвращение в профессию, первые деньги и следующая ступень.</p>
             <span class="dir-note" aria-hidden="true">первые деньги</span>
-          </li>
-          <li class="dir-card" tabindex="0">
-            <h3 class="dir-tab">Навыки и финансы</h3>
+          </div>
+          <div class="dir-sheet" tabindex="0">
+            <h3>Навыки и финансы</h3>
             <p>Практические инструменты, финансовая грамотность, планирование и самостоятельность в деньгах.</p>
             <span class="dir-note" aria-hidden="true">самостоятельность в деньгах</span>
-          </li>
-          <li class="dir-card" tabindex="0">
-            <h3 class="dir-tab">Окружение и возможности</h3>
+          </div>
+          <div class="dir-sheet" tabindex="0">
+            <h3>Окружение и возможности</h3>
             <p>Знакомства, обмен опытом, клиенты и проекты, которые появляются из разговоров.</p>
             <span class="dir-note" aria-hidden="true">всё начинается с разговора</span>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
     </div>
   </section>
