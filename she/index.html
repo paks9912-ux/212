@@ -460,6 +460,7 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   .dir-main{grid-column:1/6;grid-row:1}
   .dir-fan-wrap{grid-column:1/13;grid-row:2}
   .featured{gap:32px}
+  .featured.more{grid-template-columns:repeat(2,1fr)}
 }
 
 @media (max-width:1024px){
@@ -505,7 +506,7 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   .dark-head .label{padding-top:0}
   .dark-lede{margin-top:6px}
 
-  .featured{grid-template-columns:1fr;gap:36px}
+  .featured,.featured.more{grid-template-columns:1fr;gap:36px}
   .feat{grid-template-columns:minmax(0,38%) 1fr}
 
   .ev-feat{grid-template-columns:1fr;gap:28px}
@@ -603,6 +604,17 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
 
 /* §12 · действие в карточке эксперта */
 .feat-cta{margin-top:16px}
+.featured.more{margin-top:clamp(44px,6.5vh,88px);grid-template-columns:repeat(3,1fr);
+  padding-top:clamp(34px,4.6vh,60px);border-top:1px solid var(--line-soft)}
+/* второй ярус — карточка вертикальная: плашка сверху, текст под ней */
+.featured.more .feat{grid-template-columns:1fr;gap:clamp(14px,1.6vw,22px);align-items:start}
+.featured.more .feat-plate{aspect-ratio:3/2;font-size:clamp(1rem,.7vw + .62rem,1.3rem)}
+.featured.more .feat h3{margin-top:8px}
+/* плашка вместо портрета: несёт направление, а не пустоту */
+.feat-plate{display:grid;place-items:center;aspect-ratio:4/5;background:var(--sand);padding:18px;
+  font-family:var(--display);font-weight:300;font-style:italic;font-size:clamp(1.1rem,1vw + .6rem,1.5rem);
+  line-height:1.16;text-align:center;color:var(--text-soft)}
+
 
 /* §13 · истории */
 .st-grid{margin-top:clamp(36px,5vh,72px);display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(28px,4vw,80px)}
@@ -667,6 +679,7 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
 .btn-lg{min-height:60px;padding:18px 40px;font-size:13px}
 
 @media (max-width:1024px){
+  .featured.more{grid-template-columns:repeat(2,1fr)}
   .in-photo{grid-column:1/13;grid-row:auto}
   .in-lead,.in-lead:nth-of-type(1),.in-lead:nth-of-type(2){grid-column:1/13;grid-row:auto;align-self:auto}
   .in-grid .in-item:not(.in-lead){grid-row:auto}
@@ -680,6 +693,8 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
   .principles{grid-template-columns:repeat(2,1fr)}
 }
 @media (max-width:640px){
+  .featured.more{grid-template-columns:1fr}
+  .featured.more .feat-plate{aspect-ratio:16/9}
   .in-grid .in-item:not(.in-lead){grid-column:1/13!important}
   .in-photo img{aspect-ratio:4/3}
   .proof{grid-template-columns:repeat(2,1fr);row-gap:26px}
@@ -1007,9 +1022,39 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
           </div>
         </article>
       </div>
+
+      <!-- Второй ярус: эксперты без портретов. Когда появятся кадры со съёмки,
+           заменить .feat-plate на <figure class="reveal-img"><picture>…</picture></figure>
+           и перенести карточку в .featured выше. -->
+      <div class="featured more" data-stagger>
+        <article class="feat">
+          <div class="feat-plate reveal-img"><span>Дело<br>и бизнес</span></div>
+          <div class="feat-body reveal">
+            <h3>Коуч</h3>
+            <p>Помогает превратить «хочу что-то своё» в план на месяц: цель, шаги, сроки и честный разговор о том, что мешает начать.</p>
+            <a class="text-link feat-cta" href="#apply">Задать вопрос эксперту</a>
+          </div>
+        </article>
+        <article class="feat">
+          <div class="feat-plate reveal-img"><span>Здоровье<br>и энергия</span></div>
+          <div class="feat-body reveal">
+            <h3>Нутрициолог</h3>
+            <p>Питание без диет и запретов: как есть так, чтобы к вечеру оставались силы, а не чувство вины.</p>
+            <a class="text-link feat-cta" href="#apply">Задать вопрос эксперту</a>
+          </div>
+        </article>
+        <article class="feat">
+          <div class="feat-plate reveal-img"><span>Здоровье<br>и энергия</span></div>
+          <div class="feat-body reveal">
+            <h3>Fitness-тренер</h3>
+            <p>Движение под реальный график: не марафон в зале, а нагрузка, которую можно выдержать после бессонной ночи.</p>
+            <a class="text-link feat-cta" href="#apply">Узнать о ближайшей встрече</a>
+          </div>
+        </article>
+      </div>
+
       <ul class="roster reveal">
-        <li>Психолог</li><li>Коуч</li><li>Нутрициолог</li><li>Fitness-тренер</li>
-        <li>Финансовый специалист</li><li>SMM и Instagram</li><li>Предприниматель</li><li>Личный бренд</li>
+        <li>SMM и Instagram</li><li>Предприниматель</li><li>Личный бренд</li>
       </ul>
       <p class="roster-note reveal">Состав экспертов меняется от&nbsp;сезона к&nbsp;сезону&nbsp;— расписание приходит участницам заранее.</p>
     </div>
@@ -1028,15 +1073,15 @@ html:has(#menu-toggle:checked),html:has(.modal:target){overflow:hidden}
     <div class="st-grid" data-stagger>
       <article class="st reveal">
         <blockquote>
-          <p>Я&nbsp;долго думала, что&nbsp;сначала нужно разобраться с&nbsp;ребёнком, а&nbsp;уже потом заниматься собой. Оказалось, этого «потом» можно ждать бесконечно.</p>
+          <p>Я&nbsp;искала поддержку, а&nbsp;нашла здесь людей, с&nbsp;которыми можно развиваться и&nbsp;достигать новых целей.</p>
         </blockquote>
-        <footer><b>Анна, 31</b><span>мама · блог · lifestyle</span></footer>
+        <footer><b>Анастасия, 23</b><span>мама · блог · lifestyle</span></footer>
       </article>
       <article class="st reveal">
         <blockquote>
           <p>Я&nbsp;пришла ради знакомств, а&nbsp;в итоге начала развивать свой блог и&nbsp;впервые за&nbsp;долгое время почувствовала, что&nbsp;двигаюсь вперёд.</p>
         </blockquote>
-        <footer><b>Алина, 34</b><span>мама · бизнес</span></footer>
+        <footer><b>Алёна, 30</b><span>мама · бизнес</span></footer>
       </article>
     </div>
   </section>
