@@ -446,6 +446,23 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
 .ask .ask-btns button + button{border-left:.5px solid var(--line)}
 .ask .ask-btns button.danger{color:var(--red);font-weight:600}
 .ask .ask-btns button:active{background:var(--fill-2)}
+
+/* ---------- график уровня топлива ---------- */
+.chart svg{display:block;width:100%;height:108px}
+.chart-x{
+  display:flex;justify-content:space-between;gap:8px;
+  font-size:11px;color:var(--text-3);margin-top:2px;
+}
+.chart-legend{
+  display:flex;flex-wrap:wrap;gap:12px;margin-top:10px;
+  font-size:11.5px;color:var(--text-2);
+}
+.chart-legend span{display:flex;align-items:center;gap:5px}
+.chart-legend i{display:block;flex:none}
+.chart-legend i.ln{width:12px;height:2px;border-radius:2px;background:var(--accent)}
+.chart-legend i.pt{width:7px;height:7px;border-radius:50%;border:1.6px solid var(--accent);background:var(--bg-elev)}
+.chart-legend i.fl{width:3px;height:8px;border-radius:1px;background:var(--accent)}
+.chart-legend i.dr{width:3px;height:8px;border-radius:1px;background:var(--red)}
 </style>
 
 <script>
@@ -677,7 +694,7 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
 
     empty: function () {
       return {
-        version: 1,
+        version: 2,
         createdAt: U.today(),
         isDemo: false,
         settings: {
@@ -724,19 +741,80 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       ['units', 'drivers', 'shifts', 'fuel', 'services'].forEach(function (k) {
         d[k] = Array.isArray(d[k]) ? d[k] : [];
       });
-      d.units.forEach(function (u) {
-        if (!u.meter) u.meter = 'hours';
-        if (u.active == null) u.active = true;
-        u.norm = U.num(u.norm);
-        u.tank = U.num(u.tank);
+      d.units.forEach(function (u) { DB.normUnit(u); });
+      d.services.forEach(function (s) {
+        if (s.kind === 'to' && !s.programId) s.programId = 'to';
       });
       d.fuel.forEach(function (f) {
         if (!f.type) f.type = 'fill';
         f.liters = U.num(f.liters);
         if (f.sum == null) f.sum = U.num(f.liters) * U.num(f.price);
       });
-      d.version = 1;
+      d.version = 2;
       return d;
+    },
+
+    /* Приводим единицу техники в порядок: числа числами, регламент списком.
+       Поле «ТО каждые N» в форме — это первая работа регламента с id 'to',
+       поэтому держим их синхронными в обе стороны.                        */
+    normUnit: function (u) {
+      if (!u) return u;
+      if (!u.meter) u.meter = 'hours';
+      if (u.active == null) u.active = true;
+      u.norm = U.num(u.norm);
+      u.tank = U.num(u.tank);
+      if (!Array.isArray(u.programs)) u.programs = [];
+      u.programs.forEach(function (pr) {
+        pr.id = pr.id || U.uid();
+        pr.everyWork = U.num(pr.everyWork);
+        pr.everyDays = U.num(pr.everyDays);
+      });
+      var every = U.num(u.serviceEvery);
+      var to = u.programs.filter(function (p) { return p.id === 'to'; })[0];
+      if (every > 0) {
+        if (to) to.everyWork = every;
+        else u.programs.unshift({ id: 'to', name: 'ТО по регламенту', everyWork: every, everyDays: 0 });
+      } else if (to && !to.everyDays) {
+        u.programs = u.programs.filter(function (p) { return p.id !== 'to'; });
+      }
+      return u;
+    },
+
+    /* ---------- регламенты обслуживания ---------- */
+    programs: function (u) { return (u && u.programs) || []; },
+    program: function (u, id) {
+      return this.programs(u).filter(function (p) { return p.id === id; })[0] || null;
+    },
+    addProgram: function (unitId, pr) {
+      var u = this.unit(unitId);
+      if (!u) return null;
+      if (!Array.isArray(u.programs)) u.programs = [];
+      pr.id = pr.id || U.uid();
+      pr.everyWork = U.num(pr.everyWork);
+      pr.everyDays = U.num(pr.everyDays);
+      u.programs.push(pr);
+      this.syncEvery(u);
+      this.save();
+      return pr;
+    },
+    updProgram: function (unitId, id, patch) {
+      var pr = this.program(this.unit(unitId), id);
+      if (pr) {
+        Object.assign(pr, patch);
+        pr.everyWork = U.num(pr.everyWork);
+        pr.everyDays = U.num(pr.everyDays);
+        this.syncEvery(this.unit(unitId));
+        this.save();
+      }
+      return pr;
+    },
+    delProgram: function (unitId, id) {
+      var u = this.unit(unitId);
+      if (!u) return;
+      u.programs = this.programs(u).filter(function (p) { return p.id !== id; });
+      this.data.services.forEach(function (s) { if (s.programId === id) s.programId = null; });
+      this.syncEvery(u);
+      this.save();
     },
 
     save: function () {
@@ -767,14 +845,14 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     addUnit: function (u) {
       u.id = u.id || U.uid();
       u.createdAt = u.createdAt || U.today();
-      if (u.active == null) u.active = true;
+      this.normUnit(u);
       this.data.units.push(u);
       this.save();
       return u;
     },
     updUnit: function (id, patch) {
       var u = this.unit(id);
-      if (u) { Object.assign(u, patch); this.save(); }
+      if (u) { Object.assign(u, patch); this.normUnit(u); this.save(); }
       return u;
     },
     delUnit: function (id) {
@@ -783,6 +861,12 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       this.data.fuel = this.data.fuel.filter(function (f) { return f.unitId !== id; });
       this.data.services = this.data.services.filter(function (s) { return s.unitId !== id; });
       this.save();
+    },
+
+    syncEvery: function (u) {
+      if (!u) return;
+      var to = this.programs(u).filter(function (p) { return p.id === 'to'; })[0];
+      u.serviceEvery = to ? U.num(to.everyWork) : 0;
     },
 
     /* ---------- водители ---------- */
@@ -955,21 +1039,151 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       return { units: this.data.units.length, fuel: this.data.fuel.length, shifts: this.data.shifts.length };
     },
 
+    /* ---------- выгрузка из телематики ----------
+       Wialon, Omnicomm, заводские КОМТРАКС/LiveLink и прочие отдают отчёт
+       «по дням»: счётчик, уровень в баке, заправки, сливы. Колонки у всех
+       называются по-разному, поэтому ищем их по смыслу заголовка.        */
+    TELEMETRY_COLS: [
+      ['date', /дата|date|сутки|день|период/],
+      ['unit', /техник|машин|объект|транспорт|unit|name|наименован|госномер|номер/],
+      ['meter', /моточас|мото.?час|пробег|наработ|счётчик|счетчик|odometer|mileage|hours|engine/],
+      ['level', /уровень|остаток|конец.*бак|бак.*конец|level|fuel.?end/],
+      ['fill', /заправ|залито|fill|refuel/],
+      ['drain', /слив|слито|утечк|хищен|drain|theft/]
+    ],
+
+    /* какая колонка за что отвечает — по заголовку таблицы */
+    telemetryMap: function (head) {
+      var map = {};
+      this.TELEMETRY_COLS.forEach(function (pair) {
+        head.forEach(function (h, i) {
+          if (map[pair[0]] != null) return;
+          if (pair[1].test(String(h).toLowerCase())) map[pair[0]] = i;
+        });
+      });
+      return map;
+    },
+
+    /* rows — уже разобранные строки, map — результат telemetryMap */
+    importTelemetry: function (rows, map, opt) {
+      opt = opt || {};
+      var self = this;
+      var res = { kind: 'telemetry', units: 0, shifts: 0, fills: 0, checks: 0, drains: 0, skipped: 0 };
+      if (map.date == null || map.unit == null) throw new Error('Не нашёл колонки «Дата» и «Техника»');
+
+      /* сначала по технике и датам, иначе наработка посчитается задом наперёд */
+      var parsed = [];
+      rows.forEach(function (c) {
+        var date = self.parseDate(c[map.date]);
+        var name = String(c[map.unit] || '').trim();
+        if (!date || !name) { res.skipped++; return; }
+        parsed.push({ date: date, name: name, row: c });
+      });
+      parsed.sort(function (a, b) {
+        if (a.name !== b.name) return a.name < b.name ? -1 : 1;
+        return a.date < b.date ? -1 : 1;
+      });
+
+      /* что уже есть — чтобы повторная загрузка того же файла не плодила дубли */
+      var have = {};
+      this.data.shifts.forEach(function (x) { have['s' + x.unitId + x.date] = 1; });
+      this.data.fuel.forEach(function (x) { have[x.type[0] + x.unitId + x.date] = 1; });
+
+      var prevMeter = {};
+      parsed.forEach(function (p) {
+        var c = p.row;
+        var u = self.unitByName(p.name);
+        if (!u) {
+          u = self.addUnit({
+            name: p.name, meter: opt.meter || 'hours', norm: 0, kind: 'other',
+            fuel: self.data.settings.fuel, meterStart: map.meter != null ? U.num(c[map.meter]) : 0
+          });
+          res.units++;
+        }
+        var num = function (i) { return i != null && c[i] != null && c[i] !== '' ? U.num(c[i]) : null; };
+
+        /* наработка — разница показаний счётчика между строками */
+        var meter = num(map.meter);
+        if (meter != null) {
+          var prev = prevMeter[u.id];
+          if (prev == null) prev = U.num(u.meterStart) || meter;
+          var work = meter - prev;
+          if (work > 0 && !have['s' + u.id + p.date]) {
+            self.data.shifts.push({
+              id: U.uid(), unitId: u.id, driverId: u.driverId || null, date: p.date,
+              start: prev, end: meter, site: '', note: 'из телематики', src: 'telemetry'
+            });
+            have['s' + u.id + p.date] = 1;
+            res.shifts++;
+          }
+          prevMeter[u.id] = meter;
+        }
+
+        var lit = num(map.fill);
+        if (lit && lit > 0 && !have['f' + u.id + p.date]) {
+          self.data.fuel.push({
+            id: U.uid(), type: 'fill', unitId: u.id, driverId: u.driverId || null, date: p.date,
+            liters: lit, price: U.num(self.data.settings.price),
+            sum: lit * U.num(self.data.settings.price),
+            source: opt.source === 'azs' ? 'azs' : 'tank',
+            meter: meter, fuel: u.fuel || self.data.settings.fuel,
+            note: 'из телематики', src: 'telemetry'
+          });
+          have['f' + u.id + p.date] = 1;
+          res.fills++;
+        }
+
+        var dr = num(map.drain);
+        if (dr && dr > 0 && !have['d' + u.id + p.date]) {
+          self.data.fuel.push({
+            id: U.uid(), type: 'drain', unitId: u.id, date: p.date,
+            liters: dr, price: 0, sum: 0, note: 'слив по датчику', src: 'telemetry'
+          });
+          have['d' + u.id + p.date] = 1;
+          res.drains++;
+        }
+
+        /* уровень в баке — это тот же замер, только его снял датчик, а не человек */
+        var lvl = num(map.level);
+        if (lvl != null && !have['c' + u.id + p.date]) {
+          self.data.fuel.push({
+            id: U.uid(), type: 'check', unitId: u.id, date: p.date,
+            liters: lvl, price: 0, sum: 0, meter: meter,
+            note: 'уровень по датчику', src: 'telemetry'
+          });
+          have['c' + u.id + p.date] = 1;
+          res.checks++;
+        }
+      });
+
+      this.sortAll();
+      this.save();
+      return res;
+    },
+
     /* CSV: две таблицы, различаются по заголовку.
        Техника:  Название;Госномер;Тип;Счётчик;Норма;Бак;Топливо;ТО через
        Заправки: Дата;Техника;Водитель;Литры;Цена;Счётчик;Заметка          */
-    importCSV: function (text) {
+    importCSV: function (text, opt) {
       var lines = String(text).replace(/^﻿/, '').split(/\r?\n/).filter(function (s) { return s.trim(); });
       if (!lines.length) throw new Error('Пустой файл');
       var sep = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',';
       var head = lines[0].toLowerCase();
-      var isFuel = /литр|дата|заправ/.test(head) && !/норма/.test(head);
-      var start = /назван|госномер|дата|литр|техник/.test(head) ? 1 : 0;
-      var self = this, added = 0;
-
       var cut = function (line) {
         return line.split(sep).map(function (s) { return s.trim().replace(/^"|"$/g, ''); });
       };
+
+      /* выгрузка из телематики: там есть уровень в баке, слив или счётчик по дням */
+      if (/уровень|остаток|слив|моточас|пробег|наработ/.test(head) && !/норма/.test(head)) {
+        var map = this.telemetryMap(cut(lines[0]));
+        if (map.date != null && map.unit != null && (map.meter != null || map.level != null)) {
+          return this.importTelemetry(lines.slice(1).map(cut), map, opt);
+        }
+      }
+
+      var isFuel = /литр|дата|заправ/.test(head) && !/норма/.test(head);
+      var start = /назван|госномер|дата|литр|техник/.test(head) ? 1 : 0;
+      var self = this, added = 0;
 
       for (var i = start; i < lines.length; i++) {
         var c = cut(lines[i]);
@@ -1036,7 +1250,8 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     /* журнал топлива одной таблицей */
     exportCSV: function () {
       var self = this;
-      var TYPE = { fill: 'заправка', intake: 'приход на склад', check: 'замер бака', tankcheck: 'замер склада' };
+      var TYPE = { fill: 'заправка', intake: 'приход на склад', check: 'замер бака',
+        tankcheck: 'замер склада', drain: 'слив' };
       var rows = [['Дата', 'Операция', 'Техника', 'Госномер', 'Водитель', 'Литров', 'Цена за литр', 'Сумма', 'Откуда', 'Счётчик', 'Топливо', 'Заметка']];
       this.data.fuel.forEach(function (f) {
         var u = self.unit(f.unitId);
@@ -1069,13 +1284,17 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     /* сводка по технике за период */
     exportReportCSV: function (from, to) {
       var self = this;
-      var rows = [['Техника', 'Госномер', 'Наработка', 'Единица', 'Норма расхода, л', 'Залито, л', 'Отклонение по замерам, л', 'Средний расход', 'Потрачено денег']];
+      var rows = [['Техника', 'Госномер', 'Наработка', 'Единица', 'Норма расхода, л', 'Залито, л',
+        'Отклонение по замерам, л', 'Слито, л', 'Потеряно всего, л', 'Средний расход',
+        'Топливо, деньги', 'ТО и ремонты', 'Себестоимость наработки']];
       this.data.units.forEach(function (u) {
         var r = CALC.unitPeriod(u, from, to);
         rows.push([
           u.name, u.plate || '', U.dec(r.work, 1), U.meterInfo(u.meter).unit,
           U.dec(r.norm, 1), U.dec(r.filled, 1), U.dec(r.deviation, 1),
-          r.actualRate != null ? U.dec(r.actualRate, 1) : '', Math.round(r.money)
+          U.dec(r.drained, 1), U.dec(r.lost, 1),
+          r.actualRate != null ? U.dec(r.actualRate, 1) : '', Math.round(r.money),
+          Math.round(r.serviceCost), r.costPerWork != null ? Math.round(r.costPerWork) : ''
         ]);
       });
       return this.csvRows(rows);
@@ -1103,13 +1322,22 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       db.units = [
         { id: 'u1', name: 'Экскаватор Hitachi ZX200', plate: 'EX 2201', kind: 'excavator', meter: 'hours',
           norm: 14.5, tank: 400, fuel: 'ДТ', serviceEvery: 250, driverId: 'dr1', meterStart: 4820,
-          tankStart: 320, active: true, note: '' },
+          tankStart: 320, active: true, note: '', telemetry: true,
+          programs: [
+            { id: 'to', name: 'ТО по регламенту', everyWork: 250, everyDays: 0 },
+            { id: 'p11', name: 'Замена гидромасла', everyWork: 1000, everyDays: 0 },
+            { id: 'p12', name: 'Страховка', everyWork: 0, everyDays: 365 }
+          ] },
         { id: 'u2', name: 'Погрузчик SDLG LG956', plate: 'LD 3310', kind: 'loader', meter: 'hours',
           norm: 11, tank: 300, fuel: 'ДТ', serviceEvery: 250, driverId: 'dr2', meterStart: 2610,
           tankStart: 230, active: true, note: '' },
         { id: 'u3', name: 'Самосвал Howo №1', plate: '01 A 123 BA', kind: 'truck', meter: 'km',
           norm: 38, tank: 400, fuel: 'ДТ', serviceEvery: 10000, driverId: 'dr3', meterStart: 184300,
-          tankStart: 300, active: true, note: '' },
+          tankStart: 300, active: true, note: '',
+          programs: [
+            { id: 'to', name: 'ТО по регламенту', everyWork: 10000, everyDays: 0 },
+            { id: 'p31', name: 'Техосмотр', everyWork: 0, everyDays: 365 }
+          ] },
         { id: 'u4', name: 'Самосвал Howo №2', plate: '01 A 456 BA', kind: 'truck', meter: 'km',
           norm: 38, tank: 400, fuel: 'ДТ', serviceEvery: 10000, driverId: 'dr4', meterStart: 96150,
           tankStart: 300, active: true, note: '' },
@@ -1118,7 +1346,11 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
           tankStart: 300, active: true, note: '' },
         { id: 'u6', name: 'Автокран XCMG 25 т', plate: '01 B 777 CA', kind: 'crane', meter: 'km',
           norm: 32, tank: 350, fuel: 'ДТ', serviceEvery: 12000, driverId: null, meterStart: 41200,
-          tankStart: 250, active: true, note: 'Работает по заявкам' }
+          tankStart: 250, active: true, note: 'Работает по заявкам',
+          programs: [
+            { id: 'to', name: 'ТО по регламенту', everyWork: 12000, everyDays: 0 },
+            { id: 'p61', name: 'Освидетельствование крана', everyWork: 0, everyDays: 365 }
+          ] }
       ];
 
       var sites = ['ЖК «Северный»', 'Карьер', 'Трасса М-39', 'База'];
@@ -1156,8 +1388,11 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
               site: sites[Math.floor(rnd() * sites.length)], note: ''
             });
 
-            /* реальный расход слегка гуляет вокруг нормы */
-            var spent = (u.meter === 'km' ? work / 100 * u.norm : work * u.norm) * (0.96 + rnd() * 0.08);
+            /* реальный расход слегка гуляет вокруг нормы; там, где стоит
+               датчик, разброс меньше — меряет прибор, а не линейка */
+            var spread = u.telemetry ? 0.015 : 0.04;
+            var spent = (u.meter === 'km' ? work / 100 * u.norm : work * u.norm) *
+              (1 - spread + rnd() * spread * 2);
             /* самосвал №1 — с него сливают: расход стабильно выше нормы */
             if (u.id === 'u3') spent *= 1.22;
             tankLeft[u.id] -= spent;
@@ -1175,6 +1410,28 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
                 meter: Math.round(meters[u.id] * 10) / 10, fuel: 'ДТ', note: ''
               });
             }
+          });
+        }
+
+        /* на технике с датчиком уровень приезжает каждый день сам */
+        if (dow !== 0 && day <= 30) {
+          db.units.forEach(function (u) {
+            if (!u.telemetry) return;
+            db.fuel.push({
+              id: id('t'), type: 'check', unitId: u.id, date: date,
+              liters: Math.max(0, Math.round(tankLeft[u.id])),
+              meter: Math.round(meters[u.id] * 10) / 10, fuel: 'ДТ',
+              src: 'telemetry', note: 'уровень по датчику'
+            });
+          });
+        }
+
+        /* пойманный слив: топливо ушло мимо работы, и это зафиксировано */
+        if (day === 3) {
+          tankLeft.u2 -= 120;
+          db.fuel.push({
+            id: id('dr'), type: 'drain', unitId: 'u2', date: date, liters: 120,
+            price: 0, sum: 0, note: 'слив зафиксирован на стоянке, составлен акт'
           });
         }
 
@@ -1209,6 +1466,7 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
 
       var by = function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; };
       db.shifts.sort(by); db.fuel.sort(by); db.services.sort(by);
+      db.units.forEach(function (u) { DB.normUnit(u); });
       return db;
     }
   };
@@ -1311,17 +1569,22 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
   /* расчётный остаток в баке на дату (по умолчанию — сегодня) */
   CALC.tankLeft = function (u, upto) {
     var base = CALC.baseline(u, upto);
-    var left = base.liters, filled = 0, burned = 0;
+    var left = base.liters, filled = 0, burned = 0, drained = 0;
     CALC.fuelOf(u.id, null, upto, 'fill').forEach(function (f) {
       if (base.date && f.date <= base.date) return;
       filled += U.num(f.liters);
+    });
+    /* зафиксированный слив — топливо ушло, но не на работу */
+    CALC.fuelOf(u.id, null, upto, 'drain').forEach(function (f) {
+      if (base.date && f.date <= base.date) return;
+      drained += U.num(f.liters);
     });
     CALC.shiftsOf(u.id, null, upto).forEach(function (s) {
       if (base.date && s.date <= base.date) return;
       burned += CALC.normFor(u, CALC.shiftWork(s));
     });
-    left += filled - burned;
-    return { left: left, base: base, filled: filled, burned: burned };
+    left += filled - burned - drained;
+    return { left: left, base: base, filled: filled, burned: burned, drained: drained };
   };
 
   /* все замеры бака с отклонением: сколько было по расчёту и сколько нашли */
@@ -1332,24 +1595,124 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       var prev = i > 0 ? all[i - 1] : null;
       var start = prev ? { date: prev.date, liters: U.num(prev.liters) }
         : { date: null, liters: U.num(u.tankStart) };
-      var filled = 0, burned = 0;
+      var filled = 0, burned = 0, drained = 0;
       CALC.fuelOf(u.id, null, c.date, 'fill').forEach(function (f) {
         if (start.date && f.date <= start.date) return;
         filled += U.num(f.liters);
+      });
+      CALC.fuelOf(u.id, null, c.date, 'drain').forEach(function (f) {
+        if (start.date && f.date <= start.date) return;
+        drained += U.num(f.liters);
       });
       CALC.shiftsOf(u.id, null, c.date).forEach(function (s) {
         if (start.date && s.date <= start.date) return;
         burned += CALC.normFor(u, CALC.shiftWork(s));
       });
-      var expected = start.liters + filled - burned;
+      var expected = start.liters + filled - burned - drained;
       out.push({
         id: c.id, date: c.date, found: U.num(c.liters), expected: expected,
         deviation: U.num(c.liters) - expected,       // минус — недостача
         hasBase: !!prev || U.num(u.tankStart) > 0,
-        sinceDate: start.date, filled: filled, burned: burned, note: c.note || ''
+        sinceDate: start.date, filled: filled, burned: burned, drained: drained,
+        src: c.src || null, note: c.note || ''
       });
     });
     return out.filter(function (c) { return CALC.inRange(c.date, from, to); });
+  };
+
+  /* ---------- регламенты обслуживания ----------
+     У единицы может быть несколько работ: ТО по моточасам, замена масла,
+     техосмотр раз в год. Срок наступает по тому, что придёт раньше —
+     наработка или календарь.                                            */
+  CALC.serviceStates = function (u, meterNow) {
+    if (!u) return [];
+    meterNow = meterNow == null ? CALC.meterNow(u) : meterNow;
+    var warn = (U.num(DB.data.settings.serviceWarnPct) || 10) / 100;
+    var all = CALC.servicesOf(u.id);
+
+    return DB.programs(u).map(function (pr) {
+      var done = all.filter(function (s) {
+        return s.kind !== 'repair' && (s.programId === pr.id || (!s.programId && pr.id === 'to'));
+      });
+      var last = done[done.length - 1] || null;
+      var st = { program: pr, name: pr.name, last: last };
+      var everyWork = U.num(pr.everyWork), everyDays = U.num(pr.everyDays);
+
+      if (everyWork > 0) {
+        st.sinceWork = meterNow - (last && last.meter != null ? U.num(last.meter) : U.num(u.meterStart));
+        st.leftWork = everyWork - st.sinceWork;
+      }
+      if (everyDays > 0) {
+        st.sinceDays = U.diffDays(last ? last.date : (u.createdAt || DB.data.createdAt || U.today()), U.today());
+        st.leftDays = everyDays - st.sinceDays;
+      }
+
+      /* что ближе к сроку в долях интервала, то и показываем */
+      var wShare = st.leftWork != null ? st.leftWork / everyWork : Infinity;
+      var dShare = st.leftDays != null ? st.leftDays / everyDays : Infinity;
+      if (st.leftWork != null && wShare <= dShare) {
+        st.by = 'work'; st.left = st.leftWork; st.every = everyWork; st.since = st.sinceWork;
+      } else if (st.leftDays != null) {
+        st.by = 'days'; st.left = st.leftDays; st.every = everyDays; st.since = st.sinceDays;
+      } else {
+        st.by = 'none'; st.left = null; st.every = 0; st.since = 0;
+      }
+      st.pct = st.every > 0 ? Math.max(0, Math.min(1, st.since / st.every)) : null;
+      st.overdue = st.left != null && st.left < 0;
+      st.soon = st.left != null && st.left >= 0 && st.left <= st.every * warn;
+      st.urgency = st.left != null && st.every > 0 ? st.left / st.every : 99;
+      return st;
+    }).sort(function (a, b) { return a.urgency - b.urgency; });
+  };
+
+  var NO_SERVICE = { none: true, overdue: false, soon: false, left: null,
+    every: 0, since: 0, pct: null, by: 'none', last: null, name: '' };
+
+  /* ---------- уровень топлива по дням: ряд для графика ----------
+     Ровно та «пила», которую рисуют системы мониторинга: заправка —
+     скачок вверх, работа — плавный спуск, замер — точка проверки.      */
+  CALC.tankSeries = function (u, from, to) {
+    var days = U.diffDays(from, to);
+    if (!u || days < 0) return [];
+    if (days > 400) from = U.addDays(to, -400), days = 400;
+
+    var level = CALC.tankLeft(u, U.addDays(from, -1)).left;
+    var out = [];
+    for (var i = 0; i <= days; i++) {
+      var d = U.addDays(from, i);
+      var fill = 0, drain = 0, burn = 0, check = null;
+      CALC.fuelOf(u.id, d, d).forEach(function (f) {
+        if (f.type === 'fill') fill += U.num(f.liters);
+        else if (f.type === 'drain') drain += U.num(f.liters);
+        else if (f.type === 'check') check = f;
+      });
+      CALC.shiftsOf(u.id, d, d).forEach(function (s) { burn += CALC.normFor(u, CALC.shiftWork(s)); });
+
+      level = level + fill - drain - burn;
+      var expected = level, dev = null;
+      if (check) { dev = U.num(check.liters) - expected; level = U.num(check.liters); }
+      out.push({ date: d, level: level, expected: expected, fill: fill, drain: drain,
+        burn: burn, check: check ? U.num(check.liters) : null, deviation: dev });
+    }
+    return out;
+  };
+
+  /* ---------- утечки: зафиксированные сливы и провалы на замерах ---------- */
+  CALC.leaks = function (u, from, to) {
+    var out = [];
+    CALC.fuelOf(u.id, from, to, 'drain').forEach(function (f) {
+      out.push({ id: f.id, date: f.date, liters: U.num(f.liters), kind: 'drain',
+        src: f.src || null, note: f.note || '' });
+    });
+    CALC.checks(u, from, to).forEach(function (c) {
+      if (!c.hasBase) return;
+      var limit = Math.max(15, c.burned * 0.05);
+      if (c.deviation < -limit) {
+        out.push({ id: c.id, date: c.date, liters: -c.deviation, kind: 'check',
+          src: c.src || null, note: c.note || '' });
+      }
+    });
+    return out.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
   };
 
   /* ---------- состояние единицы техники ---------- */
@@ -1368,13 +1731,7 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     var lastShift = shifts[shifts.length - 1] || null;
     var lastFill = fills[fills.length - 1] || null;
 
-    /* ТО: считаем от показаний счётчика на последнем ТО */
-    var tos = CALC.servicesOf(u.id).filter(function (s) { return s.kind === 'to'; });
-    var lastTo = tos[tos.length - 1] || null;
-    var every = U.num(u.serviceEvery);
-    var sinceTo = lastTo && lastTo.meter != null ? meterNow - U.num(lastTo.meter) : meterNow - U.num(u.meterStart);
-    var leftTo = every > 0 ? every - sinceTo : null;
-    var warnAt = every * (U.num(DB.data.settings.serviceWarnPct) || 10) / 100;
+    var svc = CALC.serviceStates(u, meterNow);
 
     var st = {
       unit: u,
@@ -1392,12 +1749,9 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       lastShift: lastShift,
       lastFill: lastFill,
       idleDays: lastShift ? U.diffDays(lastShift.date, U.today()) : null,
-      service: {
-        every: every, last: lastTo, since: sinceTo, left: leftTo,
-        overdue: every > 0 && leftTo < 0,
-        soon: every > 0 && leftTo >= 0 && leftTo <= warnAt,
-        pct: every > 0 ? Math.max(0, Math.min(1, sinceTo / every)) : null
-      }
+      services: svc,
+      service: svc[0] || NO_SERVICE,
+      leaks: CALC.leaks(u)
     };
     cache[k] = st;
     return st;
@@ -1420,6 +1774,9 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       fillCount++;
       if (f.source === 'tank') filledTank += U.num(f.liters); else filledAzs += U.num(f.liters);
     });
+    var drained = 0;
+    CALC.fuelOf(u.id, from, to, 'drain').forEach(function (f) { drained += U.num(f.liters); });
+
     var checks = CALC.checks(u, from, to).filter(function (c) { return c.hasBase; });
     var deviation = checks.reduce(function (a, c) { return a + c.deviation; }, 0);
 
@@ -1434,17 +1791,24 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       fillCount: fillCount, money: money, serviceCost: serviceCost,
       over: filled - norm,                       // залито сверх нормы
       deviation: deviation,                      // недостача по замерам (минус — плохо)
+      drained: drained,                          // зафиксированные сливы
       checkCount: checks.length,
       actualRate: CALC.rateOf(u, filled, work),  // фактический расход
       normRate: U.num(u.norm)
     };
     r.rateDiff = r.actualRate != null ? r.actualRate - r.normRate : null;
+    /* во что обошёлся моточас (километр): топливо плюс ремонты */
+    r.costTotal = money + serviceCost;
+    r.costPerWork = work > 0 ? r.costTotal / work : null;
+    /* потеряно всего: явные сливы плюс необъяснённая недостача по замерам */
+    r.lost = drained + (checks.length ? Math.max(0, -deviation) : 0);
     /* «перерасход» — то, что подсвечиваем красным.
        Мелкие расхождения — это погрешность замера, а не воровство:
        считаем проблемой недостачу больше 3% нормы и больше 15 литров. */
     var limit = Math.max(15, norm * 0.03);
-    r.problem = r.checkCount ? (-r.deviation > limit) : (work > 0 && r.over > Math.max(25, norm * 0.08));
-    r.problemLiters = r.checkCount ? -r.deviation : r.over;
+    r.problem = drained > 0 ||
+      (r.checkCount ? (-r.deviation > limit) : (work > 0 && r.over > Math.max(25, norm * 0.08)));
+    r.problemLiters = (r.checkCount || drained) ? r.lost : r.over;
     r.problemLimit = limit;
     cache[k] = r;
     return r;
@@ -1457,15 +1821,16 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     });
     var last = checks[checks.length - 1] || null;
     var base = last ? { date: last.date, liters: U.num(last.liters) } : { date: null, liters: 0 };
-    var intake = 0, out = 0;
+    var intake = 0, out = 0, drained = 0;
     DB.data.fuel.forEach(function (f) {
       if (!CALC.inRange(f.date, null, upto)) return;
       if (base.date && f.date <= base.date) return;
       if (f.type === 'intake') intake += U.num(f.liters);
       if (f.type === 'fill' && f.source === 'tank') out += U.num(f.liters);
+      if (f.type === 'drain' && !f.unitId) drained += U.num(f.liters);
     });
     var vol = U.num(DB.data.settings.tankVolume);
-    var left = base.liters + intake - out;
+    var left = base.liters + intake - out - drained;
 
     /* отклонения по всем замерам склада */
     var all = DB.data.fuel.filter(function (f) { return f.type === 'tankcheck'; });
@@ -1473,20 +1838,21 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     all.forEach(function (c, i) {
       var prev = i > 0 ? all[i - 1] : null;
       var start = prev ? { date: prev.date, liters: U.num(prev.liters) } : { date: null, liters: 0 };
-      var inn = 0, o = 0;
+      var inn = 0, o = 0, dr = 0;
       DB.data.fuel.forEach(function (f) {
         if (f.date > c.date) return;
         if (start.date && f.date <= start.date) return;
         if (f.type === 'intake') inn += U.num(f.liters);
         if (f.type === 'fill' && f.source === 'tank') o += U.num(f.liters);
+        if (f.type === 'drain' && !f.unitId) dr += U.num(f.liters);
       });
-      var expected = start.liters + inn - o;
+      var expected = start.liters + inn - o - dr;
       rows.push({ id: c.id, date: c.date, found: U.num(c.liters), expected: expected,
         deviation: U.num(c.liters) - expected, hasBase: !!prev, note: c.note || '' });
     });
 
     return {
-      left: left, base: base, intake: intake, out: out,
+      left: left, base: base, intake: intake, out: out, drained: drained,
       volume: vol, pct: vol > 0 ? Math.max(0, Math.min(1, left / vol)) : null,
       checks: rows, lastCheck: rows[rows.length - 1] || null,
       deviationTotal: rows.reduce(function (a, c) { return a + (c.hasBase ? c.deviation : 0); }, 0)
@@ -1498,10 +1864,10 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     var units = DB.data.units;
     var res = {
       from: from, to: to,
-      filled: 0, money: 0, norm: 0, over: 0, deviation: 0,
+      filled: 0, money: 0, norm: 0, over: 0, deviation: 0, drained: 0, lost: 0,
       workHours: 0, workKm: 0, shiftDays: 0, fillCount: 0,
       intake: 0, intakeMoney: 0, serviceCost: 0,
-      rows: [], problems: [], serviceSoon: [], serviceOverdue: [], idle: []
+      rows: [], problems: [], serviceSoon: [], serviceOverdue: [], idle: [], leaks: []
     };
     units.forEach(function (u) {
       var p = CALC.unitPeriod(u, from, to);
@@ -1510,7 +1876,12 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       res.money += p.money;
       res.norm += p.norm;
       res.deviation += p.deviation;
+      res.drained += p.drained;
+      res.lost += p.lost;
       res.fillCount += p.fillCount;
+      CALC.leaks(u, from, to).forEach(function (l) {
+        res.leaks.push({ unit: u, leak: l });
+      });
       res.shiftDays += p.days;
       res.serviceCost += p.serviceCost;
       if (u.meter === 'km') res.workKm += p.work; else res.workHours += p.work;
@@ -1530,6 +1901,7 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
         res.intakeMoney += U.num(f.sum);
       }
     });
+    res.leaks.sort(function (a, b) { return a.leak.date < b.leak.date ? 1 : -1; });
     res.problems.sort(function (a, b) { return b.problemLiters - a.problemLiters; });
     res.serviceOverdue.sort(function (a, b) { return a.service.left - b.service.left; });
     res.serviceSoon.sort(function (a, b) { return a.service.left - b.service.left; });
@@ -1541,12 +1913,13 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     var m = {};
     var get = function (k) {
       return m[k] || (m[k] = { filled: 0, money: 0, intake: 0, intakeMoney: 0,
-        workHours: 0, workKm: 0, norm: 0, deviation: 0, serviceCost: 0 });
+        workHours: 0, workKm: 0, norm: 0, deviation: 0, drained: 0, serviceCost: 0 });
     };
     DB.data.fuel.forEach(function (f) {
       var k = U.monthKey(f.date);
       if (f.type === 'fill') { get(k).filled += U.num(f.liters); get(k).money += U.num(f.sum); }
       if (f.type === 'intake') { get(k).intake += U.num(f.liters); get(k).intakeMoney += U.num(f.sum); }
+      if (f.type === 'drain') get(k).drained += U.num(f.liters);
     });
     DB.data.shifts.forEach(function (s) {
       var u = DB.unit(s.unitId);
@@ -1668,6 +2041,72 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     return '<div class="avatar" style="background:' + U.color(name) + '">' + esc(U.initials(name)) + '</div>';
   };
 
+  /* График уровня топлива в баке: заправка — скачок вверх, работа —
+     спуск, замер — точка проверки, слив — красная отметка снизу.        */
+  V.tankChart = function (u, series) {
+    if (!series || series.length < 2) return '';
+    var W = 320, H = 108, PL = 3, PR = 3, PT = 8, PB = 10;
+    var tank = U.num(u.tank);
+    var levels = series.map(function (s) { return s.level; });
+    var maxLevel = Math.max.apply(null, levels), minLevel = Math.min.apply(null, levels);
+    var top = Math.max(tank, maxLevel, 1) * 1.06;
+    var bottom = Math.min(0, minLevel * 1.15);
+    var xs = function (i) { return PL + i * (W - PL - PR) / (series.length - 1); };
+    var ys = function (v) { return PT + (top - v) * (H - PT - PB) / (top - bottom || 1); };
+
+    var line = series.map(function (s, i) {
+      return (i ? 'L' : 'M') + xs(i).toFixed(1) + ' ' + ys(s.level).toFixed(1);
+    }).join(' ');
+    var area = line + ' L' + xs(series.length - 1).toFixed(1) + ' ' + ys(bottom).toFixed(1) +
+      ' L' + xs(0).toFixed(1) + ' ' + ys(bottom).toFixed(1) + ' Z';
+
+    var marks = '';
+    series.forEach(function (s, i) {
+      if (s.fill > 0) marks += '<rect x="' + (xs(i) - 1).toFixed(1) + '" y="' + (H - PB + 2).toFixed(1) +
+        '" width="2" height="4" rx="1" fill="var(--accent)"/>';
+      if (s.drain > 0) marks += '<rect x="' + (xs(i) - 1.4).toFixed(1) + '" y="' + (H - PB + 1).toFixed(1) +
+        '" width="2.8" height="6" rx="1" fill="var(--red)"/>';
+      if (s.check != null) {
+        var bad = s.deviation != null && s.deviation < -Math.max(15, s.burn * 0.05);
+        marks += '<circle cx="' + xs(i).toFixed(1) + '" cy="' + ys(s.level).toFixed(1) + '" r="2.6" ' +
+          'fill="var(--bg-elev)" stroke="' + (bad ? 'var(--red)' : 'var(--accent)') + '" stroke-width="1.6"/>';
+      }
+    });
+
+    var guides = '';
+    if (tank > 0 && ys(tank) > PT - 2) {
+      guides += '<line x1="' + PL + '" y1="' + ys(tank).toFixed(1) + '" x2="' + (W - PR) +
+        '" y2="' + ys(tank).toFixed(1) + '" stroke="var(--text-3)" stroke-width=".7" stroke-dasharray="3 3"/>';
+    }
+    if (bottom < 0) {
+      guides += '<line x1="' + PL + '" y1="' + ys(0).toFixed(1) + '" x2="' + (W - PR) +
+        '" y2="' + ys(0).toFixed(1) + '" stroke="var(--red)" stroke-width=".7" stroke-dasharray="2 3"/>';
+    }
+
+    return '<div class="chart">' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" ' +
+      'aria-label="Уровень топлива в баке по дням">' +
+      guides +
+      '<path d="' + area + '" fill="var(--accent)" opacity=".10"/>' +
+      '<path d="' + line + '" fill="none" stroke="var(--accent)" stroke-width="1.6" ' +
+      'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
+      marks + '</svg>' +
+      '<div class="chart-x"><span>' + U.fmtDate(series[0].date) + '</span>' +
+      '<span>' + (tank > 0 ? 'бак ' + U.liters(tank) : '') + '</span>' +
+      '<span>' + U.fmtDate(series[series.length - 1].date) + '</span></div>' +
+      '</div>';
+  };
+
+  /* сроки обслуживания читаются по-разному: наработка или календарь */
+  V.svcLeft = function (st, u) {
+    if (st.left == null) return '';
+    return st.by === 'days' ? U.days(Math.abs(st.left)) : U.work(Math.abs(st.left), u.meter);
+  };
+  V.svcEvery = function (st, u) {
+    if (!st.every) return '';
+    return st.by === 'days' ? U.days(st.every) : U.work(st.every, u.meter);
+  };
+
   V.empty = function (ic, t, d, btn) {
     return '<div class="empty"><div class="ic">' + ic + '</div><div class="t">' + esc(t) + '</div>' +
       '<div class="d">' + d + '</div>' + (btn || '') + '</div>';
@@ -1693,9 +2132,10 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
   V.unitBadge = function (u, p) {
     var st = CALC.unitState(u);
     if (u.active === false) return '<span class="badge">В простое</span>';
+    if (p && p.drained > 0) return '<span class="badge bad">Слив ' + U.liters(p.drained) + '</span>';
     if (p && p.problem) return '<span class="badge bad">Недостача ' + U.liters(p.problemLiters) + '</span>';
-    if (st.service.overdue) return '<span class="badge bad">ТО просрочено</span>';
-    if (st.service.soon) return '<span class="badge warn">ТО через ' + U.work(st.service.left, u.meter) + '</span>';
+    if (st.service.overdue) return '<span class="badge bad">Просрочено: ' + esc(st.service.name) + '</span>';
+    if (st.service.soon) return '<span class="badge warn">' + esc(st.service.name) + ' через ' + V.svcLeft(st.service, u) + '</span>';
     if (st.tankOverflow) return '<span class="badge warn">Залито больше бака</span>';
     if (st.tankNegative) return '<span class="badge warn">Топливо не проведено</span>';
     if (st.idleDays != null && st.idleDays > 7) return '<span class="badge">Без смен ' + U.days(st.idleDays) + '</span>';
@@ -1731,6 +2171,12 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
           (op.driverId ? ' · ' + esc(DB.driverName(op.driverId)) : '');
         right = '<span class="v1 num">' + U.liters(op.liters) + '</span>' +
           '<span class="v2">' + (U.num(op.sum) ? U.moneyShort(op.sum) : U.fmtDate(op.date)) + '</span>';
+      } else if (op.type === 'drain') {
+        ic = '🚨';
+        sub = 'слив топлива' + (op.src === 'telemetry' ? ' · по датчику' : '') +
+          (op.note ? ' · ' + esc(op.note) : '');
+        right = '<span class="v1 num" style="color:var(--red)">−' + U.liters(op.liters) + '</span>' +
+          '<span class="v2">мимо работы</span>';
       } else if (op.type === 'intake') {
         ic = '🛢️';
         ttl = 'Приход топлива';
@@ -1741,7 +2187,7 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
         ic = '📏';
         var c = null;
         if (u) c = CALC.checks(u).filter(function (z) { return z.id === op.id; })[0];
-        sub = 'замер бака' + (c && c.hasBase
+        sub = (op.src === 'telemetry' ? 'уровень по датчику' : 'замер бака') + (c && c.hasBase
           ? ' · ' + (c.deviation < 0 ? '<b style="color:var(--red)">недостача ' + U.liters(-c.deviation) + '</b>'
             : 'сходится') : ' · точка отсчёта');
         right = '<span class="v1 num">' + U.liters(op.liters) + '</span><span class="v2">в баке</span>';
@@ -1820,8 +2266,9 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       var price = st.price || 0;
       h += '<div class="card pad badbox">' +
         '<div class="t">Перерасход: ' + U.liters(lost) + '</div>' +
-        '<div class="d">' + U.cnt(f.problems.length, 'единица', 'единицы', 'единиц') + ' техники расходует больше нормы' +
-        (price ? '. Это примерно <b>' + U.money(lost * price) + '</b> за месяц' : '') + '.</div>' +
+        '<div class="d">' + U.cnt(f.problems.length, 'единица', 'единицы', 'единиц') + ' техники теряет топливо' +
+        (price ? '. Это примерно <b>' + U.money(lost * price) + '</b> за месяц' : '') + '.' +
+        (f.drained > 0 ? ' Из них <b>' + U.liters(f.drained) + '</b> — зафиксированные сливы.' : '') + '</div>' +
         '<div class="minilist">' +
         f.problems.slice(0, 4).map(function (p) {
           return '<button class="mini tap" data-act="unit" data-id="' + p.unit.id + '">' +
@@ -1861,10 +2308,9 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
         var u = s.unit;
         h += '<button class="row tap" data-act="unit" data-id="' + u.id + '">' + V.unitIcon(u) +
           '<span class="grow"><span class="ttl">' + esc(u.name) + '</span>' +
-          '<span class="sub">' + (s.service.overdue
-            ? '<b style="color:var(--red)">переработано ' + U.work(-s.service.left, u.meter) + '</b>'
-            : 'осталось ' + U.work(s.service.left, u.meter)) +
-          ' · каждые ' + U.work(s.service.every, u.meter) + '</span></span>' +
+          '<span class="sub">' + esc(s.service.name) + ' · ' + (s.service.overdue
+            ? '<b style="color:var(--red)">просрочено на ' + V.svcLeft(s.service, u) + '</b>'
+            : 'осталось ' + V.svcLeft(s.service, u)) + '</span></span>' +
           '<span class="val"><span class="v1 num">' + U.work(s.meterNow, u.meter) + '</span>' +
           '<span class="v2">счётчик</span></span>' +
           '<span class="chev">' + V.ICON.chev + '</span></button>';
@@ -1967,7 +2413,9 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       feed = feed.filter(function (x) {
         if (f === 'fill') return x.kind === 'fuel' && (x.op.type === 'fill');
         if (f === 'shift') return x.kind === 'shift';
-        if (f === 'tank') return x.kind === 'fuel' && (x.op.type === 'intake' || x.op.type === 'tankcheck');
+        if (f === 'leak') return x.kind === 'fuel' && x.op.type === 'drain';
+        if (f === 'tank') return x.kind === 'fuel' &&
+          (x.op.type === 'intake' || x.op.type === 'tankcheck' || (x.op.type === 'drain' && !x.op.unitId));
         if (f === 'service') return x.kind === 'service';
         return true;
       });
@@ -1987,7 +2435,7 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     h += '<div class="search">' + V.ICON.search +
       '<input id="ql" type="search" placeholder="Техника, водитель, объект" value="' + esc(V.logQuery) + '" autocomplete="off"></div>';
     h += '<div class="seg">' + sg('all', 'Всё') + sg('fill', 'Заправки') + sg('shift', 'Смены') +
-      sg('tank', 'Склад') + sg('service', 'ТО') + '</div>';
+      sg('leak', 'Сливы') + sg('tank', 'Склад') + sg('service', 'ТО') + '</div>';
 
     if (!feed.length) {
       h += V.empty('📋', 'Записей нет',
@@ -2144,6 +2592,8 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       V.kv('По норме положено', U.liters(f.norm)) +
       V.kv('Недостача по замерам', (f.deviation < -0.5
         ? '<span style="color:var(--red)">' + U.liters(-f.deviation) + '</span>' : '—')) +
+      (f.drained ? V.kv('Зафиксировано сливов',
+        '<span style="color:var(--red)">' + U.liters(f.drained) + '</span>') : '') +
       (f.workHours ? V.kv('Наработка, моточасы', U.work(f.workHours, 'hours')) : '') +
       (f.workKm ? V.kv('Пробег', U.work(f.workKm, 'km')) : '') +
       V.kv('Пришло на склад', U.liters(f.intake)) +
@@ -2322,7 +2772,7 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       '1. Откройте эту страницу в Safari.<br>2. Нажмите «Поделиться» (квадрат со стрелкой).<br>' +
       '3. Выберите «На экран «Домой»».<br>4. Запускайте с иконки — приложение работает без интернета.</div>';
 
-    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Автопарк · версия 1.0</div>';
+    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Автопарк · версия 2.0</div>';
     return h + '</div>';
 
     function rowBtn(act, ic, t, sub) {
@@ -2364,11 +2814,16 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     h += '<div class="hero">' +
       '<div class="lbl">Расчётный остаток в баке</div>' +
       '<div class="amt num"' + (st.tankNegative ? ' style="color:var(--red)"' : '') + '>' + U.liters(st.tankLeft) + '</div>' +
-      (U.num(u.tank) > 0 ? '<div class="delta">из ' + U.liters(u.tank) + '</div>' +
-        '<div class="bar"><i style="width:' + Math.round((st.tankPct || 0) * 100) + '%"></i></div>' : '') +
+      (U.num(u.tank) > 0 ? '<div class="delta">из ' + U.liters(u.tank) +
+        (st.tankOverflow ? ' — <b style="color:var(--orange)">это больше, чем влезает в бак</b>' : '') + '</div>' +
+        '<div class="bar"><i style="width:' + Math.round((st.tankPct || 0) * 100) + '%' +
+        (st.tankOverflow ? ';background:var(--orange)' : '') + '"></i></div>' : '') +
       '<div class="delta" style="margin-top:8px">' +
-      (p.problem ? '<span class="badge bad">Перерасход</span>'
-        : (V.unitBadge(u, p) || '<span class="badge ok">В норме</span>')) + '</div>' +
+      (p.problem ? '<span class="badge bad">Перерасход</span> ' : '') +
+      (st.tankOverflow ? '<span class="badge warn">Залито больше бака</span> ' : '') +
+      (st.tankNegative ? '<span class="badge warn">Топливо не проведено</span> ' : '') +
+      (!p.problem && !st.tankOverflow && !st.tankNegative
+        ? (V.unitBadge(u, p) || '<span class="badge ok">В норме</span>') : '') + '</div>' +
       (st.tankBase.fromCheck
         ? '<div class="delta">от замера ' + U.fmtDate(st.tankBase.date, true) + '</div>'
         : '<div class="delta">замеров ещё не было — расчёт от стартового остатка</div>') +
@@ -2390,7 +2845,22 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     h += '<div class="btn-row"><button class="btn" data-act="new-fill" data-id="' + u.id + '">⛽ Заправка</button>' +
       '<button class="btn sec" data-act="new-shift" data-id="' + u.id + '">🕒 Смена</button></div>' +
       '<div class="btn-row"><button class="btn sec" data-act="new-check" data-id="' + u.id + '">📏 Замер бака</button>' +
-      '<button class="btn sec" data-act="new-service" data-id="' + u.id + '">🔧 ТО / ремонт</button></div>';
+      '<button class="btn sec" data-act="new-service" data-id="' + u.id + '">🔧 ТО / ремонт</button></div>' +
+      '<div class="btn-row"><button class="btn danger" data-act="new-drain" data-id="' + u.id + '">🚨 Зафиксировать слив</button></div>';
+
+    /* график уровня в баке — то же, что показывают системы мониторинга */
+    var series = CALC.tankSeries(u, U.addDays(U.today(), -29), U.today());
+    if (series.length > 1 && (st.shiftCount || st.lastFill)) {
+      h += '<h2 class="sec">Уровень топлива в баке<span class="act" style="color:var(--text-2)">30 дней</span></h2>' +
+        '<div class="card pad">' + V.tankChart(u, series) +
+        '<div class="chart-legend">' +
+        '<span><i class="ln"></i>расчёт по норме</span>' +
+        '<span><i class="pt"></i>' + (st.lastCheck && st.lastCheck.src === 'telemetry' ? 'датчик' : 'замер') + '</span>' +
+        '<span><i class="fl"></i>заправка</span>' +
+        (CALC.fuelOf(u.id, U.addDays(U.today(), -29), U.today(), 'drain').length
+          ? '<span><i class="dr"></i>слив</span>' : '') +
+        '</div></div>';
+    }
 
     /* месяц */
     h += '<h2 class="sec">За ' + U.monthName(U.monthKey(to), true).toLowerCase() + '</h2><div class="card pad">' +
@@ -2407,24 +2877,41 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
           : U.liters(p.over))) +
       (p.actualRate ? V.kv('Фактический расход', U.normText(p.actualRate, u.meter) +
         ' <span style="color:var(--text-2);font-weight:400">норма ' + U.dec(u.norm, 1) + '</span>') : '') +
+      (p.drained ? V.kv('Зафиксировано сливов',
+        '<span style="color:var(--red)">' + U.liters(p.drained) + '</span>') : '') +
       V.kv('Потрачено на топливо', U.money(p.money)) +
+      (p.costPerWork ? V.kv('Себестоимость ' + (u.meter === 'km' ? 'километра' : 'моточаса'),
+        U.money(p.costPerWork) + ' <span style="color:var(--text-2);font-weight:400">с ремонтами</span>') : '') +
       (p.serviceCost ? V.kv('ТО и ремонты', U.money(p.serviceCost)) : '') +
       '</div>';
 
-    /* ТО */
-    if (U.num(u.serviceEvery) > 0) {
-      var s = st.service;
-      h += '<h2 class="sec">Обслуживание</h2><div class="card pad">' +
-        '<div class="kv big"><span class="k">' + (s.overdue ? 'ТО просрочено на' : 'До ТО осталось') + '</span>' +
-        '<span class="v num"' + (s.overdue ? ' style="color:var(--red)"' : s.soon ? ' style="color:var(--orange)"' : '') + '>' +
-        U.work(Math.abs(s.left), u.meter) + '</span></div>' +
-        '<div class="bar"><i style="width:' + Math.round((s.pct || 0) * 100) + '%;background:' +
-        (s.overdue ? 'var(--red)' : s.soon ? 'var(--orange)' : 'var(--accent)') + '"></i></div>' +
-        V.kv('Наработка после ТО', U.work(s.since, u.meter)) +
-        V.kv('Периодичность', 'каждые ' + U.work(s.every, u.meter)) +
-        (s.last ? V.kv('Последнее ТО', U.fmtDate(s.last.date, true) +
-          (s.last.meter != null ? ' <span style="color:var(--text-2);font-weight:400">на ' + U.work(s.last.meter, u.meter) + '</span>' : '')) : '') +
-        '</div>';
+    /* регламент обслуживания: несколько работ, по наработке и по календарю */
+    h += '<h2 class="sec">Регламент обслуживания' +
+      '<button class="act" data-act="new-program" data-id="' + u.id + '">＋ работа</button></h2>';
+    if (!st.services.length) {
+      h += '<div class="card pad" style="color:var(--text-2);font-size:15px;line-height:1.45">' +
+        'Работы не заданы. Добавьте «ТО каждые 250 моточасов» или «Техосмотр раз в год» — ' +
+        'и приложение начнёт напоминать само.</div>';
+    } else {
+      h += '<div class="list">';
+      st.services.forEach(function (sv) {
+        var col = sv.overdue ? 'var(--red)' : sv.soon ? 'var(--orange)' : 'var(--accent)';
+        h += '<button class="row tap" data-act="edit-program" data-id="' + u.id +
+          '" data-pid="' + sv.program.id + '">' +
+          '<span class="op-ic">' + (sv.overdue ? '🔴' : sv.soon ? '🟠' : '🔧') + '</span>' +
+          '<span class="grow"><span class="ttl">' + esc(sv.name) + '</span>' +
+          '<span class="sub">' + (sv.overdue
+            ? '<b style="color:var(--red)">просрочено на ' + V.svcLeft(sv, u) + '</b>'
+            : sv.left != null ? 'осталось ' + V.svcLeft(sv, u) : 'интервал не задан') +
+          (sv.every ? ' · каждые ' + V.svcEvery(sv, u) : '') +
+          (sv.last ? ' · было ' + U.fmtDate(sv.last.date) : ' · ещё не делали') + '</span></span>' +
+          '<span class="val"><span class="v1 num" style="color:' + col + '">' +
+          (sv.pct != null ? Math.round(sv.pct * 100) + '%' : '—') + '</span></span>' +
+          '<span class="chev">' + V.ICON.chev + '</span></button>';
+      });
+      h += '</div>';
+      h += '<div class="hint">Срок наступает по тому, что придёт раньше — наработка или календарь. ' +
+        'Запись «ремонт» счётчик не сбрасывает.</div>';
     }
 
     /* замеры */
@@ -2579,6 +3066,7 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       ['new-fill', '⛽', 'Заправка', 'выдать топливо в технику'],
       ['new-shift', '🕒', 'Смена', 'наработка за день, путевой лист'],
       ['new-check', '📏', 'Замер бака', 'сколько топлива реально в баке'],
+      ['new-drain', '🚨', 'Слив топлива', 'зафиксировать утечку или хищение'],
       ['new-service', '🔧', 'ТО или ремонт', 'с показаниями счётчика'],
       ['new-intake', '🛢️', 'Приход на склад', 'привезли топливо в ёмкость'],
       ['new-tankcheck', '📐', 'Замер склада', 'сколько осталось в ёмкости'],
@@ -3045,6 +3533,173 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     });
   };
 
+  /* ---------- СЛИВ ТОПЛИВА ----------
+     Отдельная операция: топливо ушло, но не на работу. Пока слив не
+     записан, он тянет вниз расчётный остаток и валит всю арифметику.   */
+  F.drainForm = function (opId, unitId) {
+    var op = opId ? DB.fuelOp(opId) : null;
+    var hasUnits = DB.units().length > 0;
+    var d = op || {
+      unitId: unitId || (hasUnits ? DB.units()[0].id : null),
+      date: U.today(), liters: '', note: ''
+    };
+    var fromTank = !d.unitId;
+
+    var h = '<div class="hint" style="padding:0 4px 12px">Записывайте сюда только топливо, ушедшее ' +
+      '<b>мимо работы</b>: слив, утечка, хищение. После записи остаток в баке и недостача сойдутся.</div>';
+    h += '<div class="seg" id="f-where">' +
+      '<button data-w="unit" class="' + (fromTank ? '' : 'on') + '">Из бака техники</button>' +
+      '<button data-w="tank" class="' + (fromTank ? 'on' : '') + '">Со склада</button></div>';
+    h += '<div class="list">' +
+      '<div id="unit-box"' + (fromTank ? ' style="display:none"' : '') + '>' +
+      (hasUnits ? unitSelect(d.unitId) : '') + '</div>' +
+      '<div class="field"><label>Дата</label><input id="f-date" type="date" value="' + esc(d.date) + '"></div>' +
+      '<div class="field"><label>Сколько ушло</label><input id="f-liters" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.liters || '') + '"><span class="unit">л</span></div>' +
+      '<div class="field col"><label>Что случилось</label><textarea id="f-note" placeholder="Слив на стоянке, порыв шланга, составлен акт…">' +
+      esc(d.note || '') + '</textarea></div></div>' +
+      '<div class="card pad" id="preview" style="margin-top:16px"></div>';
+
+    App.sheet({
+      title: op ? 'Изменить запись' : 'Слив топлива',
+      html: h, save: op ? 'Сохранить' : 'Записать',
+      onOpen: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        function where() { var b = bd.querySelector('#f-where .on'); return b ? b.dataset.w : 'unit'; }
+        function preview() {
+          var lit = U.num($('#f-liters').value);
+          $('#unit-box').style.display = where() === 'unit' ? '' : 'none';
+          var was, label;
+          if (where() === 'tank') {
+            was = CALC.tankState($('#f-date').value).left + (op && !op.unitId ? U.num(op.liters) : 0);
+            label = 'На складе было';
+          } else {
+            var u = $('#f-unit') ? DB.unit($('#f-unit').value) : null;
+            if (!u) { $('#preview').innerHTML = ''; return; }
+            was = CALC.tankLeft(u, $('#f-date').value).left + (op && op.unitId ? U.num(op.liters) : 0);
+            label = 'В баке было';
+          }
+          var html = V.kv(label, U.liters(was)) + V.kv('Останется', U.liters(was - lit), 'big');
+          if (lit > 0 && DB.data.settings.price) {
+            html += V.kv('Убыток', '<span style="color:var(--red)">' +
+              U.money(lit * DB.data.settings.price) + '</span>');
+          }
+          $('#preview').innerHTML = html;
+        }
+        bd.addEventListener('input', preview);
+        bd.addEventListener('change', preview);
+        bd.addEventListener('click', function (e) {
+          var b = e.target.closest('#f-where [data-w]');
+          if (!b) return;
+          U.$$('#f-where button', bd).forEach(function (x) { x.classList.remove('on'); });
+          b.classList.add('on');
+          preview();
+        });
+        preview();
+        if (!op) setTimeout(function () { $('#f-liters').focus(); }, 380);
+      },
+      onSave: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        var lit = U.num($('#f-liters').value);
+        if (lit <= 0) { U.toast('Сколько литров ушло?'); return false; }
+        var wb = bd.querySelector('#f-where .on');
+        var toTank = wb && wb.dataset.w === 'tank';
+        var rec = {
+          type: 'drain',
+          unitId: toTank ? null : ($('#f-unit') ? $('#f-unit').value : null),
+          date: $('#f-date').value || U.today(),
+          liters: lit, price: 0, sum: 0, note: $('#f-note').value.trim()
+        };
+        if (op) { DB.updFuel(op.id, rec); U.toast('Запись изменена'); }
+        else { DB.addFuel(rec); U.toast('Слив записан: ' + U.liters(lit)); }
+        App.render();
+        return true;
+      }
+    });
+  };
+
+  /* ---------- РАБОТА В РЕГЛАМЕНТЕ ---------- */
+  F.programForm = function (unitId, programId) {
+    var u = DB.unit(unitId);
+    if (!u) return;
+    var pr = programId ? DB.program(u, programId) : null;
+    var d = pr || { name: '', everyWork: '', everyDays: 0 };
+    var mi = U.meterInfo(u.meter);
+
+    var h = '<div class="list">' +
+      '<div class="field"><label>Название</label><input id="p-name" placeholder="Замена масла" value="' +
+      esc(d.name) + '" autocomplete="off"></div>' +
+      '<div class="field"><label>Каждые</label><input id="p-work" type="text" inputmode="decimal" placeholder="не следить" value="' +
+      (d.everyWork || '') + '"><span class="unit">' + esc(mi.unit) + '</span></div>' +
+      '<div class="field"><label>И каждые</label><input id="p-days" type="text" inputmode="decimal" placeholder="не следить" value="' +
+      (d.everyDays || '') + '"><span class="unit">дней</span></div></div>' +
+      '<div class="chips">' + [['', 'без срока'], [90, '3 месяца'], [180, 'полгода'], [365, 'год']].map(function (x) {
+        return '<button class="chip" data-days="' + x[0] + '">' + x[1] + '</button>';
+      }).join('') + '</div>' +
+      '<div class="hint">Можно задать оба интервала — тогда срок наступит по тому, что придёт раньше. ' +
+      'Так делают и в паспорте техники: «каждые 250 моточасов, но не реже раза в год».</div>' +
+      '<div class="card pad" id="preview" style="margin-top:16px"></div>' +
+      (pr ? '<button class="btn danger" id="del" style="margin-top:16px">Удалить работу</button>' : '');
+
+    App.sheet({
+      title: pr ? 'Работа регламента' : 'Новая работа',
+      html: h, save: 'Сохранить',
+      onOpen: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        function preview() {
+          var work = U.num($('#p-work').value), days = U.num($('#p-days').value);
+          if (!work && !days) {
+            $('#preview').innerHTML = '<div class="hint" style="padding:0">Задайте хотя бы один интервал, ' +
+              'иначе напоминать не о чем.</div>';
+            return;
+          }
+          var meterNow = CALC.meterNow(u);
+          $('#preview').innerHTML =
+            (work ? V.kv('Следующий срок', U.work(meterNow + work, u.meter) + ' по счётчику', 'big') : '') +
+            (days ? V.kv(work ? 'или не позже' : 'Следующий срок',
+              U.fmtDateFull(U.addDays(U.today(), days))) : '');
+        }
+        bd.addEventListener('input', preview);
+        bd.addEventListener('click', function (e) {
+          var c = e.target.closest('[data-days]');
+          if (c) {
+            $('#p-days').value = c.dataset.days;
+            U.$$('[data-days]', bd).forEach(function (x) { x.classList.remove('on'); });
+            c.classList.add('on');
+            preview();
+            return;
+          }
+          if (e.target.closest('#del')) {
+            App.closeSheet();
+            setTimeout(function () {
+              App.ask({
+                title: 'Удалить «' + pr.name + '»?',
+                text: 'Записи о выполненных работах останутся в истории.',
+                ok: 'Удалить', danger: true,
+                onOk: function () { DB.delProgram(u.id, pr.id); U.toast('Работа удалена'); App.render(); }
+              });
+            }, 320);
+          }
+        });
+        preview();
+        if (!pr) setTimeout(function () { $('#p-name').focus(); }, 380);
+      },
+      onSave: function (bd) {
+        var name = bd.querySelector('#p-name').value.trim();
+        if (!name) { U.toast('Как называется работа?'); return false; }
+        var work = U.num(bd.querySelector('#p-work').value);
+        var days = U.num(bd.querySelector('#p-days').value);
+        if (!work && !days) { U.toast('Задайте интервал — по наработке или по времени'); return false; }
+        var patch = { name: name, everyWork: work, everyDays: days };
+        if (pr) DB.updProgram(u.id, pr.id, patch);
+        else DB.addProgram(u.id, patch);
+        U.toast('Сохранено');
+        App.render();
+        return true;
+      }
+    });
+  };
+
   /* ---------- ПРИХОД НА СКЛАД ---------- */
   F.intakeForm = function (opId) {
     var op = opId ? DB.fuelOp(opId) : null;
@@ -3151,6 +3806,15 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     });
   };
 
+  /* варианты работ регламента для выпадающего списка */
+  function progOptions(u, sel) {
+    var list = DB.programs(u);
+    if (!list.length) return '<option value="">регламент не задан</option>';
+    return list.map(function (pr) {
+      return '<option value="' + pr.id + '"' + (sel === pr.id ? ' selected' : '') + '>' + esc(pr.name) + '</option>';
+    }).join('');
+  }
+
   /* ---------- ТО И РЕМОНТ ---------- */
   F.serviceForm = function (opId, unitId) {
     if (!DB.units().length) { U.toast('Сначала добавьте технику'); return F.unitForm(); }
@@ -3165,6 +3829,8 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       '<button data-k="to" class="' + (d.kind !== 'repair' ? 'on' : '') + '">ТО по регламенту</button>' +
       '<button data-k="repair" class="' + (d.kind === 'repair' ? 'on' : '') + '">Ремонт</button></div>' +
       '<div class="list">' + unitSelect(d.unitId) +
+      '<div class="field" id="prog-row"><label>Какая работа</label><select id="f-program">' +
+      progOptions(DB.unit(d.unitId), d.programId) + '</select></div>' +
       '<div class="field"><label>Дата</label><input id="f-date" type="date" value="' + esc(d.date) + '"></div>' +
       '<div class="field"><label>Счётчик</label><input id="f-meter" type="text" inputmode="decimal" placeholder="0" value="' +
       (d.meter != null ? d.meter : '') + '"><span class="unit" id="u-m">м·ч</span></div>' +
@@ -3184,24 +3850,31 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
           var u = DB.unit($('#f-unit').value);
           if (!u) return;
           $('#u-m').textContent = U.meterInfo(u.meter).unit;
+          $('#prog-row').style.display = kind() === 'to' ? '' : 'none';
+          var pr = kind() === 'to' ? DB.program(u, $('#f-program').value) : null;
           var html = '';
-          if (kind() === 'to' && U.num(u.serviceEvery) > 0) {
-            var next = U.num($('#f-meter').value) + U.num(u.serviceEvery);
-            html = V.kv('Следующее ТО на', U.work(next, u.meter), 'big') +
-              V.kv('Периодичность', 'каждые ' + U.work(u.serviceEvery, u.meter));
-          } else if (kind() === 'to') {
-            html = '<div class="hint" style="padding:0">У этой техники не задана периодичность ТО — ' +
-              'укажите её в карточке, тогда приложение начнёт напоминать.</div>';
+          if (kind() === 'repair') {
+            html = V.kv('Ремонт', 'сроки регламента не сдвигает', 'big');
+          } else if (pr) {
+            html = V.kv('Работа', esc(pr.name), 'big') +
+              (pr.everyWork ? V.kv('Следующий срок',
+                U.work(U.num($('#f-meter').value) + U.num(pr.everyWork), u.meter) + ' по счётчику') : '') +
+              (pr.everyDays ? V.kv(pr.everyWork ? 'или не позже' : 'Следующий срок',
+                U.fmtDateFull(U.addDays($('#f-date').value || U.today(), U.num(pr.everyDays)))) : '');
           } else {
-            html = V.kv('Ремонт', 'счётчик ТО не сбрасывается', 'big');
+            html = '<div class="hint" style="padding:0">У этой техники не задан регламент — ' +
+              'добавьте работу в её карточке, тогда приложение начнёт напоминать о сроках.</div>';
           }
           $('#preview').innerHTML = html;
         }
         bd.addEventListener('input', preview);
         bd.addEventListener('change', function (e) {
-          if (e.target.id === 'f-unit' && !op) {
+          if (e.target.id === 'f-unit') {
             var u = DB.unit(e.target.value);
-            if (u) $('#f-meter').value = U.dec(CALC.meterNow(u), 1);
+            if (u) {
+              if (!op) $('#f-meter').value = U.dec(CALC.meterNow(u), 1);
+              $('#f-program').innerHTML = progOptions(u, null);
+            }
           }
           preview();
         });
@@ -3217,9 +3890,11 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       onSave: function (bd) {
         var $ = function (x) { return bd.querySelector(x); };
         var kb = bd.querySelector('#f-kind .on');
+        var isTo = (kb ? kb.dataset.k : 'to') === 'to';
         var rec = {
           unitId: $('#f-unit').value, date: $('#f-date').value || U.today(),
-          kind: kb ? kb.dataset.k : 'to',
+          kind: isTo ? 'to' : 'repair',
+          programId: isTo ? ($('#f-program').value || null) : null,
           meter: $('#f-meter').value !== '' ? U.num($('#f-meter').value) : null,
           sum: U.num($('#f-sum').value), note: $('#f-note').value.trim()
         };
@@ -3243,10 +3918,17 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
       '<h2 class="sec">Или вставьте текст</h2>' +
       '<div class="list"><div class="field col"><textarea id="paste" style="min-height:130px;font-size:14px" ' +
       'placeholder="Экскаватор Hitachi;EX 2201;Экскаватор;моточасы;14,5;400;ДТ;250"></textarea></div></div>' +
-      '<div class="hint">Таблица техники: <b>Название;Госномер;Тип;Счётчик;Норма;Бак;Топливо;ТО через</b>.<br>' +
-      'Таблица заправок: <b>Дата;Техника;Водитель;Литров;Цена;Счётчик;Заметка</b>.<br>' +
-      'Разделитель — точка с запятой, строка заголовков не обязательна. ' +
-      'Технику загружайте первой: заправки привяжутся к ней по названию или госномеру.</div>' +
+      '<div class="hint">Формат определяется по заголовку таблицы, разделитель — точка с запятой.<br><br>' +
+      '<b>Техника:</b> Название;Госномер;Тип;Счётчик;Норма;Бак;Топливо;ТО через<br>' +
+      '<b>Заправки:</b> Дата;Техника;Водитель;Литров;Цена;Счётчик;Заметка<br>' +
+      '<b>Телематика:</b> Дата;Техника;Моточасы;Уровень топлива;Заправлено;Слито</div>' +
+      '<h2 class="sec">Выгрузка из телематики</h2>' +
+      '<div class="hint" style="padding-top:0">Отчёт «по дням» из Wialon, Omnicomm или заводской системы ' +
+      '(КОМТРАКС, LiveLink, CareTrack) загружается как есть — колонки ищутся по смыслу заголовка. ' +
+      'Из счётчика получится наработка, из уровня в баке — замеры, а сливы станут отдельными записями. ' +
+      'Повторная загрузка того же файла дублей не создаёт.</div>' +
+      '<div class="seg" id="src"><button data-s="tank" class="on">Заправки со склада</button>' +
+      '<button data-s="azs">Заправки на АЗС</button></div>' +
       '<h2 class="sec">Как загружать</h2>' +
       '<div class="seg" id="mode"><button data-m="merge" class="on">Добавить к текущим</button>' +
       '<button data-m="replace">Заменить всё</button></div>';
@@ -3263,8 +3945,12 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
           fr.readAsText(f);
         });
         bd.addEventListener('click', function (e) {
-          var m = e.target.closest('#mode [data-m]');
-          if (m) { U.$$('#mode button', bd).forEach(function (b) { b.classList.remove('on'); }); m.classList.add('on'); }
+          ['#mode', '#src'].forEach(function (box) {
+            var b = e.target.closest(box + ' [data-m], ' + box + ' [data-s]');
+            if (!b) return;
+            U.$$(box + ' button', bd).forEach(function (x) { x.classList.remove('on'); });
+            b.classList.add('on');
+          });
         });
       },
       onSave: function (bd) {
@@ -3279,11 +3965,22 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
               U.toast('Загружено: ' + res.units + ' единиц техники');
             } else {
               if (mode === 'replace') { DB.data = DB.empty(); DB.save(); }
-              var r = DB.importCSV(text);
+              var srcBtn = bd.querySelector('#src .on');
+              var r = DB.importCSV(text, { source: srcBtn ? srcBtn.dataset.s : 'tank' });
               DB.save();
-              U.toast(r.added
-                ? (r.kind === 'fuel' ? 'Добавлено заправок: ' : 'Добавлено техники: ') + r.added
-                : 'Ни одной строки не распознано');
+              if (r.kind === 'telemetry') {
+                var parts = [];
+                if (r.units) parts.push('техники ' + r.units);
+                if (r.shifts) parts.push('смен ' + r.shifts);
+                if (r.fills) parts.push('заправок ' + r.fills);
+                if (r.checks) parts.push('замеров ' + r.checks);
+                if (r.drains) parts.push('сливов ' + r.drains);
+                U.toast(parts.length ? 'Загружено: ' + parts.join(', ') : 'Всё это уже загружено');
+              } else {
+                U.toast(r.added
+                  ? (r.kind === 'fuel' ? 'Добавлено заправок: ' : 'Добавлено техники: ') + r.added
+                  : 'Ни одной строки не распознано');
+              }
             }
             App.closeSheet();
             App.go('#/');
@@ -3559,6 +4256,7 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
               else if (kind === 'service') F.serviceForm(id);
               else if (op.type === 'fill') F.fillForm(id);
               else if (op.type === 'check') F.checkForm(id);
+              else if (op.type === 'drain') F.drainForm(id);
               else if (op.type === 'intake') F.intakeForm(id);
               else F.tankCheckForm(id);
               return;
@@ -3597,6 +4295,9 @@ h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight
     'new-check': function (d) { F.checkForm(null, d.id || null); },
     'new-service': function (d) { F.serviceForm(null, d.id || null); },
     'new-intake': function () { F.intakeForm(); },
+    'new-drain': function (d) { F.drainForm(null, d.id || null); },
+    'new-program': function (d) { F.programForm(d.id); },
+    'edit-program': function (d) { F.programForm(d.id, d.pid); },
     'new-tankcheck': function () { F.tankCheckForm(); },
 
     'op-fuel': function (d) { App.opMenu('fuel', d.id); },

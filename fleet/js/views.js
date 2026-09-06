@@ -24,6 +24,72 @@
     return '<div class="avatar" style="background:' + U.color(name) + '">' + esc(U.initials(name)) + '</div>';
   };
 
+  /* График уровня топлива в баке: заправка — скачок вверх, работа —
+     спуск, замер — точка проверки, слив — красная отметка снизу.        */
+  V.tankChart = function (u, series) {
+    if (!series || series.length < 2) return '';
+    var W = 320, H = 108, PL = 3, PR = 3, PT = 8, PB = 10;
+    var tank = U.num(u.tank);
+    var levels = series.map(function (s) { return s.level; });
+    var maxLevel = Math.max.apply(null, levels), minLevel = Math.min.apply(null, levels);
+    var top = Math.max(tank, maxLevel, 1) * 1.06;
+    var bottom = Math.min(0, minLevel * 1.15);
+    var xs = function (i) { return PL + i * (W - PL - PR) / (series.length - 1); };
+    var ys = function (v) { return PT + (top - v) * (H - PT - PB) / (top - bottom || 1); };
+
+    var line = series.map(function (s, i) {
+      return (i ? 'L' : 'M') + xs(i).toFixed(1) + ' ' + ys(s.level).toFixed(1);
+    }).join(' ');
+    var area = line + ' L' + xs(series.length - 1).toFixed(1) + ' ' + ys(bottom).toFixed(1) +
+      ' L' + xs(0).toFixed(1) + ' ' + ys(bottom).toFixed(1) + ' Z';
+
+    var marks = '';
+    series.forEach(function (s, i) {
+      if (s.fill > 0) marks += '<rect x="' + (xs(i) - 1).toFixed(1) + '" y="' + (H - PB + 2).toFixed(1) +
+        '" width="2" height="4" rx="1" fill="var(--accent)"/>';
+      if (s.drain > 0) marks += '<rect x="' + (xs(i) - 1.4).toFixed(1) + '" y="' + (H - PB + 1).toFixed(1) +
+        '" width="2.8" height="6" rx="1" fill="var(--red)"/>';
+      if (s.check != null) {
+        var bad = s.deviation != null && s.deviation < -Math.max(15, s.burn * 0.05);
+        marks += '<circle cx="' + xs(i).toFixed(1) + '" cy="' + ys(s.level).toFixed(1) + '" r="2.6" ' +
+          'fill="var(--bg-elev)" stroke="' + (bad ? 'var(--red)' : 'var(--accent)') + '" stroke-width="1.6"/>';
+      }
+    });
+
+    var guides = '';
+    if (tank > 0 && ys(tank) > PT - 2) {
+      guides += '<line x1="' + PL + '" y1="' + ys(tank).toFixed(1) + '" x2="' + (W - PR) +
+        '" y2="' + ys(tank).toFixed(1) + '" stroke="var(--text-3)" stroke-width=".7" stroke-dasharray="3 3"/>';
+    }
+    if (bottom < 0) {
+      guides += '<line x1="' + PL + '" y1="' + ys(0).toFixed(1) + '" x2="' + (W - PR) +
+        '" y2="' + ys(0).toFixed(1) + '" stroke="var(--red)" stroke-width=".7" stroke-dasharray="2 3"/>';
+    }
+
+    return '<div class="chart">' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" ' +
+      'aria-label="Уровень топлива в баке по дням">' +
+      guides +
+      '<path d="' + area + '" fill="var(--accent)" opacity=".10"/>' +
+      '<path d="' + line + '" fill="none" stroke="var(--accent)" stroke-width="1.6" ' +
+      'stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' +
+      marks + '</svg>' +
+      '<div class="chart-x"><span>' + U.fmtDate(series[0].date) + '</span>' +
+      '<span>' + (tank > 0 ? 'бак ' + U.liters(tank) : '') + '</span>' +
+      '<span>' + U.fmtDate(series[series.length - 1].date) + '</span></div>' +
+      '</div>';
+  };
+
+  /* сроки обслуживания читаются по-разному: наработка или календарь */
+  V.svcLeft = function (st, u) {
+    if (st.left == null) return '';
+    return st.by === 'days' ? U.days(Math.abs(st.left)) : U.work(Math.abs(st.left), u.meter);
+  };
+  V.svcEvery = function (st, u) {
+    if (!st.every) return '';
+    return st.by === 'days' ? U.days(st.every) : U.work(st.every, u.meter);
+  };
+
   V.empty = function (ic, t, d, btn) {
     return '<div class="empty"><div class="ic">' + ic + '</div><div class="t">' + esc(t) + '</div>' +
       '<div class="d">' + d + '</div>' + (btn || '') + '</div>';
@@ -49,9 +115,10 @@
   V.unitBadge = function (u, p) {
     var st = CALC.unitState(u);
     if (u.active === false) return '<span class="badge">В простое</span>';
+    if (p && p.drained > 0) return '<span class="badge bad">Слив ' + U.liters(p.drained) + '</span>';
     if (p && p.problem) return '<span class="badge bad">Недостача ' + U.liters(p.problemLiters) + '</span>';
-    if (st.service.overdue) return '<span class="badge bad">ТО просрочено</span>';
-    if (st.service.soon) return '<span class="badge warn">ТО через ' + U.work(st.service.left, u.meter) + '</span>';
+    if (st.service.overdue) return '<span class="badge bad">Просрочено: ' + esc(st.service.name) + '</span>';
+    if (st.service.soon) return '<span class="badge warn">' + esc(st.service.name) + ' через ' + V.svcLeft(st.service, u) + '</span>';
     if (st.tankOverflow) return '<span class="badge warn">Залито больше бака</span>';
     if (st.tankNegative) return '<span class="badge warn">Топливо не проведено</span>';
     if (st.idleDays != null && st.idleDays > 7) return '<span class="badge">Без смен ' + U.days(st.idleDays) + '</span>';
@@ -87,6 +154,12 @@
           (op.driverId ? ' · ' + esc(DB.driverName(op.driverId)) : '');
         right = '<span class="v1 num">' + U.liters(op.liters) + '</span>' +
           '<span class="v2">' + (U.num(op.sum) ? U.moneyShort(op.sum) : U.fmtDate(op.date)) + '</span>';
+      } else if (op.type === 'drain') {
+        ic = '🚨';
+        sub = 'слив топлива' + (op.src === 'telemetry' ? ' · по датчику' : '') +
+          (op.note ? ' · ' + esc(op.note) : '');
+        right = '<span class="v1 num" style="color:var(--red)">−' + U.liters(op.liters) + '</span>' +
+          '<span class="v2">мимо работы</span>';
       } else if (op.type === 'intake') {
         ic = '🛢️';
         ttl = 'Приход топлива';
@@ -97,7 +170,7 @@
         ic = '📏';
         var c = null;
         if (u) c = CALC.checks(u).filter(function (z) { return z.id === op.id; })[0];
-        sub = 'замер бака' + (c && c.hasBase
+        sub = (op.src === 'telemetry' ? 'уровень по датчику' : 'замер бака') + (c && c.hasBase
           ? ' · ' + (c.deviation < 0 ? '<b style="color:var(--red)">недостача ' + U.liters(-c.deviation) + '</b>'
             : 'сходится') : ' · точка отсчёта');
         right = '<span class="v1 num">' + U.liters(op.liters) + '</span><span class="v2">в баке</span>';
@@ -176,8 +249,9 @@
       var price = st.price || 0;
       h += '<div class="card pad badbox">' +
         '<div class="t">Перерасход: ' + U.liters(lost) + '</div>' +
-        '<div class="d">' + U.cnt(f.problems.length, 'единица', 'единицы', 'единиц') + ' техники расходует больше нормы' +
-        (price ? '. Это примерно <b>' + U.money(lost * price) + '</b> за месяц' : '') + '.</div>' +
+        '<div class="d">' + U.cnt(f.problems.length, 'единица', 'единицы', 'единиц') + ' техники теряет топливо' +
+        (price ? '. Это примерно <b>' + U.money(lost * price) + '</b> за месяц' : '') + '.' +
+        (f.drained > 0 ? ' Из них <b>' + U.liters(f.drained) + '</b> — зафиксированные сливы.' : '') + '</div>' +
         '<div class="minilist">' +
         f.problems.slice(0, 4).map(function (p) {
           return '<button class="mini tap" data-act="unit" data-id="' + p.unit.id + '">' +
@@ -217,10 +291,9 @@
         var u = s.unit;
         h += '<button class="row tap" data-act="unit" data-id="' + u.id + '">' + V.unitIcon(u) +
           '<span class="grow"><span class="ttl">' + esc(u.name) + '</span>' +
-          '<span class="sub">' + (s.service.overdue
-            ? '<b style="color:var(--red)">переработано ' + U.work(-s.service.left, u.meter) + '</b>'
-            : 'осталось ' + U.work(s.service.left, u.meter)) +
-          ' · каждые ' + U.work(s.service.every, u.meter) + '</span></span>' +
+          '<span class="sub">' + esc(s.service.name) + ' · ' + (s.service.overdue
+            ? '<b style="color:var(--red)">просрочено на ' + V.svcLeft(s.service, u) + '</b>'
+            : 'осталось ' + V.svcLeft(s.service, u)) + '</span></span>' +
           '<span class="val"><span class="v1 num">' + U.work(s.meterNow, u.meter) + '</span>' +
           '<span class="v2">счётчик</span></span>' +
           '<span class="chev">' + V.ICON.chev + '</span></button>';
@@ -323,7 +396,9 @@
       feed = feed.filter(function (x) {
         if (f === 'fill') return x.kind === 'fuel' && (x.op.type === 'fill');
         if (f === 'shift') return x.kind === 'shift';
-        if (f === 'tank') return x.kind === 'fuel' && (x.op.type === 'intake' || x.op.type === 'tankcheck');
+        if (f === 'leak') return x.kind === 'fuel' && x.op.type === 'drain';
+        if (f === 'tank') return x.kind === 'fuel' &&
+          (x.op.type === 'intake' || x.op.type === 'tankcheck' || (x.op.type === 'drain' && !x.op.unitId));
         if (f === 'service') return x.kind === 'service';
         return true;
       });
@@ -343,7 +418,7 @@
     h += '<div class="search">' + V.ICON.search +
       '<input id="ql" type="search" placeholder="Техника, водитель, объект" value="' + esc(V.logQuery) + '" autocomplete="off"></div>';
     h += '<div class="seg">' + sg('all', 'Всё') + sg('fill', 'Заправки') + sg('shift', 'Смены') +
-      sg('tank', 'Склад') + sg('service', 'ТО') + '</div>';
+      sg('leak', 'Сливы') + sg('tank', 'Склад') + sg('service', 'ТО') + '</div>';
 
     if (!feed.length) {
       h += V.empty('📋', 'Записей нет',
@@ -500,6 +575,8 @@
       V.kv('По норме положено', U.liters(f.norm)) +
       V.kv('Недостача по замерам', (f.deviation < -0.5
         ? '<span style="color:var(--red)">' + U.liters(-f.deviation) + '</span>' : '—')) +
+      (f.drained ? V.kv('Зафиксировано сливов',
+        '<span style="color:var(--red)">' + U.liters(f.drained) + '</span>') : '') +
       (f.workHours ? V.kv('Наработка, моточасы', U.work(f.workHours, 'hours')) : '') +
       (f.workKm ? V.kv('Пробег', U.work(f.workKm, 'km')) : '') +
       V.kv('Пришло на склад', U.liters(f.intake)) +
@@ -678,7 +755,7 @@
       '1. Откройте эту страницу в Safari.<br>2. Нажмите «Поделиться» (квадрат со стрелкой).<br>' +
       '3. Выберите «На экран «Домой»».<br>4. Запускайте с иконки — приложение работает без интернета.</div>';
 
-    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Автопарк · версия 1.0</div>';
+    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Автопарк · версия 2.0</div>';
     return h + '</div>';
 
     function rowBtn(act, ic, t, sub) {

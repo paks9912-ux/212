@@ -129,6 +129,111 @@ eq('второй замер: ожидалось 4700', ts.checks[1].expected, 47
 eq('недостача 50 л', ts.checks[1].deviation, -50);
 
 /* ---------------------------------------------------------------- */
+console.log('\nЗафиксированный слив:');
+reset();
+const u6 = DB.addUnit({ name: 'Кран', meter: 'hours', norm: 10, tank: 300, tankStart: 300, meterStart: 0 });
+DB.addShift({ unitId: u6.id, date: D(-5), work: 10 });          // −100 л по норме
+DB.addFuel({ type: 'drain', unitId: u6.id, date: D(-4), liters: 60, note: 'слив на стоянке' });
+eq('остаток 300 − 100 − 60 = 140', CALC.tankLeft(u6).left, 140);
+DB.addFuel({ type: 'check', unitId: u6.id, date: D(-3), liters: 140 });
+eq('замер сходится — слив уже объяснён', CALC.checks(u6)[0].deviation, 0);
+let p6 = CALC.unitPeriod(u6, D(-30), t);
+eq('слив за период 60 л', p6.drained, 60);
+eq('потеряно всего 60 л', p6.lost, 60);
+is('это перерасход, даже без недостачи на замере', p6.problem === true);
+
+console.log('Незаписанный слив всплывает как недостача:');
+reset();
+const u7 = DB.addUnit({ name: 'Кран 2', meter: 'hours', norm: 10, tank: 300, tankStart: 300, meterStart: 0 });
+DB.addShift({ unitId: u7.id, date: D(-5), work: 10 });
+DB.addFuel({ type: 'check', unitId: u7.id, date: D(-3), liters: 140 });   // 60 л пропали молча
+eq('недостача 60 л', CALC.checks(u7)[0].deviation, -60);
+eq('утечка найдена', CALC.leaks(u7).length, 1);
+eq('и она размером 60 л', CALC.leaks(u7)[0].liters, 60);
+
+console.log('\nСлив со склада:');
+reset();
+DB.addFuel({ type: 'intake', date: D(-10), liters: 5000, price: 9800 });
+DB.addFuel({ type: 'drain', unitId: null, date: D(-9), liters: 200, note: 'порыв шланга' });
+eq('на складе 4800 л', CALC.tankState().left, 4800);
+
+/* ---------------------------------------------------------------- */
+console.log('\nРегламент: срок по тому, что придёт раньше:');
+reset();
+const u8 = DB.addUnit({ name: 'Автокран', meter: 'km', norm: 30, meterStart: 0 });
+DB.addProgram(u8.id, { id: 'to', name: 'ТО', everyWork: 10000, everyDays: 0 });
+DB.addProgram(u8.id, { name: 'Освидетельствование', everyWork: 0, everyDays: 365 });
+DB.addShift({ unitId: u8.id, date: D(-2), start: 0, end: 500 });
+let sv = CALC.serviceStates(u8);
+eq('работ в регламенте две', sv.length, 2);
+const to8 = sv.filter(x => x.name === 'ТО')[0];
+const os8 = sv.filter(x => x.name === 'Освидетельствование')[0];
+eq('до ТО осталось 9500 км', to8.leftWork, 9500);
+is('ТО считается по наработке', to8.by === 'work');
+is('освидетельствование — по календарю', os8.by === 'days');
+is('первым в списке — что ближе к сроку', sv[0].urgency <= sv[1].urgency);
+
+console.log('Работа с двумя интервалами: календарь наступает раньше:');
+reset();
+const u9 = DB.addUnit({ name: 'Погрузчик', meter: 'hours', norm: 10, meterStart: 0, createdAt: D(-300) });
+DB.addProgram(u9.id, { name: 'Масло', everyWork: 500, everyDays: 180 });
+DB.addShift({ unitId: u9.id, date: D(-2), start: 0, end: 50 });
+const sv9 = CALC.serviceStates(u9)[0];
+is('срок считается по календарю', sv9.by === 'days');
+is('и он просрочен', sv9.overdue === true);
+eq('переработано 120 дней', -sv9.left, 120);
+
+/* ---------------------------------------------------------------- */
+console.log('\nРяд для графика уровня топлива:');
+reset();
+const u10 = DB.addUnit({ name: 'Экскаватор', meter: 'hours', norm: 10, tank: 400, tankStart: 200, meterStart: 0 });
+DB.addShift({ unitId: u10.id, date: D(-4), work: 5 });                       // −50
+DB.addFuel({ type: 'fill', unitId: u10.id, date: D(-3), liters: 300, price: 100, source: 'tank' });
+DB.addShift({ unitId: u10.id, date: D(-3), work: 5 });                       // −50
+DB.addFuel({ type: 'check', unitId: u10.id, date: D(-2), liters: 380 });
+const ser = CALC.tankSeries(u10, D(-5), t);
+eq('точек по числу дней', ser.length, 6);
+eq('на старте 200 л', ser[0].level, 200);
+eq('после смены 150 л', ser[1].level, 150);
+eq('заправка подняла до 400 л', ser[2].level, 400);
+eq('замер задал уровень 380 л', ser[3].level, 380);
+eq('и показал недостачу 20 л', ser[3].deviation, -20);
+eq('последний день держит уровень', ser[5].level, 380);
+
+console.log('\nСебестоимость наработки:');
+DB.addService({ unitId: u10.id, date: D(-2), kind: 'repair', sum: 20000 });
+const p10 = CALC.unitPeriod(u10, D(-30), t);
+eq('топливо 30 000', p10.money, 30000);
+eq('с ремонтом 50 000', p10.costTotal, 50000);
+eq('за 10 моточасов — 5 000 за час', p10.costPerWork, 5000);
+
+/* ---------------------------------------------------------------- */
+console.log('\nЗагрузка выгрузки из телематики:');
+reset();
+const tele =
+  'Дата;Объект;Моточасы;Уровень топлива, л;Заправлено, л;Слито, л\n' +
+  '01.09.2026;Экскаватор Cat;1000;300;;\n' +
+  '02.09.2026;Экскаватор Cat;1008;210;;\n' +
+  '03.09.2026;Экскаватор Cat;1016;350;250;\n' +
+  '04.09.2026;Экскаватор Cat;1024;150;;80\n';
+let rt = DB.importCSV(tele);
+is('формат распознан как телематика', rt.kind === 'telemetry');
+eq('техника создана', rt.units, 1);
+eq('смен из счётчика три', rt.shifts, 3);
+eq('заправка одна', rt.fills, 1);
+eq('уровней четыре', rt.checks, 4);
+eq('слив один', rt.drains, 1);
+const ut = DB.unitByName('Экскаватор Cat');
+eq('наработка второго дня 8 моточасов', CALC.shiftWork(DB.data.shifts[0]), 8);
+eq('счётчик дошёл до 1024', CALC.meterNow(ut), 1024);
+eq('слив попал в потери', CALC.unitPeriod(ut, '2026-09-01', '2026-09-30').drained, 80);
+console.log('Повторная загрузка того же файла:');
+rt = DB.importCSV(tele);
+eq('новых смен нет', rt.shifts, 0);
+eq('новых замеров нет', rt.checks, 0);
+eq('новых сливов нет', rt.drains, 0);
+
+/* ---------------------------------------------------------------- */
 console.log('\nОтчёты по водителям и объектам:');
 reset();
 const d1 = DB.addDriver({ name: 'Рустам' });
@@ -184,9 +289,10 @@ const f = CALC.fleet(U.monthStart(t), t);
 is('техника есть', DB.data.units.length === 6);
 is('смены есть', DB.data.shifts.length > 100);
 is('за месяц что-то залито', f.filled > 0);
-is('ровно одна машина с перерасходом', f.problems.length === 1);
-is('это самосвал №1', f.problems[0].unit.id === 'u3');
-is('недостача больше 100 л', f.problems[0].problemLiters > 100);
+is('две машины с потерями', f.problems.length === 2);
+is('самосвал №1 — недостача по замерам', CALC.unitPeriod(DB.unit('u3'), U.monthStart(t), t).deviation < -100);
+is('погрузчик — пойманный слив 120 л', CALC.unitPeriod(DB.unit('u2'), U.monthStart(t), t).drained === 120);
+is('у экскаватора с датчиком ложной тревоги нет', CALC.unitPeriod(DB.unit('u1'), U.monthStart(t), t).problem === false);
 is('есть просроченное ТО', f.serviceOverdue.length > 0);
 is('на складе положительный остаток', CALC.tankState().left > 0);
 is('в журнале есть записи', CALC.feed(10).length === 10);

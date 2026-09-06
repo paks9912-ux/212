@@ -28,7 +28,7 @@
 
     empty: function () {
       return {
-        version: 1,
+        version: 2,
         createdAt: U.today(),
         isDemo: false,
         settings: {
@@ -75,19 +75,80 @@
       ['units', 'drivers', 'shifts', 'fuel', 'services'].forEach(function (k) {
         d[k] = Array.isArray(d[k]) ? d[k] : [];
       });
-      d.units.forEach(function (u) {
-        if (!u.meter) u.meter = 'hours';
-        if (u.active == null) u.active = true;
-        u.norm = U.num(u.norm);
-        u.tank = U.num(u.tank);
+      d.units.forEach(function (u) { DB.normUnit(u); });
+      d.services.forEach(function (s) {
+        if (s.kind === 'to' && !s.programId) s.programId = 'to';
       });
       d.fuel.forEach(function (f) {
         if (!f.type) f.type = 'fill';
         f.liters = U.num(f.liters);
         if (f.sum == null) f.sum = U.num(f.liters) * U.num(f.price);
       });
-      d.version = 1;
+      d.version = 2;
       return d;
+    },
+
+    /* Приводим единицу техники в порядок: числа числами, регламент списком.
+       Поле «ТО каждые N» в форме — это первая работа регламента с id 'to',
+       поэтому держим их синхронными в обе стороны.                        */
+    normUnit: function (u) {
+      if (!u) return u;
+      if (!u.meter) u.meter = 'hours';
+      if (u.active == null) u.active = true;
+      u.norm = U.num(u.norm);
+      u.tank = U.num(u.tank);
+      if (!Array.isArray(u.programs)) u.programs = [];
+      u.programs.forEach(function (pr) {
+        pr.id = pr.id || U.uid();
+        pr.everyWork = U.num(pr.everyWork);
+        pr.everyDays = U.num(pr.everyDays);
+      });
+      var every = U.num(u.serviceEvery);
+      var to = u.programs.filter(function (p) { return p.id === 'to'; })[0];
+      if (every > 0) {
+        if (to) to.everyWork = every;
+        else u.programs.unshift({ id: 'to', name: 'ТО по регламенту', everyWork: every, everyDays: 0 });
+      } else if (to && !to.everyDays) {
+        u.programs = u.programs.filter(function (p) { return p.id !== 'to'; });
+      }
+      return u;
+    },
+
+    /* ---------- регламенты обслуживания ---------- */
+    programs: function (u) { return (u && u.programs) || []; },
+    program: function (u, id) {
+      return this.programs(u).filter(function (p) { return p.id === id; })[0] || null;
+    },
+    addProgram: function (unitId, pr) {
+      var u = this.unit(unitId);
+      if (!u) return null;
+      if (!Array.isArray(u.programs)) u.programs = [];
+      pr.id = pr.id || U.uid();
+      pr.everyWork = U.num(pr.everyWork);
+      pr.everyDays = U.num(pr.everyDays);
+      u.programs.push(pr);
+      this.syncEvery(u);
+      this.save();
+      return pr;
+    },
+    updProgram: function (unitId, id, patch) {
+      var pr = this.program(this.unit(unitId), id);
+      if (pr) {
+        Object.assign(pr, patch);
+        pr.everyWork = U.num(pr.everyWork);
+        pr.everyDays = U.num(pr.everyDays);
+        this.syncEvery(this.unit(unitId));
+        this.save();
+      }
+      return pr;
+    },
+    delProgram: function (unitId, id) {
+      var u = this.unit(unitId);
+      if (!u) return;
+      u.programs = this.programs(u).filter(function (p) { return p.id !== id; });
+      this.data.services.forEach(function (s) { if (s.programId === id) s.programId = null; });
+      this.syncEvery(u);
+      this.save();
     },
 
     save: function () {
@@ -118,14 +179,14 @@
     addUnit: function (u) {
       u.id = u.id || U.uid();
       u.createdAt = u.createdAt || U.today();
-      if (u.active == null) u.active = true;
+      this.normUnit(u);
       this.data.units.push(u);
       this.save();
       return u;
     },
     updUnit: function (id, patch) {
       var u = this.unit(id);
-      if (u) { Object.assign(u, patch); this.save(); }
+      if (u) { Object.assign(u, patch); this.normUnit(u); this.save(); }
       return u;
     },
     delUnit: function (id) {
@@ -134,6 +195,12 @@
       this.data.fuel = this.data.fuel.filter(function (f) { return f.unitId !== id; });
       this.data.services = this.data.services.filter(function (s) { return s.unitId !== id; });
       this.save();
+    },
+
+    syncEvery: function (u) {
+      if (!u) return;
+      var to = this.programs(u).filter(function (p) { return p.id === 'to'; })[0];
+      u.serviceEvery = to ? U.num(to.everyWork) : 0;
     },
 
     /* ---------- водители ---------- */
@@ -306,21 +373,151 @@
       return { units: this.data.units.length, fuel: this.data.fuel.length, shifts: this.data.shifts.length };
     },
 
+    /* ---------- выгрузка из телематики ----------
+       Wialon, Omnicomm, заводские КОМТРАКС/LiveLink и прочие отдают отчёт
+       «по дням»: счётчик, уровень в баке, заправки, сливы. Колонки у всех
+       называются по-разному, поэтому ищем их по смыслу заголовка.        */
+    TELEMETRY_COLS: [
+      ['date', /дата|date|сутки|день|период/],
+      ['unit', /техник|машин|объект|транспорт|unit|name|наименован|госномер|номер/],
+      ['meter', /моточас|мото.?час|пробег|наработ|счётчик|счетчик|odometer|mileage|hours|engine/],
+      ['level', /уровень|остаток|конец.*бак|бак.*конец|level|fuel.?end/],
+      ['fill', /заправ|залито|fill|refuel/],
+      ['drain', /слив|слито|утечк|хищен|drain|theft/]
+    ],
+
+    /* какая колонка за что отвечает — по заголовку таблицы */
+    telemetryMap: function (head) {
+      var map = {};
+      this.TELEMETRY_COLS.forEach(function (pair) {
+        head.forEach(function (h, i) {
+          if (map[pair[0]] != null) return;
+          if (pair[1].test(String(h).toLowerCase())) map[pair[0]] = i;
+        });
+      });
+      return map;
+    },
+
+    /* rows — уже разобранные строки, map — результат telemetryMap */
+    importTelemetry: function (rows, map, opt) {
+      opt = opt || {};
+      var self = this;
+      var res = { kind: 'telemetry', units: 0, shifts: 0, fills: 0, checks: 0, drains: 0, skipped: 0 };
+      if (map.date == null || map.unit == null) throw new Error('Не нашёл колонки «Дата» и «Техника»');
+
+      /* сначала по технике и датам, иначе наработка посчитается задом наперёд */
+      var parsed = [];
+      rows.forEach(function (c) {
+        var date = self.parseDate(c[map.date]);
+        var name = String(c[map.unit] || '').trim();
+        if (!date || !name) { res.skipped++; return; }
+        parsed.push({ date: date, name: name, row: c });
+      });
+      parsed.sort(function (a, b) {
+        if (a.name !== b.name) return a.name < b.name ? -1 : 1;
+        return a.date < b.date ? -1 : 1;
+      });
+
+      /* что уже есть — чтобы повторная загрузка того же файла не плодила дубли */
+      var have = {};
+      this.data.shifts.forEach(function (x) { have['s' + x.unitId + x.date] = 1; });
+      this.data.fuel.forEach(function (x) { have[x.type[0] + x.unitId + x.date] = 1; });
+
+      var prevMeter = {};
+      parsed.forEach(function (p) {
+        var c = p.row;
+        var u = self.unitByName(p.name);
+        if (!u) {
+          u = self.addUnit({
+            name: p.name, meter: opt.meter || 'hours', norm: 0, kind: 'other',
+            fuel: self.data.settings.fuel, meterStart: map.meter != null ? U.num(c[map.meter]) : 0
+          });
+          res.units++;
+        }
+        var num = function (i) { return i != null && c[i] != null && c[i] !== '' ? U.num(c[i]) : null; };
+
+        /* наработка — разница показаний счётчика между строками */
+        var meter = num(map.meter);
+        if (meter != null) {
+          var prev = prevMeter[u.id];
+          if (prev == null) prev = U.num(u.meterStart) || meter;
+          var work = meter - prev;
+          if (work > 0 && !have['s' + u.id + p.date]) {
+            self.data.shifts.push({
+              id: U.uid(), unitId: u.id, driverId: u.driverId || null, date: p.date,
+              start: prev, end: meter, site: '', note: 'из телематики', src: 'telemetry'
+            });
+            have['s' + u.id + p.date] = 1;
+            res.shifts++;
+          }
+          prevMeter[u.id] = meter;
+        }
+
+        var lit = num(map.fill);
+        if (lit && lit > 0 && !have['f' + u.id + p.date]) {
+          self.data.fuel.push({
+            id: U.uid(), type: 'fill', unitId: u.id, driverId: u.driverId || null, date: p.date,
+            liters: lit, price: U.num(self.data.settings.price),
+            sum: lit * U.num(self.data.settings.price),
+            source: opt.source === 'azs' ? 'azs' : 'tank',
+            meter: meter, fuel: u.fuel || self.data.settings.fuel,
+            note: 'из телематики', src: 'telemetry'
+          });
+          have['f' + u.id + p.date] = 1;
+          res.fills++;
+        }
+
+        var dr = num(map.drain);
+        if (dr && dr > 0 && !have['d' + u.id + p.date]) {
+          self.data.fuel.push({
+            id: U.uid(), type: 'drain', unitId: u.id, date: p.date,
+            liters: dr, price: 0, sum: 0, note: 'слив по датчику', src: 'telemetry'
+          });
+          have['d' + u.id + p.date] = 1;
+          res.drains++;
+        }
+
+        /* уровень в баке — это тот же замер, только его снял датчик, а не человек */
+        var lvl = num(map.level);
+        if (lvl != null && !have['c' + u.id + p.date]) {
+          self.data.fuel.push({
+            id: U.uid(), type: 'check', unitId: u.id, date: p.date,
+            liters: lvl, price: 0, sum: 0, meter: meter,
+            note: 'уровень по датчику', src: 'telemetry'
+          });
+          have['c' + u.id + p.date] = 1;
+          res.checks++;
+        }
+      });
+
+      this.sortAll();
+      this.save();
+      return res;
+    },
+
     /* CSV: две таблицы, различаются по заголовку.
        Техника:  Название;Госномер;Тип;Счётчик;Норма;Бак;Топливо;ТО через
        Заправки: Дата;Техника;Водитель;Литры;Цена;Счётчик;Заметка          */
-    importCSV: function (text) {
+    importCSV: function (text, opt) {
       var lines = String(text).replace(/^﻿/, '').split(/\r?\n/).filter(function (s) { return s.trim(); });
       if (!lines.length) throw new Error('Пустой файл');
       var sep = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',';
       var head = lines[0].toLowerCase();
-      var isFuel = /литр|дата|заправ/.test(head) && !/норма/.test(head);
-      var start = /назван|госномер|дата|литр|техник/.test(head) ? 1 : 0;
-      var self = this, added = 0;
-
       var cut = function (line) {
         return line.split(sep).map(function (s) { return s.trim().replace(/^"|"$/g, ''); });
       };
+
+      /* выгрузка из телематики: там есть уровень в баке, слив или счётчик по дням */
+      if (/уровень|остаток|слив|моточас|пробег|наработ/.test(head) && !/норма/.test(head)) {
+        var map = this.telemetryMap(cut(lines[0]));
+        if (map.date != null && map.unit != null && (map.meter != null || map.level != null)) {
+          return this.importTelemetry(lines.slice(1).map(cut), map, opt);
+        }
+      }
+
+      var isFuel = /литр|дата|заправ/.test(head) && !/норма/.test(head);
+      var start = /назван|госномер|дата|литр|техник/.test(head) ? 1 : 0;
+      var self = this, added = 0;
 
       for (var i = start; i < lines.length; i++) {
         var c = cut(lines[i]);
@@ -387,7 +584,8 @@
     /* журнал топлива одной таблицей */
     exportCSV: function () {
       var self = this;
-      var TYPE = { fill: 'заправка', intake: 'приход на склад', check: 'замер бака', tankcheck: 'замер склада' };
+      var TYPE = { fill: 'заправка', intake: 'приход на склад', check: 'замер бака',
+        tankcheck: 'замер склада', drain: 'слив' };
       var rows = [['Дата', 'Операция', 'Техника', 'Госномер', 'Водитель', 'Литров', 'Цена за литр', 'Сумма', 'Откуда', 'Счётчик', 'Топливо', 'Заметка']];
       this.data.fuel.forEach(function (f) {
         var u = self.unit(f.unitId);
@@ -420,13 +618,17 @@
     /* сводка по технике за период */
     exportReportCSV: function (from, to) {
       var self = this;
-      var rows = [['Техника', 'Госномер', 'Наработка', 'Единица', 'Норма расхода, л', 'Залито, л', 'Отклонение по замерам, л', 'Средний расход', 'Потрачено денег']];
+      var rows = [['Техника', 'Госномер', 'Наработка', 'Единица', 'Норма расхода, л', 'Залито, л',
+        'Отклонение по замерам, л', 'Слито, л', 'Потеряно всего, л', 'Средний расход',
+        'Топливо, деньги', 'ТО и ремонты', 'Себестоимость наработки']];
       this.data.units.forEach(function (u) {
         var r = CALC.unitPeriod(u, from, to);
         rows.push([
           u.name, u.plate || '', U.dec(r.work, 1), U.meterInfo(u.meter).unit,
           U.dec(r.norm, 1), U.dec(r.filled, 1), U.dec(r.deviation, 1),
-          r.actualRate != null ? U.dec(r.actualRate, 1) : '', Math.round(r.money)
+          U.dec(r.drained, 1), U.dec(r.lost, 1),
+          r.actualRate != null ? U.dec(r.actualRate, 1) : '', Math.round(r.money),
+          Math.round(r.serviceCost), r.costPerWork != null ? Math.round(r.costPerWork) : ''
         ]);
       });
       return this.csvRows(rows);
@@ -454,13 +656,22 @@
       db.units = [
         { id: 'u1', name: 'Экскаватор Hitachi ZX200', plate: 'EX 2201', kind: 'excavator', meter: 'hours',
           norm: 14.5, tank: 400, fuel: 'ДТ', serviceEvery: 250, driverId: 'dr1', meterStart: 4820,
-          tankStart: 320, active: true, note: '' },
+          tankStart: 320, active: true, note: '', telemetry: true,
+          programs: [
+            { id: 'to', name: 'ТО по регламенту', everyWork: 250, everyDays: 0 },
+            { id: 'p11', name: 'Замена гидромасла', everyWork: 1000, everyDays: 0 },
+            { id: 'p12', name: 'Страховка', everyWork: 0, everyDays: 365 }
+          ] },
         { id: 'u2', name: 'Погрузчик SDLG LG956', plate: 'LD 3310', kind: 'loader', meter: 'hours',
           norm: 11, tank: 300, fuel: 'ДТ', serviceEvery: 250, driverId: 'dr2', meterStart: 2610,
           tankStart: 230, active: true, note: '' },
         { id: 'u3', name: 'Самосвал Howo №1', plate: '01 A 123 BA', kind: 'truck', meter: 'km',
           norm: 38, tank: 400, fuel: 'ДТ', serviceEvery: 10000, driverId: 'dr3', meterStart: 184300,
-          tankStart: 300, active: true, note: '' },
+          tankStart: 300, active: true, note: '',
+          programs: [
+            { id: 'to', name: 'ТО по регламенту', everyWork: 10000, everyDays: 0 },
+            { id: 'p31', name: 'Техосмотр', everyWork: 0, everyDays: 365 }
+          ] },
         { id: 'u4', name: 'Самосвал Howo №2', plate: '01 A 456 BA', kind: 'truck', meter: 'km',
           norm: 38, tank: 400, fuel: 'ДТ', serviceEvery: 10000, driverId: 'dr4', meterStart: 96150,
           tankStart: 300, active: true, note: '' },
@@ -469,7 +680,11 @@
           tankStart: 300, active: true, note: '' },
         { id: 'u6', name: 'Автокран XCMG 25 т', plate: '01 B 777 CA', kind: 'crane', meter: 'km',
           norm: 32, tank: 350, fuel: 'ДТ', serviceEvery: 12000, driverId: null, meterStart: 41200,
-          tankStart: 250, active: true, note: 'Работает по заявкам' }
+          tankStart: 250, active: true, note: 'Работает по заявкам',
+          programs: [
+            { id: 'to', name: 'ТО по регламенту', everyWork: 12000, everyDays: 0 },
+            { id: 'p61', name: 'Освидетельствование крана', everyWork: 0, everyDays: 365 }
+          ] }
       ];
 
       var sites = ['ЖК «Северный»', 'Карьер', 'Трасса М-39', 'База'];
@@ -507,8 +722,11 @@
               site: sites[Math.floor(rnd() * sites.length)], note: ''
             });
 
-            /* реальный расход слегка гуляет вокруг нормы */
-            var spent = (u.meter === 'km' ? work / 100 * u.norm : work * u.norm) * (0.96 + rnd() * 0.08);
+            /* реальный расход слегка гуляет вокруг нормы; там, где стоит
+               датчик, разброс меньше — меряет прибор, а не линейка */
+            var spread = u.telemetry ? 0.015 : 0.04;
+            var spent = (u.meter === 'km' ? work / 100 * u.norm : work * u.norm) *
+              (1 - spread + rnd() * spread * 2);
             /* самосвал №1 — с него сливают: расход стабильно выше нормы */
             if (u.id === 'u3') spent *= 1.22;
             tankLeft[u.id] -= spent;
@@ -526,6 +744,28 @@
                 meter: Math.round(meters[u.id] * 10) / 10, fuel: 'ДТ', note: ''
               });
             }
+          });
+        }
+
+        /* на технике с датчиком уровень приезжает каждый день сам */
+        if (dow !== 0 && day <= 30) {
+          db.units.forEach(function (u) {
+            if (!u.telemetry) return;
+            db.fuel.push({
+              id: id('t'), type: 'check', unitId: u.id, date: date,
+              liters: Math.max(0, Math.round(tankLeft[u.id])),
+              meter: Math.round(meters[u.id] * 10) / 10, fuel: 'ДТ',
+              src: 'telemetry', note: 'уровень по датчику'
+            });
+          });
+        }
+
+        /* пойманный слив: топливо ушло мимо работы, и это зафиксировано */
+        if (day === 3) {
+          tankLeft.u2 -= 120;
+          db.fuel.push({
+            id: id('dr'), type: 'drain', unitId: 'u2', date: date, liters: 120,
+            price: 0, sum: 0, note: 'слив зафиксирован на стоянке, составлен акт'
           });
         }
 
@@ -560,6 +800,7 @@
 
       var by = function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; };
       db.shifts.sort(by); db.fuel.sort(by); db.services.sort(by);
+      db.units.forEach(function (u) { DB.normUnit(u); });
       return db;
     }
   };

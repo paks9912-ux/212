@@ -1,5 +1,5 @@
 /* Офлайн-кэш. Меняйте VER при обновлении файлов. */
-const VER = 'avtopark-v1';
+const VER = 'avtopark-v2';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './css/app.css',

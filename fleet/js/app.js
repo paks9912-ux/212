@@ -227,6 +227,7 @@
               else if (kind === 'service') F.serviceForm(id);
               else if (op.type === 'fill') F.fillForm(id);
               else if (op.type === 'check') F.checkForm(id);
+              else if (op.type === 'drain') F.drainForm(id);
               else if (op.type === 'intake') F.intakeForm(id);
               else F.tankCheckForm(id);
               return;
@@ -265,6 +266,9 @@
     'new-check': function (d) { F.checkForm(null, d.id || null); },
     'new-service': function (d) { F.serviceForm(null, d.id || null); },
     'new-intake': function () { F.intakeForm(); },
+    'new-drain': function (d) { F.drainForm(null, d.id || null); },
+    'new-program': function (d) { F.programForm(d.id); },
+    'edit-program': function (d) { F.programForm(d.id, d.pid); },
     'new-tankcheck': function () { F.tankCheckForm(); },
 
     'op-fuel': function (d) { App.opMenu('fuel', d.id); },

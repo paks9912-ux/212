@@ -93,17 +93,22 @@
   /* расчётный остаток в баке на дату (по умолчанию — сегодня) */
   CALC.tankLeft = function (u, upto) {
     var base = CALC.baseline(u, upto);
-    var left = base.liters, filled = 0, burned = 0;
+    var left = base.liters, filled = 0, burned = 0, drained = 0;
     CALC.fuelOf(u.id, null, upto, 'fill').forEach(function (f) {
       if (base.date && f.date <= base.date) return;
       filled += U.num(f.liters);
+    });
+    /* зафиксированный слив — топливо ушло, но не на работу */
+    CALC.fuelOf(u.id, null, upto, 'drain').forEach(function (f) {
+      if (base.date && f.date <= base.date) return;
+      drained += U.num(f.liters);
     });
     CALC.shiftsOf(u.id, null, upto).forEach(function (s) {
       if (base.date && s.date <= base.date) return;
       burned += CALC.normFor(u, CALC.shiftWork(s));
     });
-    left += filled - burned;
-    return { left: left, base: base, filled: filled, burned: burned };
+    left += filled - burned - drained;
+    return { left: left, base: base, filled: filled, burned: burned, drained: drained };
   };
 
   /* все замеры бака с отклонением: сколько было по расчёту и сколько нашли */
@@ -114,24 +119,124 @@
       var prev = i > 0 ? all[i - 1] : null;
       var start = prev ? { date: prev.date, liters: U.num(prev.liters) }
         : { date: null, liters: U.num(u.tankStart) };
-      var filled = 0, burned = 0;
+      var filled = 0, burned = 0, drained = 0;
       CALC.fuelOf(u.id, null, c.date, 'fill').forEach(function (f) {
         if (start.date && f.date <= start.date) return;
         filled += U.num(f.liters);
+      });
+      CALC.fuelOf(u.id, null, c.date, 'drain').forEach(function (f) {
+        if (start.date && f.date <= start.date) return;
+        drained += U.num(f.liters);
       });
       CALC.shiftsOf(u.id, null, c.date).forEach(function (s) {
         if (start.date && s.date <= start.date) return;
         burned += CALC.normFor(u, CALC.shiftWork(s));
       });
-      var expected = start.liters + filled - burned;
+      var expected = start.liters + filled - burned - drained;
       out.push({
         id: c.id, date: c.date, found: U.num(c.liters), expected: expected,
         deviation: U.num(c.liters) - expected,       // минус — недостача
         hasBase: !!prev || U.num(u.tankStart) > 0,
-        sinceDate: start.date, filled: filled, burned: burned, note: c.note || ''
+        sinceDate: start.date, filled: filled, burned: burned, drained: drained,
+        src: c.src || null, note: c.note || ''
       });
     });
     return out.filter(function (c) { return CALC.inRange(c.date, from, to); });
+  };
+
+  /* ---------- регламенты обслуживания ----------
+     У единицы может быть несколько работ: ТО по моточасам, замена масла,
+     техосмотр раз в год. Срок наступает по тому, что придёт раньше —
+     наработка или календарь.                                            */
+  CALC.serviceStates = function (u, meterNow) {
+    if (!u) return [];
+    meterNow = meterNow == null ? CALC.meterNow(u) : meterNow;
+    var warn = (U.num(DB.data.settings.serviceWarnPct) || 10) / 100;
+    var all = CALC.servicesOf(u.id);
+
+    return DB.programs(u).map(function (pr) {
+      var done = all.filter(function (s) {
+        return s.kind !== 'repair' && (s.programId === pr.id || (!s.programId && pr.id === 'to'));
+      });
+      var last = done[done.length - 1] || null;
+      var st = { program: pr, name: pr.name, last: last };
+      var everyWork = U.num(pr.everyWork), everyDays = U.num(pr.everyDays);
+
+      if (everyWork > 0) {
+        st.sinceWork = meterNow - (last && last.meter != null ? U.num(last.meter) : U.num(u.meterStart));
+        st.leftWork = everyWork - st.sinceWork;
+      }
+      if (everyDays > 0) {
+        st.sinceDays = U.diffDays(last ? last.date : (u.createdAt || DB.data.createdAt || U.today()), U.today());
+        st.leftDays = everyDays - st.sinceDays;
+      }
+
+      /* что ближе к сроку в долях интервала, то и показываем */
+      var wShare = st.leftWork != null ? st.leftWork / everyWork : Infinity;
+      var dShare = st.leftDays != null ? st.leftDays / everyDays : Infinity;
+      if (st.leftWork != null && wShare <= dShare) {
+        st.by = 'work'; st.left = st.leftWork; st.every = everyWork; st.since = st.sinceWork;
+      } else if (st.leftDays != null) {
+        st.by = 'days'; st.left = st.leftDays; st.every = everyDays; st.since = st.sinceDays;
+      } else {
+        st.by = 'none'; st.left = null; st.every = 0; st.since = 0;
+      }
+      st.pct = st.every > 0 ? Math.max(0, Math.min(1, st.since / st.every)) : null;
+      st.overdue = st.left != null && st.left < 0;
+      st.soon = st.left != null && st.left >= 0 && st.left <= st.every * warn;
+      st.urgency = st.left != null && st.every > 0 ? st.left / st.every : 99;
+      return st;
+    }).sort(function (a, b) { return a.urgency - b.urgency; });
+  };
+
+  var NO_SERVICE = { none: true, overdue: false, soon: false, left: null,
+    every: 0, since: 0, pct: null, by: 'none', last: null, name: '' };
+
+  /* ---------- уровень топлива по дням: ряд для графика ----------
+     Ровно та «пила», которую рисуют системы мониторинга: заправка —
+     скачок вверх, работа — плавный спуск, замер — точка проверки.      */
+  CALC.tankSeries = function (u, from, to) {
+    var days = U.diffDays(from, to);
+    if (!u || days < 0) return [];
+    if (days > 400) from = U.addDays(to, -400), days = 400;
+
+    var level = CALC.tankLeft(u, U.addDays(from, -1)).left;
+    var out = [];
+    for (var i = 0; i <= days; i++) {
+      var d = U.addDays(from, i);
+      var fill = 0, drain = 0, burn = 0, check = null;
+      CALC.fuelOf(u.id, d, d).forEach(function (f) {
+        if (f.type === 'fill') fill += U.num(f.liters);
+        else if (f.type === 'drain') drain += U.num(f.liters);
+        else if (f.type === 'check') check = f;
+      });
+      CALC.shiftsOf(u.id, d, d).forEach(function (s) { burn += CALC.normFor(u, CALC.shiftWork(s)); });
+
+      level = level + fill - drain - burn;
+      var expected = level, dev = null;
+      if (check) { dev = U.num(check.liters) - expected; level = U.num(check.liters); }
+      out.push({ date: d, level: level, expected: expected, fill: fill, drain: drain,
+        burn: burn, check: check ? U.num(check.liters) : null, deviation: dev });
+    }
+    return out;
+  };
+
+  /* ---------- утечки: зафиксированные сливы и провалы на замерах ---------- */
+  CALC.leaks = function (u, from, to) {
+    var out = [];
+    CALC.fuelOf(u.id, from, to, 'drain').forEach(function (f) {
+      out.push({ id: f.id, date: f.date, liters: U.num(f.liters), kind: 'drain',
+        src: f.src || null, note: f.note || '' });
+    });
+    CALC.checks(u, from, to).forEach(function (c) {
+      if (!c.hasBase) return;
+      var limit = Math.max(15, c.burned * 0.05);
+      if (c.deviation < -limit) {
+        out.push({ id: c.id, date: c.date, liters: -c.deviation, kind: 'check',
+          src: c.src || null, note: c.note || '' });
+      }
+    });
+    return out.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
   };
 
   /* ---------- состояние единицы техники ---------- */
@@ -150,13 +255,7 @@
     var lastShift = shifts[shifts.length - 1] || null;
     var lastFill = fills[fills.length - 1] || null;
 
-    /* ТО: считаем от показаний счётчика на последнем ТО */
-    var tos = CALC.servicesOf(u.id).filter(function (s) { return s.kind === 'to'; });
-    var lastTo = tos[tos.length - 1] || null;
-    var every = U.num(u.serviceEvery);
-    var sinceTo = lastTo && lastTo.meter != null ? meterNow - U.num(lastTo.meter) : meterNow - U.num(u.meterStart);
-    var leftTo = every > 0 ? every - sinceTo : null;
-    var warnAt = every * (U.num(DB.data.settings.serviceWarnPct) || 10) / 100;
+    var svc = CALC.serviceStates(u, meterNow);
 
     var st = {
       unit: u,
@@ -174,12 +273,9 @@
       lastShift: lastShift,
       lastFill: lastFill,
       idleDays: lastShift ? U.diffDays(lastShift.date, U.today()) : null,
-      service: {
-        every: every, last: lastTo, since: sinceTo, left: leftTo,
-        overdue: every > 0 && leftTo < 0,
-        soon: every > 0 && leftTo >= 0 && leftTo <= warnAt,
-        pct: every > 0 ? Math.max(0, Math.min(1, sinceTo / every)) : null
-      }
+      services: svc,
+      service: svc[0] || NO_SERVICE,
+      leaks: CALC.leaks(u)
     };
     cache[k] = st;
     return st;
@@ -202,6 +298,9 @@
       fillCount++;
       if (f.source === 'tank') filledTank += U.num(f.liters); else filledAzs += U.num(f.liters);
     });
+    var drained = 0;
+    CALC.fuelOf(u.id, from, to, 'drain').forEach(function (f) { drained += U.num(f.liters); });
+
     var checks = CALC.checks(u, from, to).filter(function (c) { return c.hasBase; });
     var deviation = checks.reduce(function (a, c) { return a + c.deviation; }, 0);
 
@@ -216,17 +315,24 @@
       fillCount: fillCount, money: money, serviceCost: serviceCost,
       over: filled - norm,                       // залито сверх нормы
       deviation: deviation,                      // недостача по замерам (минус — плохо)
+      drained: drained,                          // зафиксированные сливы
       checkCount: checks.length,
       actualRate: CALC.rateOf(u, filled, work),  // фактический расход
       normRate: U.num(u.norm)
     };
     r.rateDiff = r.actualRate != null ? r.actualRate - r.normRate : null;
+    /* во что обошёлся моточас (километр): топливо плюс ремонты */
+    r.costTotal = money + serviceCost;
+    r.costPerWork = work > 0 ? r.costTotal / work : null;
+    /* потеряно всего: явные сливы плюс необъяснённая недостача по замерам */
+    r.lost = drained + (checks.length ? Math.max(0, -deviation) : 0);
     /* «перерасход» — то, что подсвечиваем красным.
        Мелкие расхождения — это погрешность замера, а не воровство:
        считаем проблемой недостачу больше 3% нормы и больше 15 литров. */
     var limit = Math.max(15, norm * 0.03);
-    r.problem = r.checkCount ? (-r.deviation > limit) : (work > 0 && r.over > Math.max(25, norm * 0.08));
-    r.problemLiters = r.checkCount ? -r.deviation : r.over;
+    r.problem = drained > 0 ||
+      (r.checkCount ? (-r.deviation > limit) : (work > 0 && r.over > Math.max(25, norm * 0.08)));
+    r.problemLiters = (r.checkCount || drained) ? r.lost : r.over;
     r.problemLimit = limit;
     cache[k] = r;
     return r;
@@ -239,15 +345,16 @@
     });
     var last = checks[checks.length - 1] || null;
     var base = last ? { date: last.date, liters: U.num(last.liters) } : { date: null, liters: 0 };
-    var intake = 0, out = 0;
+    var intake = 0, out = 0, drained = 0;
     DB.data.fuel.forEach(function (f) {
       if (!CALC.inRange(f.date, null, upto)) return;
       if (base.date && f.date <= base.date) return;
       if (f.type === 'intake') intake += U.num(f.liters);
       if (f.type === 'fill' && f.source === 'tank') out += U.num(f.liters);
+      if (f.type === 'drain' && !f.unitId) drained += U.num(f.liters);
     });
     var vol = U.num(DB.data.settings.tankVolume);
-    var left = base.liters + intake - out;
+    var left = base.liters + intake - out - drained;
 
     /* отклонения по всем замерам склада */
     var all = DB.data.fuel.filter(function (f) { return f.type === 'tankcheck'; });
@@ -255,20 +362,21 @@
     all.forEach(function (c, i) {
       var prev = i > 0 ? all[i - 1] : null;
       var start = prev ? { date: prev.date, liters: U.num(prev.liters) } : { date: null, liters: 0 };
-      var inn = 0, o = 0;
+      var inn = 0, o = 0, dr = 0;
       DB.data.fuel.forEach(function (f) {
         if (f.date > c.date) return;
         if (start.date && f.date <= start.date) return;
         if (f.type === 'intake') inn += U.num(f.liters);
         if (f.type === 'fill' && f.source === 'tank') o += U.num(f.liters);
+        if (f.type === 'drain' && !f.unitId) dr += U.num(f.liters);
       });
-      var expected = start.liters + inn - o;
+      var expected = start.liters + inn - o - dr;
       rows.push({ id: c.id, date: c.date, found: U.num(c.liters), expected: expected,
         deviation: U.num(c.liters) - expected, hasBase: !!prev, note: c.note || '' });
     });
 
     return {
-      left: left, base: base, intake: intake, out: out,
+      left: left, base: base, intake: intake, out: out, drained: drained,
       volume: vol, pct: vol > 0 ? Math.max(0, Math.min(1, left / vol)) : null,
       checks: rows, lastCheck: rows[rows.length - 1] || null,
       deviationTotal: rows.reduce(function (a, c) { return a + (c.hasBase ? c.deviation : 0); }, 0)
@@ -280,10 +388,10 @@
     var units = DB.data.units;
     var res = {
       from: from, to: to,
-      filled: 0, money: 0, norm: 0, over: 0, deviation: 0,
+      filled: 0, money: 0, norm: 0, over: 0, deviation: 0, drained: 0, lost: 0,
       workHours: 0, workKm: 0, shiftDays: 0, fillCount: 0,
       intake: 0, intakeMoney: 0, serviceCost: 0,
-      rows: [], problems: [], serviceSoon: [], serviceOverdue: [], idle: []
+      rows: [], problems: [], serviceSoon: [], serviceOverdue: [], idle: [], leaks: []
     };
     units.forEach(function (u) {
       var p = CALC.unitPeriod(u, from, to);
@@ -292,7 +400,12 @@
       res.money += p.money;
       res.norm += p.norm;
       res.deviation += p.deviation;
+      res.drained += p.drained;
+      res.lost += p.lost;
       res.fillCount += p.fillCount;
+      CALC.leaks(u, from, to).forEach(function (l) {
+        res.leaks.push({ unit: u, leak: l });
+      });
       res.shiftDays += p.days;
       res.serviceCost += p.serviceCost;
       if (u.meter === 'km') res.workKm += p.work; else res.workHours += p.work;
@@ -312,6 +425,7 @@
         res.intakeMoney += U.num(f.sum);
       }
     });
+    res.leaks.sort(function (a, b) { return a.leak.date < b.leak.date ? 1 : -1; });
     res.problems.sort(function (a, b) { return b.problemLiters - a.problemLiters; });
     res.serviceOverdue.sort(function (a, b) { return a.service.left - b.service.left; });
     res.serviceSoon.sort(function (a, b) { return a.service.left - b.service.left; });
@@ -323,12 +437,13 @@
     var m = {};
     var get = function (k) {
       return m[k] || (m[k] = { filled: 0, money: 0, intake: 0, intakeMoney: 0,
-        workHours: 0, workKm: 0, norm: 0, deviation: 0, serviceCost: 0 });
+        workHours: 0, workKm: 0, norm: 0, deviation: 0, drained: 0, serviceCost: 0 });
     };
     DB.data.fuel.forEach(function (f) {
       var k = U.monthKey(f.date);
       if (f.type === 'fill') { get(k).filled += U.num(f.liters); get(k).money += U.num(f.sum); }
       if (f.type === 'intake') { get(k).intake += U.num(f.liters); get(k).intakeMoney += U.num(f.sum); }
+      if (f.type === 'drain') get(k).drained += U.num(f.liters);
     });
     DB.data.shifts.forEach(function (s) {
       var u = DB.unit(s.unitId);
