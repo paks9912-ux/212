@@ -16,7 +16,7 @@ JS[NAMES.indexOf('app')] = JS[NAMES.indexOf('app')].replace(
 );
 
 const tabs = `
-<nav class="tabbar">
+<nav class="nav">
   <a href="#/"      data-tab="home"><span id="i-home"></span><span>Обзор</span></a>
   <a href="#/units" data-tab="units"><span id="i-units"></span><span>Техника</span></a>
   <a href="#/tank"  data-tab="tank"><span id="i-tank"></span><span>Топливо</span></a>
@@ -45,12 +45,12 @@ if (artifactIdx >= 0) {
 } else {
   const out = path.join(root, 'toplivo-standalone.html');
   fs.writeFileSync(out, `<!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="auto">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Топливо — учёт заправок техники</title>
-<meta name="theme-color" content="#f2f2f7" id="theme-color">
+<meta name="theme-color" content="#0c0e11" id="theme-color">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Топливо">

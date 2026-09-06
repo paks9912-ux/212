@@ -8,6 +8,7 @@
   V.spark = function (u, segs) {
     var good = segs.filter(function (s) { return s.rate != null; }).slice(-12);
     if (good.length < 2) return '';
+
     /* шкала не от нуля: около нормы разница в 5% иначе не видна */
     var hi = u.norm > 0 ? u.norm : 0, lo = u.norm > 0 ? u.norm : Infinity;
     good.forEach(function (s) { hi = Math.max(hi, s.rate); lo = Math.min(lo, s.rate); });
@@ -19,15 +20,15 @@
     var bars = good.map(function (s) {
       var over = u.norm > 0 && s.rate > u.norm * (1 + lim / 100);
       return '<div class="b' + (over ? ' over' : '') + '" style="height:' + pos(s.rate).toFixed(1) + '%" ' +
-        'title="' + U.rate(s.rate, u.meter) + '"><i style="height:100%"></i></div>';
+        'title="' + U.rate(s.rate, u.meter) + '"></div>';
     }).join('');
 
-    var normLine = u.norm > 0
+    var norm = u.norm > 0
       ? '<div style="position:absolute;left:0;right:0;bottom:' + pos(u.norm).toFixed(1) + '%;' +
         'border-top:1.5px dashed var(--text-2);pointer-events:none;z-index:2"></div>'
       : '';
 
-    return '<div style="position:relative"><div class="spark">' + bars + '</div>' + normLine + '</div>' +
+    return '<div style="position:relative"><div class="spark">' + bars + '</div>' + norm + '</div>' +
       '<div class="spark-x"><span>' + U.fmtDate(good[0].to.date) + '</span>' +
       (u.norm > 0 ? '<span>пунктир — норма ' + U.rate(u.norm, u.meter) + '</span>' : '') +
       '<span>' + U.fmtDate(good[good.length - 1].to.date) + '</span></div>';
@@ -36,112 +37,107 @@
   /* ============ КАРТОЧКА ТЕХНИКИ ============ */
   V.unitDetail = function (id) {
     var u = DB.unit(id);
-    if (!u) return V.topbarBack('Техника') + '<div class="wrap">' +
+    if (!u) return V.topbar('Техника', '', true) + '<div class="wrap">' +
       V.empty('🤷', 'Техника не найдена', 'Возможно, она была удалена.') + '</div>';
 
     var s = CALC.unit(u);
     var mk = U.monthKey(U.today());
     var m = CALC.month(mk).byUnit[u.id] || { liters: 0, cost: 0, run: 0 };
 
-    var h = V.topbarBack(u.name, '<button data-act="edit-unit" data-id="' + u.id + '" style="font-size:16px">Изменить</button>');
+    var h = V.topbar(u.name, '<button data-act="edit-unit" data-id="' + u.id + '">Изменить</button>', true);
     h += '<div class="wrap">';
-    h += '<h1 class="big" style="margin-bottom:6px">' + esc(u.name) + '</h1>';
-    h += '<div style="margin-bottom:14px">' + V.devBadge(s) + ' ' +
-      '<span class="badge">' + esc(U.kind(u.kind).name) + '</span> ' +
-      (u.plate ? '<span class="badge">' + esc(u.plate) + '</span> ' : '') +
-      '<span class="badge">' + esc(U.fuel(u.fuel).short) + '</span></div>';
+    h += V.hdr(U.kind(u.kind).name + (u.plate ? ' · ' + u.plate : ''), u.name);
+    h += '<div class="pills" style="margin:-8px 0 12px">' + V.devPill(s) +
+      '<span class="pill">' + esc(U.fuel(u.fuel).short) + '</span>' +
+      (u.tank ? '<span class="pill">бак ' + U.liters(u.tank) + '</span>' : '') + '</div>';
 
-    /* главное число — фактический расход */
-    h += '<div class="hero">' +
-      '<div class="lbl">Средний расход</div>' +
-      '<div class="amt num">' + (s.avg != null ? U.rate(s.avg, u.meter) : '—') + '</div>' +
-      '<div class="delta">' +
-      (u.norm > 0 ? 'норма ' + U.rate(u.norm, u.meter) : 'норма не задана') +
+    /* главное — фактический расход */
+    h += '<div class="panel">' +
+      '<div class="eyebrow">Средний расход</div>' +
+      '<div class="metric num">' + (s.avg != null ? U.rate(s.avg, u.meter, true) : '—') +
+      '<small>' + U.rateUnit(u.meter) + '</small></div>' +
+      '<div class="sub">' + (u.norm > 0 ? 'норма ' + U.rate(u.norm, u.meter) : 'норма не задана') +
       (s.dev != null ? ' · отклонение ' + U.pct(s.dev, true) : '') + '</div>' +
+      V.devbar(s.dev) +
       (s.extraLiters > 0.5
-        ? '<div class="delta" style="color:var(--red);font-weight:600">лишних ' + U.liters(s.extraLiters) +
-          ' ≈ ' + U.moneyShort(s.extraCost) + ' за всё время наблюдений</div>'
+        ? '<div class="sub bad">лишних ' + U.liters(s.extraLiters) + ' ≈ ' + U.moneyShort(s.extraCost) + ' за всё время</div>'
         : (s.extraLiters < -0.5 && s.avg != null
-          ? '<div class="delta" style="color:var(--accent);font-weight:600">экономия ' + U.liters(-s.extraLiters) +
-            ' ≈ ' + U.moneyShort(-s.extraCost) + '</div>' : '')) +
+          ? '<div class="sub good">экономия ' + U.liters(-s.extraLiters) + ' ≈ ' + U.moneyShort(-s.extraCost) + '</div>' : '')) +
       V.spark(u, s.segments) +
       '</div>';
 
     h += '<div class="btn-row">' +
       '<button class="btn" data-act="new-fill" data-unit="' + u.id + '">Заправка</button>' +
-      (s.last ? '<button class="btn sec" data-act="repeat-fill" data-unit="' + u.id + '">Как в прошлый раз</button>' : '') +
+      (s.last ? '<button class="btn sec" data-act="repeat-fill" data-unit="' + u.id + '">Повторить</button>' : '') +
       '</div>';
 
-    h += '<div class="stats">' +
-      '<div class="stat"><div class="k">За этот месяц</div><div class="v num">' + U.liters(m.liters) + '</div>' +
-      '<div class="k" style="margin-top:3px">' + U.money(m.cost) + '</div></div>' +
-      '<div class="stat"><div class="k">Счётчик</div><div class="v num sm">' + U.meter(s.meterNow, u.meter) + '</div>' +
-      '<div class="k" style="margin-top:3px">' + (s.perDay > 0 ? U.dec(s.perDay, 1) + ' ' + U.meterUnit(u.meter) + ' в день' : 'нет данных') + '</div></div>' +
-      '<div class="stat"><div class="k">Всего залито</div><div class="v num sm">' + U.liters(s.totalLiters) + '</div>' +
-      '<div class="k" style="margin-top:3px">' + U.money(s.totalCost) + '</div></div>' +
-      '<div class="stat"><div class="k">Последняя заправка</div><div class="v num sm">' +
-      (s.last ? U.fmtDate(s.last.date) : '—') + '</div>' +
-      '<div class="k" style="margin-top:3px">' + (s.idleDays != null ? U.days(s.idleDays) + ' назад' : '') + '</div></div>' +
+    h += '<div class="grid-2">' +
+      tile('За этот месяц', U.liters(m.liters), U.money(m.cost)) +
+      tile('Счётчик', U.meter(s.meterNow, u.meter),
+        s.perDay > 0 ? U.dec(s.perDay, 1) + ' ' + U.meterUnit(u.meter) + ' в день' : 'нет данных') +
+      tile('Всего залито', U.liters(s.totalLiters), U.money(s.totalCost)) +
+      tile('Последняя заправка', s.last ? U.fmtDate(s.last.date) : '—',
+        s.idleDays != null ? (s.idleDays === 0 ? 'сегодня' : U.days(s.idleDays) + ' назад') : '') +
       '</div>';
 
     /* обслуживание */
     if (s.service) {
       var sv = s.service;
       var pct = Math.max(0, Math.min(100, sv.since / sv.every * 100));
-      h += '<h2 class="sec">Обслуживание</h2><div class="card pad">' +
-        '<div class="kv big"><span class="k">' + (sv.due ? 'ТО просрочено' : 'До ТО') + '</span>' +
-        '<span class="v num" style="color:' + (sv.due ? 'var(--red)' : sv.soon ? 'var(--orange)' : 'var(--text)') + '">' +
+      h += '<h2 class="sec"><span>Обслуживание</span></h2><div class="panel">' +
+        '<div class="panel-hd"><span class="eyebrow">' + (sv.due ? 'ТО просрочено' : 'До ТО') + '</span>' +
+        '<span class="num" style="font-size:21px;font-weight:800;color:' +
+        (sv.due ? 'var(--red)' : sv.soon ? 'var(--amber)' : 'var(--text)') + '">' +
         U.meter(Math.abs(sv.left), u.meter) + '</span></div>' +
-        '<div class="bar ' + (sv.due ? 'bad' : sv.soon ? 'warn' : '') + '"><i style="width:' + pct.toFixed(0) + '%"></i></div>' +
-        '<div class="hint" style="padding:10px 0 0">Наработка с последнего ТО — ' + U.meter(sv.since, u.meter) +
+        '<div class="progress ' + (sv.due ? 'bad' : '') + '"><i style="width:' + pct.toFixed(0) + '%"></i></div>' +
+        '<div class="note" style="padding:10px 0 0">Наработка с последнего ТО — ' + U.meter(sv.since, u.meter) +
         ' из ' + U.meter(sv.every, u.meter) +
         (sv.days != null && !sv.due ? '. При нынешнем темпе это примерно ' + U.days(sv.days) + '.' : '.') + '</div>' +
-        '<button class="btn sec sm" style="width:100%;margin-top:12px" data-act="service-done" data-id="' + u.id + '">Отметить ТО сегодня</button>' +
+        '<button class="btn sec sm" style="margin-top:12px;width:100%" data-act="service-done" data-id="' + u.id + '">Отметить ТО сегодня</button>' +
         '</div>';
     }
 
-    /* сигналы по этой единице */
     if (s.alerts.length) {
-      h += '<h2 class="sec">Замечания</h2><div class="list">';
+      h += '<h2 class="sec"><span>Замечания</span></h2><div class="stack">';
       s.alerts.forEach(function (a) {
-        h += '<div class="alert' + (a.type === 'overrun' || a.type === 'service' ? ' bad' : '') + '">' +
-          '<span class="ic">⚠️</span><span class="tx"><span>' + esc(a.text) + '</span></span></div>';
+        h += '<div class="ticket ' + (a.type === 'overrun' || a.type === 'service' ? 'bad' : 'warn') + '">' +
+          '<span class="t-ic">⚠️</span><span class="t-main">' +
+          '<span class="t-sub" style="white-space:normal;margin:0;font-size:14px;color:var(--text)">' + esc(a.text) + '</span></span></div>';
       });
       h += '</div>';
     }
 
-    /* история заправок */
-    h += '<h2 class="sec">Заправки<span class="act">' + s.count + '</span></h2>';
+    h += '<h2 class="sec"><span>Заправки</span><span class="act">' + s.count + '</span></h2>';
     if (!s.count) {
       h += V.empty('⛽', 'Заправок ещё не было',
         'Первая заправка задаёт точку отсчёта — расход посчитается со второй.',
-        '<div style="margin-top:16px"><button class="btn" data-act="new-fill" data-unit="' + u.id + '">Записать заправку</button></div>');
+        '<div style="margin-top:18px"><button class="btn" data-act="new-fill" data-unit="' + u.id + '">Записать заправку</button></div>');
     } else {
-      h += '<div class="list">';
-      s.fills.slice().reverse().slice(0, 40).forEach(function (f) {
-        h += V.fillRow(f, { noIcon: true });
-      });
-      h += '</div>';
-      h += '<div class="hint">Расход считается от полной заправки до полной. Строки без расхода — те, где счётчик не рос или бак заливали не до полного.</div>';
+      h += '<div class="stack">';
+      s.fills.slice().reverse().slice(0, 40).forEach(function (f) { h += V.fillTicket(f, { noIcon: true }); });
+      h += '</div><div class="note">Расход считается от полной заправки до полной. Строки без расхода — те, где счётчик не рос или бак заливали не до полного.</div>';
     }
 
     if (u.note) {
-      h += '<h2 class="sec">Заметка</h2><div class="card pad" style="font-size:15px;color:var(--text-2)">' + esc(u.note) + '</div>';
+      h += '<h2 class="sec"><span>Заметка</span></h2><div class="panel" style="font-size:14.5px;color:var(--text-2);line-height:1.5">' + esc(u.note) + '</div>';
     }
 
-    h += '<div class="btn-row" style="margin-top:22px">' +
+    h += '<div class="btn-row" style="margin-top:20px">' +
       '<button class="btn sec" data-act="edit-unit" data-id="' + u.id + '">Изменить</button>' +
       '<button class="btn danger" data-act="del-unit" data-id="' + u.id + '">Удалить</button></div>';
 
     return h + '</div>';
+
+    function tile(k, v, n) {
+      return '<div class="tile"><div class="k">' + esc(k) + '</div><div class="v num">' + v + '</div>' +
+        (n ? '<div class="n">' + esc(n) + '</div>' : '') + '</div>';
+    }
   };
 
   var F = {};
 
-  /* предыдущая заправка этой же техники */
   function prevFill(u, f) {
-    var list = DB.fillsOf(u.id);
-    var i = -1;
+    var list = DB.fillsOf(u.id), i = -1;
     for (var k = 0; k < list.length; k++) if (list[k].id === f.id) i = k;
     return i > 0 ? list[i - 1] : null;
   }
@@ -172,24 +168,23 @@
       forecast = Math.round(U.num(prev.meter) + s.perDay * days);
     }
 
-    var h = '<div class="list">';
-    h += '<div class="field"><label>Техника</label><select id="f-unit">' +
+    var h = '<div class="form">';
+    h += '<div class="fld"><label>Техника</label><select id="f-unit">' +
       units.map(function (x) {
         return '<option value="' + x.id + '"' + (x.id === u.id ? ' selected' : '') + '>' + esc(x.name) + '</option>';
       }).join('') + '</select></div>';
-    h += '<div class="field"><label>Литры</label>' +
-      '<input id="f-lit" type="text" inputmode="decimal" placeholder="0" style="font-size:22px;font-weight:600" value="' +
+    h += '<div class="fld big"><label>Литры</label><input id="f-lit" type="text" inputmode="decimal" placeholder="0" value="' +
       (f ? String(f.liters).replace('.', ',') : (preset ? String(preset.liters).replace('.', ',') : '')) + '"><span class="unit">л</span></div>';
-    h += '<div class="field"><label>Цена за литр</label><input id="f-price" type="text" inputmode="decimal" value="' +
-      (price ? String(price).replace('.', ',') : '') + '"><span class="unit">' + esc(U.sym()) + '</span></div>';
-    h += '<div class="field"><label>Сумма</label><input id="f-cost" type="text" inputmode="decimal" placeholder="0"><span class="unit">' + esc(U.sym()) + '</span></div>';
-    h += '<div class="field"><label>Счётчик</label><input id="f-meter" type="text" inputmode="numeric" placeholder="' +
+    h += '<div class="fld"><label>Счётчик</label><input id="f-meter" type="text" inputmode="numeric" placeholder="' +
       (prev ? 'было ' + U.int(prev.meter) : U.meterName(u.meter)) + '" value="' +
       (f && f.meter ? U.num(f.meter) : '') + '"><span class="unit" id="f-mu">' + U.meterUnit(u.meter) + '</span></div>';
-    h += '<div class="field"><label>Дата</label><input id="f-date" type="date" value="' + (f ? f.date : U.today()) + '"></div>';
+    h += '<div class="fld"><label>Цена за литр</label><input id="f-price" type="text" inputmode="decimal" value="' +
+      (price ? U.int(price) : '') + '"><span class="unit">' + esc(U.sym()) + '</span></div>';
+    h += '<div class="fld"><label>Сумма</label><input id="f-cost" type="text" inputmode="decimal" placeholder="0"><span class="unit">' + esc(U.sym()) + '</span></div>';
+    h += '<div class="fld"><label>Дата</label><input id="f-date" type="date" value="' + (f ? f.date : U.today()) + '"></div>';
     h += '</div>';
 
-    h += '<div class="chips" style="margin-top:12px;border-radius:var(--radius)">' +
+    h += '<div class="chips" style="margin-top:10px">' +
       '<button class="chip' + (source === 'tank' ? ' on' : '') + '" data-src="tank">Из бочки</button>' +
       '<button class="chip' + (source === 'station' ? ' on' : '') + '" data-src="station">АЗС</button>' +
       '<button class="chip' + (full ? ' on' : '') + '" data-full="1">До полного бака</button>' +
@@ -197,17 +192,15 @@
       (prev && prev.liters ? '<button class="chip" data-lit="' + prev.liters + '">Как в прошлый раз · ' + U.liters(prev.liters) + '</button>' : '') +
       '</div>';
 
-    h += '<div class="list" style="margin-top:12px">' +
-      '<div class="field"><label>Заправлял</label><input id="f-op" type="text" placeholder="имя водителя" value="' +
+    h += '<div class="panel" id="f-prev" style="margin-top:12px"></div>';
+
+    h += '<div class="form" style="margin-top:10px">' +
+      '<div class="fld"><label>Заправлял</label><input id="f-op" type="text" placeholder="имя водителя" value="' +
       esc(f ? f.operator || '' : (preset ? preset.operator || '' : '')) + '"></div>' +
-      '<div class="field col"><label>Заметка</label><textarea id="f-note" style="min-height:44px" placeholder="объект, смена, номер чека…">' +
+      '<div class="fld col"><label>Заметка</label><textarea id="f-note" placeholder="объект, смена, номер чека…">' +
       esc(f ? f.note || '' : '') + '</textarea></div></div>';
 
-    h += '<div class="card pad" id="f-prev" style="margin-top:14px"></div>';
-
-    if (f) {
-      h += '<button class="btn danger" style="margin-top:14px" data-del="' + f.id + '">Удалить заправку</button>';
-    }
+    if (f) h += '<button class="btn danger" style="margin-top:12px" data-del="' + f.id + '">Удалить заправку</button>';
 
     App.sheet({
       title: f ? 'Заправка' : 'Новая заправка',
@@ -215,8 +208,7 @@
       onOpen: function (bd) {
         var $ = function (sel) { return bd.querySelector(sel); };
         var litEl = $('#f-lit'), priceEl = $('#f-price'), costEl = $('#f-cost'), meterEl = $('#f-meter');
-        var srcEl = 'tank', fullEl = full;
-        srcEl = source;
+        var srcEl = source, fullEl = full;
 
         function cur() { return DB.unit($('#f-unit').value) || u; }
 
@@ -232,7 +224,6 @@
           var pv = f ? prevFill(cu, f) : cs.last;
           var out = [];
 
-          /* расход на участке */
           if (lit > 0 && meter > 0 && pv && U.num(pv.meter) > 0) {
             var run = meter - U.num(pv.meter);
             if (run > 0) {
@@ -242,13 +233,13 @@
                 var dev = (rate - cu.norm) / cu.norm * 100;
                 txt += '<br>Норма ' + U.rate(cu.norm, cu.meter) + ' — ' +
                   (dev > 0.5 ? '<b style="color:var(--red)">перерасход ' + U.pct(dev, true) + '</b>'
-                    : dev < -0.5 ? '<b style="color:var(--accent)">экономия ' + U.pct(-dev) + '</b>' : 'ровно по норме');
+                    : dev < -0.5 ? '<b style="color:var(--green)">экономия ' + U.pct(-dev) + '</b>' : 'ровно по норме');
               }
               out.push(txt);
             } else if (run < 0) {
               out.push('<b style="color:var(--red)">Счётчик меньше прошлого показания (' + U.int(pv.meter) + ')</b> — проверьте цифру');
             } else {
-              out.push('<b style="color:var(--orange)">Счётчик не изменился с прошлой заправки</b>');
+              out.push('<b style="color:var(--amber)">Счётчик не изменился с прошлой заправки</b>');
             }
           } else if (lit > 0 && !meter) {
             out.push('Без показания счётчика расход посчитать не получится — запись сохранится, но в статистику не войдёт.');
@@ -264,9 +255,9 @@
           }
           if (!fullEl) out.push('Заправка не до полного — расход посчитается на следующей полной.');
 
-          $('#f-prev').innerHTML = out.length
-            ? '<div style="font-size:14px;line-height:1.5;color:var(--text-2)">' + out.join('<br><br>') + '</div>'
-            : '<div style="font-size:14px;color:var(--text-2)">Введите литры и показание счётчика — приложение сразу покажет расход.</div>';
+          $('#f-prev').innerHTML = '<div style="font-size:14px;line-height:1.55;color:var(--text-2)">' +
+            (out.length ? out.join('<br><br>')
+              : 'Введите литры и показание счётчика — расход посчитается сразу.') + '</div>';
         }
         draw();
 
@@ -280,9 +271,8 @@
         });
         meterEl.addEventListener('input', draw);
         $('#f-unit').addEventListener('change', function () {
-          var cu = cur();
+          var cu = cur(), cs = CALC.unit(cu);
           $('#f-mu').textContent = U.meterUnit(cu.meter);
-          var cs = CALC.unit(cu);
           meterEl.placeholder = cs.last ? 'было ' + U.int(cs.last.meter) : U.meterName(cu.meter);
           if (!priceEl.value) priceEl.value = DB.price(cu.fuel) || '';
           draw();
@@ -345,9 +335,7 @@
         else {
           DB.addFill(patch);
           var seg = CALC.segmentOf(cu, DB.lastFill(cu.id).id);
-          U.toast(seg && seg.rate != null
-            ? 'Записано · расход ' + U.rate(seg.rate, cu.meter)
-            : 'Заправка записана');
+          U.toast(seg && seg.rate != null ? 'Записано · расход ' + U.rate(seg.rate, cu.meter) : 'Заправка записана');
         }
         App.render();
         return true;
@@ -364,37 +352,37 @@
     var sv = (u && u.service) || {};
     var cur = u ? CALC.unit(u) : null;
 
-    var h = '<div class="list">' +
-      '<div class="field"><label>Название</label><input id="u-name" placeholder="Самосвал №1" value="' + esc(u ? u.name : '') + '" autocomplete="off"></div>' +
-      '<div class="field"><label>Вид</label><select id="u-kind">' +
+    var h = '<div class="form">' +
+      '<div class="fld"><label>Название</label><input id="u-name" placeholder="Самосвал №1" value="' + esc(u ? u.name : '') + '" autocomplete="off"></div>' +
+      '<div class="fld"><label>Вид</label><select id="u-kind">' +
       U.KINDS.map(function (k) {
         return '<option value="' + k.code + '"' + (kind === k.code ? ' selected' : '') + '>' + k.ic + ' ' + esc(k.name) + '</option>';
       }).join('') + '</select></div>' +
-      '<div class="field"><label>Счётчик</label><select id="u-meter">' +
+      '<div class="fld"><label>Счётчик</label><select id="u-meter">' +
       [['km', 'Пробег, км'], ['mh', 'Моточасы']].map(function (t) {
         return '<option value="' + t[0] + '"' + (meter === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
       }).join('') + '</select></div>' +
-      '<div class="field"><label>Госномер</label><input id="u-plate" placeholder="не обязательно" value="' + esc(u ? u.plate || '' : '') + '"></div>' +
-      '<div class="field"><label>Топливо</label><select id="u-fuel">' +
+      '<div class="fld"><label>Госномер</label><input id="u-plate" placeholder="не обязательно" value="' + esc(u ? u.plate || '' : '') + '"></div>' +
+      '<div class="fld"><label>Топливо</label><select id="u-fuel">' +
       U.FUELS.map(function (x) {
         return '<option value="' + x.code + '"' + ((u ? u.fuel : st.fuel) === x.code ? ' selected' : '') + '>' + esc(x.name) + '</option>';
       }).join('') + '</select></div>' +
-      '<div class="field"><label>Норма</label><input id="u-norm" type="text" inputmode="decimal" placeholder="0" value="' +
+      '<div class="fld"><label>Норма</label><input id="u-norm" type="text" inputmode="decimal" placeholder="0" value="' +
       (u && u.norm ? String(u.norm).replace('.', ',') : '') + '"><span class="unit" id="u-nu">' + U.rateUnit(meter) + '</span></div>' +
-      '<div class="field"><label>Объём бака</label><input id="u-tank" type="text" inputmode="decimal" placeholder="не обязательно" value="' +
+      '<div class="fld"><label>Объём бака</label><input id="u-tank" type="text" inputmode="decimal" placeholder="не обязательно" value="' +
       (u && u.tank ? U.num(u.tank) : '') + '"><span class="unit">л</span></div>' +
       '</div>' +
-      '<div class="hint">Норма — паспортный или ваш собственный расход. По ней приложение считает перерасход в литрах и деньгах. Объём бака нужен, чтобы ловить заправки «больше, чем влезает».</div>';
+      '<div class="note">Норма — паспортный или ваш собственный расход. По ней считается перерасход в литрах и деньгах. Объём бака нужен, чтобы ловить заправки «больше, чем влезает».</div>';
 
-    h += '<h2 class="sec">Обслуживание</h2><div class="list">' +
-      '<div class="field"><label>ТО каждые</label><input id="u-svc" type="text" inputmode="numeric" placeholder="не следить" value="' +
+    h += '<h2 class="sec"><span>Обслуживание</span></h2><div class="form">' +
+      '<div class="fld"><label>ТО каждые</label><input id="u-svc" type="text" inputmode="numeric" placeholder="не следить" value="' +
       (sv.every ? U.num(sv.every) : '') + '"><span class="unit" id="u-su">' + U.meterUnit(meter) + '</span></div>' +
-      '<div class="field"><label>Последнее ТО</label><input id="u-svcm" type="text" inputmode="numeric" placeholder="' +
+      '<div class="fld"><label>Последнее ТО</label><input id="u-svcm" type="text" inputmode="numeric" placeholder="' +
       (cur && cur.meterNow ? 'сейчас ' + U.int(cur.meterNow) : 'показание счётчика') + '" value="' +
       (sv.lastMeter ? U.num(sv.lastMeter) : '') + '"><span class="unit" id="u-su2">' + U.meterUnit(meter) + '</span></div>' +
-      '</div><div class="hint">Приложение посчитает наработку с этого показания и предупредит заранее — с запасом в 15%.</div>';
+      '</div><div class="note">Приложение посчитает наработку с этого показания и предупредит заранее — с запасом в 15%.</div>';
 
-    h += '<div class="list" style="margin-top:12px"><div class="field col"><label>Заметка</label>' +
+    h += '<div class="form" style="margin-top:10px"><div class="fld col"><label>Заметка</label>' +
       '<textarea id="u-note" placeholder="объект, водитель, особенности…">' + esc(u ? u.note || '' : '') + '</textarea></div></div>';
 
     App.sheet({
@@ -408,10 +396,7 @@
           bd.querySelector('#u-su').textContent = U.meterUnit(m);
           bd.querySelector('#u-su2').textContent = U.meterUnit(m);
         }
-        kindEl.addEventListener('change', function () {
-          meterEl.value = U.kind(kindEl.value).meter;
-          units();
-        });
+        kindEl.addEventListener('change', function () { meterEl.value = U.kind(kindEl.value).meter; units(); });
         meterEl.addEventListener('change', units);
         if (!u) setTimeout(function () { bd.querySelector('#u-name').focus(); }, 380);
       },
@@ -444,18 +429,18 @@
   /* ============ ПРИХОД ТОПЛИВА ============ */
   F.supplyForm = function () {
     var st = DB.data.settings;
-    var h = '<div class="list">' +
-      '<div class="field"><label>Топливо</label><select id="s-fuel">' +
+    var h = '<div class="form">' +
+      '<div class="fld"><label>Топливо</label><select id="s-fuel">' +
       U.FUELS.map(function (x) {
         return '<option value="' + x.code + '"' + (st.fuel === x.code ? ' selected' : '') + '>' + esc(x.name) + '</option>';
       }).join('') + '</select></div>' +
-      '<div class="field"><label>Литры</label><input id="s-lit" type="text" inputmode="decimal" placeholder="0" style="font-size:22px;font-weight:600"><span class="unit">л</span></div>' +
-      '<div class="field"><label>Цена за литр</label><input id="s-price" type="text" inputmode="decimal" value="' +
+      '<div class="fld big"><label>Литры</label><input id="s-lit" type="text" inputmode="decimal" placeholder="0"><span class="unit">л</span></div>' +
+      '<div class="fld"><label>Цена за литр</label><input id="s-price" type="text" inputmode="decimal" value="' +
       (DB.price(st.fuel) || '') + '"><span class="unit">' + esc(U.sym()) + '</span></div>' +
-      '<div class="field"><label>Сумма</label><input id="s-cost" type="text" inputmode="decimal" placeholder="0"><span class="unit">' + esc(U.sym()) + '</span></div>' +
-      '<div class="field"><label>Дата</label><input id="s-date" type="date" value="' + U.today() + '"></div>' +
-      '<div class="field"><label>Поставщик</label><input id="s-note" placeholder="не обязательно"></div>' +
-      '</div><div class="card pad" id="s-prev" style="margin-top:14px"></div>';
+      '<div class="fld"><label>Сумма</label><input id="s-cost" type="text" inputmode="decimal" placeholder="0"><span class="unit">' + esc(U.sym()) + '</span></div>' +
+      '<div class="fld"><label>Дата</label><input id="s-date" type="date" value="' + U.today() + '"></div>' +
+      '<div class="fld"><label>Поставщик</label><input id="s-note" placeholder="не обязательно"></div>' +
+      '</div><div class="panel" id="s-prev" style="margin-top:12px"></div>';
 
     App.sheet({
       title: 'Приход топлива', html: h, save: 'Внести',
@@ -465,11 +450,10 @@
           var l = U.num(lit.value), p = U.num(pr.value);
           if (l > 0 && p > 0) cost.value = U.int(l * p);
           var t = CALC.tank(bd.querySelector('#s-fuel').value);
-          bd.querySelector('#s-prev').innerHTML = '<div style="font-size:14px;line-height:1.5;color:var(--text-2)">' +
+          bd.querySelector('#s-prev').innerHTML = '<div style="font-size:14px;line-height:1.55;color:var(--text-2)">' +
             'Сейчас в бочке <b>' + U.liters(t.balance) + '</b>' +
             (l > 0 ? '<br>После прихода станет <b>' + U.liters(t.balance + l) + '</b>' +
-              (t.perDay > 0 ? ' — примерно на ' + U.days((t.balance + l) / t.perDay) : '') : '') +
-            '</div>';
+              (t.perDay > 0 ? ' — примерно на ' + U.days((t.balance + l) / t.perDay) : '') : '') + '</div>';
         }
         draw();
         lit.addEventListener('input', draw);
@@ -506,16 +490,16 @@
     var fuels = CALC.tankFuels();
     var fuel = fuels.length ? fuels[0] : st.fuel;
 
-    var h = '<div class="hint" style="padding:0 4px 14px">Замерьте остаток в бочке щупом или счётчиком и впишите фактическое число. Приложение сравнит его с учётом и покажет недостачу.</div>' +
-      '<div class="list">' +
-      '<div class="field"><label>Топливо</label><select id="k-fuel">' +
+    var h = '<div class="note" style="padding:0 2px 12px">Замерьте остаток в бочке щупом или счётчиком и впишите фактическое число. Приложение сравнит его с учётом и покажет недостачу.</div>' +
+      '<div class="form">' +
+      '<div class="fld"><label>Топливо</label><select id="k-fuel">' +
       U.FUELS.map(function (x) {
         return '<option value="' + x.code + '"' + (fuel === x.code ? ' selected' : '') + '>' + esc(x.name) + '</option>';
       }).join('') + '</select></div>' +
-      '<div class="field"><label>По факту</label><input id="k-lit" type="text" inputmode="decimal" placeholder="0" style="font-size:22px;font-weight:600"><span class="unit">л</span></div>' +
-      '<div class="field"><label>Дата</label><input id="k-date" type="date" value="' + U.today() + '"></div>' +
-      '<div class="field col"><label>Заметка</label><textarea id="k-note" style="min-height:44px" placeholder="кто замерял, чем…"></textarea></div>' +
-      '</div><div class="card pad" id="k-prev" style="margin-top:14px"></div>';
+      '<div class="fld big"><label>По факту</label><input id="k-lit" type="text" inputmode="decimal" placeholder="0"><span class="unit">л</span></div>' +
+      '<div class="fld"><label>Дата</label><input id="k-date" type="date" value="' + U.today() + '"></div>' +
+      '<div class="fld col"><label>Заметка</label><textarea id="k-note" placeholder="кто замерял, чем…"></textarea></div>' +
+      '</div><div class="panel" id="k-prev" style="margin-top:12px"></div>';
 
     App.sheet({
       title: 'Замер остатка', html: h, save: 'Записать',
@@ -531,9 +515,9 @@
               : (d < 0
                 ? '<br><b style="color:var(--red)">Недостача ' + U.liters(-d) + '</b> ≈ ' +
                   U.money(-d * DB.price(bd.querySelector('#k-fuel').value))
-                : '<br><b style="color:var(--accent)">Излишек ' + U.liters(d) + '</b> — возможно, забыли внести приход');
+                : '<br><b style="color:var(--green)">Излишек ' + U.liters(d) + '</b> — возможно, забыли внести приход');
           }
-          bd.querySelector('#k-prev').innerHTML = '<div style="font-size:14px;line-height:1.5;color:var(--text-2)">' + txt + '</div>';
+          bd.querySelector('#k-prev').innerHTML = '<div style="font-size:14px;line-height:1.55;color:var(--text-2)">' + txt + '</div>';
         }
         draw();
         lit.addEventListener('input', draw);
@@ -559,11 +543,11 @@
   /* ============ ОТЧЁТ ЗА МЕСЯЦ ============ */
   F.reportSheet = function (key) {
     var text = CALC.report(key);
-    var h = '<div class="hint" style="padding:0 4px 12px">Короткая сводка за месяц — можно отправить в мессенджер или скопировать в отчёт.</div>' +
+    var h = '<div class="note" style="padding:0 2px 12px">Короткая сводка за месяц — отправьте в мессенджер или скопируйте в отчёт.</div>' +
       '<button class="btn" id="r-send">Отправить</button>' +
       '<button class="btn sec" style="margin-top:8px" id="r-csv">Выгрузить CSV за всё время</button>' +
-      '<div class="list" style="margin-top:12px"><div class="field col">' +
-      '<textarea id="r-text" readonly style="min-height:260px;font-size:13px;line-height:1.5"></textarea></div></div>';
+      '<div class="form" style="margin-top:12px"><div class="fld col">' +
+      '<textarea id="r-text" readonly style="min-height:250px;font-size:13px;line-height:1.6"></textarea></div></div>';
     App.sheet({
       title: U.monthName(key), html: h, save: null,
       onOpen: function (bd) {
@@ -579,17 +563,15 @@
 
   /* ============ ЗАГРУЗКА БАЗЫ ============ */
   F.importSheet = function () {
-    var h = '<div class="hint" style="padding:0 4px 14px">Выберите резервную копию <b>.json</b> или таблицу <b>.csv</b> с заправками. Можно вставить текст ниже.</div>' +
-      '<div class="list">' +
-      '<button class="row tap" id="pick"><span class="grow"><span class="ttl" style="color:var(--accent)">Выбрать файл</span>' +
-      '<span class="sub">.json или .csv</span></span></button></div>' +
+    var h = '<div class="note" style="padding:0 2px 12px">Выберите резервную копию <b>.json</b> или таблицу <b>.csv</b> с заправками. Можно вставить текст ниже.</div>' +
+      '<button class="btn sec" id="pick">Выбрать файл</button>' +
       '<input type="file" id="file" accept=".json,.csv,.txt,application/json,text/csv" style="display:none">' +
-      '<h2 class="sec">Или вставьте текст</h2>' +
-      '<div class="list"><div class="field col"><textarea id="paste" style="min-height:130px;font-size:14px" ' +
+      '<div class="form" style="margin-top:12px"><div class="fld col"><label>Или вставьте текст</label>' +
+      '<textarea id="paste" style="min-height:120px;font-size:13px" ' +
       'placeholder="Самосвал №1;01.09.2026;180;12300;190500;ДТ;бочка;до полного;объект Восток"></textarea></div></div>' +
-      '<div class="hint">Столбцы CSV: <b>Техника;Дата;Литры;Цена;Счётчик;Топливо;Источник;До полного;Заметка</b>. ' +
+      '<div class="note">Столбцы CSV: <b>Техника;Дата;Литры;Цена;Счётчик;Топливо;Источник;До полного;Заметка</b>. ' +
       'Разделитель — точка с запятой, строка заголовков не обязательна. Техника создаётся автоматически, если её ещё нет.</div>' +
-      '<h2 class="sec">Как загружать</h2>' +
+      '<h2 class="sec"><span>Как загружать</span></h2>' +
       '<div class="seg" id="mode"><button data-m="merge" class="on">Добавить к текущим</button>' +
       '<button data-m="replace">Заменить всё</button></div>';
 
@@ -645,12 +627,12 @@
 
   /* ============ КОД-ПАРОЛЬ ============ */
   F.pinSheet = function () {
-    var h = '<div class="hint" style="padding:0 4px 14px">Код из 4 цифр будет спрашиваться при каждом запуске приложения.</div>' +
-      '<div class="list"><div class="field"><label>Новый код</label>' +
+    var h = '<div class="note" style="padding:0 2px 12px">Код из 4 цифр будет спрашиваться при каждом запуске приложения.</div>' +
+      '<div class="form"><div class="fld"><label>Новый код</label>' +
       '<input id="pin1" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••" style="letter-spacing:6px"></div>' +
-      '<div class="field"><label>Ещё раз</label>' +
+      '<div class="fld"><label>Ещё раз</label>' +
       '<input id="pin2" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••" style="letter-spacing:6px"></div></div>' +
-      '<div class="hint">Код закрывает вход от чужих глаз, но не шифрует базу. Не отменяет резервную копию.</div>';
+      '<div class="note">Код закрывает вход от чужих глаз, но не шифрует базу. Резервную копию он не отменяет.</div>';
     App.sheet({
       title: 'Код-пароль', html: h, save: 'Включить',
       onOpen: function (bd) { setTimeout(function () { bd.querySelector('#pin1').focus(); }, 380); },

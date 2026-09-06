@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="auto">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>Топливо — учёт заправок техники</title>
-<meta name="theme-color" content="#f2f2f7" id="theme-color">
+<meta name="theme-color" content="#0c0e11" id="theme-color">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Топливо">
@@ -12,7 +12,7 @@
 </head>
 <body>
 <main id="screen"></main>
-<nav class="tabbar">
+<nav class="nav">
   <a href="#/"      data-tab="home"><span id="i-home"></span><span>Обзор</span></a>
   <a href="#/units" data-tab="units"><span id="i-units"></span><span>Техника</span></a>
   <a href="#/tank"  data-tab="tank"><span id="i-tank"></span><span>Топливо</span></a>
@@ -23,86 +23,78 @@
 <style>
 /* ============================================================
    Топливо — учёт заправок техники
-   iOS-first PWA. Без внешних зависимостей.
+   Приборный интерфейс: тёмная панель, крупные цифры, шкалы.
+   Без внешних зависимостей.
    ============================================================ */
 
-:root{
-  --green:#28a745;  --green-d:#1e7e34;
-  --red:#e5484d;    --orange:#f5a524;
-  --blue:#0a84ff;   --violet:#7c5cff;
+/* ---------- тёмная тема (основная) ---------- */
+:root,
+html[data-theme="dark"]{
+  --bg:#0c0e11;
+  --bg-2:#111419;
+  --panel:#171b21;
+  --panel-2:#1e232b;
+  --line:rgba(255,255,255,.07);
+  --line-2:rgba(255,255,255,.13);
 
-  --radius:16px;
-  --radius-sm:11px;
-  --tap:44px;
+  --text:#f3f5f8;
+  --text-2:#98a2b3;
+  --text-3:#667085;
 
-  --ease:cubic-bezier(.32,.72,0,1);
-  --safe-b:env(safe-area-inset-b, 0px);
+  --amber:#ffb020;
+  --amber-2:#ff8f0a;
+  --amber-soft:rgba(255,176,32,.14);
+  --on-amber:#171203;
+
+  --red:#ff5c47;
+  --red-soft:rgba(255,92,71,.15);
+  --green:#35d07f;
+  --green-soft:rgba(53,208,127,.14);
+  --blue:#54a8ff;
+
+  --shadow:0 1px 0 rgba(255,255,255,.03) inset, 0 10px 30px rgba(0,0,0,.35);
+  color-scheme:dark;
 }
 
-/* ---------- тема: светлая (по умолчанию) ---------- */
-:root,
+/* ---------- светлая тема ---------- */
 html[data-theme="light"]{
-  --bg:#f2f2f7;
-  --bg-elev:#ffffff;
-  --bg-sunken:#e9e9ee;
-  --fill:rgba(120,120,128,.12);
-  --fill-2:rgba(120,120,128,.08);
-  --text:#000000;
-  --text-2:rgba(60,60,67,.6);
-  --text-3:rgba(60,60,67,.35);
-  --line:rgba(60,60,67,.13);
-  --bar:rgba(249,249,251,.82);
-  --shadow:0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.05);
-  --accent:#d97706;
-  --accent-soft:rgba(217,119,6,.12);
-  --on-accent:#ffffff;
-  --danger-soft:rgba(229,72,77,.12);
-  --warn-soft:rgba(245,165,36,.15);
+  --bg:#eceef1;
+  --bg-2:#e3e6ea;
+  --panel:#ffffff;
+  --panel-2:#f4f6f8;
+  --line:rgba(16,24,40,.09);
+  --line-2:rgba(16,24,40,.16);
+
+  --text:#101828;
+  --text-2:#5a6472;
+  --text-3:#8b95a4;
+
+  --amber:#c2700a;
+  --amber-2:#a85c05;
+  --amber-soft:rgba(194,112,10,.12);
+  --on-amber:#ffffff;
+
+  --red:#d92d20;
+  --red-soft:rgba(217,45,32,.1);
+  --green:#12855b;
+  --green-soft:rgba(18,133,91,.12);
+  --blue:#175cd3;
+
+  --shadow:0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.06);
   color-scheme:light;
 }
 
-/* ---------- тема: тёмная ---------- */
-@media (prefers-color-scheme:dark){
-  html:not([data-theme="light"]){
-    --bg:#000000;
-    --bg-elev:#1c1c1e;
-    --bg-sunken:#0b0b0d;
-    --fill:rgba(120,120,128,.24);
-    --fill-2:rgba(120,120,128,.16);
-    --text:#ffffff;
-    --text-2:rgba(235,235,245,.6);
-    --text-3:rgba(235,235,245,.3);
-    --line:rgba(84,84,88,.5);
-    --bar:rgba(22,22,24,.8);
-    --shadow:none;
-    --accent:#ff9f0a;
-    --accent-soft:rgba(255,159,10,.16);
-    --on-accent:#1c1c1e;
-    --danger-soft:rgba(255,69,58,.18);
-    --warn-soft:rgba(255,159,10,.2);
-    --red:#ff453a; --orange:#ff9f0a; --blue:#0a84ff; --violet:#9a7cff;
-    color-scheme:dark;
+@media (prefers-color-scheme:light){
+  html[data-theme="auto"]{
+    --bg:#eceef1; --bg-2:#e3e6ea; --panel:#ffffff; --panel-2:#f4f6f8;
+    --line:rgba(16,24,40,.09); --line-2:rgba(16,24,40,.16);
+    --text:#101828; --text-2:#5a6472; --text-3:#8b95a4;
+    --amber:#c2700a; --amber-2:#a85c05; --amber-soft:rgba(194,112,10,.12); --on-amber:#ffffff;
+    --red:#d92d20; --red-soft:rgba(217,45,32,.1);
+    --green:#12855b; --green-soft:rgba(18,133,91,.12); --blue:#175cd3;
+    --shadow:0 1px 2px rgba(16,24,40,.06), 0 8px 24px rgba(16,24,40,.06);
+    color-scheme:light;
   }
-}
-html[data-theme="dark"]{
-  --bg:#000000;
-  --bg-elev:#1c1c1e;
-  --bg-sunken:#0b0b0d;
-  --fill:rgba(120,120,128,.24);
-  --fill-2:rgba(120,120,128,.16);
-  --text:#ffffff;
-  --text-2:rgba(235,235,245,.6);
-  --text-3:rgba(235,235,245,.3);
-  --line:rgba(84,84,88,.5);
-  --bar:rgba(22,22,24,.8);
-  --shadow:none;
-  --accent:#ff9f0a;
-  --accent-soft:rgba(255,159,10,.16);
-  --on-accent:#1c1c1e;
-  --danger-soft:rgba(255,69,58,.18);
-  --warn-soft:rgba(255,159,10,.2);
-  --red:#ff453a; --orange:#ff9f0a; --blue:#0a84ff; --violet:#9a7cff;
-  color-scheme:dark;
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -110,385 +102,391 @@ html,body{margin:0;padding:0;height:100%}
 body{
   background:var(--bg);
   color:var(--text);
-  font:400 17px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
+  font:400 16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
   -webkit-font-smoothing:antialiased;
   overscroll-behavior-y:none;
   -webkit-text-size-adjust:100%;
 }
 body.no-scroll{overflow:hidden}
-button,input,select,textarea{font-family:inherit;font-size:17px;color:inherit}
-button{border:0;background:none;padding:0;cursor:pointer;color:var(--accent)}
+button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
+button{border:0;background:none;padding:0;cursor:pointer;color:inherit}
 input,textarea,select{-webkit-appearance:none;appearance:none}
-a{color:var(--accent);text-decoration:none}
-.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+a{color:inherit;text-decoration:none}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";letter-spacing:-.01em}
 
 /* ---------- каркас ---------- */
-#screen{
-  min-height:100%;
-  padding-bottom:calc(72px + env(safe-area-inset-bottom));
-}
-.wrap{padding:0 16px;max-width:640px;margin:0 auto}
+#screen{min-height:100%;padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+.wrap{padding:0 14px;max-width:620px;margin:0 auto}
 
 .topbar{
   position:sticky;top:0;z-index:40;
-  height:calc(48px + env(safe-area-inset-top));
+  height:calc(46px + env(safe-area-inset-top));
   padding-top:env(safe-area-inset-top);
-  display:flex;align-items:center;gap:8px;
-  padding-left:8px;padding-right:8px;
-  background:transparent;
-  transition:background .2s linear;
+  display:flex;align-items:center;gap:6px;padding-left:6px;padding-right:6px;
+  background:transparent;transition:background .18s linear,border-color .18s linear;
+  border-bottom:1px solid transparent;
 }
 .topbar.solid{
-  background:var(--bar);
-  -webkit-backdrop-filter:saturate(180%) blur(20px);
-  backdrop-filter:saturate(180%) blur(20px);
-  border-bottom:.5px solid var(--line);
+  background:color-mix(in srgb, var(--bg) 86%, transparent);
+  -webkit-backdrop-filter:saturate(160%) blur(14px);
+  backdrop-filter:saturate(160%) blur(14px);
+  border-bottom-color:var(--line);
 }
-.topbar .tb-title{
-  flex:1;text-align:center;font-size:17px;font-weight:600;
-  opacity:0;transition:opacity .2s linear;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+.topbar .tb-t{
+  flex:1;text-align:center;font-size:15px;font-weight:600;letter-spacing:.01em;
+  opacity:0;transition:opacity .18s linear;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.topbar.solid .tb-title{opacity:1}
+.topbar.solid .tb-t{opacity:1}
 .tb-btn{
-  min-width:var(--tap);height:var(--tap);display:flex;align-items:center;
-  justify-content:center;gap:3px;font-size:17px;color:var(--accent);
+  min-width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  color:var(--amber);font-size:15px;font-weight:500;
 }
-.tb-btn.right{justify-content:flex-end;padding-right:8px}
-.tb-btn:active{opacity:.4}
+.tb-btn:active{opacity:.5}
+.tb-btn.right{justify-content:flex-end;padding-right:10px}
 
-h1.big{
-  font-size:34px;line-height:1.12;font-weight:700;letter-spacing:-.6px;
-  margin:2px 0 14px;
+/* ---------- заголовки ---------- */
+.hdr{padding:2px 2px 16px}
+.eyebrow{
+  font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-3);
+}
+.hdr h1{
+  margin:6px 0 0;font-size:32px;line-height:1.08;font-weight:800;letter-spacing:-.02em;
 }
 h2.sec{
-  font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;
-  color:var(--text-2);margin:26px 4px 8px;
+  font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-3);margin:24px 2px 9px;display:flex;align-items:baseline;justify-content:space-between;gap:10px;
 }
-h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent);font-weight:400}
+h2.sec .act{font-size:13px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--amber)}
 
-/* ---------- карточки / списки ---------- */
-.card{
-  background:var(--bg-elev);border-radius:var(--radius);
-  box-shadow:var(--shadow);overflow:hidden;
+/* ---------- панели ---------- */
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:14px;
+  padding:15px 15px 16px;box-shadow:var(--shadow);
 }
-.card + .card{margin-top:12px}
-.pad{padding:16px}
+.panel + .panel{margin-top:10px}
+.panel.flat{box-shadow:none}
+.panel-hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px}
 
-.list{background:var(--bg-elev);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
-.row{
-  display:flex;align-items:center;gap:12px;
-  min-height:52px;padding:11px 14px;position:relative;
-  color:inherit;width:100%;text-align:left;background:none;font-size:17px;
+/* крупный показатель */
+.metric{
+  font-size:clamp(30px,9vw,40px);font-weight:800;letter-spacing:-.03em;line-height:1.05;
+  margin-top:5px;overflow-wrap:anywhere;
 }
-.row + .row::before{
-  content:"";position:absolute;left:14px;right:0;top:0;height:.5px;background:var(--line);
-}
-.row.tap:active{background:var(--fill-2)}
-.row .grow{flex:1;min-width:0;display:block}
-.row .chev{color:var(--text-3);font-size:15px;flex:none}
-.row .ttl{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .sub{display:block;font-size:13px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.row .val{text-align:right;flex:none;display:block;max-width:42%}
-.row .val .v1{display:block;font-size:17px;font-weight:600;white-space:nowrap}
-.row .val .v2{display:block;font-size:12px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.metric small{font-size:.42em;font-weight:600;color:var(--text-2);letter-spacing:0;margin-left:7px}
+.sub{font-size:13.5px;color:var(--text-2);margin-top:6px}
+.sub.warn{color:var(--amber)}
+.sub.bad{color:var(--red);font-weight:600}
+.sub.good{color:var(--green);font-weight:600}
 
-.avatar{
-  width:38px;height:38px;border-radius:50%;flex:none;
-  display:flex;align-items:center;justify-content:center;
-  font-size:15px;font-weight:600;color:#fff;letter-spacing:.2px;
+/* ---------- плитки ---------- */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.tile{
+  background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 13px 13px;
+  text-align:left;display:block;width:100%;box-shadow:var(--shadow);
 }
+.tile:active{background:var(--panel-2)}
+.tile .k{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3);line-height:1.3;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .v{font-size:clamp(17px,5.4vw,22px);font-weight:750;letter-spacing:-.02em;margin-top:7px;overflow-wrap:anywhere}
+.tile .n{font-size:12.5px;color:var(--text-2);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .v.bad{color:var(--red)}
+.tile .v.warn{color:var(--amber)}
+.tile .v.good{color:var(--green)}
 
-/* ---------- сводка ---------- */
-.hero{
-  background:var(--bg-elev);border-radius:20px;padding:18px 18px 16px;
-  box-shadow:var(--shadow);
+/* ---------- шкала бака ---------- */
+.gauge{
+  position:relative;height:34px;border-radius:8px;overflow:hidden;
+  background:var(--panel-2);border:1px solid var(--line-2);margin-top:12px;
 }
-.hero .lbl{font-size:13px;color:var(--text-2)}
-.hero .amt{font-size:clamp(26px,8.6vw,38px);font-weight:700;letter-spacing:-1px;line-height:1.1;margin-top:3px;overflow-wrap:anywhere}
-.hero .delta{font-size:13px;color:var(--text-2);margin-top:6px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.stat{background:var(--bg-elev);border-radius:var(--radius);padding:13px 14px;box-shadow:var(--shadow)}
-.stat .k{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:5px}
-.stat .v{font-size:clamp(16px,5vw,21px);font-weight:650;letter-spacing:-.3px;margin-top:4px;overflow-wrap:anywhere}
-.stat .v.sm{font-size:18px}
-.dot{width:7px;height:7px;border-radius:50%;flex:none}
+.gauge i{
+  position:absolute;left:0;top:0;bottom:0;display:block;border-radius:7px 0 0 7px;
+  background:linear-gradient(180deg,var(--amber),var(--amber-2));
+  transition:width .45s cubic-bezier(.32,.72,0,1);
+}
+.gauge.low i{background:linear-gradient(180deg,#ff7a5c,var(--red))}
+.gauge.good i{background:linear-gradient(180deg,#4ee59a,var(--green))}
+.gauge u{
+  position:absolute;inset:0;display:block;pointer-events:none;
+  background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),var(--line-2) calc(10% - 1px),var(--line-2) 10%);
+}
+.gauge-x{display:flex;justify-content:space-between;font-size:11.5px;color:var(--text-3);margin-top:6px}
 
-/* ---------- бейджи / чипы ---------- */
-.badge{
-  display:inline-flex;align-items:center;gap:4px;
-  font-size:12px;font-weight:600;padding:3px 8px;border-radius:100px;
-  background:var(--fill);color:var(--text-2);white-space:nowrap;
-}
-.badge.ok{background:var(--accent-soft);color:var(--accent)}
-.badge.bad{background:var(--danger-soft);color:var(--red)}
-.badge.warn{background:var(--warn-soft);color:var(--orange)}
+/* шкала отклонения от нормы: центр — норма */
+.devbar{display:block;position:relative;height:6px;border-radius:3px;background:var(--panel-2);margin-top:9px;overflow:hidden}
+.devbar b{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--line-2)}
+.devbar i{position:absolute;top:0;bottom:0;border-radius:3px;background:var(--green)}
+.devbar i.over{background:var(--amber)}
+.devbar i.bad{background:var(--red)}
 
-.seg{
-  display:flex;background:var(--fill-2);border-radius:9px;padding:2px;gap:2px;margin:0 0 14px;
+/* ---------- лента записей ---------- */
+.stack{display:flex;flex-direction:column;gap:8px}
+.ticket{
+  display:flex;align-items:stretch;gap:12px;width:100%;text-align:left;
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--line-2);
+  border-radius:11px;padding:12px 13px;box-shadow:var(--shadow);color:inherit;
 }
-.seg button{
-  flex:1;min-height:32px;border-radius:7px;font-size:13px;font-weight:500;color:var(--text);
-  display:flex;align-items:center;justify-content:center;gap:5px;
+.ticket:active{background:var(--panel-2)}
+.ticket.ok{border-left-color:var(--green)}
+.ticket.warn{border-left-color:var(--amber)}
+.ticket.bad{border-left-color:var(--red)}
+.ticket .t-ic{
+  width:34px;height:34px;border-radius:9px;flex:none;display:flex;align-items:center;
+  justify-content:center;font-size:17px;background:var(--panel-2);
 }
-.seg button.on{background:var(--bg-elev);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
-.seg .cnt{font-size:11px;color:var(--text-2)}
-.seg button.on .cnt{color:var(--text-2)}
+.ticket .t-main{flex:1;min-width:0}
+.ticket .t-title{display:block;font-size:15.5px;font-weight:650;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticket .t-sub{display:block;font-size:12.5px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticket .t-flag{display:block;font-size:12.5px;color:var(--amber);margin-top:5px;line-height:1.35}
+.ticket .t-flag.bad{color:var(--red)}
+.ticket .t-val{flex:none;text-align:right;align-self:center;max-width:38%}
+.ticket .t-val b{display:block;font-size:16px;font-weight:750;letter-spacing:-.02em;white-space:nowrap}
+.ticket .t-val span{display:block;font-size:12px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ticket .t-val b.bad{color:var(--red)}
+.ticket .t-val b.good{color:var(--green)}
+
+/* ---------- метки ---------- */
+.pill{
+  display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;
+  letter-spacing:.02em;padding:4px 9px;border-radius:6px;background:var(--panel-2);
+  color:var(--text-2);white-space:nowrap;
+}
+.pill.ok{background:var(--green-soft);color:var(--green)}
+.pill.bad{background:var(--red-soft);color:var(--red)}
+.pill.warn{background:var(--amber-soft);color:var(--amber)}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 
 /* ---------- кнопки ---------- */
 .btn{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  min-height:50px;border-radius:14px;font-size:17px;font-weight:600;
-  background:var(--accent);color:var(--on-accent);width:100%;padding:0 14px;white-space:nowrap;
-  transition:transform .12s var(--ease),opacity .12s;
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  min-height:50px;padding:0 16px;border-radius:12px;
+  font-size:16px;font-weight:700;letter-spacing:.01em;
+  background:var(--amber);color:var(--on-amber);
+  transition:transform .12s cubic-bezier(.32,.72,0,1),opacity .12s;
 }
-.btn:active{transform:scale(.975);opacity:.9}
-.btn.sec{background:var(--fill);color:var(--text)}
-.btn.ghost{background:transparent;color:var(--accent)}
-.btn.danger{background:var(--danger-soft);color:var(--red)}
-.btn.sm{min-height:40px;font-size:15px;border-radius:11px;width:auto;padding:0 14px}
+.btn:active{transform:scale(.98);opacity:.92}
+.btn.sec{background:var(--panel-2);color:var(--text);border:1px solid var(--line-2)}
+.btn.ghost{background:transparent;color:var(--amber);border:1px solid var(--line-2)}
+.btn.danger{background:var(--red-soft);color:var(--red);border:1px solid transparent}
+.btn.sm{min-height:40px;font-size:14px;border-radius:9px;padding:0 14px}
+.btn.big{min-height:56px;font-size:17px;letter-spacing:.02em}
 .btn[disabled]{opacity:.4;pointer-events:none}
-.btn-row{display:flex;gap:10px;margin-top:14px}
-.btn-row .btn{font-size:16px}
+.btn-row{display:flex;gap:9px;margin-top:12px}
+.btn-row .btn{font-size:15px;padding:0 10px}
 .btn-row .btn{flex:1}
 
-.fab{
-  position:fixed;right:16px;z-index:45;
-  bottom:calc(74px + env(safe-area-inset-bottom));
-  width:56px;height:56px;border-radius:50%;
-  background:var(--accent);color:var(--on-accent);
-  display:flex;align-items:center;justify-content:center;
-  font-size:30px;font-weight:300;line-height:1;
-  box-shadow:0 6px 20px rgba(0,0,0,.28);
-  transition:transform .15s var(--ease);
+/* нижняя панель действия */
+.actionbar{
+  position:fixed;left:0;right:0;z-index:44;
+  bottom:calc(62px + env(safe-area-inset-bottom));
+  padding:10px 14px;
+  background:linear-gradient(180deg,transparent,var(--bg) 42%);
+  pointer-events:none;
 }
-.fab:active{transform:scale(.9)}
+.actionbar .btn{max-width:592px;margin:0 auto;pointer-events:auto;box-shadow:0 8px 24px rgba(0,0,0,.35)}
 
-/* ---------- таббар ---------- */
-.tabbar{
-  position:fixed;left:0;right:0;bottom:0;z-index:50;
-  display:flex;
+/* ---------- нижняя навигация ---------- */
+.nav{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;display:flex;
   padding-bottom:env(safe-area-inset-bottom);
-  background:var(--bar);
-  -webkit-backdrop-filter:saturate(180%) blur(20px);
-  backdrop-filter:saturate(180%) blur(20px);
-  border-top:.5px solid var(--line);
+  background:color-mix(in srgb, var(--bg-2) 92%, transparent);
+  -webkit-backdrop-filter:saturate(160%) blur(16px);
+  backdrop-filter:saturate(160%) blur(16px);
+  border-top:1px solid var(--line);
 }
-.tabbar a{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;height:52px;color:var(--text-3);font-size:10px;font-weight:500;
+.nav a{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  height:62px;color:var(--text-3);font-size:10px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;position:relative;
 }
-.tabbar a.on{color:var(--accent)}
-.tabbar a:active{opacity:.55}
-.tabbar svg{width:25px;height:25px;display:block}
+.nav a.on{color:var(--amber)}
+.nav a.on::before{content:"";position:absolute;top:0;left:22%;right:22%;height:2px;background:var(--amber);border-radius:0 0 2px 2px}
+.nav a:active{opacity:.6}
+.nav svg{width:23px;height:23px;display:block}
 
 /* ---------- формы ---------- */
-.field{
-  display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 14px;
-  position:relative;background:var(--bg-elev);
+.form{display:flex;flex-direction:column;gap:9px}
+.fld{
+  background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 13px 10px;
+  display:flex;align-items:center;gap:10px;
 }
-.field + .field::before{content:"";position:absolute;left:14px;right:0;top:0;height:.5px;background:var(--line)}
-.field label{font-size:17px;flex:none;min-width:104px;color:var(--text)}
-.field input,.field select,.field textarea{
-  flex:1;min-width:0;border:0;background:transparent;outline:none;
-  padding:10px 0;font-size:17px;text-align:right;
+.fld.col{flex-direction:column;align-items:stretch;gap:2px}
+.fld label{
+  font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--text-3);flex:none;min-width:96px;
 }
-.field.col{flex-direction:column;align-items:stretch;gap:0;padding:10px 14px}
-.field.col label{font-size:13px;color:var(--text-2);margin-bottom:2px}
-.field.col input,.field.col textarea{text-align:left;padding:4px 0}
-.field textarea{resize:none;min-height:60px;line-height:1.35}
-.field select{
-  text-align:right;color:var(--text);padding-right:17px;
-  background:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 16'%3E%3Cpath d='M2 6l3-3 3 3M2 10l3 3 3-3' fill='none' stroke='%23999' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right center/9px 15px;
+.fld.col label{min-width:0}
+.fld input,.fld select,.fld textarea{
+  flex:1;min-width:0;border:0;background:transparent;outline:none;padding:6px 0;
+  font-size:17px;font-weight:600;color:var(--text);text-align:right;
 }
-.field .unit{color:var(--text-2);font-size:15px;flex:none}
-.field input::placeholder,.field textarea::placeholder{color:var(--text-3)}
-.hint{font-size:12.5px;color:var(--text-2);padding:8px 6px 0;line-height:1.4}
-.hint b{color:var(--text);font-weight:600}
+.fld.col input,.fld.col textarea{text-align:left;font-weight:500;font-size:16px}
+.fld textarea{resize:none;min-height:52px;line-height:1.4}
+.fld input::placeholder,.fld textarea::placeholder{color:var(--text-3);font-weight:400}
+.fld .unit{font-size:13px;color:var(--text-2);flex:none;font-weight:600}
+.fld.big input{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.fld:focus-within{border-color:var(--amber);box-shadow:0 0 0 3px var(--amber-soft)}
+.fld select{
+  text-align:right;padding-right:16px;font-weight:600;
+  background:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 16'%3E%3Cpath d='M2 6l3-3 3 3M2 10l3 3 3-3' fill='none' stroke='%23888' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right center/9px 14px;
+}
+.fld select option{background:var(--panel);color:var(--text)}
 
-.chips{display:flex;flex-wrap:wrap;gap:8px;padding:12px 14px;background:var(--bg-elev)}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
 .chip{
-  padding:7px 13px;border-radius:100px;background:var(--fill-2);
-  font-size:14px;color:var(--text);border:1.5px solid transparent;
+  padding:9px 13px;border-radius:9px;background:var(--panel);border:1px solid var(--line-2);
+  font-size:13.5px;font-weight:600;color:var(--text-2);
 }
-.chip.on{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+.chip.on{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
 .chip:active{opacity:.6}
 
-.search{
-  display:flex;align-items:center;gap:7px;background:var(--fill-2);
-  border-radius:10px;padding:0 10px;height:38px;margin-bottom:14px;
+.note{font-size:12.5px;color:var(--text-2);line-height:1.5;padding:9px 3px 0}
+.note b{color:var(--text);font-weight:650}
+
+/* переключатель разделов */
+.seg{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.seg button{
+  flex:none;padding:8px 13px;border-radius:8px;background:var(--panel);border:1px solid var(--line);
+  font-size:13.5px;font-weight:600;color:var(--text-2);white-space:nowrap;
 }
-.search input{flex:1;border:0;background:transparent;outline:none;font-size:17px;min-width:0}
+.seg button.on{background:var(--amber-soft);border-color:var(--amber);color:var(--amber)}
+.seg .cnt{opacity:.65;margin-left:4px}
+
+.search{
+  display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);
+  border-radius:10px;padding:0 12px;height:42px;margin-bottom:11px;
+}
+.search input{flex:1;border:0;background:transparent;outline:none;font-size:15px;min-width:0}
 .search svg{width:16px;height:16px;color:var(--text-3);flex:none}
+
+/* ---------- столбики расхода ---------- */
+.spark{display:flex;align-items:flex-end;gap:3px;height:70px;margin-top:14px}
+.spark .b{
+  flex:1;border-radius:2px 2px 0 0;min-height:3px;
+  background:linear-gradient(180deg,var(--amber),var(--amber-2));
+}
+.spark .b.over{background:linear-gradient(180deg,#ff7a5c,var(--red))}
+.spark-x{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-top:6px;gap:8px}
 
 /* ---------- модальный лист ---------- */
 .sheet-bg{
-  position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.42);
-  opacity:0;transition:opacity .3s var(--ease);
-  -webkit-backdrop-filter:blur(1px);backdrop-filter:blur(1px);
+  position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.55);
+  opacity:0;transition:opacity .28s cubic-bezier(.32,.72,0,1);
+  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
 }
 .sheet-bg.in{opacity:1}
 .sheet{
-  position:fixed;left:0;right:0;bottom:0;z-index:61;
-  max-height:92vh;display:flex;flex-direction:column;
-  background:var(--bg);border-radius:14px 14px 0 0;
-  transform:translateY(100%);transition:transform .34s var(--ease);
-  padding-bottom:env(safe-area-inset-bottom);
-  max-width:640px;margin:0 auto;
-  box-shadow:0 -8px 40px rgba(0,0,0,.3);
+  position:fixed;left:0;right:0;bottom:0;z-index:61;max-height:93vh;
+  display:flex;flex-direction:column;background:var(--bg-2);
+  border-top:1px solid var(--line-2);border-radius:16px 16px 0 0;
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);
+  padding-bottom:env(safe-area-inset-bottom);max-width:620px;margin:0 auto;
+  box-shadow:0 -10px 44px rgba(0,0,0,.5);
 }
 .sheet.in{transform:translateY(0)}
 .sheet-hd{
   display:flex;align-items:center;justify-content:space-between;gap:10px;
-  padding:12px 14px;border-bottom:.5px solid var(--line);flex:none;
+  padding:13px 14px;border-bottom:1px solid var(--line);flex:none;
 }
-.sheet-hd .t{font-size:17px;font-weight:600;flex:1;text-align:center}
-.sheet-hd button{font-size:17px;min-width:64px}
-.sheet-hd button.strong{font-weight:600;text-align:right}
+.sheet-hd .t{font-size:13px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;flex:1;text-align:center;color:var(--text-2)}
+.sheet-hd button{font-size:15px;min-width:70px;color:var(--text-2)}
+.sheet-hd button.strong{font-weight:700;text-align:right;color:var(--amber)}
 .sheet-bd{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;flex:1}
-.grabber{width:36px;height:5px;border-radius:3px;background:var(--fill);margin:7px auto 0;flex:none}
+.grab{width:34px;height:4px;border-radius:2px;background:var(--line-2);margin:7px auto 0;flex:none}
 
-/* ---------- всплывающее уведомление ---------- */
+/* ---------- уведомление ---------- */
 #toast{
-  position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));
-  transform:translate(-50%,14px);z-index:90;
-  background:rgba(30,30,32,.95);color:#fff;font-size:14.5px;font-weight:500;
-  padding:11px 18px;border-radius:100px;max-width:88vw;text-align:center;
-  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s var(--ease);
-  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom));
+  transform:translate(-50%,12px);z-index:90;
+  background:var(--text);color:var(--bg);font-size:14px;font-weight:650;
+  padding:11px 17px;border-radius:10px;max-width:86vw;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .18s,transform .18s cubic-bezier(.32,.72,0,1);
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
 }
 #toast.in{opacity:1;transform:translate(-50%,0)}
 
 /* ---------- служебное ---------- */
-.empty{text-align:center;padding:46px 26px;color:var(--text-2)}
-.empty .ic{font-size:44px;margin-bottom:10px;opacity:.5}
-.empty .t{font-size:17px;font-weight:600;color:var(--text);margin-bottom:5px}
-.empty .d{font-size:14px;line-height:1.45}
+.empty{text-align:center;padding:44px 20px 30px;color:var(--text-2)}
+.empty .ic{font-size:40px;margin-bottom:12px;opacity:.65}
+.empty .t{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;letter-spacing:-.01em}
+.empty .d{font-size:14px;line-height:1.5;max-width:340px;margin:0 auto}
 
-.bar{height:6px;border-radius:3px;background:var(--fill);overflow:hidden;margin-top:10px}
-.bar i{display:block;height:100%;border-radius:3px;background:var(--accent);transition:width .4s var(--ease)}
+.rows{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.rows > * + *{border-top:1px solid var(--line)}
+.row{
+  display:flex;align-items:center;gap:12px;min-height:52px;padding:11px 14px;
+  width:100%;text-align:left;color:inherit;background:none;
+}
+.row:active{background:var(--panel-2)}
+.row .r-main{flex:1;min-width:0}
+.row .r-t{display:block;font-size:15.5px;font-weight:600}
+.row .r-s{display:block;font-size:12.5px;color:var(--text-2);margin-top:3px}
+.row .r-v{flex:none;font-size:15px;font-weight:700;color:var(--amber);text-align:right}
+.row .r-v small{display:block;font-size:12px;font-weight:500;color:var(--text-2);margin-top:3px}
+.row.danger .r-t{color:var(--red)}
 
-.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:15px}
-.kv + .kv{border-top:.5px solid var(--line)}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:14.5px}
+.kv + .kv{border-top:1px solid var(--line)}
 .kv .k{color:var(--text-2)}
-.kv .v{font-weight:600;text-align:right;overflow-wrap:anywhere}
-.kv.big .v{font-size:19px}
+.kv .v{font-weight:700;text-align:right;overflow-wrap:anywhere}
+.kv .v.bad{color:var(--red)}
+.kv .v.good{color:var(--green)}
 
-.tl{position:relative;padding-left:22px}
-.tl .ev{position:relative;padding:9px 0}
-.tl .ev + .ev{border-top:.5px solid var(--line)}
-.tl .ev::before{
-  content:"";position:absolute;left:-18px;top:16px;width:9px;height:9px;
-  border-radius:50%;background:var(--accent);
-}
-.tl::before{content:"";position:absolute;left:-14px;top:12px;bottom:12px;width:1.5px;background:var(--line)}
+.progress{height:8px;border-radius:4px;background:var(--panel-2);overflow:hidden;margin-top:10px}
+.progress i{display:block;height:100%;border-radius:4px;background:var(--amber);transition:width .4s cubic-bezier(.32,.72,0,1)}
+.progress.bad i{background:var(--red)}
+.progress.good i{background:var(--green)}
 
-.lock{
-  position:fixed;inset:0;z-index:100;background:var(--bg);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
-}
-.pin-dots{display:flex;gap:16px}
-.pin-dots i{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--text-2)}
-.pin-dots i.on{background:var(--text);border-color:var(--text)}
-.keypad{display:grid;grid-template-columns:repeat(3,72px);gap:18px;justify-content:center}
-.keypad button{
-  width:72px;height:72px;border-radius:50%;background:var(--fill-2);
-  font-size:28px;font-weight:400;color:var(--text);
-  display:flex;align-items:center;justify-content:center;
-}
-.keypad button:active{background:var(--fill)}
-.keypad button.blank{background:none;pointer-events:none}
+.fade{animation:fade .2s cubic-bezier(.32,.72,0,1)}
+@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 .shake{animation:shake .4s}
 @keyframes shake{
   10%,90%{transform:translateX(-2px)} 20%,80%{transform:translateX(4px)}
   30%,50%,70%{transform:translateX(-7px)} 40%,60%{transform:translateX(7px)}
 }
-.fade{animation:fade .22s var(--ease)}
-@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
 
-/* ---------- диалог подтверждения ---------- */
+/* ---------- экран блокировки ---------- */
+.lock{
+  position:fixed;inset:0;z-index:100;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+}
+.pin-dots{display:flex;gap:15px}
+.pin-dots i{width:12px;height:12px;border-radius:50%;border:1.5px solid var(--text-3)}
+.pin-dots i.on{background:var(--amber);border-color:var(--amber)}
+.keypad{display:grid;grid-template-columns:repeat(3,70px);gap:16px;justify-content:center}
+.keypad button{
+  width:70px;height:70px;border-radius:14px;background:var(--panel);border:1px solid var(--line);
+  font-size:25px;font-weight:600;color:var(--text);display:flex;align-items:center;justify-content:center;
+}
+.keypad button:active{background:var(--panel-2)}
+.keypad button.blank{background:none;border:0;pointer-events:none}
+
+/* ---------- диалог ---------- */
 .ask-bg{
-  position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.4);
-  display:flex;align-items:center;justify-content:center;padding:28px;
-  opacity:0;transition:opacity .2s ease;
-  -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+  position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;padding:26px;
+  opacity:0;transition:opacity .18s ease;
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
 }
 .ask-bg.in{opacity:1}
 .ask{
-  width:100%;max-width:290px;background:var(--bg-elev);border-radius:15px;
-  overflow:hidden;text-align:center;
-  transform:scale(.92);transition:transform .22s var(--ease);
-  box-shadow:0 12px 44px rgba(0,0,0,.3);
+  width:100%;max-width:320px;background:var(--panel);border:1px solid var(--line-2);
+  border-radius:14px;overflow:hidden;
+  transform:scale(.94);transition:transform .2s cubic-bezier(.32,.72,0,1);
+  box-shadow:0 20px 50px rgba(0,0,0,.5);
 }
 .ask-bg.in .ask{transform:scale(1)}
-.ask .ask-t{font-size:17px;font-weight:600;padding:20px 18px 0}
-.ask .ask-d{font-size:13.5px;color:var(--text-2);line-height:1.4;padding:6px 18px 18px}
-.ask .ask-btns{display:flex;border-top:.5px solid var(--line)}
+.ask .ask-t{font-size:17px;font-weight:750;padding:18px 18px 0;letter-spacing:-.01em}
+.ask .ask-d{font-size:13.5px;color:var(--text-2);line-height:1.45;padding:7px 18px 16px}
+.ask .ask-btns{display:flex;gap:9px;padding:0 14px 14px}
 .ask .ask-btns button{
-  flex:1;min-height:46px;font-size:17px;color:var(--accent);
-  display:flex;align-items:center;justify-content:center;
+  flex:1;min-height:44px;border-radius:10px;font-size:15px;font-weight:650;
+  background:var(--panel-2);color:var(--text);border:1px solid var(--line-2);
 }
-.ask .ask-btns button + button{border-left:.5px solid var(--line)}
-.ask .ask-btns button.danger{color:var(--red);font-weight:600}
-.ask .ask-btns button:active{background:var(--fill-2)}
-
-/* ============================================================
-   Топливо: свои элементы
-   ============================================================ */
-
-/* крупная кнопка заправки на главном экране */
-.btn.lg{min-height:58px;font-size:19px;border-radius:16px}
-.btn.lg .sub{font-size:12px;font-weight:400;opacity:.8}
-
-/* сигнал: перерасход, недостача, ТО */
-.alert{
-  display:flex;gap:11px;align-items:flex-start;
-  padding:12px 14px;background:var(--bg-elev);
-  position:relative;width:100%;text-align:left;color:inherit;
-}
-.alert + .alert::before{content:"";position:absolute;left:14px;right:0;top:0;height:.5px;background:var(--line)}
-.alert .ic{
-  width:26px;height:26px;border-radius:50%;flex:none;
-  display:flex;align-items:center;justify-content:center;font-size:14px;
-  background:var(--warn-soft);
-}
-.alert.bad .ic{background:var(--danger-soft)}
-.alert .tx{flex:1;min-width:0;font-size:15px;line-height:1.35}
-.alert .tx b{display:block;font-weight:600;font-size:15px;margin-bottom:2px}
-.alert .tx span{color:var(--text-2);font-size:13px}
-.alert .money{font-size:14px;font-weight:600;color:var(--red);white-space:nowrap;flex:none}
-
-/* полоса остатка / до ТО */
-.bar.warn i{background:var(--orange)}
-.bar.bad i{background:var(--red)}
-
-/* столбики расхода по участкам */
-.spark{display:flex;align-items:flex-end;gap:3px;height:64px;margin-top:12px}
-.spark .b{flex:1;border-radius:3px 3px 0 0;background:var(--accent-soft);position:relative;min-height:3px}
-.spark .b.over{background:var(--danger-soft)}
-.spark .b i{position:absolute;left:0;right:0;bottom:0;border-radius:3px 3px 0 0;background:var(--accent);display:block}
-.spark .b.over i{background:var(--red)}
-.spark-x{display:flex;justify-content:space-between;font-size:11px;color:var(--text-3);margin-top:5px}
-.spark-norm{
-  position:relative;height:0;border-top:1.5px dashed var(--text-3);
-  margin-top:-1px;font-size:10px;color:var(--text-3);
-}
-
-/* строка заправки */
-.fill-row .lit{font-weight:600}
-.flag{
-  display:block;font-size:12.5px;color:var(--orange);margin-top:3px;line-height:1.3;
-}
-.flag.bad{color:var(--red)}
-
-/* переключатель месяцев в отчёте */
-.mrow{display:flex;gap:10px;overflow-x:auto;padding:2px 0 10px;-webkit-overflow-scrolling:touch}
-.mrow button{
-  flex:none;padding:8px 14px;border-radius:100px;background:var(--fill-2);
-  font-size:14px;color:var(--text);white-space:nowrap;
-}
-.mrow button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.ask .ask-btns button.go{background:var(--amber);color:var(--on-amber);border-color:transparent}
+.ask .ask-btns button.danger{background:var(--red);color:#fff;border-color:transparent}
+.ask .ask-btns button:active{opacity:.8}
 </style>
 
 <script>
@@ -1511,82 +1509,25 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
   /* ============ иконки ============ */
   V.ICON = {
-    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20h13V9.5"/><path d="M9.5 20v-5.5h5V20"/></svg>',
-    units: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 16V7.5h11V16"/><path d="M13.5 10.5h4l3 3.2V16"/><circle cx="7" cy="16.5" r="2.2"/><circle cx="17" cy="16.5" r="2.2"/><path d="M9.2 16.5h5.6"/></svg>',
-    tank: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2s5.5 6 5.5 9.6a5.5 5.5 0 0 1-11 0C6.5 9.2 12 3.2 12 3.2Z"/><path d="M9.6 13.4a2.6 2.6 0 0 0 2.6 2.6"/></svg>',
-    more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>',
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 11 12 4l8.5 7"/><path d="M6 10v9.5h12V10"/><path d="M10 19.5V14h4v5.5"/></svg>',
+    units: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 16.2V7.6h11v8.6"/><path d="M13.5 10.6h4l3 3.2v2.4"/><circle cx="7" cy="16.8" r="2.1"/><circle cx="17" cy="16.8" r="2.1"/></svg>',
+    tank: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.4s5.4 5.9 5.4 9.4a5.4 5.4 0 0 1-10.8 0C6.6 9.3 12 3.4 12 3.4Z"/><path d="M9.7 13.3a2.5 2.5 0 0 0 2.5 2.5"/></svg>',
+    more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg>',
     search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>',
-    back: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4 7 12l8 8"/></svg>',
-    chev: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l8 8-8 8"/></svg>'
+    back: '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4 7 12l8 8"/></svg>'
   };
 
-  /* ============ общие кусочки ============ */
-  V.unitIcon = function (u) {
-    return '<div class="avatar" style="background:' + U.color(u.name) + ';font-size:18px">' +
-      U.kind(u.kind).ic + '</div>';
+  /* ============ мелкие детали ============ */
+  V.topbar = function (title, right, back) {
+    return '<div class="topbar" id="topbar">' +
+      (back ? '<button class="tb-btn" data-act="back">' + V.ICON.back + '</button>'
+        : '<span class="tb-btn" style="visibility:hidden">' + V.ICON.back + '</span>') +
+      '<span class="tb-t">' + esc(title) + '</span>' +
+      '<span class="tb-btn right">' + (right || '') + '</span></div>';
   };
 
-  V.devBadge = function (s) {
-    if (!s || s.avg == null) return '<span class="badge">Мало данных</span>';
-    if (s.dev == null) return '<span class="badge">Нет нормы</span>';
-    var lim = U.num(DB.data.settings.overrun) || 10;
-    if (s.dev > lim) return '<span class="badge bad">Перерасход ' + U.pct(s.dev, true) + '</span>';
-    if (s.dev > 0) return '<span class="badge warn">' + U.pct(s.dev, true) + ' к норме</span>';
-    return '<span class="badge ok">В норме</span>';
-  };
-
-  V.unitRow = function (u) {
-    var s = CALC.unit(u);
-    var sub = [];
-    if (u.plate) sub.push(esc(u.plate));
-    sub.push(u.norm > 0 ? 'норма ' + U.rate(u.norm, u.meter) : 'норма не задана');
-    return '<button class="row tap" data-act="unit" data-id="' + u.id + '">' +
-      V.unitIcon(u) +
-      '<span class="grow"><span class="ttl">' + esc(u.name) + '</span>' +
-      '<span class="sub">' + V.devBadge(s) + ' ' + sub.join(' · ') + '</span></span>' +
-      '<span class="val"><span class="v1 num">' + (s.avg != null ? U.rate(s.avg, u.meter, true) : '—') + '</span>' +
-      '<span class="v2">' + U.rateUnit(u.meter) + '</span></span>' +
-      '<span class="chev">' + V.ICON.chev + '</span></button>';
-  };
-
-  V.fillRow = function (f, opt) {
-    opt = opt || {};
-    var u = DB.unit(f.unitId) || { name: 'Техника удалена', kind: 'other', meter: 'km', norm: 0 };
-    var seg = CALC.segmentOf(u, f.id);
-    var flags = CALC.fillFlags(u, f);
-    var sub = U.fmtDate(f.date) + ' · ' + (f.source === 'station' ? 'АЗС' : 'бочка') +
-      (f.full === false ? ' · не до полного' : '') +
-      (f.meter ? ' · ' + U.meter(f.meter, u.meter) : '');
-    var right = seg && seg.rate != null
-      ? '<span class="v2">' + U.rate(seg.rate, u.meter, true) + ' ' + U.rateUnit(u.meter) + '</span>'
-      : '<span class="v2">' + U.money(f.cost) + '</span>';
-
-    return '<button class="row tap fill-row" data-act="edit-fill" data-id="' + f.id + '">' +
-      (opt.noIcon ? '' : V.unitIcon(u)) +
-      '<span class="grow"><span class="ttl">' + (opt.noIcon ? U.liters(f.liters) + ' · ' + U.money(f.cost) : esc(u.name)) + '</span>' +
-      '<span class="sub">' + esc(sub) + '</span>' +
-      flags.map(function (x) {
-        return '<span class="flag' + (x.soft ? '' : ' bad') + '">' + esc(x.text) + '</span>';
-      }).join('') +
-      '</span>' +
-      '<span class="val"><span class="v1 num lit">' + (opt.noIcon ? '' : U.liters(f.liters)) + '</span>' + right + '</span>' +
-      '</button>';
-  };
-
-  V.alertRow = function (a) {
-    var bad = ['overrun', 'service', 'shortage', 'over-tank', 'meter-back', 'tank-negative'].indexOf(a.type) >= 0;
-    var ic = { overrun: '⛽', service: '🔧', 'service-soon': '🔧', shortage: '📉', 'low-fuel': '🛢️',
-      'over-tank': '❗', 'meter-back': '↩️', 'no-run': '⏸️', 'tank-negative': '❗' }[a.type] || '⚠️';
-    var head = a.unit ? esc(a.unit.name) : {
-      'low-fuel': 'Топливо заканчивается', shortage: 'Недостача при замере',
-      'tank-negative': 'Учёт бочки не сходится'
-    }[a.type] || 'Внимание';
-    return '<' + (a.unit ? 'button class="alert tap' : 'div class="alert') + (bad ? ' bad' : '') + '"' +
-      (a.unit ? ' data-act="unit" data-id="' + a.unit.id + '"' : '') + '>' +
-      '<span class="ic">' + ic + '</span>' +
-      '<span class="tx"><b>' + head + '</b><span>' + esc(a.text) + '</span></span>' +
-      (a.money > 0 ? '<span class="money">' + U.moneyShort(a.money) + '</span>' : '') +
-      '</' + (a.unit ? 'button' : 'div') + '>';
+  V.hdr = function (eyebrow, title) {
+    return '<div class="hdr"><div class="eyebrow">' + esc(eyebrow) + '</div><h1>' + esc(title) + '</h1></div>';
   };
 
   V.empty = function (ic, t, d, btn) {
@@ -1594,23 +1535,111 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       '<div class="d">' + d + '</div>' + (btn || '') + '</div>';
   };
 
-  V.topbar = function (title, right) {
-    return '<div class="topbar" id="topbar"><span class="tb-btn" style="visibility:hidden">' + V.ICON.back + '</span>' +
-      '<span class="tb-title">' + esc(title) + '</span>' +
-      '<span class="tb-btn right">' + (right || '') + '</span></div>';
+  /* уровень отклонения от нормы: 0 — норма, ±50% — края шкалы */
+  V.devbar = function (dev) {
+    if (dev == null) return '';
+    var lim = U.num(DB.data.settings.overrun) || 10;
+    var v = Math.max(-50, Math.min(50, dev));
+    var wpc = Math.abs(v) / 50 * 50;
+    var cls = dev > lim ? 'bad' : dev > 0.5 ? 'over' : '';
+    var side = v >= 0 ? 'left:50%' : 'right:50%';
+    return '<span class="devbar"><b></b><i class="' + cls + '" style="' + side + ';width:' + wpc.toFixed(1) + '%"></i></span>';
   };
-  V.topbarBack = function (title, right) {
-    return '<div class="topbar" id="topbar"><button class="tb-btn" data-act="back">' + V.ICON.back + '</button>' +
-      '<span class="tb-title">' + esc(title) + '</span>' +
-      '<span class="tb-btn right">' + (right || '') + '</span></div>';
+
+  V.devPill = function (s) {
+    if (!s || s.avg == null) return '<span class="pill">Мало данных</span>';
+    if (s.dev == null) return '<span class="pill">Нет нормы</span>';
+    var lim = U.num(DB.data.settings.overrun) || 10;
+    if (s.dev > lim) return '<span class="pill bad">Перерасход ' + U.pct(s.dev, true) + '</span>';
+    if (s.dev > 0.5) return '<span class="pill warn">' + U.pct(s.dev, true) + ' к норме</span>';
+    return '<span class="pill ok">В норме</span>';
+  };
+
+  /* шкала бочки */
+  V.gauge = function (t) {
+    var cap = 0;
+    t.supplies.forEach(function (s) { cap = Math.max(cap, U.num(s.liters)); });
+    cap = Math.max(cap, t.balance);
+    var pct = cap > 0 ? Math.max(0, Math.min(100, t.balance / cap * 100)) : 0;
+    var low = U.num(DB.data.settings.lowDays) || 5;
+    var cls = t.balance <= 0 ? 'low' : (t.daysLeft != null && t.daysLeft <= low ? 'low' : '');
+    return '<div class="gauge ' + cls + '"><i style="width:' + pct.toFixed(1) + '%"></i><u></u></div>' +
+      '<div class="gauge-x"><span>пусто</span><span>' + U.liters(cap) + '</span></div>';
+  };
+
+  /* ============ карточки-строки ============ */
+  V.unitTicket = function (u) {
+    var s = CALC.unit(u);
+    var lim = U.num(DB.data.settings.overrun) || 10;
+    var cls = s.dev == null ? '' : s.dev > lim ? 'bad' : s.dev > 0.5 ? 'warn' : 'ok';
+    var sub = [];
+    if (u.plate) sub.push(u.plate);
+    sub.push(u.norm > 0 ? 'норма ' + U.rate(u.norm, u.meter, true) : 'без нормы');
+    if (s.service && s.service.due) sub.push('ТО просрочено');
+
+    return '<button class="ticket ' + cls + '" data-act="unit" data-id="' + u.id + '">' +
+      '<span class="t-ic">' + U.kind(u.kind).ic + '</span>' +
+      '<span class="t-main"><span class="t-title">' + esc(u.name) + '</span>' +
+      '<span class="t-sub">' + esc(sub.join(' · ')) + '</span>' +
+      V.devbar(s.dev) + '</span>' +
+      '<span class="t-val"><b class="' + (s.dev != null && s.dev > lim ? 'bad' : '') + '">' +
+      (s.avg != null ? U.rate(s.avg, u.meter, true) : '—') + '</b>' +
+      '<span>' + U.rateUnit(u.meter) + '</span></span></button>';
+  };
+
+  V.fillTicket = function (f, opt) {
+    opt = opt || {};
+    var u = DB.unit(f.unitId) || { id: '', name: 'Техника удалена', kind: 'other', meter: 'km', norm: 0 };
+    var seg = CALC.segmentOf(u, f.id);
+    var flags = CALC.fillFlags(u, f);
+    var hard = flags.filter(function (x) { return !x.soft; }).length;
+    var cls = hard ? 'bad' : flags.length ? 'warn' : '';
+
+    var sub = U.fmtDate(f.date) + ' · ' + (f.source === 'station' ? 'АЗС' : 'из бочки') +
+      (f.full === false ? ' · не до полного' : '') +
+      (f.meter ? ' · ' + U.meter(f.meter, u.meter) : '');
+
+    return '<button class="ticket ' + cls + '" data-act="edit-fill" data-id="' + f.id + '">' +
+      (opt.noIcon ? '' : '<span class="t-ic">' + U.kind(u.kind).ic + '</span>') +
+      '<span class="t-main">' +
+      '<span class="t-title">' + (opt.noIcon ? U.liters(f.liters) + ' · ' + U.money(f.cost) : esc(u.name)) + '</span>' +
+      '<span class="t-sub">' + esc(sub) + '</span>' +
+      flags.map(function (x) {
+        return '<span class="t-flag' + (x.soft ? '' : ' bad') + '">' + esc(x.text) + '</span>';
+      }).join('') +
+      '</span>' +
+      '<span class="t-val">' +
+      (opt.noIcon
+        ? '<b>' + (seg && seg.rate != null ? U.rate(seg.rate, u.meter, true) : '—') + '</b><span>' + U.rateUnit(u.meter) + '</span>'
+        : '<b>' + U.liters(f.liters) + '</b><span>' +
+          (seg && seg.rate != null ? U.rate(seg.rate, u.meter) : U.money(f.cost)) + '</span>') +
+      '</span></button>';
+  };
+
+  V.alertTicket = function (a) {
+    var hard = ['overrun', 'service', 'shortage', 'over-tank', 'meter-back', 'tank-negative'].indexOf(a.type) >= 0;
+    var ic = { overrun: '⛽', service: '🔧', 'service-soon': '🔧', shortage: '📉', 'low-fuel': '🛢️',
+      'over-tank': '❗', 'meter-back': '↩️', 'no-run': '⏸️', 'tank-negative': '❗' }[a.type] || '⚠️';
+    var head = a.unit ? a.unit.name : ({
+      'low-fuel': 'Топливо заканчивается', shortage: 'Недостача при замере',
+      'tank-negative': 'Учёт бочки не сходится'
+    }[a.type] || 'Внимание');
+    var tag = a.unit ? 'button' : 'div';
+    return '<' + tag + ' class="ticket ' + (hard ? 'bad' : 'warn') + '"' +
+      (a.unit ? ' data-act="unit" data-id="' + a.unit.id + '"' : '') + '>' +
+      '<span class="t-ic">' + ic + '</span>' +
+      '<span class="t-main"><span class="t-title">' + esc(head) + '</span>' +
+      '<span class="t-sub" style="white-space:normal">' + esc(a.text) + '</span></span>' +
+      (a.money > 0 ? '<span class="t-val"><b class="bad">' + U.moneyShort(a.money) + '</b></span>' : '') +
+      '</' + tag + '>';
   };
 
   V.demoNote = function () {
     if (!DB.data.isDemo) return '';
-    return '<div class="card pad" style="margin-bottom:12px;background:var(--warn-soft)">' +
-      '<div style="font-weight:600;margin-bottom:3px">Это демонстрационные данные</div>' +
-      '<div style="font-size:14px;color:var(--text-2);line-height:1.4">Вымышленный парк из пяти единиц с заправками за два месяца — чтобы посмотреть, как всё считается. Очистите перед тем, как заносить своё.</div>' +
-      '<button class="btn sec sm" style="margin-top:12px;width:100%" data-act="demo-off">Очистить и начать с нуля</button></div>';
+    return '<div class="panel" style="border-color:var(--amber);background:var(--amber-soft);margin-bottom:10px">' +
+      '<div class="eyebrow" style="color:var(--amber)">Пример</div>' +
+      '<div style="font-size:14.5px;line-height:1.5;margin-top:7px">Вымышленный парк из пяти единиц с заправками за два месяца — чтобы посмотреть, как всё считается. Очистите перед тем, как заносить своё.</div>' +
+      '<button class="btn sec sm" style="margin-top:12px" data-act="demo-off">Очистить и начать с нуля</button></div>';
   };
 
   /* ============ ОБЗОР ============ */
@@ -1618,66 +1647,89 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     var units = DB.units(), mk = U.monthKey(U.today());
     var m = CALC.month(mk), fleet = CALC.fleet();
 
-    var h = V.topbar('Обзор', '<button data-act="new-fill" style="font-size:26px;font-weight:300">＋</button>');
-    h += '<div class="wrap"><h1 class="big">Обзор</h1>';
-    h += V.demoNote();
+    var h = V.topbar('Обзор');
+    h += '<div class="wrap">' + V.hdr(U.fmtDateFull(U.today()), 'Обзор') + V.demoNote();
 
     if (!units.length) {
       h += V.empty('⛽', 'Техники пока нет',
         'Заведите машину или агрегат — дальше приложение само посчитает расход, сравнит его с нормой и покажет, где топливо уходит мимо.',
-        '<div style="margin-top:18px"><button class="btn" data-act="new-unit">Добавить технику</button>' +
-        '<button class="btn ghost" style="margin-top:8px" data-act="demo">Посмотреть на примере</button>' +
-        '<button class="btn ghost" style="margin-top:4px" data-act="import">Загрузить свою базу</button></div>');
+        '<div style="margin-top:20px;display:flex;flex-direction:column;gap:8px">' +
+        '<button class="btn" data-act="new-unit">Добавить технику</button>' +
+        '<button class="btn sec" data-act="demo">Посмотреть на примере</button>' +
+        '<button class="btn ghost" data-act="import">Загрузить свою базу</button></div>');
       return h + '</div>';
     }
 
-    /* сколько денег ушло на топливо в этом месяце */
-    h += '<div class="hero">' +
-      '<div class="lbl">Топливо за ' + esc(U.monthName(mk).split(' ')[0].toLowerCase()) + '</div>' +
-      '<div class="amt num">' + U.money(m.cost) + '</div>' +
-      '<div class="delta">' + U.liters(m.liters) + ' · ' + m.count + ' ' +
+    /* деньги за месяц */
+    h += '<div class="panel">' +
+      '<div class="eyebrow">Топливо за ' + esc(U.monthName(mk).split(' ')[0].toLowerCase()) + '</div>' +
+      '<div class="metric num">' + U.money(m.cost, { noCur: true }) + '<small>' + esc(U.sym()) + '</small></div>' +
+      '<div class="sub">' + U.liters(m.liters) + ' · ' + m.count + ' ' +
       U.plural(m.count, 'заправка', 'заправки', 'заправок') + '</div>' +
       (m.extraCost > 0
-        ? '<div class="delta" style="color:var(--red);font-weight:600">из них перерасход ' + U.moneyShort(m.extraCost) + '</div>'
-        : '') +
+        ? '<div class="pills"><span class="pill bad">Перерасход ' + U.moneyShort(m.extraCost) + '</span>' +
+          '<span class="pill">' + fleet.overrun + ' из ' + units.length + ' с перерасходом</span></div>'
+        : '<div class="pills"><span class="pill ok">Все в норме</span></div>') +
       '</div>';
 
-    h += '<button class="btn lg" style="margin-top:12px" data-act="new-fill">＋&nbsp; Заправка</button>';
-
-    /* плитки */
+    /* бочка */
     var fuels = CALC.tankFuels();
     var tk = fuels.length ? CALC.tank(fuels[0]) : null;
-    h += '<div class="stats">';
-    h += '<button class="stat" data-act="go-tank" style="text-align:left">' +
-      '<div class="k">В бочке</div><div class="v num">' + (tk ? U.liters(tk.balance) : '—') + '</div>' +
-      '<div class="k" style="margin-top:3px">' +
-      (tk && tk.daysLeft != null ? 'хватит на ' + U.days(tk.daysLeft) : 'учёт не ведётся') + '</div></button>';
-    h += '<div class="stat"><div class="k">Средняя цена литра</div><div class="v num">' +
-      U.money(m.liters > 0 ? m.cost / m.liters : DB.price(DB.data.settings.fuel)) + '</div>' +
-      '<div class="k" style="margin-top:3px">за этот месяц</div></div>';
-    h += '<div class="stat"><div class="k">Залито из бочки</div><div class="v num">' +
-      U.liters(m.tank) + '</div>' +
-      '<div class="k" style="margin-top:3px">с АЗС ' + U.liters(m.station) + '</div></div>';
-    h += '<div class="stat"><div class="k">Техника с перерасходом</div><div class="v num" style="color:' +
-      (fleet.overrun ? 'var(--red)' : 'var(--accent)') + '">' + fleet.overrun + ' из ' + units.length + '</div></div>';
+    if (tk) {
+      h += '<button class="panel" style="display:block;text-align:left;width:100%" data-act="go-tank">' +
+        '<div class="panel-hd"><span class="eyebrow">' + esc(U.fuel(tk.fuel).name) + ' в бочке</span>' +
+        '<span class="num" style="font-size:22px;font-weight:800;letter-spacing:-.02em">' + U.liters(tk.balance) + '</span></div>' +
+        V.gauge(tk) +
+        '<div class="sub' + (tk.daysLeft != null && tk.daysLeft <= (U.num(DB.data.settings.lowDays) || 5) ? ' bad' : '') + '">' +
+        (tk.daysLeft != null
+          ? 'расход ' + U.liters(tk.perDay) + ' в день — хватит примерно на ' + U.days(tk.daysLeft)
+          : 'выдач пока не было') + '</div></button>';
+    }
+
+    /* плитки */
+    h += '<div class="grid-2">';
+    h += tile('Средняя цена литра', U.money(m.liters > 0 ? m.cost / m.liters : DB.price(DB.data.settings.fuel)), 'в этом месяце');
+    h += tile('Залито из бочки', U.liters(m.tank), 'с АЗС ' + U.liters(m.station));
+    var due = nearestService(units);
+    h += tile('Ближайшее ТО', due ? U.meter(Math.abs(due.left), due.unit.meter) : '—',
+      due ? (due.left <= 0 ? 'просрочено: ' : '') + due.unit.name : 'не настроено',
+      due && due.left <= 0 ? 'bad' : due && due.soon ? 'warn' : '');
+    h += tile('Всего заправок', String(m.count), 'за месяц');
     h += '</div>';
 
     /* сигналы */
     if (fleet.alerts.length) {
-      h += '<h2 class="sec">Требует внимания</h2><div class="list">';
-      fleet.alerts.slice(0, 6).forEach(function (a) { h += V.alertRow(a); });
+      h += '<h2 class="sec"><span>Требует внимания</span><span class="act">' + fleet.alerts.length + '</span></h2>';
+      h += '<div class="stack">';
+      fleet.alerts.slice(0, 6).forEach(function (a) { h += V.alertTicket(a); });
       h += '</div>';
     }
 
     /* последние заправки */
     var last = DB.fills().slice().sort(DB.byDate).reverse().slice(0, 5);
     if (last.length) {
-      h += '<h2 class="sec">Последние заправки<a class="act" href="#/units">вся техника</a></h2><div class="list">';
-      last.forEach(function (f) { h += V.fillRow(f); });
+      h += '<h2 class="sec"><span>Последние заправки</span><a class="act" href="#/units">вся техника</a></h2>';
+      h += '<div class="stack">';
+      last.forEach(function (f) { h += V.fillTicket(f); });
       h += '</div>';
     }
 
     return h + '</div>';
+
+    function tile(k, v, n, cls) {
+      return '<div class="tile"><div class="k">' + esc(k) + '</div>' +
+        '<div class="v num ' + (cls || '') + '">' + v + '</div>' +
+        (n ? '<div class="n">' + esc(n) + '</div>' : '') + '</div>';
+    }
+    function nearestService(list) {
+      var best = null;
+      list.forEach(function (u) {
+        var s = CALC.unit(u);
+        if (!s.service) return;
+        if (!best || s.service.left < best.left) best = { left: s.service.left, soon: s.service.soon, unit: u };
+      });
+      return best;
+    }
   };
 
   /* ============ ТЕХНИКА ============ */
@@ -1692,17 +1744,16 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       if (V.unitsFilter === 'service') return s.service && (s.service.due || s.service.soon);
       return true;
     });
-
     var over = all.filter(function (u) { var s = CALC.unit(u); return s.dev != null && s.dev > lim; }).length;
     var svc = all.filter(function (u) { var s = CALC.unit(u); return s.service && (s.service.due || s.service.soon); }).length;
 
-    var h = V.topbar('Техника', '<button data-act="new-unit" style="font-size:26px;font-weight:300">＋</button>');
-    h += '<div class="wrap"><h1 class="big">Техника</h1>';
+    var h = V.topbar('Техника', '<button data-act="new-unit">Добавить</button>');
+    h += '<div class="wrap">' + V.hdr(U.unitsWord(all.length) + ' в парке', 'Техника');
 
     if (!all.length) {
       h += V.empty('🚛', 'Список пуст',
         'Добавьте самосвал, экскаватор или генератор — у каждого свой счётчик и своя норма расхода.',
-        '<div style="margin-top:18px"><button class="btn" data-act="new-unit">Добавить технику</button></div>');
+        '<div style="margin-top:20px"><button class="btn" data-act="new-unit">Добавить технику</button></div>');
       return h + '</div>';
     }
 
@@ -1710,77 +1761,68 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       h += '<div class="search">' + V.ICON.search +
         '<input id="qu" placeholder="Название или госномер" value="' + esc(V.unitsQuery) + '" autocomplete="off"></div>';
     }
-    h += '<div class="seg">' +
-      seg('all', 'Все', all.length) + seg('over', 'Перерасход', over) + seg('service', 'К ТО', svc) +
-      '</div>';
+    h += '<div class="seg">' + seg('all', 'Все', all.length) + seg('over', 'Перерасход', over) + seg('service', 'К ТО', svc) + '</div>';
 
     if (!list.length) {
       h += V.empty('🔍', 'Ничего не нашлось', 'Попробуйте другой запрос или снимите фильтр.');
     } else {
-      h += '<div class="list">';
-      list.forEach(function (u) { h += V.unitRow(u); });
+      h += '<div class="stack">';
+      list.forEach(function (u) { h += V.unitTicket(u); });
       h += '</div>';
       var m = CALC.month(U.monthKey(U.today())), lit = 0, cost = 0;
       list.forEach(function (u) {
         var b = m.byUnit[u.id];
         if (b) { lit += b.liters; cost += b.cost; }
       });
-      h += '<div style="font-size:13px;color:var(--text-2);margin:10px 4px">' +
-        U.unitsWord(list.length) + ' · за месяц ' + U.liters(lit) + ' на ' + U.money(cost) + '</div>';
+      h += '<div class="note">За месяц по этому списку — ' + U.liters(lit) + ' на ' + U.money(cost) + '.</div>';
     }
     return h + '</div>';
 
     function seg(k, t, n) {
       return '<button data-act="filter" data-f="' + k + '" class="' + (V.unitsFilter === k ? 'on' : '') + '">' +
-        t + (n ? ' <span class="cnt">' + n + '</span>' : '') + '</button>';
+        t + (n ? '<span class="cnt">' + n + '</span>' : '') + '</button>';
     }
   };
 
-  /* ============ ТОПЛИВО (бочка) ============ */
+  /* ============ ТОПЛИВО ============ */
   V.tank = function () {
     var fuels = CALC.tankFuels();
-    var h = V.topbar('Топливо');
-    h += '<div class="wrap"><h1 class="big">Топливо</h1>';
+    var h = V.topbar('Топливо', '<button data-act="new-supply">Приход</button>');
+    h += '<div class="wrap">' + V.hdr('Своя ёмкость', 'Топливо');
 
     if (!fuels.length) {
-      h += V.empty('🛢️', 'Своя бочка не ведётся',
+      h += V.empty('🛢️', 'Бочка не ведётся',
         'Внесите приход топлива — и приложение начнёт само списывать из бочки каждую заправку, показывать остаток и сколько дней его хватит.',
-        '<div style="margin-top:18px"><button class="btn" data-act="new-supply">Внести приход</button></div>');
+        '<div style="margin-top:20px"><button class="btn" data-act="new-supply">Внести приход</button></div>');
       return h + '</div>';
     }
 
     fuels.forEach(function (fuel) {
       var t = CALC.tank(fuel);
       var low = U.num(DB.data.settings.lowDays) || 5;
-      var cls = t.balance <= 0 ? 'bad' : (t.daysLeft != null && t.daysLeft <= low ? 'warn' : '');
-      var maxIn = 0;
-      t.supplies.forEach(function (s) { maxIn = Math.max(maxIn, U.num(s.liters)); });
-      var pct = maxIn > 0 ? Math.max(0, Math.min(100, t.balance / maxIn * 100)) : 0;
-
-      h += '<div class="card pad" style="margin-bottom:12px">' +
-        '<div class="lbl" style="font-size:13px;color:var(--text-2)">' + esc(U.fuel(fuel).name) + ' в бочке</div>' +
-        '<div class="amt num" style="font-size:34px;font-weight:700;letter-spacing:-1px;margin-top:2px">' +
-        U.liters(t.balance) + '</div>' +
-        '<div class="delta" style="font-size:13px;color:var(--text-2);margin-top:4px">' +
+      h += '<div class="panel">' +
+        '<div class="eyebrow">' + esc(U.fuel(fuel).name) + ' в бочке</div>' +
+        '<div class="metric num">' + U.liters(t.balance, true) + '<small>л</small></div>' +
+        '<div class="sub' + (t.daysLeft != null && t.daysLeft <= low ? ' bad' : '') + '">' +
         (t.daysLeft != null
           ? 'расход ' + U.liters(t.perDay) + ' в день — хватит примерно на ' + U.days(t.daysLeft)
-          : 'ещё нет выдач, чтобы оценить расход') + '</div>' +
-        '<div class="bar ' + cls + '"><i style="width:' + pct.toFixed(0) + '%"></i></div>' +
-        '<div class="kv" style="margin-top:10px"><span class="k">Всего заведено</span><span class="v num">' + U.liters(t.gotTotal) + '</span></div>' +
+          : 'выдач пока не было') + '</div>' +
+        V.gauge(t) +
+        '<div style="margin-top:12px">' +
+        '<div class="kv"><span class="k">Всего заведено</span><span class="v num">' + U.liters(t.gotTotal) + '</span></div>' +
         '<div class="kv"><span class="k">Выдано технике</span><span class="v num">' + U.liters(t.usedTotal) + '</span></div>' +
         (t.diff
-          ? '<div class="kv"><span class="k">Замер ' + U.fmtDate(t.diff.date) + '</span><span class="v num" style="color:' +
-            (t.diff.delta < -0.5 ? 'var(--red)' : 'var(--accent)') + '">' +
-            (t.diff.delta < 0 ? 'недостача ' + U.liters(-t.diff.delta) : t.diff.delta > 0.5 ? 'излишек ' + U.liters(t.diff.delta) : 'сошёлся') +
-            '</span></div>'
+          ? '<div class="kv"><span class="k">Замер ' + U.fmtDate(t.diff.date) + '</span><span class="v num ' +
+            (t.diff.delta < -0.5 ? 'bad' : 'good') + '">' +
+            (t.diff.delta < -0.5 ? 'недостача ' + U.liters(-t.diff.delta)
+              : t.diff.delta > 0.5 ? 'излишек ' + U.liters(t.diff.delta) : 'сошёлся') + '</span></div>'
           : '') +
-        '</div>';
+        '</div></div>';
     });
 
     h += '<div class="btn-row"><button class="btn sec" data-act="new-supply">Приход</button>' +
-      '<button class="btn sec" data-act="new-check">Замер</button></div>';
+      '<button class="btn sec" data-act="new-check">Замер остатка</button></div>';
 
-    /* движение топлива */
     var ops = [];
     DB.data.supplies.forEach(function (s) { ops.push({ kind: 'in', date: s.date, obj: s }); });
     DB.data.checks.forEach(function (c) { ops.push({ kind: 'check', date: c.date, obj: c }); });
@@ -1789,31 +1831,30 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     ops.sort(function (a, b) { return a.date < b.date ? 1 : a.date > b.date ? -1 : 0; });
 
     if (ops.length) {
-      h += '<h2 class="sec">Движение</h2><div class="list">';
+      h += '<h2 class="sec"><span>Движение</span></h2><div class="stack">';
       ops.slice(0, 20).forEach(function (o) {
         if (o.kind === 'in') {
-          h += '<button class="row tap" data-act="del-supply" data-id="' + o.obj.id + '">' +
-            '<span class="avatar" style="background:var(--accent-soft);color:var(--accent);font-size:16px">＋</span>' +
-            '<span class="grow"><span class="ttl">Приход · ' + esc(U.fuel(o.obj.fuel).short) + '</span>' +
-            '<span class="sub">' + U.fmtDate(o.date) + (o.obj.note ? ' · ' + esc(o.obj.note) : '') + '</span></span>' +
-            '<span class="val"><span class="v1 num" style="color:var(--accent)">+' + U.liters(o.obj.liters) + '</span>' +
-            '<span class="v2">' + U.money(o.obj.cost) + '</span></span></button>';
+          h += '<button class="ticket ok" data-act="del-supply" data-id="' + o.obj.id + '">' +
+            '<span class="t-ic">＋</span><span class="t-main">' +
+            '<span class="t-title">Приход · ' + esc(U.fuel(o.obj.fuel).short) + '</span>' +
+            '<span class="t-sub">' + U.fmtDate(o.date) + (o.obj.note ? ' · ' + esc(o.obj.note) : '') + '</span></span>' +
+            '<span class="t-val"><b class="good">+' + U.liters(o.obj.liters) + '</b><span>' + U.money(o.obj.cost) + '</span></span></button>';
         } else if (o.kind === 'check') {
-          h += '<button class="row tap" data-act="del-check" data-id="' + o.obj.id + '">' +
-            '<span class="avatar" style="background:var(--fill);color:var(--text-2);font-size:15px">📏</span>' +
-            '<span class="grow"><span class="ttl">Замер остатка</span>' +
-            '<span class="sub">' + U.fmtDate(o.date) + (o.obj.note ? ' · ' + esc(o.obj.note) : '') + '</span></span>' +
-            '<span class="val"><span class="v1 num">' + U.liters(o.obj.liters) + '</span></span></button>';
+          h += '<button class="ticket" data-act="del-check" data-id="' + o.obj.id + '">' +
+            '<span class="t-ic">📏</span><span class="t-main">' +
+            '<span class="t-title">Замер остатка</span>' +
+            '<span class="t-sub">' + U.fmtDate(o.date) + (o.obj.note ? ' · ' + esc(o.obj.note) : '') + '</span></span>' +
+            '<span class="t-val"><b>' + U.liters(o.obj.liters) + '</b></span></button>';
         } else {
           var u = DB.unit(o.obj.unitId) || { name: 'Техника удалена', kind: 'other' };
-          h += '<button class="row tap" data-act="edit-fill" data-id="' + o.obj.id + '">' + V.unitIcon(u) +
-            '<span class="grow"><span class="ttl">' + esc(u.name) + '</span>' +
-            '<span class="sub">' + U.fmtDate(o.date) + ' · выдача из бочки</span></span>' +
-            '<span class="val"><span class="v1 num">−' + U.liters(o.obj.liters) + '</span>' +
-            '<span class="v2">' + U.money(o.obj.cost) + '</span></span></button>';
+          h += '<button class="ticket" data-act="edit-fill" data-id="' + o.obj.id + '">' +
+            '<span class="t-ic">' + U.kind(u.kind).ic + '</span><span class="t-main">' +
+            '<span class="t-title">' + esc(u.name) + '</span>' +
+            '<span class="t-sub">' + U.fmtDate(o.date) + ' · выдача</span></span>' +
+            '<span class="t-val"><b>−' + U.liters(o.obj.liters) + '</b><span>' + U.money(o.obj.cost) + '</span></span></button>';
         }
       });
-      h += '</div><div class="hint">Заправка «из бочки» списывается автоматически — отдельно проводить расход не нужно. Нажмите на строку, чтобы изменить или удалить её.</div>';
+      h += '</div><div class="note">Заправка «из бочки» списывается автоматически — отдельно проводить расход не нужно. Нажмите на строку, чтобы изменить или удалить её.</div>';
     }
     return h + '</div>';
   };
@@ -1834,86 +1875,74 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     });
 
     var h = V.topbar('Ещё');
-    h += '<div class="wrap"><h1 class="big">Ещё</h1>';
+    h += '<div class="wrap">' + V.hdr('Итоги и настройки', 'Ещё');
 
-    h += '<div class="card pad">' +
-      '<div class="kv big"><span class="k">Залито за всё время</span><span class="v num">' + U.liters(totalL) + '</span></div>' +
-      '<div class="kv big"><span class="k">Потрачено на топливо</span><span class="v num">' + U.money(totalC) + '</span></div>' +
-      '<div class="kv"><span class="k">Перерасход к норме</span><span class="v num" style="color:' +
-      (extra > 0 ? 'var(--red)' : 'var(--text)') + '">' + U.money(extra) + '</span></div>' +
+    h += '<div class="panel">' +
+      '<div class="kv"><span class="k">Залито за всё время</span><span class="v num">' + U.liters(totalL) + '</span></div>' +
+      '<div class="kv"><span class="k">Потрачено на топливо</span><span class="v num">' + U.money(totalC) + '</span></div>' +
+      '<div class="kv"><span class="k">Перерасход к норме</span><span class="v num ' + (extra > 0 ? 'bad' : '') + '">' +
+      U.moneyShort(extra) + '</span></div>' +
       '<div class="kv"><span class="k">Техника</span><span class="v num">' + U.unitsWord(DB.units().length) + '</span></div>' +
       '</div>';
 
     if (list.length) {
-      h += '<h2 class="sec">По месяцам</h2><div class="list">';
+      h += '<h2 class="sec"><span>По месяцам</span><span class="act">отчёт</span></h2><div class="rows">';
       list.forEach(function (k) {
         var m = CALC.month(k);
-        h += '<button class="row tap" data-act="report" data-m="' + k + '">' +
-          '<span class="grow"><span class="ttl">' + esc(U.monthName(k)) + '</span>' +
-          '<span class="sub">' + U.liters(m.liters) + ' · ' + m.count + ' ' +
+        h += '<button class="row" data-act="report" data-m="' + k + '">' +
+          '<span class="r-main"><span class="r-t">' + esc(U.monthName(k)) + '</span>' +
+          '<span class="r-s">' + U.liters(m.liters) + ' · ' + m.count + ' ' +
           U.plural(m.count, 'заправка', 'заправки', 'заправок') +
           (m.extraCost > 0 ? ' · перерасход ' + U.moneyShort(m.extraCost) : '') + '</span></span>' +
-          '<span class="val"><span class="v1 num">' + U.moneyShort(m.cost) + '</span>' +
-          '<span class="v2">отчёт</span></span><span class="chev">' + V.ICON.chev + '</span></button>';
+          '<span class="r-v">' + U.moneyShort(m.cost) + '<small>открыть</small></span></button>';
       });
-      h += '</div><div class="hint">Нажмите на месяц — приложение соберёт короткий отчёт, который можно отправить в мессенджер.</div>';
+      h += '</div><div class="note">Нажмите на месяц — приложение соберёт короткий отчёт, который отправляется в мессенджер одной кнопкой.</div>';
     }
 
-    h += '<h2 class="sec">Настройки</h2><div class="list">';
-    h += '<div class="field"><label>Валюта</label><select data-act="set" data-k="currency">' +
-      U.CUR.map(function (c) {
-        return '<option value="' + c.code + '"' + (st.currency === c.code ? ' selected' : '') + '>' + esc(c.name) + ' · ' + esc(c.sym) + '</option>';
-      }).join('') + '</select></div>';
-    h += '<div class="field"><label>Топливо</label><select data-act="set" data-k="fuel">' +
-      U.FUELS.map(function (f) {
-        return '<option value="' + f.code + '"' + (st.fuel === f.code ? ' selected' : '') + '>' + esc(f.name) + '</option>';
-      }).join('') + '</select></div>';
-    h += '<div class="field"><label>Заправляют</label><select data-act="set" data-k="source">' +
-      [['tank', 'из своей бочки'], ['station', 'на АЗС']].map(function (t) {
-        return '<option value="' + t[0] + '"' + (st.source === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
-      }).join('') + '</select></div>';
-    h += '<div class="field"><label>Перерасход от</label><input type="number" inputmode="decimal" step="1" value="' +
+    h += '<h2 class="sec"><span>Настройки</span></h2><div class="form">';
+    h += fldSelect('Валюта', 'currency', U.CUR.map(function (c) { return [c.code, c.name + ' · ' + c.sym]; }), st.currency);
+    h += fldSelect('Топливо', 'fuel', U.FUELS.map(function (f) { return [f.code, f.name]; }), st.fuel);
+    h += fldSelect('Заправляют', 'source', [['tank', 'из своей бочки'], ['station', 'на АЗС']], st.source);
+    h += '<div class="fld"><label>Перерасход от</label><input type="number" inputmode="decimal" value="' +
       st.overrun + '" data-act="set" data-k="overrun"><span class="unit">% к норме</span></div>';
-    h += '<div class="field"><label>Предупредить за</label><input type="number" inputmode="numeric" value="' +
+    h += '<div class="fld"><label>Предупредить за</label><input type="number" inputmode="numeric" value="' +
       st.lowDays + '" data-act="set" data-k="lowDays"><span class="unit">дней</span></div>';
-    h += '<div class="field"><label>Оформление</label><select data-act="set" data-k="theme">' +
-      [['auto', 'Как в системе'], ['light', 'Светлое'], ['dark', 'Тёмное']].map(function (t) {
-        return '<option value="' + t[0] + '"' + (st.theme === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
-      }).join('') + '</select></div>';
-    h += '</div><div class="hint">Топливо и источник подставляются в новую заправку — в каждой записи их можно поменять. ' +
-      '«Перерасход от» — с какого отклонения техника считается прожорливой, «предупредить за» — за сколько дней до пустой бочки напомнить.</div>';
+    h += fldSelect('Оформление', 'theme', [['auto', 'Как в системе'], ['dark', 'Тёмное'], ['light', 'Светлое']], st.theme);
+    h += '</div><div class="note">«Перерасход от» — с какого отклонения техника попадает в список прожорливых. «Предупредить за» — за сколько дней до пустой бочки напомнить.</div>';
 
-    h += '<h2 class="sec">Защита</h2><div class="list">' +
-      '<button class="row tap" data-act="pin">' +
-      '<span class="grow"><span class="ttl">Код-пароль</span><span class="sub">' +
-      (st.pin ? 'включён — спрашивается при запуске' : 'выключен') + '</span></span>' +
-      '<span class="val"><span class="v1" style="color:var(--accent);font-size:15px">' + (st.pin ? 'Изменить' : 'Включить') + '</span></span></button>' +
-      (st.pin ? '<button class="row tap" data-act="pin-off"><span class="grow"><span class="ttl" style="color:var(--red)">Отключить код</span></span></button>' : '') +
+    h += '<h2 class="sec"><span>Данные</span></h2><div class="rows">' +
+      row('export-json', 'Сохранить резервную копию', st.lastExport ? 'последняя: ' + U.fmtDate(st.lastExport) : 'ещё ни разу') +
+      row('export-csv', 'Выгрузить таблицу CSV', 'заправки и приход — для Excel и бухгалтерии') +
+      row('import', 'Загрузить базу', 'копия приложения или таблица CSV') +
+      row('pin', 'Код-пароль', st.pin ? 'включён — спрашивается при запуске' : 'выключен') +
+      (st.pin ? '<button class="row danger" data-act="pin-off"><span class="r-main"><span class="r-t">Отключить код</span></span></button>' : '') +
+      '<button class="row danger" data-act="wipe"><span class="r-main"><span class="r-t">Стереть все данные</span>' +
+      '<span class="r-s">без резервной копии не вернуть</span></span></button>' +
       '</div>';
-
-    h += '<h2 class="sec">Данные</h2><div class="list">' +
-      rowBtn('export-json', 'Сохранить резервную копию', st.lastExport ? 'последняя: ' + U.fmtDate(st.lastExport) : 'ещё ни разу') +
-      rowBtn('export-csv', 'Выгрузить таблицу CSV', 'заправки и приход — для Excel и бухгалтерии') +
-      rowBtn('import', 'Загрузить базу', 'копия приложения или таблица CSV') +
-      '<button class="row tap" data-act="wipe"><span class="grow"><span class="ttl" style="color:var(--red)">Стереть все данные</span></span></button>' +
-      '</div>';
-    h += '<div class="hint">Всё хранится <b>только на этом телефоне</b>, без сервера и интернета. Делайте копию хотя бы раз в месяц.</div>';
+    h += '<div class="note">Всё хранится <b>только на этом телефоне</b>, без сервера и интернета. Делайте копию хотя бы раз в месяц.</div>';
 
     if (st.lastExport && U.diffDays(st.lastExport, U.today()) > 14) {
-      h += '<div class="card pad" style="margin-top:12px;background:var(--warn-soft);font-size:14px">' +
+      h += '<div class="panel" style="margin-top:10px;border-color:var(--amber);background:var(--amber-soft);font-size:14px;line-height:1.5">' +
         'Резервной копии не было ' + U.days(U.diffDays(st.lastExport, U.today())) + '. Сохраните — это одна кнопка.</div>';
     }
 
-    h += '<h2 class="sec">Установка на iPhone</h2><div class="card pad" style="font-size:15px;line-height:1.5;color:var(--text-2)">' +
-      '1. Откройте эту страницу в Safari.<br>2. Нажмите «Поделиться» (квадрат со стрелкой).<br>' +
-      '3. Выберите «На экран «Домой»».<br>4. Запускайте с иконки — интернет не нужен.</div>';
+    h += '<h2 class="sec"><span>Установка на iPhone</span></h2>' +
+      '<div class="panel" style="font-size:14.5px;line-height:1.6;color:var(--text-2)">' +
+      '1. Откройте эту страницу в Safari.<br>2. Нажмите «Поделиться» — квадрат со стрелкой.<br>' +
+      '3. Выберите «На экран „Домой“».<br>4. Запускайте с иконки — интернет не нужен.</div>';
 
-    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Топливо · версия 1.0</div>';
+    h += '<div style="text-align:center;color:var(--text-3);font-size:12px;margin:24px 0 8px;letter-spacing:.08em;text-transform:uppercase">Топливо · версия 1.0</div>';
     return h + '</div>';
 
-    function rowBtn(act, t, sub) {
-      return '<button class="row tap" data-act="' + act + '"><span class="grow"><span class="ttl">' + t + '</span>' +
-        (sub ? '<span class="sub">' + esc(sub) + '</span>' : '') + '</span><span class="chev">' + V.ICON.chev + '</span></button>';
+    function row(act, t, sub) {
+      return '<button class="row" data-act="' + act + '"><span class="r-main"><span class="r-t">' + esc(t) + '</span>' +
+        (sub ? '<span class="r-s">' + esc(sub) + '</span>' : '') + '</span></button>';
+    }
+    function fldSelect(label, key, opts, val) {
+      return '<div class="fld"><label>' + esc(label) + '</label><select data-act="set" data-k="' + key + '">' +
+        opts.map(function (o) {
+          return '<option value="' + o[0] + '"' + (val === o[0] ? ' selected' : '') + '>' + esc(o[1]) + '</option>';
+        }).join('') + '</select></div>';
     }
   };
 
@@ -1930,6 +1959,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   V.spark = function (u, segs) {
     var good = segs.filter(function (s) { return s.rate != null; }).slice(-12);
     if (good.length < 2) return '';
+
     /* шкала не от нуля: около нормы разница в 5% иначе не видна */
     var hi = u.norm > 0 ? u.norm : 0, lo = u.norm > 0 ? u.norm : Infinity;
     good.forEach(function (s) { hi = Math.max(hi, s.rate); lo = Math.min(lo, s.rate); });
@@ -1941,15 +1971,15 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     var bars = good.map(function (s) {
       var over = u.norm > 0 && s.rate > u.norm * (1 + lim / 100);
       return '<div class="b' + (over ? ' over' : '') + '" style="height:' + pos(s.rate).toFixed(1) + '%" ' +
-        'title="' + U.rate(s.rate, u.meter) + '"><i style="height:100%"></i></div>';
+        'title="' + U.rate(s.rate, u.meter) + '"></div>';
     }).join('');
 
-    var normLine = u.norm > 0
+    var norm = u.norm > 0
       ? '<div style="position:absolute;left:0;right:0;bottom:' + pos(u.norm).toFixed(1) + '%;' +
         'border-top:1.5px dashed var(--text-2);pointer-events:none;z-index:2"></div>'
       : '';
 
-    return '<div style="position:relative"><div class="spark">' + bars + '</div>' + normLine + '</div>' +
+    return '<div style="position:relative"><div class="spark">' + bars + '</div>' + norm + '</div>' +
       '<div class="spark-x"><span>' + U.fmtDate(good[0].to.date) + '</span>' +
       (u.norm > 0 ? '<span>пунктир — норма ' + U.rate(u.norm, u.meter) + '</span>' : '') +
       '<span>' + U.fmtDate(good[good.length - 1].to.date) + '</span></div>';
@@ -1958,112 +1988,107 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   /* ============ КАРТОЧКА ТЕХНИКИ ============ */
   V.unitDetail = function (id) {
     var u = DB.unit(id);
-    if (!u) return V.topbarBack('Техника') + '<div class="wrap">' +
+    if (!u) return V.topbar('Техника', '', true) + '<div class="wrap">' +
       V.empty('🤷', 'Техника не найдена', 'Возможно, она была удалена.') + '</div>';
 
     var s = CALC.unit(u);
     var mk = U.monthKey(U.today());
     var m = CALC.month(mk).byUnit[u.id] || { liters: 0, cost: 0, run: 0 };
 
-    var h = V.topbarBack(u.name, '<button data-act="edit-unit" data-id="' + u.id + '" style="font-size:16px">Изменить</button>');
+    var h = V.topbar(u.name, '<button data-act="edit-unit" data-id="' + u.id + '">Изменить</button>', true);
     h += '<div class="wrap">';
-    h += '<h1 class="big" style="margin-bottom:6px">' + esc(u.name) + '</h1>';
-    h += '<div style="margin-bottom:14px">' + V.devBadge(s) + ' ' +
-      '<span class="badge">' + esc(U.kind(u.kind).name) + '</span> ' +
-      (u.plate ? '<span class="badge">' + esc(u.plate) + '</span> ' : '') +
-      '<span class="badge">' + esc(U.fuel(u.fuel).short) + '</span></div>';
+    h += V.hdr(U.kind(u.kind).name + (u.plate ? ' · ' + u.plate : ''), u.name);
+    h += '<div class="pills" style="margin:-8px 0 12px">' + V.devPill(s) +
+      '<span class="pill">' + esc(U.fuel(u.fuel).short) + '</span>' +
+      (u.tank ? '<span class="pill">бак ' + U.liters(u.tank) + '</span>' : '') + '</div>';
 
-    /* главное число — фактический расход */
-    h += '<div class="hero">' +
-      '<div class="lbl">Средний расход</div>' +
-      '<div class="amt num">' + (s.avg != null ? U.rate(s.avg, u.meter) : '—') + '</div>' +
-      '<div class="delta">' +
-      (u.norm > 0 ? 'норма ' + U.rate(u.norm, u.meter) : 'норма не задана') +
+    /* главное — фактический расход */
+    h += '<div class="panel">' +
+      '<div class="eyebrow">Средний расход</div>' +
+      '<div class="metric num">' + (s.avg != null ? U.rate(s.avg, u.meter, true) : '—') +
+      '<small>' + U.rateUnit(u.meter) + '</small></div>' +
+      '<div class="sub">' + (u.norm > 0 ? 'норма ' + U.rate(u.norm, u.meter) : 'норма не задана') +
       (s.dev != null ? ' · отклонение ' + U.pct(s.dev, true) : '') + '</div>' +
+      V.devbar(s.dev) +
       (s.extraLiters > 0.5
-        ? '<div class="delta" style="color:var(--red);font-weight:600">лишних ' + U.liters(s.extraLiters) +
-          ' ≈ ' + U.moneyShort(s.extraCost) + ' за всё время наблюдений</div>'
+        ? '<div class="sub bad">лишних ' + U.liters(s.extraLiters) + ' ≈ ' + U.moneyShort(s.extraCost) + ' за всё время</div>'
         : (s.extraLiters < -0.5 && s.avg != null
-          ? '<div class="delta" style="color:var(--accent);font-weight:600">экономия ' + U.liters(-s.extraLiters) +
-            ' ≈ ' + U.moneyShort(-s.extraCost) + '</div>' : '')) +
+          ? '<div class="sub good">экономия ' + U.liters(-s.extraLiters) + ' ≈ ' + U.moneyShort(-s.extraCost) + '</div>' : '')) +
       V.spark(u, s.segments) +
       '</div>';
 
     h += '<div class="btn-row">' +
       '<button class="btn" data-act="new-fill" data-unit="' + u.id + '">Заправка</button>' +
-      (s.last ? '<button class="btn sec" data-act="repeat-fill" data-unit="' + u.id + '">Как в прошлый раз</button>' : '') +
+      (s.last ? '<button class="btn sec" data-act="repeat-fill" data-unit="' + u.id + '">Повторить</button>' : '') +
       '</div>';
 
-    h += '<div class="stats">' +
-      '<div class="stat"><div class="k">За этот месяц</div><div class="v num">' + U.liters(m.liters) + '</div>' +
-      '<div class="k" style="margin-top:3px">' + U.money(m.cost) + '</div></div>' +
-      '<div class="stat"><div class="k">Счётчик</div><div class="v num sm">' + U.meter(s.meterNow, u.meter) + '</div>' +
-      '<div class="k" style="margin-top:3px">' + (s.perDay > 0 ? U.dec(s.perDay, 1) + ' ' + U.meterUnit(u.meter) + ' в день' : 'нет данных') + '</div></div>' +
-      '<div class="stat"><div class="k">Всего залито</div><div class="v num sm">' + U.liters(s.totalLiters) + '</div>' +
-      '<div class="k" style="margin-top:3px">' + U.money(s.totalCost) + '</div></div>' +
-      '<div class="stat"><div class="k">Последняя заправка</div><div class="v num sm">' +
-      (s.last ? U.fmtDate(s.last.date) : '—') + '</div>' +
-      '<div class="k" style="margin-top:3px">' + (s.idleDays != null ? U.days(s.idleDays) + ' назад' : '') + '</div></div>' +
+    h += '<div class="grid-2">' +
+      tile('За этот месяц', U.liters(m.liters), U.money(m.cost)) +
+      tile('Счётчик', U.meter(s.meterNow, u.meter),
+        s.perDay > 0 ? U.dec(s.perDay, 1) + ' ' + U.meterUnit(u.meter) + ' в день' : 'нет данных') +
+      tile('Всего залито', U.liters(s.totalLiters), U.money(s.totalCost)) +
+      tile('Последняя заправка', s.last ? U.fmtDate(s.last.date) : '—',
+        s.idleDays != null ? (s.idleDays === 0 ? 'сегодня' : U.days(s.idleDays) + ' назад') : '') +
       '</div>';
 
     /* обслуживание */
     if (s.service) {
       var sv = s.service;
       var pct = Math.max(0, Math.min(100, sv.since / sv.every * 100));
-      h += '<h2 class="sec">Обслуживание</h2><div class="card pad">' +
-        '<div class="kv big"><span class="k">' + (sv.due ? 'ТО просрочено' : 'До ТО') + '</span>' +
-        '<span class="v num" style="color:' + (sv.due ? 'var(--red)' : sv.soon ? 'var(--orange)' : 'var(--text)') + '">' +
+      h += '<h2 class="sec"><span>Обслуживание</span></h2><div class="panel">' +
+        '<div class="panel-hd"><span class="eyebrow">' + (sv.due ? 'ТО просрочено' : 'До ТО') + '</span>' +
+        '<span class="num" style="font-size:21px;font-weight:800;color:' +
+        (sv.due ? 'var(--red)' : sv.soon ? 'var(--amber)' : 'var(--text)') + '">' +
         U.meter(Math.abs(sv.left), u.meter) + '</span></div>' +
-        '<div class="bar ' + (sv.due ? 'bad' : sv.soon ? 'warn' : '') + '"><i style="width:' + pct.toFixed(0) + '%"></i></div>' +
-        '<div class="hint" style="padding:10px 0 0">Наработка с последнего ТО — ' + U.meter(sv.since, u.meter) +
+        '<div class="progress ' + (sv.due ? 'bad' : '') + '"><i style="width:' + pct.toFixed(0) + '%"></i></div>' +
+        '<div class="note" style="padding:10px 0 0">Наработка с последнего ТО — ' + U.meter(sv.since, u.meter) +
         ' из ' + U.meter(sv.every, u.meter) +
         (sv.days != null && !sv.due ? '. При нынешнем темпе это примерно ' + U.days(sv.days) + '.' : '.') + '</div>' +
-        '<button class="btn sec sm" style="width:100%;margin-top:12px" data-act="service-done" data-id="' + u.id + '">Отметить ТО сегодня</button>' +
+        '<button class="btn sec sm" style="margin-top:12px;width:100%" data-act="service-done" data-id="' + u.id + '">Отметить ТО сегодня</button>' +
         '</div>';
     }
 
-    /* сигналы по этой единице */
     if (s.alerts.length) {
-      h += '<h2 class="sec">Замечания</h2><div class="list">';
+      h += '<h2 class="sec"><span>Замечания</span></h2><div class="stack">';
       s.alerts.forEach(function (a) {
-        h += '<div class="alert' + (a.type === 'overrun' || a.type === 'service' ? ' bad' : '') + '">' +
-          '<span class="ic">⚠️</span><span class="tx"><span>' + esc(a.text) + '</span></span></div>';
+        h += '<div class="ticket ' + (a.type === 'overrun' || a.type === 'service' ? 'bad' : 'warn') + '">' +
+          '<span class="t-ic">⚠️</span><span class="t-main">' +
+          '<span class="t-sub" style="white-space:normal;margin:0;font-size:14px;color:var(--text)">' + esc(a.text) + '</span></span></div>';
       });
       h += '</div>';
     }
 
-    /* история заправок */
-    h += '<h2 class="sec">Заправки<span class="act">' + s.count + '</span></h2>';
+    h += '<h2 class="sec"><span>Заправки</span><span class="act">' + s.count + '</span></h2>';
     if (!s.count) {
       h += V.empty('⛽', 'Заправок ещё не было',
         'Первая заправка задаёт точку отсчёта — расход посчитается со второй.',
-        '<div style="margin-top:16px"><button class="btn" data-act="new-fill" data-unit="' + u.id + '">Записать заправку</button></div>');
+        '<div style="margin-top:18px"><button class="btn" data-act="new-fill" data-unit="' + u.id + '">Записать заправку</button></div>');
     } else {
-      h += '<div class="list">';
-      s.fills.slice().reverse().slice(0, 40).forEach(function (f) {
-        h += V.fillRow(f, { noIcon: true });
-      });
-      h += '</div>';
-      h += '<div class="hint">Расход считается от полной заправки до полной. Строки без расхода — те, где счётчик не рос или бак заливали не до полного.</div>';
+      h += '<div class="stack">';
+      s.fills.slice().reverse().slice(0, 40).forEach(function (f) { h += V.fillTicket(f, { noIcon: true }); });
+      h += '</div><div class="note">Расход считается от полной заправки до полной. Строки без расхода — те, где счётчик не рос или бак заливали не до полного.</div>';
     }
 
     if (u.note) {
-      h += '<h2 class="sec">Заметка</h2><div class="card pad" style="font-size:15px;color:var(--text-2)">' + esc(u.note) + '</div>';
+      h += '<h2 class="sec"><span>Заметка</span></h2><div class="panel" style="font-size:14.5px;color:var(--text-2);line-height:1.5">' + esc(u.note) + '</div>';
     }
 
-    h += '<div class="btn-row" style="margin-top:22px">' +
+    h += '<div class="btn-row" style="margin-top:20px">' +
       '<button class="btn sec" data-act="edit-unit" data-id="' + u.id + '">Изменить</button>' +
       '<button class="btn danger" data-act="del-unit" data-id="' + u.id + '">Удалить</button></div>';
 
     return h + '</div>';
+
+    function tile(k, v, n) {
+      return '<div class="tile"><div class="k">' + esc(k) + '</div><div class="v num">' + v + '</div>' +
+        (n ? '<div class="n">' + esc(n) + '</div>' : '') + '</div>';
+    }
   };
 
   var F = {};
 
-  /* предыдущая заправка этой же техники */
   function prevFill(u, f) {
-    var list = DB.fillsOf(u.id);
-    var i = -1;
+    var list = DB.fillsOf(u.id), i = -1;
     for (var k = 0; k < list.length; k++) if (list[k].id === f.id) i = k;
     return i > 0 ? list[i - 1] : null;
   }
@@ -2094,24 +2119,23 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       forecast = Math.round(U.num(prev.meter) + s.perDay * days);
     }
 
-    var h = '<div class="list">';
-    h += '<div class="field"><label>Техника</label><select id="f-unit">' +
+    var h = '<div class="form">';
+    h += '<div class="fld"><label>Техника</label><select id="f-unit">' +
       units.map(function (x) {
         return '<option value="' + x.id + '"' + (x.id === u.id ? ' selected' : '') + '>' + esc(x.name) + '</option>';
       }).join('') + '</select></div>';
-    h += '<div class="field"><label>Литры</label>' +
-      '<input id="f-lit" type="text" inputmode="decimal" placeholder="0" style="font-size:22px;font-weight:600" value="' +
+    h += '<div class="fld big"><label>Литры</label><input id="f-lit" type="text" inputmode="decimal" placeholder="0" value="' +
       (f ? String(f.liters).replace('.', ',') : (preset ? String(preset.liters).replace('.', ',') : '')) + '"><span class="unit">л</span></div>';
-    h += '<div class="field"><label>Цена за литр</label><input id="f-price" type="text" inputmode="decimal" value="' +
-      (price ? String(price).replace('.', ',') : '') + '"><span class="unit">' + esc(U.sym()) + '</span></div>';
-    h += '<div class="field"><label>Сумма</label><input id="f-cost" type="text" inputmode="decimal" placeholder="0"><span class="unit">' + esc(U.sym()) + '</span></div>';
-    h += '<div class="field"><label>Счётчик</label><input id="f-meter" type="text" inputmode="numeric" placeholder="' +
+    h += '<div class="fld"><label>Счётчик</label><input id="f-meter" type="text" inputmode="numeric" placeholder="' +
       (prev ? 'было ' + U.int(prev.meter) : U.meterName(u.meter)) + '" value="' +
       (f && f.meter ? U.num(f.meter) : '') + '"><span class="unit" id="f-mu">' + U.meterUnit(u.meter) + '</span></div>';
-    h += '<div class="field"><label>Дата</label><input id="f-date" type="date" value="' + (f ? f.date : U.today()) + '"></div>';
+    h += '<div class="fld"><label>Цена за литр</label><input id="f-price" type="text" inputmode="decimal" value="' +
+      (price ? U.int(price) : '') + '"><span class="unit">' + esc(U.sym()) + '</span></div>';
+    h += '<div class="fld"><label>Сумма</label><input id="f-cost" type="text" inputmode="decimal" placeholder="0"><span class="unit">' + esc(U.sym()) + '</span></div>';
+    h += '<div class="fld"><label>Дата</label><input id="f-date" type="date" value="' + (f ? f.date : U.today()) + '"></div>';
     h += '</div>';
 
-    h += '<div class="chips" style="margin-top:12px;border-radius:var(--radius)">' +
+    h += '<div class="chips" style="margin-top:10px">' +
       '<button class="chip' + (source === 'tank' ? ' on' : '') + '" data-src="tank">Из бочки</button>' +
       '<button class="chip' + (source === 'station' ? ' on' : '') + '" data-src="station">АЗС</button>' +
       '<button class="chip' + (full ? ' on' : '') + '" data-full="1">До полного бака</button>' +
@@ -2119,17 +2143,15 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       (prev && prev.liters ? '<button class="chip" data-lit="' + prev.liters + '">Как в прошлый раз · ' + U.liters(prev.liters) + '</button>' : '') +
       '</div>';
 
-    h += '<div class="list" style="margin-top:12px">' +
-      '<div class="field"><label>Заправлял</label><input id="f-op" type="text" placeholder="имя водителя" value="' +
+    h += '<div class="panel" id="f-prev" style="margin-top:12px"></div>';
+
+    h += '<div class="form" style="margin-top:10px">' +
+      '<div class="fld"><label>Заправлял</label><input id="f-op" type="text" placeholder="имя водителя" value="' +
       esc(f ? f.operator || '' : (preset ? preset.operator || '' : '')) + '"></div>' +
-      '<div class="field col"><label>Заметка</label><textarea id="f-note" style="min-height:44px" placeholder="объект, смена, номер чека…">' +
+      '<div class="fld col"><label>Заметка</label><textarea id="f-note" placeholder="объект, смена, номер чека…">' +
       esc(f ? f.note || '' : '') + '</textarea></div></div>';
 
-    h += '<div class="card pad" id="f-prev" style="margin-top:14px"></div>';
-
-    if (f) {
-      h += '<button class="btn danger" style="margin-top:14px" data-del="' + f.id + '">Удалить заправку</button>';
-    }
+    if (f) h += '<button class="btn danger" style="margin-top:12px" data-del="' + f.id + '">Удалить заправку</button>';
 
     App.sheet({
       title: f ? 'Заправка' : 'Новая заправка',
@@ -2137,8 +2159,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       onOpen: function (bd) {
         var $ = function (sel) { return bd.querySelector(sel); };
         var litEl = $('#f-lit'), priceEl = $('#f-price'), costEl = $('#f-cost'), meterEl = $('#f-meter');
-        var srcEl = 'tank', fullEl = full;
-        srcEl = source;
+        var srcEl = source, fullEl = full;
 
         function cur() { return DB.unit($('#f-unit').value) || u; }
 
@@ -2154,7 +2175,6 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
           var pv = f ? prevFill(cu, f) : cs.last;
           var out = [];
 
-          /* расход на участке */
           if (lit > 0 && meter > 0 && pv && U.num(pv.meter) > 0) {
             var run = meter - U.num(pv.meter);
             if (run > 0) {
@@ -2164,13 +2184,13 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
                 var dev = (rate - cu.norm) / cu.norm * 100;
                 txt += '<br>Норма ' + U.rate(cu.norm, cu.meter) + ' — ' +
                   (dev > 0.5 ? '<b style="color:var(--red)">перерасход ' + U.pct(dev, true) + '</b>'
-                    : dev < -0.5 ? '<b style="color:var(--accent)">экономия ' + U.pct(-dev) + '</b>' : 'ровно по норме');
+                    : dev < -0.5 ? '<b style="color:var(--green)">экономия ' + U.pct(-dev) + '</b>' : 'ровно по норме');
               }
               out.push(txt);
             } else if (run < 0) {
               out.push('<b style="color:var(--red)">Счётчик меньше прошлого показания (' + U.int(pv.meter) + ')</b> — проверьте цифру');
             } else {
-              out.push('<b style="color:var(--orange)">Счётчик не изменился с прошлой заправки</b>');
+              out.push('<b style="color:var(--amber)">Счётчик не изменился с прошлой заправки</b>');
             }
           } else if (lit > 0 && !meter) {
             out.push('Без показания счётчика расход посчитать не получится — запись сохранится, но в статистику не войдёт.');
@@ -2186,9 +2206,9 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
           }
           if (!fullEl) out.push('Заправка не до полного — расход посчитается на следующей полной.');
 
-          $('#f-prev').innerHTML = out.length
-            ? '<div style="font-size:14px;line-height:1.5;color:var(--text-2)">' + out.join('<br><br>') + '</div>'
-            : '<div style="font-size:14px;color:var(--text-2)">Введите литры и показание счётчика — приложение сразу покажет расход.</div>';
+          $('#f-prev').innerHTML = '<div style="font-size:14px;line-height:1.55;color:var(--text-2)">' +
+            (out.length ? out.join('<br><br>')
+              : 'Введите литры и показание счётчика — расход посчитается сразу.') + '</div>';
         }
         draw();
 
@@ -2202,9 +2222,8 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         });
         meterEl.addEventListener('input', draw);
         $('#f-unit').addEventListener('change', function () {
-          var cu = cur();
+          var cu = cur(), cs = CALC.unit(cu);
           $('#f-mu').textContent = U.meterUnit(cu.meter);
-          var cs = CALC.unit(cu);
           meterEl.placeholder = cs.last ? 'было ' + U.int(cs.last.meter) : U.meterName(cu.meter);
           if (!priceEl.value) priceEl.value = DB.price(cu.fuel) || '';
           draw();
@@ -2267,9 +2286,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         else {
           DB.addFill(patch);
           var seg = CALC.segmentOf(cu, DB.lastFill(cu.id).id);
-          U.toast(seg && seg.rate != null
-            ? 'Записано · расход ' + U.rate(seg.rate, cu.meter)
-            : 'Заправка записана');
+          U.toast(seg && seg.rate != null ? 'Записано · расход ' + U.rate(seg.rate, cu.meter) : 'Заправка записана');
         }
         App.render();
         return true;
@@ -2286,37 +2303,37 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     var sv = (u && u.service) || {};
     var cur = u ? CALC.unit(u) : null;
 
-    var h = '<div class="list">' +
-      '<div class="field"><label>Название</label><input id="u-name" placeholder="Самосвал №1" value="' + esc(u ? u.name : '') + '" autocomplete="off"></div>' +
-      '<div class="field"><label>Вид</label><select id="u-kind">' +
+    var h = '<div class="form">' +
+      '<div class="fld"><label>Название</label><input id="u-name" placeholder="Самосвал №1" value="' + esc(u ? u.name : '') + '" autocomplete="off"></div>' +
+      '<div class="fld"><label>Вид</label><select id="u-kind">' +
       U.KINDS.map(function (k) {
         return '<option value="' + k.code + '"' + (kind === k.code ? ' selected' : '') + '>' + k.ic + ' ' + esc(k.name) + '</option>';
       }).join('') + '</select></div>' +
-      '<div class="field"><label>Счётчик</label><select id="u-meter">' +
+      '<div class="fld"><label>Счётчик</label><select id="u-meter">' +
       [['km', 'Пробег, км'], ['mh', 'Моточасы']].map(function (t) {
         return '<option value="' + t[0] + '"' + (meter === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
       }).join('') + '</select></div>' +
-      '<div class="field"><label>Госномер</label><input id="u-plate" placeholder="не обязательно" value="' + esc(u ? u.plate || '' : '') + '"></div>' +
-      '<div class="field"><label>Топливо</label><select id="u-fuel">' +
+      '<div class="fld"><label>Госномер</label><input id="u-plate" placeholder="не обязательно" value="' + esc(u ? u.plate || '' : '') + '"></div>' +
+      '<div class="fld"><label>Топливо</label><select id="u-fuel">' +
       U.FUELS.map(function (x) {
         return '<option value="' + x.code + '"' + ((u ? u.fuel : st.fuel) === x.code ? ' selected' : '') + '>' + esc(x.name) + '</option>';
       }).join('') + '</select></div>' +
-      '<div class="field"><label>Норма</label><input id="u-norm" type="text" inputmode="decimal" placeholder="0" value="' +
+      '<div class="fld"><label>Норма</label><input id="u-norm" type="text" inputmode="decimal" placeholder="0" value="' +
       (u && u.norm ? String(u.norm).replace('.', ',') : '') + '"><span class="unit" id="u-nu">' + U.rateUnit(meter) + '</span></div>' +
-      '<div class="field"><label>Объём бака</label><input id="u-tank" type="text" inputmode="decimal" placeholder="не обязательно" value="' +
+      '<div class="fld"><label>Объём бака</label><input id="u-tank" type="text" inputmode="decimal" placeholder="не обязательно" value="' +
       (u && u.tank ? U.num(u.tank) : '') + '"><span class="unit">л</span></div>' +
       '</div>' +
-      '<div class="hint">Норма — паспортный или ваш собственный расход. По ней приложение считает перерасход в литрах и деньгах. Объём бака нужен, чтобы ловить заправки «больше, чем влезает».</div>';
+      '<div class="note">Норма — паспортный или ваш собственный расход. По ней считается перерасход в литрах и деньгах. Объём бака нужен, чтобы ловить заправки «больше, чем влезает».</div>';
 
-    h += '<h2 class="sec">Обслуживание</h2><div class="list">' +
-      '<div class="field"><label>ТО каждые</label><input id="u-svc" type="text" inputmode="numeric" placeholder="не следить" value="' +
+    h += '<h2 class="sec"><span>Обслуживание</span></h2><div class="form">' +
+      '<div class="fld"><label>ТО каждые</label><input id="u-svc" type="text" inputmode="numeric" placeholder="не следить" value="' +
       (sv.every ? U.num(sv.every) : '') + '"><span class="unit" id="u-su">' + U.meterUnit(meter) + '</span></div>' +
-      '<div class="field"><label>Последнее ТО</label><input id="u-svcm" type="text" inputmode="numeric" placeholder="' +
+      '<div class="fld"><label>Последнее ТО</label><input id="u-svcm" type="text" inputmode="numeric" placeholder="' +
       (cur && cur.meterNow ? 'сейчас ' + U.int(cur.meterNow) : 'показание счётчика') + '" value="' +
       (sv.lastMeter ? U.num(sv.lastMeter) : '') + '"><span class="unit" id="u-su2">' + U.meterUnit(meter) + '</span></div>' +
-      '</div><div class="hint">Приложение посчитает наработку с этого показания и предупредит заранее — с запасом в 15%.</div>';
+      '</div><div class="note">Приложение посчитает наработку с этого показания и предупредит заранее — с запасом в 15%.</div>';
 
-    h += '<div class="list" style="margin-top:12px"><div class="field col"><label>Заметка</label>' +
+    h += '<div class="form" style="margin-top:10px"><div class="fld col"><label>Заметка</label>' +
       '<textarea id="u-note" placeholder="объект, водитель, особенности…">' + esc(u ? u.note || '' : '') + '</textarea></div></div>';
 
     App.sheet({
@@ -2330,10 +2347,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
           bd.querySelector('#u-su').textContent = U.meterUnit(m);
           bd.querySelector('#u-su2').textContent = U.meterUnit(m);
         }
-        kindEl.addEventListener('change', function () {
-          meterEl.value = U.kind(kindEl.value).meter;
-          units();
-        });
+        kindEl.addEventListener('change', function () { meterEl.value = U.kind(kindEl.value).meter; units(); });
         meterEl.addEventListener('change', units);
         if (!u) setTimeout(function () { bd.querySelector('#u-name').focus(); }, 380);
       },
@@ -2366,18 +2380,18 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   /* ============ ПРИХОД ТОПЛИВА ============ */
   F.supplyForm = function () {
     var st = DB.data.settings;
-    var h = '<div class="list">' +
-      '<div class="field"><label>Топливо</label><select id="s-fuel">' +
+    var h = '<div class="form">' +
+      '<div class="fld"><label>Топливо</label><select id="s-fuel">' +
       U.FUELS.map(function (x) {
         return '<option value="' + x.code + '"' + (st.fuel === x.code ? ' selected' : '') + '>' + esc(x.name) + '</option>';
       }).join('') + '</select></div>' +
-      '<div class="field"><label>Литры</label><input id="s-lit" type="text" inputmode="decimal" placeholder="0" style="font-size:22px;font-weight:600"><span class="unit">л</span></div>' +
-      '<div class="field"><label>Цена за литр</label><input id="s-price" type="text" inputmode="decimal" value="' +
+      '<div class="fld big"><label>Литры</label><input id="s-lit" type="text" inputmode="decimal" placeholder="0"><span class="unit">л</span></div>' +
+      '<div class="fld"><label>Цена за литр</label><input id="s-price" type="text" inputmode="decimal" value="' +
       (DB.price(st.fuel) || '') + '"><span class="unit">' + esc(U.sym()) + '</span></div>' +
-      '<div class="field"><label>Сумма</label><input id="s-cost" type="text" inputmode="decimal" placeholder="0"><span class="unit">' + esc(U.sym()) + '</span></div>' +
-      '<div class="field"><label>Дата</label><input id="s-date" type="date" value="' + U.today() + '"></div>' +
-      '<div class="field"><label>Поставщик</label><input id="s-note" placeholder="не обязательно"></div>' +
-      '</div><div class="card pad" id="s-prev" style="margin-top:14px"></div>';
+      '<div class="fld"><label>Сумма</label><input id="s-cost" type="text" inputmode="decimal" placeholder="0"><span class="unit">' + esc(U.sym()) + '</span></div>' +
+      '<div class="fld"><label>Дата</label><input id="s-date" type="date" value="' + U.today() + '"></div>' +
+      '<div class="fld"><label>Поставщик</label><input id="s-note" placeholder="не обязательно"></div>' +
+      '</div><div class="panel" id="s-prev" style="margin-top:12px"></div>';
 
     App.sheet({
       title: 'Приход топлива', html: h, save: 'Внести',
@@ -2387,11 +2401,10 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
           var l = U.num(lit.value), p = U.num(pr.value);
           if (l > 0 && p > 0) cost.value = U.int(l * p);
           var t = CALC.tank(bd.querySelector('#s-fuel').value);
-          bd.querySelector('#s-prev').innerHTML = '<div style="font-size:14px;line-height:1.5;color:var(--text-2)">' +
+          bd.querySelector('#s-prev').innerHTML = '<div style="font-size:14px;line-height:1.55;color:var(--text-2)">' +
             'Сейчас в бочке <b>' + U.liters(t.balance) + '</b>' +
             (l > 0 ? '<br>После прихода станет <b>' + U.liters(t.balance + l) + '</b>' +
-              (t.perDay > 0 ? ' — примерно на ' + U.days((t.balance + l) / t.perDay) : '') : '') +
-            '</div>';
+              (t.perDay > 0 ? ' — примерно на ' + U.days((t.balance + l) / t.perDay) : '') : '') + '</div>';
         }
         draw();
         lit.addEventListener('input', draw);
@@ -2428,16 +2441,16 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     var fuels = CALC.tankFuels();
     var fuel = fuels.length ? fuels[0] : st.fuel;
 
-    var h = '<div class="hint" style="padding:0 4px 14px">Замерьте остаток в бочке щупом или счётчиком и впишите фактическое число. Приложение сравнит его с учётом и покажет недостачу.</div>' +
-      '<div class="list">' +
-      '<div class="field"><label>Топливо</label><select id="k-fuel">' +
+    var h = '<div class="note" style="padding:0 2px 12px">Замерьте остаток в бочке щупом или счётчиком и впишите фактическое число. Приложение сравнит его с учётом и покажет недостачу.</div>' +
+      '<div class="form">' +
+      '<div class="fld"><label>Топливо</label><select id="k-fuel">' +
       U.FUELS.map(function (x) {
         return '<option value="' + x.code + '"' + (fuel === x.code ? ' selected' : '') + '>' + esc(x.name) + '</option>';
       }).join('') + '</select></div>' +
-      '<div class="field"><label>По факту</label><input id="k-lit" type="text" inputmode="decimal" placeholder="0" style="font-size:22px;font-weight:600"><span class="unit">л</span></div>' +
-      '<div class="field"><label>Дата</label><input id="k-date" type="date" value="' + U.today() + '"></div>' +
-      '<div class="field col"><label>Заметка</label><textarea id="k-note" style="min-height:44px" placeholder="кто замерял, чем…"></textarea></div>' +
-      '</div><div class="card pad" id="k-prev" style="margin-top:14px"></div>';
+      '<div class="fld big"><label>По факту</label><input id="k-lit" type="text" inputmode="decimal" placeholder="0"><span class="unit">л</span></div>' +
+      '<div class="fld"><label>Дата</label><input id="k-date" type="date" value="' + U.today() + '"></div>' +
+      '<div class="fld col"><label>Заметка</label><textarea id="k-note" placeholder="кто замерял, чем…"></textarea></div>' +
+      '</div><div class="panel" id="k-prev" style="margin-top:12px"></div>';
 
     App.sheet({
       title: 'Замер остатка', html: h, save: 'Записать',
@@ -2453,9 +2466,9 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
               : (d < 0
                 ? '<br><b style="color:var(--red)">Недостача ' + U.liters(-d) + '</b> ≈ ' +
                   U.money(-d * DB.price(bd.querySelector('#k-fuel').value))
-                : '<br><b style="color:var(--accent)">Излишек ' + U.liters(d) + '</b> — возможно, забыли внести приход');
+                : '<br><b style="color:var(--green)">Излишек ' + U.liters(d) + '</b> — возможно, забыли внести приход');
           }
-          bd.querySelector('#k-prev').innerHTML = '<div style="font-size:14px;line-height:1.5;color:var(--text-2)">' + txt + '</div>';
+          bd.querySelector('#k-prev').innerHTML = '<div style="font-size:14px;line-height:1.55;color:var(--text-2)">' + txt + '</div>';
         }
         draw();
         lit.addEventListener('input', draw);
@@ -2481,11 +2494,11 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   /* ============ ОТЧЁТ ЗА МЕСЯЦ ============ */
   F.reportSheet = function (key) {
     var text = CALC.report(key);
-    var h = '<div class="hint" style="padding:0 4px 12px">Короткая сводка за месяц — можно отправить в мессенджер или скопировать в отчёт.</div>' +
+    var h = '<div class="note" style="padding:0 2px 12px">Короткая сводка за месяц — отправьте в мессенджер или скопируйте в отчёт.</div>' +
       '<button class="btn" id="r-send">Отправить</button>' +
       '<button class="btn sec" style="margin-top:8px" id="r-csv">Выгрузить CSV за всё время</button>' +
-      '<div class="list" style="margin-top:12px"><div class="field col">' +
-      '<textarea id="r-text" readonly style="min-height:260px;font-size:13px;line-height:1.5"></textarea></div></div>';
+      '<div class="form" style="margin-top:12px"><div class="fld col">' +
+      '<textarea id="r-text" readonly style="min-height:250px;font-size:13px;line-height:1.6"></textarea></div></div>';
     App.sheet({
       title: U.monthName(key), html: h, save: null,
       onOpen: function (bd) {
@@ -2501,17 +2514,15 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
   /* ============ ЗАГРУЗКА БАЗЫ ============ */
   F.importSheet = function () {
-    var h = '<div class="hint" style="padding:0 4px 14px">Выберите резервную копию <b>.json</b> или таблицу <b>.csv</b> с заправками. Можно вставить текст ниже.</div>' +
-      '<div class="list">' +
-      '<button class="row tap" id="pick"><span class="grow"><span class="ttl" style="color:var(--accent)">Выбрать файл</span>' +
-      '<span class="sub">.json или .csv</span></span></button></div>' +
+    var h = '<div class="note" style="padding:0 2px 12px">Выберите резервную копию <b>.json</b> или таблицу <b>.csv</b> с заправками. Можно вставить текст ниже.</div>' +
+      '<button class="btn sec" id="pick">Выбрать файл</button>' +
       '<input type="file" id="file" accept=".json,.csv,.txt,application/json,text/csv" style="display:none">' +
-      '<h2 class="sec">Или вставьте текст</h2>' +
-      '<div class="list"><div class="field col"><textarea id="paste" style="min-height:130px;font-size:14px" ' +
+      '<div class="form" style="margin-top:12px"><div class="fld col"><label>Или вставьте текст</label>' +
+      '<textarea id="paste" style="min-height:120px;font-size:13px" ' +
       'placeholder="Самосвал №1;01.09.2026;180;12300;190500;ДТ;бочка;до полного;объект Восток"></textarea></div></div>' +
-      '<div class="hint">Столбцы CSV: <b>Техника;Дата;Литры;Цена;Счётчик;Топливо;Источник;До полного;Заметка</b>. ' +
+      '<div class="note">Столбцы CSV: <b>Техника;Дата;Литры;Цена;Счётчик;Топливо;Источник;До полного;Заметка</b>. ' +
       'Разделитель — точка с запятой, строка заголовков не обязательна. Техника создаётся автоматически, если её ещё нет.</div>' +
-      '<h2 class="sec">Как загружать</h2>' +
+      '<h2 class="sec"><span>Как загружать</span></h2>' +
       '<div class="seg" id="mode"><button data-m="merge" class="on">Добавить к текущим</button>' +
       '<button data-m="replace">Заменить всё</button></div>';
 
@@ -2567,12 +2578,12 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
   /* ============ КОД-ПАРОЛЬ ============ */
   F.pinSheet = function () {
-    var h = '<div class="hint" style="padding:0 4px 14px">Код из 4 цифр будет спрашиваться при каждом запуске приложения.</div>' +
-      '<div class="list"><div class="field"><label>Новый код</label>' +
+    var h = '<div class="note" style="padding:0 2px 12px">Код из 4 цифр будет спрашиваться при каждом запуске приложения.</div>' +
+      '<div class="form"><div class="fld"><label>Новый код</label>' +
       '<input id="pin1" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••" style="letter-spacing:6px"></div>' +
-      '<div class="field"><label>Ещё раз</label>' +
+      '<div class="fld"><label>Ещё раз</label>' +
       '<input id="pin2" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••" style="letter-spacing:6px"></div></div>' +
-      '<div class="hint">Код закрывает вход от чужих глаз, но не шифрует базу. Не отменяет резервную копию.</div>';
+      '<div class="note">Код закрывает вход от чужих глаз, но не шифрует базу. Резервную копию он не отменяет.</div>';
     App.sheet({
       title: 'Код-пароль', html: h, save: 'Включить',
       onOpen: function (bd) { setTimeout(function () { bd.querySelector('#pin1').focus(); }, 380); },
@@ -2624,16 +2635,20 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     var wrap = scr.querySelector('.wrap');
     if (wrap) wrap.classList.add('fade');
 
-    /* кнопка «＋» поверх списка техники — быстрая заправка */
-    if (r === '#/units' || r === '#/tank') {
-      var fab = document.createElement('button');
-      fab.className = 'fab';
-      fab.setAttribute('data-act', r === '#/tank' ? 'new-supply' : 'new-fill');
-      fab.textContent = '＋';
-      scr.appendChild(fab);
+    /* панель действия внизу — главное действие экрана всегда под большим пальцем */
+    var action = null;
+    if (r === '#/' || r === '#/units') action = ['new-fill', 'Записать заправку'];
+    else if (r === '#/tank') action = ['new-supply', 'Внести приход'];
+    else if (r.indexOf('#/unit/') === 0) action = ['new-fill', 'Записать заправку'];
+    if (action && DB.units().length) {
+      var bar = document.createElement('div');
+      bar.className = 'actionbar';
+      bar.innerHTML = '<button class="btn big" data-act="' + action[0] + '"' +
+        (r.indexOf('#/unit/') === 0 ? ' data-unit="' + r.slice(7) + '"' : '') + '>＋ ' + action[1] + '</button>';
+      scr.appendChild(bar);
     }
 
-    U.$$('.tabbar a').forEach(function (a) {
+    U.$$('.nav a').forEach(function (a) {
       var base = r.indexOf('#/unit/') === 0 ? '#/units' : r;
       a.classList.toggle('on', a.getAttribute('href') === base);
     });
@@ -2654,7 +2669,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     bg.className = 'sheet-bg';
     var sh = document.createElement('div');
     sh.className = 'sheet';
-    sh.innerHTML = '<div class="grabber"></div>' +
+    sh.innerHTML = '<div class="grab"></div>' +
       '<div class="sheet-hd"><button data-sheet="cancel">Отмена</button>' +
       '<span class="t">' + U.esc(opt.title || '') + '</span>' +
       (opt.save ? '<button class="strong" data-sheet="save">' + U.esc(opt.save) + '</button>'
@@ -2698,7 +2713,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     bg.innerHTML = '<div class="ask"><div class="ask-t">' + U.esc(opt.title) + '</div>' +
       (opt.text ? '<div class="ask-d">' + U.esc(opt.text) + '</div>' : '<div style="height:16px"></div>') +
       '<div class="ask-btns"><button data-a="no">' + U.esc(opt.cancel || 'Отмена') + '</button>' +
-      '<button data-a="yes" class="' + (opt.danger ? 'danger' : '') + '">' + U.esc(opt.ok || 'Да') + '</button></div></div>';
+      '<button data-a="yes" class="' + (opt.danger ? 'danger' : 'go') + '">' + U.esc(opt.ok || 'Да') + '</button></div></div>';
     document.body.appendChild(bg);
     requestAnimationFrame(function () { bg.classList.add('in'); });
 
@@ -2780,9 +2795,9 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     App.sheet({
       title: 'Скопируйте копию',
       save: null,
-      html: '<div class="hint" style="padding:0 4px 12px">Здесь сохранить файл нельзя. Скопируйте текст и вставьте его в заметку или мессенджер — из него база восстанавливается целиком через «Загрузить базу».</div>' +
+      html: '<div class="note" style="padding:0 2px 12px">Здесь сохранить файл нельзя. Скопируйте текст и вставьте его в заметку или мессенджер — из него база восстанавливается целиком через «Загрузить базу».</div>' +
         '<button class="btn" id="cp">Скопировать всё</button>' +
-        '<div class="list" style="margin-top:12px"><div class="field col">' +
+        '<div class="form" style="margin-top:12px"><div class="fld col">' +
         '<label>' + U.esc(name) + '</label>' +
         '<textarea id="dump" readonly style="min-height:220px;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace"></textarea>' +
         '</div></div>',
@@ -2930,12 +2945,11 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   /* ---------- тема ---------- */
   App.applyTheme = function () {
     var t = DB.data.settings.theme || 'auto';
-    if (t === 'auto') document.documentElement.removeAttribute('data-theme');
-    else document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.setAttribute('data-theme', t);
     var meta = U.$('#theme-color');
     if (meta) {
-      var dark = t === 'dark' || (t === 'auto' && w.matchMedia('(prefers-color-scheme:dark)').matches);
-      meta.setAttribute('content', dark ? '#000000' : '#f2f2f7');
+      var light = t === 'light' || (t === 'auto' && w.matchMedia('(prefers-color-scheme:light)').matches);
+      meta.setAttribute('content', light ? '#eceef1' : '#0c0e11');
     }
   };
 

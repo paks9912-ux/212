@@ -32,16 +32,20 @@
     var wrap = scr.querySelector('.wrap');
     if (wrap) wrap.classList.add('fade');
 
-    /* кнопка «＋» поверх списка техники — быстрая заправка */
-    if (r === '#/units' || r === '#/tank') {
-      var fab = document.createElement('button');
-      fab.className = 'fab';
-      fab.setAttribute('data-act', r === '#/tank' ? 'new-supply' : 'new-fill');
-      fab.textContent = '＋';
-      scr.appendChild(fab);
+    /* панель действия внизу — главное действие экрана всегда под большим пальцем */
+    var action = null;
+    if (r === '#/' || r === '#/units') action = ['new-fill', 'Записать заправку'];
+    else if (r === '#/tank') action = ['new-supply', 'Внести приход'];
+    else if (r.indexOf('#/unit/') === 0) action = ['new-fill', 'Записать заправку'];
+    if (action && DB.units().length) {
+      var bar = document.createElement('div');
+      bar.className = 'actionbar';
+      bar.innerHTML = '<button class="btn big" data-act="' + action[0] + '"' +
+        (r.indexOf('#/unit/') === 0 ? ' data-unit="' + r.slice(7) + '"' : '') + '>＋ ' + action[1] + '</button>';
+      scr.appendChild(bar);
     }
 
-    U.$$('.tabbar a').forEach(function (a) {
+    U.$$('.nav a').forEach(function (a) {
       var base = r.indexOf('#/unit/') === 0 ? '#/units' : r;
       a.classList.toggle('on', a.getAttribute('href') === base);
     });
@@ -62,7 +66,7 @@
     bg.className = 'sheet-bg';
     var sh = document.createElement('div');
     sh.className = 'sheet';
-    sh.innerHTML = '<div class="grabber"></div>' +
+    sh.innerHTML = '<div class="grab"></div>' +
       '<div class="sheet-hd"><button data-sheet="cancel">Отмена</button>' +
       '<span class="t">' + U.esc(opt.title || '') + '</span>' +
       (opt.save ? '<button class="strong" data-sheet="save">' + U.esc(opt.save) + '</button>'
@@ -106,7 +110,7 @@
     bg.innerHTML = '<div class="ask"><div class="ask-t">' + U.esc(opt.title) + '</div>' +
       (opt.text ? '<div class="ask-d">' + U.esc(opt.text) + '</div>' : '<div style="height:16px"></div>') +
       '<div class="ask-btns"><button data-a="no">' + U.esc(opt.cancel || 'Отмена') + '</button>' +
-      '<button data-a="yes" class="' + (opt.danger ? 'danger' : '') + '">' + U.esc(opt.ok || 'Да') + '</button></div></div>';
+      '<button data-a="yes" class="' + (opt.danger ? 'danger' : 'go') + '">' + U.esc(opt.ok || 'Да') + '</button></div></div>';
     document.body.appendChild(bg);
     requestAnimationFrame(function () { bg.classList.add('in'); });
 
@@ -188,9 +192,9 @@
     App.sheet({
       title: 'Скопируйте копию',
       save: null,
-      html: '<div class="hint" style="padding:0 4px 12px">Здесь сохранить файл нельзя. Скопируйте текст и вставьте его в заметку или мессенджер — из него база восстанавливается целиком через «Загрузить базу».</div>' +
+      html: '<div class="note" style="padding:0 2px 12px">Здесь сохранить файл нельзя. Скопируйте текст и вставьте его в заметку или мессенджер — из него база восстанавливается целиком через «Загрузить базу».</div>' +
         '<button class="btn" id="cp">Скопировать всё</button>' +
-        '<div class="list" style="margin-top:12px"><div class="field col">' +
+        '<div class="form" style="margin-top:12px"><div class="fld col">' +
         '<label>' + U.esc(name) + '</label>' +
         '<textarea id="dump" readonly style="min-height:220px;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace"></textarea>' +
         '</div></div>',
@@ -338,12 +342,11 @@
   /* ---------- тема ---------- */
   App.applyTheme = function () {
     var t = DB.data.settings.theme || 'auto';
-    if (t === 'auto') document.documentElement.removeAttribute('data-theme');
-    else document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.setAttribute('data-theme', t);
     var meta = U.$('#theme-color');
     if (meta) {
-      var dark = t === 'dark' || (t === 'auto' && w.matchMedia('(prefers-color-scheme:dark)').matches);
-      meta.setAttribute('content', dark ? '#000000' : '#f2f2f7');
+      var light = t === 'light' || (t === 'auto' && w.matchMedia('(prefers-color-scheme:light)').matches);
+      meta.setAttribute('content', light ? '#eceef1' : '#0c0e11');
     }
   };
 

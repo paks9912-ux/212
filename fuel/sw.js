@@ -1,5 +1,5 @@
 /* Офлайн-кэш. Меняйте VER при обновлении файлов. */
-const VER = 'toplivo-v1';
+const VER = 'toplivo-v2';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './css/app.css',
