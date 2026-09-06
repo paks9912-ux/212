@@ -1,0 +1,3841 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Автопарк — техника и ГСМ</title>
+<meta name="theme-color" content="#f2f2f7" id="theme-color">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Автопарк">
+<meta name="format-detection" content="telephone=no">
+</head>
+<body>
+<main id="screen"></main>
+<nav class="tabbar">
+  <a href="#/"      data-tab="home"><span id="i-home"></span><span>Обзор</span></a>
+  <a href="#/units" data-tab="units"><span id="i-units"></span><span>Техника</span></a>
+  <a href="#/log"   data-tab="log"><span id="i-log"></span><span>Журнал</span></a>
+  <a href="#/more"  data-tab="more"><span id="i-more"></span><span>Ещё</span></a>
+</nav>
+<div id="toast"></div>
+
+<style>
+/* ============================================================
+   Автопарк — техника, ГСМ и наработка
+   iOS-first PWA. Без внешних зависимостей.
+   ============================================================ */
+
+:root{
+  --green:#28a745;
+  --red:#e5484d;    --orange:#f5a524;
+  --blue:#0a84ff;   --violet:#7c5cff;
+
+  --radius:16px;
+  --radius-sm:11px;
+  --tap:44px;
+
+  --ease:cubic-bezier(.32,.72,0,1);
+}
+
+/* ---------- тема: светлая (по умолчанию) ---------- */
+:root,
+html[data-theme="light"]{
+  --bg:#f2f2f7;
+  --bg-elev:#ffffff;
+  --fill:rgba(120,120,128,.12);
+  --fill-2:rgba(120,120,128,.08);
+  --text:#000000;
+  --text-2:rgba(60,60,67,.6);
+  --text-3:rgba(60,60,67,.35);
+  --line:rgba(60,60,67,.13);
+  --bar:rgba(249,249,251,.82);
+  --shadow:0 1px 2px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.05);
+  --accent:#0a6fd1;
+  --accent-soft:rgba(10,111,209,.12);
+  --danger-soft:rgba(229,72,77,.12);
+  --warn-soft:rgba(245,165,36,.15);
+  color-scheme:light;
+}
+
+/* ---------- тема: тёмная ---------- */
+@media (prefers-color-scheme:dark){
+  html:not([data-theme="light"]){
+    --bg:#000000;
+    --bg-elev:#1c1c1e;
+    --fill:rgba(120,120,128,.24);
+    --fill-2:rgba(120,120,128,.16);
+    --text:#ffffff;
+    --text-2:rgba(235,235,245,.6);
+    --text-3:rgba(235,235,245,.3);
+    --line:rgba(84,84,88,.5);
+    --bar:rgba(22,22,24,.8);
+    --shadow:none;
+    --accent:#0a84ff;
+    --accent-soft:rgba(10,132,255,.18);
+    --danger-soft:rgba(255,69,58,.18);
+    --warn-soft:rgba(255,159,10,.2);
+    --red:#ff453a; --orange:#ff9f0a; --violet:#9a7cff;
+    color-scheme:dark;
+  }
+}
+html[data-theme="dark"]{
+  --bg:#000000;
+  --bg-elev:#1c1c1e;
+  --fill:rgba(120,120,128,.24);
+  --fill-2:rgba(120,120,128,.16);
+  --text:#ffffff;
+  --text-2:rgba(235,235,245,.6);
+  --text-3:rgba(235,235,245,.3);
+  --line:rgba(84,84,88,.5);
+  --bar:rgba(22,22,24,.8);
+  --shadow:none;
+  --accent:#0a84ff;
+  --accent-soft:rgba(10,132,255,.18);
+  --danger-soft:rgba(255,69,58,.18);
+  --warn-soft:rgba(255,159,10,.2);
+  --red:#ff453a; --orange:#ff9f0a; --violet:#9a7cff;
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font:400 17px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+  -webkit-text-size-adjust:100%;
+}
+body.no-scroll{overflow:hidden}
+button,input,select,textarea{font-family:inherit;font-size:17px;color:inherit}
+button{border:0;background:none;padding:0;cursor:pointer;color:var(--accent)}
+input,textarea,select{-webkit-appearance:none;appearance:none}
+a{color:var(--accent);text-decoration:none}
+.num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ---------- каркас ---------- */
+#screen{
+  min-height:100%;
+  padding-bottom:calc(72px + env(safe-area-inset-bottom));
+}
+.wrap{padding:0 16px;max-width:640px;margin:0 auto}
+
+.topbar{
+  position:sticky;top:0;z-index:40;
+  height:calc(48px + env(safe-area-inset-top));
+  padding-top:env(safe-area-inset-top);
+  display:flex;align-items:center;gap:8px;
+  padding-left:8px;padding-right:8px;
+  background:transparent;
+  transition:background .2s linear;
+}
+.topbar.solid{
+  background:var(--bar);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:.5px solid var(--line);
+}
+.topbar .tb-title{
+  flex:1;text-align:center;font-size:17px;font-weight:600;
+  opacity:0;transition:opacity .2s linear;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.topbar.solid .tb-title{opacity:1}
+.tb-btn{
+  min-width:var(--tap);height:var(--tap);display:flex;align-items:center;
+  justify-content:center;gap:3px;font-size:17px;color:var(--accent);
+}
+.tb-btn.right{justify-content:flex-end;padding-right:8px}
+.tb-btn:active{opacity:.4}
+
+h1.big{
+  font-size:34px;line-height:1.12;font-weight:700;letter-spacing:-.6px;
+  margin:2px 0 14px;
+}
+h2.sec{
+  font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;
+  color:var(--text-2);margin:26px 4px 8px;
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+}
+h2.sec .act{text-transform:none;letter-spacing:0;color:var(--accent);font-weight:400;font-size:13px;white-space:nowrap}
+
+/* ---------- карточки / списки ---------- */
+.card{
+  background:var(--bg-elev);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow:hidden;
+}
+.card + .card{margin-top:12px}
+.pad{padding:16px}
+
+.warnbox,.badbox{margin-top:12px}
+.warnbox{background:var(--warn-soft)}
+.badbox{background:var(--danger-soft)}
+.warnbox .t,.badbox .t{font-weight:600;margin-bottom:3px}
+.badbox .t{color:var(--red)}
+.warnbox .d,.badbox .d{font-size:14px;color:var(--text-2);line-height:1.42;margin-bottom:4px}
+.warnbox .d b,.badbox .d b{color:var(--text)}
+.btn.full,.btn.sm.full{width:100%;margin-top:12px}
+
+.minilist{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.mini{
+  display:flex;justify-content:space-between;gap:10px;align-items:center;
+  background:var(--bg-elev);border-radius:10px;padding:9px 12px;
+  font-size:14px;color:var(--text);width:100%;text-align:left;
+}
+.mini b{color:var(--red);white-space:nowrap;font-variant-numeric:tabular-nums}
+.mini span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini:active{opacity:.6}
+
+.list{background:var(--bg-elev);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.row{
+  display:flex;align-items:center;gap:12px;
+  min-height:52px;padding:11px 14px;position:relative;
+  color:inherit;width:100%;text-align:left;background:none;font-size:17px;
+}
+.row + .row::before{
+  content:"";position:absolute;left:14px;right:0;top:0;height:.5px;background:var(--line);
+}
+.row.tap:active{background:var(--fill-2)}
+.row .grow{flex:1;min-width:0;display:block}
+.row .chev{color:var(--text-3);font-size:15px;flex:none}
+.row .ttl{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sub{display:block;font-size:13px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .val{text-align:right;flex:none;display:block;max-width:44%}
+.row .val .v1{display:block;font-size:17px;font-weight:600;white-space:nowrap}
+.row .val .v2{display:block;font-size:12px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.avatar{
+  width:38px;height:38px;border-radius:50%;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:600;color:#fff;letter-spacing:.2px;
+}
+.avatar.sq{border-radius:11px;font-size:19px}
+.op-ic{
+  width:34px;height:34px;border-radius:10px;flex:none;background:var(--fill-2);
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+
+.unit-head{display:flex;align-items:center;gap:12px;margin:2px 0 14px}
+.unit-name{font-size:22px;font-weight:700;letter-spacing:-.3px;line-height:1.15;overflow-wrap:anywhere}
+.unit-sub{font-size:13px;color:var(--text-2);margin-top:2px}
+
+/* ---------- сводка ---------- */
+.hero{
+  background:var(--bg-elev);border-radius:20px;padding:18px 18px 16px;
+  box-shadow:var(--shadow);
+}
+.hero .lbl{font-size:13px;color:var(--text-2)}
+.hero .amt{font-size:clamp(26px,8.6vw,38px);font-weight:700;letter-spacing:-1px;line-height:1.1;margin-top:3px;overflow-wrap:anywhere}
+.hero .delta{font-size:13px;color:var(--text-2);margin-top:6px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.stat{background:var(--bg-elev);border-radius:var(--radius);padding:13px 14px;box-shadow:var(--shadow)}
+.stat .k{font-size:12px;color:var(--text-2);display:flex;align-items:center;gap:5px}
+.stat .v{font-size:clamp(16px,5vw,21px);font-weight:650;letter-spacing:-.3px;margin-top:4px;overflow-wrap:anywhere}
+.dot{width:7px;height:7px;border-radius:50%;flex:none}
+
+/* ---------- бейджи / чипы ---------- */
+.badge{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:12px;font-weight:600;padding:3px 8px;border-radius:100px;
+  background:var(--fill);color:var(--text-2);white-space:nowrap;
+}
+.badge.ok{background:var(--accent-soft);color:var(--accent)}
+.badge.bad{background:var(--danger-soft);color:var(--red)}
+.badge.warn{background:var(--warn-soft);color:var(--orange)}
+
+.seg{
+  display:flex;background:var(--fill-2);border-radius:9px;padding:2px;gap:2px;margin:0 0 14px;
+}
+.seg button{
+  flex:1;min-height:32px;border-radius:7px;font-size:13px;font-weight:500;color:var(--text);
+  display:flex;align-items:center;justify-content:center;gap:5px;padding:0 4px;
+}
+.seg button.on{background:var(--bg-elev);box-shadow:0 1px 3px rgba(0,0,0,.12);font-weight:600}
+.seg .cnt{font-size:11px;color:var(--text-2)}
+
+.monthnav{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:var(--fill-2);border-radius:11px;padding:4px 6px;margin-bottom:14px;
+}
+.monthnav span{font-size:16px;font-weight:600}
+.monthnav button{
+  width:38px;height:34px;border-radius:8px;font-size:22px;line-height:1;color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+}
+.monthnav button:active{background:var(--fill)}
+.monthnav button[disabled]{opacity:.25;pointer-events:none}
+
+/* ---------- кнопки ---------- */
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  min-height:50px;border-radius:14px;font-size:17px;font-weight:600;
+  background:var(--accent);color:#fff;width:100%;padding:0 14px;white-space:nowrap;
+  transition:transform .12s var(--ease),opacity .12s;
+}
+.btn:active{transform:scale(.975);opacity:.9}
+.btn.sec{background:var(--fill);color:var(--text)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn.danger{background:var(--danger-soft);color:var(--red)}
+.btn.sm{min-height:40px;font-size:15px;border-radius:11px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.btn-row{display:flex;gap:10px;margin-top:14px}
+.btn-row .btn{flex:1;font-size:16px}
+
+.fab{
+  position:fixed;right:16px;z-index:45;
+  bottom:calc(74px + env(safe-area-inset-bottom));
+  width:56px;height:56px;border-radius:50%;
+  background:var(--accent);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;font-weight:300;line-height:1;
+  box-shadow:0 6px 20px rgba(0,0,0,.28);
+  transition:transform .15s var(--ease);
+}
+.fab:active{transform:scale(.9)}
+
+/* ---------- таббар ---------- */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:50;
+  display:flex;
+  padding-bottom:env(safe-area-inset-bottom);
+  background:var(--bar);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  backdrop-filter:saturate(180%) blur(20px);
+  border-top:.5px solid var(--line);
+}
+.tabbar a{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;height:52px;color:var(--text-3);font-size:10px;font-weight:500;
+}
+.tabbar a.on{color:var(--accent)}
+.tabbar a:active{opacity:.55}
+.tabbar svg{width:25px;height:25px;display:block}
+
+/* ---------- формы ---------- */
+.field{
+  display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 14px;
+  position:relative;background:var(--bg-elev);
+}
+.field + .field::before{content:"";position:absolute;left:14px;right:0;top:0;height:.5px;background:var(--line)}
+.field label{font-size:17px;flex:none;min-width:112px;color:var(--text)}
+.field input,.field select,.field textarea{
+  flex:1;min-width:0;border:0;background:transparent;outline:none;
+  padding:10px 0;font-size:17px;text-align:right;
+}
+.field.col{flex-direction:column;align-items:stretch;gap:0;padding:10px 14px}
+.field.col label{font-size:13px;color:var(--text-2);margin-bottom:2px;min-width:0}
+.field.col input,.field.col textarea{text-align:left;padding:4px 0}
+.field textarea{resize:none;min-height:60px;line-height:1.35}
+.field select{
+  text-align:right;color:var(--text);padding-right:17px;
+  background:url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 16'%3E%3Cpath d='M2 6l3-3 3 3M2 10l3 3 3-3' fill='none' stroke='%23999' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right center/9px 15px;
+}
+.field .unit{color:var(--text-2);font-size:15px;flex:none}
+.field input::placeholder,.field textarea::placeholder{color:var(--text-3)}
+.field input.cb{flex:none;width:auto;-webkit-appearance:checkbox;appearance:checkbox;transform:scale(1.3)}
+.hint{font-size:12.5px;color:var(--text-2);padding:8px 6px 0;line-height:1.45}
+.hint b{color:var(--text);font-weight:600}
+
+.search{
+  display:flex;align-items:center;gap:7px;background:var(--fill-2);
+  border-radius:10px;padding:0 10px;height:38px;margin-bottom:14px;
+}
+.search input{flex:1;border:0;background:transparent;outline:none;font-size:17px;min-width:0}
+.search svg{width:16px;height:16px;color:var(--text-3);flex:none}
+
+/* ---------- модальный лист ---------- */
+.sheet-bg{
+  position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.42);
+  opacity:0;transition:opacity .3s var(--ease);
+}
+.sheet-bg.in{opacity:1}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:61;
+  max-height:92vh;display:flex;flex-direction:column;
+  background:var(--bg);border-radius:14px 14px 0 0;
+  transform:translateY(100%);transition:transform .34s var(--ease);
+  padding-bottom:env(safe-area-inset-bottom);
+  max-width:640px;margin:0 auto;
+  box-shadow:0 -8px 40px rgba(0,0,0,.3);
+}
+.sheet.in{transform:translateY(0)}
+.sheet-hd{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px 14px;border-bottom:.5px solid var(--line);flex:none;
+}
+.sheet-hd .t{font-size:17px;font-weight:600;flex:1;text-align:center}
+.sheet-hd button{font-size:17px;min-width:64px}
+.sheet-hd button.strong{font-weight:600;text-align:right}
+.sheet-bd{overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;flex:1}
+.sheet-bd h2.sec:first-child{margin-top:6px}
+.grabber{width:36px;height:5px;border-radius:3px;background:var(--fill);margin:7px auto 0;flex:none}
+
+/* ---------- всплывающее уведомление ---------- */
+#toast{
+  position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));
+  transform:translate(-50%,14px);z-index:90;
+  background:rgba(30,30,32,.95);color:#fff;font-size:14.5px;font-weight:500;
+  padding:11px 18px;border-radius:100px;max-width:88vw;text-align:center;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s var(--ease);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+}
+#toast.in{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- служебное ---------- */
+.empty{text-align:center;padding:46px 26px;color:var(--text-2)}
+.empty .ic{font-size:44px;margin-bottom:10px;opacity:.5}
+.empty .t{font-size:17px;font-weight:600;color:var(--text);margin-bottom:5px}
+.empty .d{font-size:14px;line-height:1.45}
+
+.bar{height:6px;border-radius:3px;background:var(--fill);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;border-radius:3px;background:var(--accent);transition:width .4s var(--ease)}
+
+.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;font-size:15px}
+.kv + .kv{border-top:.5px solid var(--line)}
+.kv .k{color:var(--text-2);flex:none;max-width:52%}
+.kv .v{font-weight:600;text-align:right;overflow-wrap:anywhere}
+.kv.big .v{font-size:19px}
+
+.lock{
+  position:fixed;inset:0;z-index:100;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+}
+.pin-dots{display:flex;gap:16px}
+.pin-dots i{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--text-2)}
+.pin-dots i.on{background:var(--text);border-color:var(--text)}
+.keypad{display:grid;grid-template-columns:repeat(3,72px);gap:18px;justify-content:center}
+.keypad button{
+  width:72px;height:72px;border-radius:50%;background:var(--fill-2);
+  font-size:28px;font-weight:400;color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+}
+.keypad button:active{background:var(--fill)}
+.keypad button.blank{background:none;pointer-events:none}
+.shake{animation:shake .4s}
+@keyframes shake{
+  10%,90%{transform:translateX(-2px)} 20%,80%{transform:translateX(4px)}
+  30%,50%,70%{transform:translateX(-7px)} 40%,60%{transform:translateX(7px)}
+}
+.fade{animation:fade .22s var(--ease)}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition-duration:.01ms!important}}
+
+/* ---------- диалог подтверждения ---------- */
+.ask-bg{
+  position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.4);
+  display:flex;align-items:center;justify-content:center;padding:28px;
+  opacity:0;transition:opacity .2s ease;
+}
+.ask-bg.in{opacity:1}
+.ask{
+  width:100%;max-width:290px;background:var(--bg-elev);border-radius:15px;
+  overflow:hidden;text-align:center;
+  transform:scale(.92);transition:transform .22s var(--ease);
+  box-shadow:0 12px 44px rgba(0,0,0,.3);
+}
+.ask-bg.in .ask{transform:scale(1)}
+.ask .ask-t{font-size:17px;font-weight:600;padding:20px 18px 0}
+.ask .ask-d{font-size:13.5px;color:var(--text-2);line-height:1.4;padding:6px 18px 18px}
+.ask .ask-btns{display:flex;border-top:.5px solid var(--line)}
+.ask .ask-btns button{
+  flex:1;min-height:46px;font-size:17px;color:var(--accent);
+  display:flex;align-items:center;justify-content:center;
+}
+.ask .ask-btns button + button{border-left:.5px solid var(--line)}
+.ask .ask-btns button.danger{color:var(--red);font-weight:600}
+.ask .ask-btns button:active{background:var(--fill-2)}
+</style>
+
+<script>
+/* Утилиты: числа, литры, наработка, даты, DOM-хелперы */
+(function (w) {
+  'use strict';
+
+  var U = {};
+
+  /* ---------- id ---------- */
+  U.uid = function () {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  };
+
+  /* ---------- экранирование ---------- */
+  U.esc = function (s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  };
+
+  /* ---------- числа ---------- */
+  U.num = function (v) {
+    if (typeof v === 'number') return isFinite(v) ? v : 0;
+    var s = String(v == null ? '' : v).replace(/\s| /g, '').replace(',', '.').replace(/[^\d.\-]/g, '');
+    var n = parseFloat(s);
+    return isFinite(n) ? n : 0;
+  };
+
+  var nf0 = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
+  var nf1 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  var nf2 = new Intl.NumberFormat('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+  /* число с нужной точностью: 12.5 → «12,5» */
+  U.dec = function (v, digits) {
+    var n = U.num(v);
+    if (digits === 2) return nf2.format(n);
+    if (digits === 1 || (digits == null && Math.round(n) !== n)) return nf1.format(n);
+    return nf0.format(Math.round(n));
+  };
+
+  /* ---------- деньги ---------- */
+  U.cur = function () {
+    return (w.DB && DB.data && DB.data.settings && DB.data.settings.currency) || 'сум';
+  };
+  U.money = function (v, opt) {
+    opt = opt || {};
+    var n = U.num(v), sign = n < 0 ? '−' : '', abs = Math.abs(n);
+    var body = opt.exact ? nf2.format(abs) : nf0.format(Math.round(abs));
+    return sign + body + (opt.noCur ? '' : ' ' + U.cur());
+  };
+  U.moneyShort = function (v) {
+    var n = Math.abs(U.num(v)), s = U.num(v) < 0 ? '−' : '', sym = ' ' + U.cur();
+    if (n >= 1e9) return s + nf1.format(n / 1e9) + ' млрд' + sym;
+    if (n >= 1e6) return s + nf1.format(n / 1e6) + ' млн' + sym;
+    if (n >= 1e5) return s + nf0.format(Math.round(n / 1e3)) + ' тыс' + sym;
+    return s + nf0.format(Math.round(n)) + sym;
+  };
+
+  /* ---------- топливо и наработка ---------- */
+  U.liters = function (v, opt) {
+    opt = opt || {};
+    var n = U.num(v), sign = n < 0 ? '−' : (opt.sign && n > 0 ? '+' : '');
+    return sign + U.dec(Math.abs(n), Math.abs(n) < 100 && Math.round(n) !== n ? 1 : 0) + (opt.noUnit ? '' : ' л');
+  };
+
+  /* единица наработки: моточасы или километры */
+  U.METER = {
+    hours: { unit: 'м·ч', long: 'моточасы', one: 'моточас', few: 'моточаса', many: 'моточасов', norm: 'л/м·ч' },
+    km: { unit: 'км', long: 'километры', one: 'километр', few: 'километра', many: 'километров', norm: 'л/100 км' }
+  };
+  U.meterInfo = function (m) { return U.METER[m] || U.METER.hours; };
+  U.work = function (v, meter, opt) {
+    opt = opt || {};
+    var i = U.meterInfo(meter), n = U.num(v);
+    return U.dec(n, meter === 'km' ? 0 : (Math.abs(n) < 1000 && Math.round(n) !== n ? 1 : 0)) +
+      (opt.noUnit ? '' : ' ' + i.unit);
+  };
+  U.normText = function (v, meter) {
+    return U.dec(v, 1) + ' ' + U.meterInfo(meter).norm;
+  };
+
+  /* ---------- склонение ---------- */
+  U.plural = function (n, one, few, many) {
+    n = Math.abs(Math.round(n)) % 100;
+    var n1 = n % 10;
+    if (n > 10 && n < 20) return many;
+    if (n1 > 1 && n1 < 5) return few;
+    if (n1 === 1) return one;
+    return many;
+  };
+  U.days = function (n) { return Math.round(n) + ' ' + U.plural(n, 'день', 'дня', 'дней'); };
+  U.cnt = function (n, one, few, many) { return n + ' ' + U.plural(n, one, few, many); };
+
+  /* ---------- даты (хранятся как 'YYYY-MM-DD') ---------- */
+  U.today = function () { return U.iso(new Date()); };
+  U.iso = function (d) {
+    var m = String(d.getMonth() + 1), day = String(d.getDate());
+    return d.getFullYear() + '-' + (m.length < 2 ? '0' + m : m) + '-' + (day.length < 2 ? '0' + day : day);
+  };
+  U.parse = function (s) {
+    if (!s) return null;
+    var p = String(s).slice(0, 10).split('-');
+    if (p.length !== 3) return null;
+    return Date.UTC(+p[0], +p[1] - 1, +p[2]);
+  };
+  U.diffDays = function (a, b) {                       // b − a, в днях
+    var x = U.parse(a), y = U.parse(b);
+    if (x == null || y == null) return 0;
+    return Math.round((y - x) / 86400000);
+  };
+  U.addDays = function (s, n) {
+    var t = U.parse(s);
+    if (t == null) return s;
+    var d = new Date(t + n * 86400000);
+    return d.getUTCFullYear() + '-' +
+      String(d.getUTCMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getUTCDate()).padStart(2, '0');
+  };
+  U.addMonths = function (s, n) {
+    var t = U.parse(s);
+    if (t == null) return s;
+    var d = new Date(t), day = d.getUTCDate();
+    d.setUTCMonth(d.getUTCMonth() + n);
+    if (d.getUTCDate() < day) d.setUTCDate(0);
+    return d.getUTCFullYear() + '-' +
+      String(d.getUTCMonth() + 1).padStart(2, '0') + '-' +
+      String(d.getUTCDate()).padStart(2, '0');
+  };
+  U.monthStart = function (s) { return String(s).slice(0, 7) + '-01'; };
+  U.monthEnd = function (s) { return U.addDays(U.addMonths(U.monthStart(s), 1), -1); };
+
+  var MON = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  var MONF = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+  var MONN = ['январь', 'февраль', 'март', 'апрель', 'май', 'июнь', 'июль', 'август', 'сентябрь', 'октябрь', 'ноябрь', 'декабрь'];
+
+  U.fmtDate = function (s, full) {
+    var t = U.parse(s);
+    if (t == null) return '—';
+    var d = new Date(t), cy = new Date().getFullYear();
+    var out = d.getUTCDate() + ' ' + (full ? MONF : MON)[d.getUTCMonth()];
+    if (d.getUTCFullYear() !== cy) out += ' ' + d.getUTCFullYear();
+    return out;
+  };
+  U.fmtDateFull = function (s) {
+    var t = U.parse(s);
+    if (t == null) return '—';
+    var d = new Date(t);
+    return d.getUTCDate() + ' ' + MONF[d.getUTCMonth()] + ' ' + d.getUTCFullYear();
+  };
+  U.relDate = function (s) {
+    var n = U.diffDays(U.today(), s);
+    if (n === 0) return 'сегодня';
+    if (n === 1) return 'завтра';
+    if (n === -1) return 'вчера';
+    if (n > 1 && n < 30) return 'через ' + U.days(n);
+    if (n < -1 && n > -30) return U.days(-n) + ' назад';
+    return U.fmtDate(s);
+  };
+  U.monthKey = function (s) { return String(s).slice(0, 7); };
+  U.monthName = function (key, short) {
+    var p = String(key).split('-');
+    var n = MONN[+p[1] - 1] || '';
+    n = n.charAt(0).toUpperCase() + n.slice(1);
+    return short ? n : n + ' ' + p[0];
+  };
+
+  /* ---------- DOM ---------- */
+  U.$ = function (sel, root) { return (root || document).querySelector(sel); };
+  U.$$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+  U.toast = function (msg) {
+    var t = U.$('#toast');
+    if (!t) return;
+    t.textContent = msg;
+    t.classList.add('in');
+    clearTimeout(U._tt);
+    U._tt = setTimeout(function () { t.classList.remove('in'); }, 2300);
+  };
+
+  /* цвет плашки по названию — стабильный */
+  var PALETTE = ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2', '#64d2ff', '#ffd60a', '#ff375f', '#5e5ce6', '#66d4cf'];
+  U.color = function (str) {
+    var h = 0, s = String(str || '?');
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    return PALETTE[h % PALETTE.length];
+  };
+  U.initials = function (name) {
+    var p = String(name || '?').trim().split(/\s+/);
+    return ((p[0] || '?')[0] + (p[1] ? p[1][0] : '')).toUpperCase();
+  };
+  U.telHref = function (phone) { return 'tel:' + String(phone || '').replace(/[^\d+]/g, ''); };
+  U.waHref = function (phone) {
+    var d = String(phone || '').replace(/\D/g, '');
+    if (d.length === 11 && d[0] === '8') d = '7' + d.slice(1);
+    return 'https://wa.me/' + d;
+  };
+
+  w.U = U;
+})(window);
+
+/* Хранилище: всё лежит на телефоне (localStorage), ничего не уходит в сеть */
+(function (w) {
+  'use strict';
+
+  var KEY = 'fleet.db.v1';
+  var BAK = 'fleet.autobackup';
+
+  var DB = {
+    data: null,
+    listeners: [],
+
+    /* виды топлива и типы техники — справочники */
+    FUELS: ['ДТ', 'АИ-80', 'АИ-92', 'АИ-95', 'газ'],
+    KINDS: [
+      { k: 'excavator', n: 'Экскаватор', ic: '🚜', meter: 'hours' },
+      { k: 'loader', n: 'Погрузчик', ic: '🚜', meter: 'hours' },
+      { k: 'dozer', n: 'Бульдозер', ic: '🚜', meter: 'hours' },
+      { k: 'crane', n: 'Кран', ic: '🏗️', meter: 'km' },
+      { k: 'truck', n: 'Самосвал', ic: '🚛', meter: 'km' },
+      { k: 'car', n: 'Легковая', ic: '🚙', meter: 'km' },
+      { k: 'genset', n: 'Генератор', ic: '⚡', meter: 'hours' },
+      { k: 'other', n: 'Другое', ic: '🔧', meter: 'hours' }
+    ],
+    kind: function (k) {
+      var f = this.KINDS.filter(function (x) { return x.k === k; })[0];
+      return f || this.KINDS[this.KINDS.length - 1];
+    },
+
+    empty: function () {
+      return {
+        version: 1,
+        createdAt: U.today(),
+        isDemo: false,
+        settings: {
+          currency: 'сум',
+          theme: 'auto',
+          fuel: 'ДТ',              // вид топлива по умолчанию
+          price: 0,                // последняя цена за литр — подставляется в форму
+          tankName: 'Топливозаправщик',
+          tankVolume: 0,           // объём ёмкости склада, л (0 — не задан)
+          serviceWarnPct: 10,      // предупреждать, когда до ТО осталось меньше этой доли
+          pin: null,
+          lastExport: null
+        },
+        units: [],      // техника
+        drivers: [],    // водители и машинисты
+        shifts: [],     // смены (путевые листы)
+        fuel: [],       // журнал топлива: приход, выдача, замеры
+        services: []    // ТО и ремонты
+      };
+    },
+
+    load: function () {
+      var raw = null;
+      try { raw = localStorage.getItem(KEY); } catch (e) { }
+      if (!raw) { this.data = this.empty(); return false; }
+      try {
+        this.data = this.migrate(JSON.parse(raw));
+        return true;
+      } catch (e) {
+        try {
+          var b = localStorage.getItem(BAK);
+          if (b) { this.data = this.migrate(JSON.parse(b)); U.toast('Данные восстановлены из копии'); return true; }
+        } catch (e2) { }
+        this.data = this.empty();
+        return false;
+      }
+    },
+
+    migrate: function (d) {
+      d = d || {};
+      var base = this.empty();
+      d.settings = Object.assign(base.settings, d.settings || {});
+      d.isDemo = !!d.isDemo;
+      ['units', 'drivers', 'shifts', 'fuel', 'services'].forEach(function (k) {
+        d[k] = Array.isArray(d[k]) ? d[k] : [];
+      });
+      d.units.forEach(function (u) {
+        if (!u.meter) u.meter = 'hours';
+        if (u.active == null) u.active = true;
+        u.norm = U.num(u.norm);
+        u.tank = U.num(u.tank);
+      });
+      d.fuel.forEach(function (f) {
+        if (!f.type) f.type = 'fill';
+        f.liters = U.num(f.liters);
+        if (f.sum == null) f.sum = U.num(f.liters) * U.num(f.price);
+      });
+      d.version = 1;
+      return d;
+    },
+
+    save: function () {
+      try {
+        var json = JSON.stringify(this.data);
+        localStorage.setItem(KEY, json);
+        try { localStorage.setItem(BAK, json); } catch (e) { }
+        if (w.CALC) CALC.clearCache();
+      } catch (e) {
+        U.toast('Не удалось сохранить: нет места в памяти');
+        return false;
+      }
+      this.listeners.forEach(function (f) { try { f(); } catch (e) { } });
+      return true;
+    },
+
+    onChange: function (f) { this.listeners.push(f); },
+
+    /* ---------- техника ---------- */
+    units: function () { return this.data.units; },
+    unit: function (id) { return this.data.units.filter(function (u) { return u.id === id; })[0] || null; },
+    unitByName: function (name) {
+      var n = String(name || '').trim().toLowerCase();
+      return this.data.units.filter(function (u) {
+        return u.name.trim().toLowerCase() === n || String(u.plate || '').trim().toLowerCase() === n;
+      })[0] || null;
+    },
+    addUnit: function (u) {
+      u.id = u.id || U.uid();
+      u.createdAt = u.createdAt || U.today();
+      if (u.active == null) u.active = true;
+      this.data.units.push(u);
+      this.save();
+      return u;
+    },
+    updUnit: function (id, patch) {
+      var u = this.unit(id);
+      if (u) { Object.assign(u, patch); this.save(); }
+      return u;
+    },
+    delUnit: function (id) {
+      this.data.units = this.data.units.filter(function (u) { return u.id !== id; });
+      this.data.shifts = this.data.shifts.filter(function (s) { return s.unitId !== id; });
+      this.data.fuel = this.data.fuel.filter(function (f) { return f.unitId !== id; });
+      this.data.services = this.data.services.filter(function (s) { return s.unitId !== id; });
+      this.save();
+    },
+
+    /* ---------- водители ---------- */
+    drivers: function () { return this.data.drivers; },
+    driver: function (id) { return this.data.drivers.filter(function (d) { return d.id === id; })[0] || null; },
+    driverName: function (id) { var d = this.driver(id); return d ? d.name : ''; },
+    driverByName: function (name) {
+      var n = String(name || '').trim().toLowerCase();
+      return this.data.drivers.filter(function (d) { return d.name.trim().toLowerCase() === n; })[0] || null;
+    },
+    addDriver: function (d) {
+      d.id = d.id || U.uid();
+      d.createdAt = d.createdAt || U.today();
+      this.data.drivers.push(d);
+      this.save();
+      return d;
+    },
+    updDriver: function (id, patch) {
+      var d = this.driver(id);
+      if (d) { Object.assign(d, patch); this.save(); }
+      return d;
+    },
+    delDriver: function (id) {
+      this.data.drivers = this.data.drivers.filter(function (d) { return d.id !== id; });
+      this.data.shifts.forEach(function (s) { if (s.driverId === id) s.driverId = null; });
+      this.data.fuel.forEach(function (f) { if (f.driverId === id) f.driverId = null; });
+      this.save();
+    },
+
+    /* ---------- смены ---------- */
+    shifts: function () { return this.data.shifts; },
+    shift: function (id) { return this.data.shifts.filter(function (s) { return s.id === id; })[0] || null; },
+    addShift: function (s) {
+      s.id = s.id || U.uid();
+      s.date = s.date || U.today();
+      this.data.shifts.push(s);
+      this.sortAll();
+      this.save();
+      return s;
+    },
+    updShift: function (id, patch) {
+      var s = this.shift(id);
+      if (s) { Object.assign(s, patch); this.sortAll(); this.save(); }
+      return s;
+    },
+    delShift: function (id) {
+      this.data.shifts = this.data.shifts.filter(function (s) { return s.id !== id; });
+      this.save();
+    },
+
+    /* ---------- топливо ---------- */
+    fuelOps: function () { return this.data.fuel; },
+    fuelOp: function (id) { return this.data.fuel.filter(function (f) { return f.id === id; })[0] || null; },
+    addFuel: function (f) {
+      f.id = f.id || U.uid();
+      f.date = f.date || U.today();
+      f.type = f.type || 'fill';
+      f.liters = U.num(f.liters);
+      f.sum = f.sum != null ? U.num(f.sum) : U.num(f.liters) * U.num(f.price);
+      this.data.fuel.push(f);
+      this.sortAll();
+      if (f.type === 'fill' && U.num(f.price) > 0) this.data.settings.price = U.num(f.price);
+      this.save();
+      return f;
+    },
+    updFuel: function (id, patch) {
+      var f = this.fuelOp(id);
+      if (f) {
+        Object.assign(f, patch);
+        f.sum = patch.sum != null ? U.num(patch.sum) : U.num(f.liters) * U.num(f.price);
+        this.sortAll();
+        this.save();
+      }
+      return f;
+    },
+    delFuel: function (id) {
+      this.data.fuel = this.data.fuel.filter(function (f) { return f.id !== id; });
+      this.save();
+    },
+
+    /* ---------- ТО и ремонты ---------- */
+    services: function () { return this.data.services; },
+    service: function (id) { return this.data.services.filter(function (s) { return s.id === id; })[0] || null; },
+    addService: function (s) {
+      s.id = s.id || U.uid();
+      s.date = s.date || U.today();
+      s.kind = s.kind || 'to';
+      this.data.services.push(s);
+      this.sortAll();
+      this.save();
+      return s;
+    },
+    updService: function (id, patch) {
+      var s = this.service(id);
+      if (s) { Object.assign(s, patch); this.sortAll(); this.save(); }
+      return s;
+    },
+    delService: function (id) {
+      this.data.services = this.data.services.filter(function (s) { return s.id !== id; });
+      this.save();
+    },
+
+    /* журналы держим отсортированными по дате — на них опираются расчёты */
+    sortAll: function () {
+      var by = function (a, b) {
+        if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+        return (a.id || '') < (b.id || '') ? -1 : 1;
+      };
+      this.data.shifts.sort(by);
+      this.data.fuel.sort(by);
+      this.data.services.sort(by);
+    },
+
+    /* объекты, которые уже встречались — для подсказок в форме */
+    sites: function () {
+      var seen = {}, out = [];
+      this.data.shifts.forEach(function (s) {
+        var v = String(s.site || '').trim();
+        if (v && !seen[v.toLowerCase()]) { seen[v.toLowerCase()] = 1; out.push(v); }
+      });
+      return out.sort(function (a, b) { return a.localeCompare(b, 'ru'); });
+    },
+
+    /* ---------- экспорт / импорт ---------- */
+    exportJSON: function () { return JSON.stringify(this.data, null, 2); },
+
+    importJSON: function (text, mode) {
+      var d = JSON.parse(text);
+      if (!d || !Array.isArray(d.units)) throw new Error('Не похоже на резервную копию «Автопарка»');
+      d = this.migrate(d);
+      if (mode === 'replace') {
+        this.data = d;
+      } else {
+        var self = this, umap = {}, dmap = {};
+        d.drivers.forEach(function (dr) {
+          var ex = self.driverByName(dr.name);
+          if (ex) { dmap[dr.id] = ex.id; return; }
+          var nid = U.uid();
+          dmap[dr.id] = nid;
+          self.data.drivers.push(Object.assign({}, dr, { id: nid }));
+        });
+        d.units.forEach(function (u) {
+          var ex = self.unitByName(u.plate || u.name) || self.unitByName(u.name);
+          if (ex) { umap[u.id] = ex.id; return; }
+          var nid = U.uid();
+          umap[u.id] = nid;
+          self.data.units.push(Object.assign({}, u, { id: nid, driverId: dmap[u.driverId] || null }));
+        });
+        var have = {};
+        var key = function (x, extra) { return x.date + '|' + (umap[x.unitId] || x.unitId) + '|' + extra; };
+        this.data.shifts.forEach(function (s) { have['s' + key(s, s.work || (s.end - s.start))] = 1; });
+        this.data.fuel.forEach(function (f) { have['f' + key(f, f.type + f.liters)] = 1; });
+        this.data.services.forEach(function (s) { have['t' + key(s, s.kind + s.meter)] = 1; });
+
+        d.shifts.forEach(function (s) {
+          if (have['s' + key(s, s.work || (s.end - s.start))]) return;
+          self.data.shifts.push(Object.assign({}, s, { id: U.uid(), unitId: umap[s.unitId] || s.unitId, driverId: dmap[s.driverId] || null }));
+        });
+        d.fuel.forEach(function (f) {
+          if (have['f' + key(f, f.type + f.liters)]) return;
+          self.data.fuel.push(Object.assign({}, f, { id: U.uid(), unitId: umap[f.unitId] || f.unitId, driverId: dmap[f.driverId] || null }));
+        });
+        d.services.forEach(function (s) {
+          if (have['t' + key(s, s.kind + s.meter)]) return;
+          self.data.services.push(Object.assign({}, s, { id: U.uid(), unitId: umap[s.unitId] || s.unitId }));
+        });
+      }
+      this.sortAll();
+      this.save();
+      return { units: this.data.units.length, fuel: this.data.fuel.length, shifts: this.data.shifts.length };
+    },
+
+    /* CSV: две таблицы, различаются по заголовку.
+       Техника:  Название;Госномер;Тип;Счётчик;Норма;Бак;Топливо;ТО через
+       Заправки: Дата;Техника;Водитель;Литры;Цена;Счётчик;Заметка          */
+    importCSV: function (text) {
+      var lines = String(text).replace(/^﻿/, '').split(/\r?\n/).filter(function (s) { return s.trim(); });
+      if (!lines.length) throw new Error('Пустой файл');
+      var sep = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',';
+      var head = lines[0].toLowerCase();
+      var isFuel = /литр|дата|заправ/.test(head) && !/норма/.test(head);
+      var start = /назван|госномер|дата|литр|техник/.test(head) ? 1 : 0;
+      var self = this, added = 0;
+
+      var cut = function (line) {
+        return line.split(sep).map(function (s) { return s.trim().replace(/^"|"$/g, ''); });
+      };
+
+      for (var i = start; i < lines.length; i++) {
+        var c = cut(lines[i]);
+        if (!c[0]) continue;
+
+        if (isFuel) {
+          /* Дата;Техника;Водитель;Литров;Цена;Счётчик;Заметка */
+          var date = self.parseDate(c[0]);
+          if (!date) continue;
+          var un = self.unitByName(c[1]);
+          if (!un) {
+            if (!c[1]) continue;
+            un = self.addUnit({ name: c[1], meter: 'hours', norm: 0, kind: 'other', fuel: self.data.settings.fuel });
+          }
+          var dr = null;
+          if (c[2]) dr = self.driverByName(c[2]) || self.addDriver({ name: c[2], phone: '' });
+          var lit = U.num(c[3]);
+          if (!lit) continue;
+          self.addFuel({
+            type: 'fill', date: date, unitId: un.id, driverId: dr ? dr.id : null,
+            liters: lit, price: U.num(c[4]), meter: c[5] ? U.num(c[5]) : null,
+            source: 'azs', fuel: un.fuel || self.data.settings.fuel, note: c[6] || ''
+          });
+          added++;
+        } else {
+          /* Название;Госномер;Тип;Счётчик;Норма;Бак;Топливо;ТО через */
+          if (self.unitByName(c[0])) continue;
+          var meter = /км|km|пробег/i.test(c[3] || '') ? 'km' : 'hours';
+          var kind = self.KINDS.filter(function (k) {
+            return c[2] && k.n.toLowerCase().indexOf(String(c[2]).toLowerCase().slice(0, 5)) === 0;
+          })[0];
+          self.addUnit({
+            name: c[0], plate: c[1] || '', kind: kind ? kind.k : 'other',
+            meter: meter, norm: U.num(c[4]), tank: U.num(c[5]),
+            fuel: c[6] || self.data.settings.fuel,
+            serviceEvery: U.num(c[7]), meterStart: 0
+          });
+          added++;
+        }
+      }
+      return { added: added, kind: isFuel ? 'fuel' : 'units' };
+    },
+
+    /* принимает 01.02.2026 / 2026-02-01 / 1.2.26 */
+    parseDate: function (s) {
+      s = String(s || '').trim();
+      if (!s) return null;
+      var m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (m) return m[1] + '-' + String(m[2]).padStart(2, '0') + '-' + String(m[3]).padStart(2, '0');
+      m = s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{2,4})/);
+      if (m) {
+        var y = +m[3]; if (y < 100) y += 2000;
+        return y + '-' + String(m[2]).padStart(2, '0') + '-' + String(m[1]).padStart(2, '0');
+      }
+      return null;
+    },
+
+    csvRows: function (rows) {
+      return '﻿' + rows.map(function (r) {
+        return r.map(function (x) { return '"' + String(x == null ? '' : x).replace(/"/g, '""') + '"'; }).join(';');
+      }).join('\n');
+    },
+
+    /* журнал топлива одной таблицей */
+    exportCSV: function () {
+      var self = this;
+      var TYPE = { fill: 'заправка', intake: 'приход на склад', check: 'замер бака', tankcheck: 'замер склада' };
+      var rows = [['Дата', 'Операция', 'Техника', 'Госномер', 'Водитель', 'Литров', 'Цена за литр', 'Сумма', 'Откуда', 'Счётчик', 'Топливо', 'Заметка']];
+      this.data.fuel.forEach(function (f) {
+        var u = self.unit(f.unitId);
+        rows.push([
+          f.date, TYPE[f.type] || f.type, u ? u.name : '', u ? u.plate || '' : '',
+          self.driverName(f.driverId), U.dec(f.liters, 1), f.price || '', Math.round(U.num(f.sum)),
+          f.type === 'fill' ? (f.source === 'tank' ? self.data.settings.tankName : 'АЗС') : '',
+          f.meter != null ? f.meter : '', f.fuel || '', f.note || ''
+        ]);
+      });
+      return this.csvRows(rows);
+    },
+
+    /* смены отдельной таблицей */
+    exportShiftsCSV: function () {
+      var self = this;
+      var rows = [['Дата', 'Техника', 'Госномер', 'Водитель', 'Объект', 'Начало', 'Конец', 'Наработка', 'Единица', 'Норма расхода, л', 'Заметка']];
+      this.data.shifts.forEach(function (s) {
+        var u = self.unit(s.unitId) || { name: '', plate: '', meter: 'hours', norm: 0 };
+        var wk = CALC.shiftWork(s);
+        rows.push([
+          s.date, u.name, u.plate || '', self.driverName(s.driverId), s.site || '',
+          s.start != null ? s.start : '', s.end != null ? s.end : '',
+          U.dec(wk, 1), U.meterInfo(u.meter).unit, U.dec(CALC.normFor(u, wk), 1), s.note || ''
+        ]);
+      });
+      return this.csvRows(rows);
+    },
+
+    /* сводка по технике за период */
+    exportReportCSV: function (from, to) {
+      var self = this;
+      var rows = [['Техника', 'Госномер', 'Наработка', 'Единица', 'Норма расхода, л', 'Залито, л', 'Отклонение по замерам, л', 'Средний расход', 'Потрачено денег']];
+      this.data.units.forEach(function (u) {
+        var r = CALC.unitPeriod(u, from, to);
+        rows.push([
+          u.name, u.plate || '', U.dec(r.work, 1), U.meterInfo(u.meter).unit,
+          U.dec(r.norm, 1), U.dec(r.filled, 1), U.dec(r.deviation, 1),
+          r.actualRate != null ? U.dec(r.actualRate, 1) : '', Math.round(r.money)
+        ]);
+      });
+      return this.csvRows(rows);
+    },
+
+    /* ---------- демонстрационный набор ---------- */
+    demo: function () {
+      var db = this.empty();
+      db.isDemo = true;
+      db.settings.price = 9800;
+      db.settings.tankVolume = 10000;
+
+      var t = U.today(), d = U.addDays;
+      var seed = 20260101;
+      var rnd = function () { seed = (seed * 1103515245 + 12345) % 2147483648; return seed / 2147483648; };
+
+      db.drivers = [
+        { id: 'dr1', name: 'Рустам Хайдаров', phone: '+998 90 123-45-67', note: 'Экскаваторщик, 12 лет стажа' },
+        { id: 'dr2', name: 'Азиз Каримов', phone: '+998 91 222-33-44', note: '' },
+        { id: 'dr3', name: 'Сергей Волков', phone: '+998 93 555-66-77', note: '' },
+        { id: 'dr4', name: 'Бахтиёр Юсупов', phone: '+998 94 777-88-99', note: 'Стажёр' },
+        { id: 'dr5', name: 'Дилшод Рахимов', phone: '+998 97 111-22-33', note: '' }
+      ];
+
+      db.units = [
+        { id: 'u1', name: 'Экскаватор Hitachi ZX200', plate: 'EX 2201', kind: 'excavator', meter: 'hours',
+          norm: 14.5, tank: 400, fuel: 'ДТ', serviceEvery: 250, driverId: 'dr1', meterStart: 4820,
+          tankStart: 320, active: true, note: '' },
+        { id: 'u2', name: 'Погрузчик SDLG LG956', plate: 'LD 3310', kind: 'loader', meter: 'hours',
+          norm: 11, tank: 300, fuel: 'ДТ', serviceEvery: 250, driverId: 'dr2', meterStart: 2610,
+          tankStart: 230, active: true, note: '' },
+        { id: 'u3', name: 'Самосвал Howo №1', plate: '01 A 123 BA', kind: 'truck', meter: 'km',
+          norm: 38, tank: 400, fuel: 'ДТ', serviceEvery: 10000, driverId: 'dr3', meterStart: 184300,
+          tankStart: 300, active: true, note: '' },
+        { id: 'u4', name: 'Самосвал Howo №2', plate: '01 A 456 BA', kind: 'truck', meter: 'km',
+          norm: 38, tank: 400, fuel: 'ДТ', serviceEvery: 10000, driverId: 'dr4', meterStart: 96150,
+          tankStart: 300, active: true, note: '' },
+        { id: 'u5', name: 'Бульдозер Shantui SD16', plate: 'BD 1601', kind: 'dozer', meter: 'hours',
+          norm: 16, tank: 380, fuel: 'ДТ', serviceEvery: 250, driverId: 'dr5', meterStart: 7305,
+          tankStart: 300, active: true, note: '' },
+        { id: 'u6', name: 'Автокран XCMG 25 т', plate: '01 B 777 CA', kind: 'crane', meter: 'km',
+          norm: 32, tank: 350, fuel: 'ДТ', serviceEvery: 12000, driverId: null, meterStart: 41200,
+          tankStart: 250, active: true, note: 'Работает по заявкам' }
+      ];
+
+      var sites = ['ЖК «Северный»', 'Карьер', 'Трасса М-39', 'База'];
+      var meters = {}, tankLeft = {}, stock = 0, n = 0;
+      db.units.forEach(function (u) { meters[u.id] = u.meterStart; tankLeft[u.id] = u.tankStart; });
+      var id = function (p) { return p + (++n); };
+
+      /* замеры баков делаем месяц назад и вчера — как на реальной инвентаризации */
+      var checkDays = [31, 1];
+
+      /* последние 60 дней: смены, заправки, приход топлива на склад */
+      for (var day = 60; day >= 0; day--) {
+        var date = d(t, -day);
+        var dow = new Date(U.parse(date)).getUTCDay();
+
+        /* приход топлива на склад раз в 10 дней */
+        if (day % 10 === 3) {
+          db.fuel.push({ id: id('i'), type: 'intake', date: date, liters: 5000, price: 9800,
+            sum: 5000 * 9800, fuel: 'ДТ', note: 'бензовоз, накладная' });
+          stock += 5000;
+        }
+
+        if (dow !== 0) {                                            // воскресенье — выходной
+          db.units.forEach(function (u) {
+            if (u.id === 'u6' && day % 3 !== 0) return;              // кран работает по заявкам
+            var work = u.meter === 'km'
+              ? Math.round(120 + rnd() * 110)                        // 120–230 км
+              : Math.round((6 + rnd() * 3.5) * 10) / 10;             // 6–9,5 моточаса
+
+            meters[u.id] += work;
+            db.shifts.push({
+              id: id('s'), date: date, unitId: u.id, driverId: u.driverId,
+              start: Math.round((meters[u.id] - work) * 10) / 10,
+              end: Math.round(meters[u.id] * 10) / 10,
+              site: sites[Math.floor(rnd() * sites.length)], note: ''
+            });
+
+            /* реальный расход слегка гуляет вокруг нормы */
+            var spent = (u.meter === 'km' ? work / 100 * u.norm : work * u.norm) * (0.96 + rnd() * 0.08);
+            /* самосвал №1 — с него сливают: расход стабильно выше нормы */
+            if (u.id === 'u3') spent *= 1.22;
+            tankLeft[u.id] -= spent;
+
+            /* заправляем, когда в баке остаётся меньше трети */
+            if (tankLeft[u.id] < u.tank * 0.34) {
+              var lit = Math.round((u.tank * 0.9 - tankLeft[u.id]) / 10) * 10;
+              var fromTank = !(u.meter === 'km' && rnd() < 0.4);     // самосвалы иногда заправляют на АЗС
+              tankLeft[u.id] += lit;
+              if (fromTank) stock -= lit;
+              db.fuel.push({
+                id: id('f'), type: 'fill', date: date, unitId: u.id, driverId: u.driverId,
+                liters: lit, price: 9800, sum: lit * 9800,
+                source: fromTank ? 'tank' : 'azs',
+                meter: Math.round(meters[u.id] * 10) / 10, fuel: 'ДТ', note: ''
+              });
+            }
+          });
+        }
+
+        /* инвентаризация: замеряем баки техники и остаток в ёмкости */
+        if (checkDays.indexOf(day) >= 0) {
+          db.units.forEach(function (u) {
+            db.fuel.push({
+              id: id('c'), type: 'check', date: date, unitId: u.id,
+              liters: Math.max(0, Math.round(tankLeft[u.id])),
+              meter: Math.round(meters[u.id] * 10) / 10, fuel: 'ДТ',
+              note: u.id === 'u3' && day === 1 ? 'замер комиссией' : ''
+            });
+          });
+          /* со склада тоже понемногу утекает */
+          stock -= day === 1 ? 180 : 60;
+          db.fuel.push({ id: id('tc'), type: 'tankcheck', date: date,
+            liters: Math.max(0, Math.round(stock)), fuel: 'ДТ', note: 'замер в ёмкости' });
+        }
+      }
+
+      /* ТО: одно свежее, одно давнее — чтобы было видно и «скоро», и «просрочено» */
+      db.services = [
+        { id: 'sv1', date: d(t, -34), unitId: 'u1', kind: 'to', meter: meters.u1 - 210, sum: 2400000, note: 'ТО-2, масло и фильтры' },
+        { id: 'sv2', date: d(t, -18), unitId: 'u2', kind: 'to', meter: meters.u2 - 95, sum: 1750000, note: 'ТО-1' },
+        { id: 'sv3', date: d(t, -50), unitId: 'u3', kind: 'to', meter: meters.u3 - 9600, sum: 3100000, note: 'ТО, замена масла' },
+        { id: 'sv4', date: d(t, -12), unitId: 'u4', kind: 'to', meter: meters.u4 - 1200, sum: 2900000, note: 'ТО' },
+        { id: 'sv5', date: d(t, -40), unitId: 'u5', kind: 'to', meter: meters.u5 - 265, sum: 2600000, note: 'ТО-2' },
+        { id: 'sv6', date: d(t, -7), unitId: 'u5', kind: 'repair', meter: meters.u5 - 40, sum: 4200000, note: 'Ремонт гидроцилиндра отвала' },
+        { id: 'sv7', date: d(t, -3), unitId: 'u3', kind: 'repair', meter: meters.u3 - 300, sum: 900000, note: 'Замена двух колёс' },
+        { id: 'sv8', date: d(t, -60), unitId: 'u6', kind: 'to', meter: meters.u6 - 3200, sum: 2200000, note: 'ТО' }
+      ];
+
+      var by = function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; };
+      db.shifts.sort(by); db.fuel.sort(by); db.services.sort(by);
+      return db;
+    }
+  };
+
+  w.DB = DB;
+})(window);
+
+/* Расчёты: наработка, норма расхода, остаток в баке, недостача, ТО */
+(function (w) {
+  'use strict';
+
+  var CALC = {};
+  var cache = {};
+
+  CALC.clearCache = function () { cache = {}; };
+
+  /* ---------- мелочи ---------- */
+
+  /* наработка смены: по показаниям счётчика, а если их нет — введённая руками */
+  CALC.shiftWork = function (s) {
+    if (!s) return 0;
+    if (s.start != null && s.end != null && s.end !== '' && s.start !== '') {
+      var v = U.num(s.end) - U.num(s.start);
+      if (v > 0) return v;
+    }
+    return Math.max(0, U.num(s.work));
+  };
+
+  /* сколько литров положено по норме на такую наработку */
+  CALC.normFor = function (u, work) {
+    if (!u) return 0;
+    var n = U.num(u.norm), v = U.num(work);
+    return u.meter === 'km' ? v / 100 * n : v * n;
+  };
+
+  /* обратное: фактический расход при такой наработке */
+  CALC.rateOf = function (u, liters, work) {
+    var v = U.num(work);
+    if (v <= 0) return null;
+    return u.meter === 'km' ? U.num(liters) / v * 100 : U.num(liters) / v;
+  };
+
+  CALC.inRange = function (date, from, to) {
+    return (!from || date >= from) && (!to || date <= to);
+  };
+
+  /* ---------- журналы одной единицы техники ---------- */
+  CALC.shiftsOf = function (unitId, from, to) {
+    return DB.data.shifts.filter(function (s) {
+      return s.unitId === unitId && CALC.inRange(s.date, from, to);
+    });
+  };
+  CALC.fuelOf = function (unitId, from, to, type) {
+    return DB.data.fuel.filter(function (f) {
+      return f.unitId === unitId && (!type || f.type === type) && CALC.inRange(f.date, from, to);
+    });
+  };
+  CALC.servicesOf = function (unitId, from, to) {
+    return DB.data.services.filter(function (s) {
+      return s.unitId === unitId && CALC.inRange(s.date, from, to);
+    });
+  };
+
+  /* показания счётчика сейчас — максимум из всего, что было записано */
+  CALC.meterNow = function (u) {
+    if (!u) return 0;
+    var k = 'm' + u.id;
+    if (cache[k] != null) return cache[k];
+    var m = U.num(u.meterStart);
+    CALC.shiftsOf(u.id).forEach(function (s) {
+      if (s.end != null && s.end !== '') m = Math.max(m, U.num(s.end));
+    });
+    CALC.fuelOf(u.id).forEach(function (f) {
+      if (f.meter != null && f.meter !== '') m = Math.max(m, U.num(f.meter));
+    });
+    CALC.servicesOf(u.id).forEach(function (s) {
+      if (s.meter != null && s.meter !== '') m = Math.max(m, U.num(s.meter));
+    });
+    /* смены без показаний счётчика тоже наматывают наработку */
+    var loose = 0;
+    CALC.shiftsOf(u.id).forEach(function (s) {
+      if (s.end == null || s.end === '') loose += CALC.shiftWork(s);
+    });
+    cache[k] = m + loose;
+    return cache[k];
+  };
+
+  /* ---------- топливо в баке ----------
+     Замер бака — это точка опоры: он обнуляет все прошлые догадки.
+     Дальше остаток = замер + заправки − списание по норме.
+     Операции того же дня, что и замер, считаются сделанными до него.      */
+  CALC.baseline = function (u, upto) {
+    var checks = CALC.fuelOf(u.id, null, upto, 'check');
+    var last = checks[checks.length - 1] || null;
+    return last
+      ? { date: last.date, liters: U.num(last.liters), fromCheck: true }
+      : { date: null, liters: U.num(u.tankStart), fromCheck: false };
+  };
+
+  /* расчётный остаток в баке на дату (по умолчанию — сегодня) */
+  CALC.tankLeft = function (u, upto) {
+    var base = CALC.baseline(u, upto);
+    var left = base.liters, filled = 0, burned = 0;
+    CALC.fuelOf(u.id, null, upto, 'fill').forEach(function (f) {
+      if (base.date && f.date <= base.date) return;
+      filled += U.num(f.liters);
+    });
+    CALC.shiftsOf(u.id, null, upto).forEach(function (s) {
+      if (base.date && s.date <= base.date) return;
+      burned += CALC.normFor(u, CALC.shiftWork(s));
+    });
+    left += filled - burned;
+    return { left: left, base: base, filled: filled, burned: burned };
+  };
+
+  /* все замеры бака с отклонением: сколько было по расчёту и сколько нашли */
+  CALC.checks = function (u, from, to) {
+    var all = CALC.fuelOf(u.id, null, null, 'check');
+    var out = [];
+    all.forEach(function (c, i) {
+      var prev = i > 0 ? all[i - 1] : null;
+      var start = prev ? { date: prev.date, liters: U.num(prev.liters) }
+        : { date: null, liters: U.num(u.tankStart) };
+      var filled = 0, burned = 0;
+      CALC.fuelOf(u.id, null, c.date, 'fill').forEach(function (f) {
+        if (start.date && f.date <= start.date) return;
+        filled += U.num(f.liters);
+      });
+      CALC.shiftsOf(u.id, null, c.date).forEach(function (s) {
+        if (start.date && s.date <= start.date) return;
+        burned += CALC.normFor(u, CALC.shiftWork(s));
+      });
+      var expected = start.liters + filled - burned;
+      out.push({
+        id: c.id, date: c.date, found: U.num(c.liters), expected: expected,
+        deviation: U.num(c.liters) - expected,       // минус — недостача
+        hasBase: !!prev || U.num(u.tankStart) > 0,
+        sinceDate: start.date, filled: filled, burned: burned, note: c.note || ''
+      });
+    });
+    return out.filter(function (c) { return CALC.inRange(c.date, from, to); });
+  };
+
+  /* ---------- состояние единицы техники ---------- */
+  CALC.unitState = function (u) {
+    if (!u) return null;
+    var k = 'u' + u.id;
+    if (cache[k]) return cache[k];
+
+    var meterNow = CALC.meterNow(u);
+    var tank = CALC.tankLeft(u);
+    var checks = CALC.checks(u);
+    var lastCheck = checks[checks.length - 1] || null;
+
+    var shifts = CALC.shiftsOf(u.id);
+    var fills = CALC.fuelOf(u.id, null, null, 'fill');
+    var lastShift = shifts[shifts.length - 1] || null;
+    var lastFill = fills[fills.length - 1] || null;
+
+    /* ТО: считаем от показаний счётчика на последнем ТО */
+    var tos = CALC.servicesOf(u.id).filter(function (s) { return s.kind === 'to'; });
+    var lastTo = tos[tos.length - 1] || null;
+    var every = U.num(u.serviceEvery);
+    var sinceTo = lastTo && lastTo.meter != null ? meterNow - U.num(lastTo.meter) : meterNow - U.num(u.meterStart);
+    var leftTo = every > 0 ? every - sinceTo : null;
+    var warnAt = every * (U.num(DB.data.settings.serviceWarnPct) || 10) / 100;
+
+    var st = {
+      unit: u,
+      meterNow: meterNow,
+      tankLeft: tank.left,
+      tankBase: tank.base,
+      tankPct: U.num(u.tank) > 0 ? Math.max(0, Math.min(1, tank.left / U.num(u.tank))) : null,
+      /* залито больше, чем физически влезает, — топливо ушло мимо бака */
+      tankOverflow: U.num(u.tank) > 0 && tank.left > U.num(u.tank) * 1.03,
+      tankNegative: tank.left < -1,
+      checks: checks,
+      lastCheck: lastCheck,
+      deviationTotal: checks.reduce(function (a, c) { return a + (c.hasBase ? c.deviation : 0); }, 0),
+      shiftCount: shifts.length,
+      lastShift: lastShift,
+      lastFill: lastFill,
+      idleDays: lastShift ? U.diffDays(lastShift.date, U.today()) : null,
+      service: {
+        every: every, last: lastTo, since: sinceTo, left: leftTo,
+        overdue: every > 0 && leftTo < 0,
+        soon: every > 0 && leftTo >= 0 && leftTo <= warnAt,
+        pct: every > 0 ? Math.max(0, Math.min(1, sinceTo / every)) : null
+      }
+    };
+    cache[k] = st;
+    return st;
+  };
+
+  /* ---------- единица техники за период ---------- */
+  CALC.unitPeriod = function (u, from, to) {
+    var k = 'p' + u.id + (from || '') + (to || '');
+    if (cache[k]) return cache[k];
+
+    var work = 0, days = {};
+    CALC.shiftsOf(u.id, from, to).forEach(function (s) {
+      work += CALC.shiftWork(s);
+      days[s.date] = 1;
+    });
+    var filled = 0, filledTank = 0, filledAzs = 0, money = 0, fillCount = 0;
+    CALC.fuelOf(u.id, from, to, 'fill').forEach(function (f) {
+      filled += U.num(f.liters);
+      money += U.num(f.sum);
+      fillCount++;
+      if (f.source === 'tank') filledTank += U.num(f.liters); else filledAzs += U.num(f.liters);
+    });
+    var checks = CALC.checks(u, from, to).filter(function (c) { return c.hasBase; });
+    var deviation = checks.reduce(function (a, c) { return a + c.deviation; }, 0);
+
+    var norm = CALC.normFor(u, work);
+    var serviceCost = 0;
+    CALC.servicesOf(u.id, from, to).forEach(function (s) { serviceCost += U.num(s.sum); });
+
+    var r = {
+      unit: u, from: from, to: to,
+      work: work, days: Object.keys(days).length,
+      norm: norm, filled: filled, filledTank: filledTank, filledAzs: filledAzs,
+      fillCount: fillCount, money: money, serviceCost: serviceCost,
+      over: filled - norm,                       // залито сверх нормы
+      deviation: deviation,                      // недостача по замерам (минус — плохо)
+      checkCount: checks.length,
+      actualRate: CALC.rateOf(u, filled, work),  // фактический расход
+      normRate: U.num(u.norm)
+    };
+    r.rateDiff = r.actualRate != null ? r.actualRate - r.normRate : null;
+    /* «перерасход» — то, что подсвечиваем красным.
+       Мелкие расхождения — это погрешность замера, а не воровство:
+       считаем проблемой недостачу больше 3% нормы и больше 15 литров. */
+    var limit = Math.max(15, norm * 0.03);
+    r.problem = r.checkCount ? (-r.deviation > limit) : (work > 0 && r.over > Math.max(25, norm * 0.08));
+    r.problemLiters = r.checkCount ? -r.deviation : r.over;
+    r.problemLimit = limit;
+    cache[k] = r;
+    return r;
+  };
+
+  /* ---------- склад ГСМ ---------- */
+  CALC.tankState = function (upto) {
+    var checks = DB.data.fuel.filter(function (f) {
+      return f.type === 'tankcheck' && CALC.inRange(f.date, null, upto);
+    });
+    var last = checks[checks.length - 1] || null;
+    var base = last ? { date: last.date, liters: U.num(last.liters) } : { date: null, liters: 0 };
+    var intake = 0, out = 0;
+    DB.data.fuel.forEach(function (f) {
+      if (!CALC.inRange(f.date, null, upto)) return;
+      if (base.date && f.date <= base.date) return;
+      if (f.type === 'intake') intake += U.num(f.liters);
+      if (f.type === 'fill' && f.source === 'tank') out += U.num(f.liters);
+    });
+    var vol = U.num(DB.data.settings.tankVolume);
+    var left = base.liters + intake - out;
+
+    /* отклонения по всем замерам склада */
+    var all = DB.data.fuel.filter(function (f) { return f.type === 'tankcheck'; });
+    var rows = [];
+    all.forEach(function (c, i) {
+      var prev = i > 0 ? all[i - 1] : null;
+      var start = prev ? { date: prev.date, liters: U.num(prev.liters) } : { date: null, liters: 0 };
+      var inn = 0, o = 0;
+      DB.data.fuel.forEach(function (f) {
+        if (f.date > c.date) return;
+        if (start.date && f.date <= start.date) return;
+        if (f.type === 'intake') inn += U.num(f.liters);
+        if (f.type === 'fill' && f.source === 'tank') o += U.num(f.liters);
+      });
+      var expected = start.liters + inn - o;
+      rows.push({ id: c.id, date: c.date, found: U.num(c.liters), expected: expected,
+        deviation: U.num(c.liters) - expected, hasBase: !!prev, note: c.note || '' });
+    });
+
+    return {
+      left: left, base: base, intake: intake, out: out,
+      volume: vol, pct: vol > 0 ? Math.max(0, Math.min(1, left / vol)) : null,
+      checks: rows, lastCheck: rows[rows.length - 1] || null,
+      deviationTotal: rows.reduce(function (a, c) { return a + (c.hasBase ? c.deviation : 0); }, 0)
+    };
+  };
+
+  /* ---------- весь парк за период ---------- */
+  CALC.fleet = function (from, to) {
+    var units = DB.data.units;
+    var res = {
+      from: from, to: to,
+      filled: 0, money: 0, norm: 0, over: 0, deviation: 0,
+      workHours: 0, workKm: 0, shiftDays: 0, fillCount: 0,
+      intake: 0, intakeMoney: 0, serviceCost: 0,
+      rows: [], problems: [], serviceSoon: [], serviceOverdue: [], idle: []
+    };
+    units.forEach(function (u) {
+      var p = CALC.unitPeriod(u, from, to);
+      res.rows.push(p);
+      res.filled += p.filled;
+      res.money += p.money;
+      res.norm += p.norm;
+      res.deviation += p.deviation;
+      res.fillCount += p.fillCount;
+      res.shiftDays += p.days;
+      res.serviceCost += p.serviceCost;
+      if (u.meter === 'km') res.workKm += p.work; else res.workHours += p.work;
+      if (p.problem) res.problems.push(p);
+
+      var st = CALC.unitState(u);
+      if (u.active !== false) {
+        if (st.service.overdue) res.serviceOverdue.push(st);
+        else if (st.service.soon) res.serviceSoon.push(st);
+        if (st.idleDays != null && st.idleDays > 7) res.idle.push(st);
+      }
+    });
+    res.over = res.filled - res.norm;
+    DB.data.fuel.forEach(function (f) {
+      if (f.type === 'intake' && CALC.inRange(f.date, from, to)) {
+        res.intake += U.num(f.liters);
+        res.intakeMoney += U.num(f.sum);
+      }
+    });
+    res.problems.sort(function (a, b) { return b.problemLiters - a.problemLiters; });
+    res.serviceOverdue.sort(function (a, b) { return a.service.left - b.service.left; });
+    res.serviceSoon.sort(function (a, b) { return a.service.left - b.service.left; });
+    return res;
+  };
+
+  /* ---------- помесячно ---------- */
+  CALC.byMonth = function () {
+    var m = {};
+    var get = function (k) {
+      return m[k] || (m[k] = { filled: 0, money: 0, intake: 0, intakeMoney: 0,
+        workHours: 0, workKm: 0, norm: 0, deviation: 0, serviceCost: 0 });
+    };
+    DB.data.fuel.forEach(function (f) {
+      var k = U.monthKey(f.date);
+      if (f.type === 'fill') { get(k).filled += U.num(f.liters); get(k).money += U.num(f.sum); }
+      if (f.type === 'intake') { get(k).intake += U.num(f.liters); get(k).intakeMoney += U.num(f.sum); }
+    });
+    DB.data.shifts.forEach(function (s) {
+      var u = DB.unit(s.unitId);
+      if (!u) return;
+      var k = U.monthKey(s.date), wk = CALC.shiftWork(s);
+      if (u.meter === 'km') get(k).workKm += wk; else get(k).workHours += wk;
+      get(k).norm += CALC.normFor(u, wk);
+    });
+    DB.data.units.forEach(function (u) {
+      CALC.checks(u).forEach(function (c) {
+        if (c.hasBase) get(U.monthKey(c.date)).deviation += c.deviation;
+      });
+    });
+    DB.data.services.forEach(function (s) { get(U.monthKey(s.date)).serviceCost += U.num(s.sum); });
+    return m;
+  };
+
+  /* ---------- по водителям ---------- */
+  CALC.byDriver = function (from, to) {
+    var map = {};
+    var get = function (id) {
+      return map[id] || (map[id] = { id: id, shifts: 0, workHours: 0, workKm: 0,
+        norm: 0, filled: 0, money: 0, units: {} });
+    };
+    DB.data.shifts.forEach(function (s) {
+      if (!CALC.inRange(s.date, from, to)) return;
+      var u = DB.unit(s.unitId);
+      if (!u) return;
+      var r = get(s.driverId || '—'), wk = CALC.shiftWork(s);
+      r.shifts++;
+      if (u.meter === 'km') r.workKm += wk; else r.workHours += wk;
+      r.norm += CALC.normFor(u, wk);
+      r.units[u.id] = 1;
+    });
+    DB.data.fuel.forEach(function (f) {
+      if (f.type !== 'fill' || !CALC.inRange(f.date, from, to)) return;
+      var r = get(f.driverId || '—');
+      r.filled += U.num(f.liters);
+      r.money += U.num(f.sum);
+    });
+    return Object.keys(map).map(function (id) {
+      var r = map[id];
+      r.over = r.filled - r.norm;
+      r.unitCount = Object.keys(r.units).length;
+      r.name = id === '—' ? 'Без водителя' : (DB.driverName(id) || 'Удалён');
+      return r;
+    }).sort(function (a, b) { return b.norm - a.norm; });
+  };
+
+  /* ---------- по объектам ---------- */
+  CALC.bySite = function (from, to) {
+    var map = {};
+    DB.data.shifts.forEach(function (s) {
+      if (!CALC.inRange(s.date, from, to)) return;
+      var u = DB.unit(s.unitId);
+      if (!u) return;
+      var name = String(s.site || '').trim() || 'Без объекта';
+      var r = map[name] || (map[name] = { name: name, shifts: 0, workHours: 0, workKm: 0, norm: 0, units: {} });
+      var wk = CALC.shiftWork(s);
+      r.shifts++;
+      if (u.meter === 'km') r.workKm += wk; else r.workHours += wk;
+      r.norm += CALC.normFor(u, wk);
+      r.units[u.id] = 1;
+    });
+    return Object.keys(map).map(function (k) {
+      map[k].unitCount = Object.keys(map[k].units).length;
+      return map[k];
+    }).sort(function (a, b) { return b.norm - a.norm; });
+  };
+
+  /* ---------- лента операций ---------- */
+  CALC.feed = function (limit, unitId) {
+    var out = [];
+    DB.data.fuel.forEach(function (f) {
+      if (unitId && f.unitId !== unitId) return;
+      out.push({ kind: 'fuel', date: f.date, op: f });
+    });
+    DB.data.shifts.forEach(function (s) {
+      if (unitId && s.unitId !== unitId) return;
+      out.push({ kind: 'shift', date: s.date, op: s });
+    });
+    DB.data.services.forEach(function (s) {
+      if (unitId && s.unitId !== unitId) return;
+      out.push({ kind: 'service', date: s.date, op: s });
+    });
+    out.sort(function (a, b) {
+      if (a.date !== b.date) return a.date < b.date ? 1 : -1;
+      return (b.op.id || '') < (a.op.id || '') ? -1 : 1;
+    });
+    return limit ? out.slice(0, limit) : out;
+  };
+
+  w.CALC = CALC;
+})(window);
+
+/* Экраны: Обзор, Техника, Журнал, Ещё, Отчёты, Водители, Склад */
+(function (w) {
+  'use strict';
+
+  var esc = U.esc, V = {};
+
+  /* ============ иконки ============ */
+  V.ICON = {
+    home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4.2-5.4"/><path d="M4 18h16"/></svg>',
+    units: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 16V7.5h10V16"/><path d="M12.5 10.5H16l3.5 3.2V16"/><circle cx="7" cy="16.6" r="1.9"/><circle cx="16.5" cy="16.6" r="1.9"/><path d="M8.9 16.6h5.7"/></svg>',
+    log: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 3.5h9a1 1 0 0 1 1 1v16h-10a1 1 0 0 1-1-1v-15a1 1 0 0 1 1-1z"/><path d="M14.5 9h3.2l2.3 2.3V19a1.5 1.5 0 0 1-3 0v-1.5"/><path d="M7 7.5h4M7 11h4M7 14.5h4"/></svg>',
+    more: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>',
+    back: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4 7 12l8 8"/></svg>',
+    chev: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4l8 8-8 8"/></svg>'
+  };
+
+  /* ============ общие кусочки ============ */
+  V.unitIcon = function (u) {
+    var k = DB.kind(u.kind);
+    return '<div class="avatar sq" style="background:' + U.color(u.name) + '">' + k.ic + '</div>';
+  };
+  V.avatar = function (name) {
+    return '<div class="avatar" style="background:' + U.color(name) + '">' + esc(U.initials(name)) + '</div>';
+  };
+
+  V.empty = function (ic, t, d, btn) {
+    return '<div class="empty"><div class="ic">' + ic + '</div><div class="t">' + esc(t) + '</div>' +
+      '<div class="d">' + d + '</div>' + (btn || '') + '</div>';
+  };
+
+  V.topbar = function (title, right) {
+    return '<div class="topbar" id="topbar"><span class="tb-btn" style="visibility:hidden">' + V.ICON.back + '</span>' +
+      '<span class="tb-title">' + esc(title) + '</span>' +
+      '<span class="tb-btn right">' + (right || '') + '</span></div>';
+  };
+  V.topbarBack = function (title, right) {
+    return '<div class="topbar" id="topbar"><button class="tb-btn" data-act="back">' + V.ICON.back + '</button>' +
+      '<span class="tb-title">' + esc(title) + '</span>' +
+      '<span class="tb-btn right">' + (right || '') + '</span></div>';
+  };
+
+  V.kv = function (k, v, cls) {
+    return '<div class="kv' + (cls ? ' ' + cls : '') + '"><span class="k">' + k +
+      '</span><span class="v num">' + v + '</span></div>';
+  };
+
+  /* бейдж состояния техники */
+  V.unitBadge = function (u, p) {
+    var st = CALC.unitState(u);
+    if (u.active === false) return '<span class="badge">В простое</span>';
+    if (p && p.problem) return '<span class="badge bad">Недостача ' + U.liters(p.problemLiters) + '</span>';
+    if (st.service.overdue) return '<span class="badge bad">ТО просрочено</span>';
+    if (st.service.soon) return '<span class="badge warn">ТО через ' + U.work(st.service.left, u.meter) + '</span>';
+    if (st.tankOverflow) return '<span class="badge warn">Залито больше бака</span>';
+    if (st.tankNegative) return '<span class="badge warn">Топливо не проведено</span>';
+    if (st.idleDays != null && st.idleDays > 7) return '<span class="badge">Без смен ' + U.days(st.idleDays) + '</span>';
+    return '';
+  };
+
+  V.unitRow = function (u, from, to) {
+    var p = CALC.unitPeriod(u, from, to);
+    var st = CALC.unitState(u);
+    var b = V.unitBadge(u, p);
+    var sub = (u.plate ? esc(u.plate) + ' · ' : '') + U.work(p.work, u.meter) + ' за месяц';
+    return '<button class="row tap" data-act="unit" data-id="' + u.id + '">' +
+      V.unitIcon(u) +
+      '<span class="grow"><span class="ttl">' + esc(u.name) + '</span>' +
+      '<span class="sub">' + (b ? b + ' ' : '') + sub + '</span></span>' +
+      '<span class="val"><span class="v1 num">' + U.liters(p.filled) + '</span>' +
+      '<span class="v2">' + (U.num(u.tank) > 0 ? 'в баке ' + U.liters(st.tankLeft) : 'залито за месяц') + '</span></span>' +
+      '<span class="chev">' + V.ICON.chev + '</span></button>';
+  };
+
+  /* строка операции в журнале */
+  V.opRow = function (x, opt) {
+    opt = opt || {};
+    var op = x.op, u = DB.unit(op.unitId);
+    var name = u ? u.name : (x.kind === 'fuel' && op.type === 'intake' ? 'Приход на склад'
+      : x.kind === 'fuel' && op.type === 'tankcheck' ? 'Замер склада' : 'Техника удалена');
+    var act = 'op-' + x.kind, right = '', sub = '', ttl = name, ic = '';
+
+    if (x.kind === 'fuel') {
+      if (op.type === 'fill') {
+        ic = '⛽';
+        sub = 'заправка · ' + (op.source === 'tank' ? esc(DB.data.settings.tankName) : 'АЗС') +
+          (op.driverId ? ' · ' + esc(DB.driverName(op.driverId)) : '');
+        right = '<span class="v1 num">' + U.liters(op.liters) + '</span>' +
+          '<span class="v2">' + (U.num(op.sum) ? U.moneyShort(op.sum) : U.fmtDate(op.date)) + '</span>';
+      } else if (op.type === 'intake') {
+        ic = '🛢️';
+        ttl = 'Приход топлива';
+        sub = 'на склад' + (op.note ? ' · ' + esc(op.note) : '');
+        right = '<span class="v1 num" style="color:var(--accent)">+' + U.liters(op.liters) + '</span>' +
+          '<span class="v2">' + (U.num(op.sum) ? U.moneyShort(op.sum) : U.fmtDate(op.date)) + '</span>';
+      } else if (op.type === 'check') {
+        ic = '📏';
+        var c = null;
+        if (u) c = CALC.checks(u).filter(function (z) { return z.id === op.id; })[0];
+        sub = 'замер бака' + (c && c.hasBase
+          ? ' · ' + (c.deviation < 0 ? '<b style="color:var(--red)">недостача ' + U.liters(-c.deviation) + '</b>'
+            : 'сходится') : ' · точка отсчёта');
+        right = '<span class="v1 num">' + U.liters(op.liters) + '</span><span class="v2">в баке</span>';
+      } else {
+        ic = '📏';
+        ttl = 'Замер склада';
+        var tc = CALC.tankState().checks.filter(function (z) { return z.id === op.id; })[0];
+        sub = tc && tc.hasBase
+          ? (tc.deviation < -0.5 ? '<b style="color:var(--red)">недостача ' + U.liters(-tc.deviation) + '</b>' : 'сходится')
+          : 'точка отсчёта';
+        right = '<span class="v1 num">' + U.liters(op.liters) + '</span><span class="v2">в ёмкости</span>';
+      }
+    } else if (x.kind === 'shift') {
+      ic = '🕒';
+      var wk = CALC.shiftWork(op);
+      sub = 'смена' + (op.site ? ' · ' + esc(op.site) : '') +
+        (op.driverId ? ' · ' + esc(DB.driverName(op.driverId)) : '');
+      right = '<span class="v1 num">' + U.work(wk, u ? u.meter : 'hours') + '</span>' +
+        '<span class="v2">по норме ' + U.liters(u ? CALC.normFor(u, wk) : 0) + '</span>';
+    } else {
+      ic = op.kind === 'to' ? '🔧' : '🛠️';
+      sub = (op.kind === 'to' ? 'ТО' : 'ремонт') + (op.note ? ' · ' + esc(op.note) : '');
+      right = '<span class="v1 num">' + (U.num(op.sum) ? U.moneyShort(op.sum) : '—') + '</span>' +
+        '<span class="v2">' + (op.meter != null ? U.work(op.meter, u ? u.meter : 'hours') : '') + '</span>';
+    }
+
+    return '<button class="row tap" data-act="' + act + '" data-id="' + op.id + '">' +
+      '<span class="op-ic">' + ic + '</span>' +
+      '<span class="grow"><span class="ttl">' + (opt.hideUnit ? U.fmtDate(op.date, true) : esc(ttl)) + '</span>' +
+      '<span class="sub">' + (opt.hideUnit ? sub : U.fmtDate(op.date) + ' · ' + sub) + '</span></span>' +
+      '<span class="val">' + right + '</span></button>';
+  };
+
+  /* ============ ОБЗОР ============ */
+  V.home = function () {
+    var units = DB.units();
+    var from = U.monthStart(U.today()), to = U.today();
+    var f = CALC.fleet(from, to);
+    var tank = CALC.tankState();
+    var st = DB.data.settings;
+
+    var h = V.topbar('Обзор', '<button data-act="add-menu" style="font-size:26px;font-weight:300">＋</button>');
+    h += '<div class="wrap"><h1 class="big">Обзор</h1>';
+
+    if (DB.data.isDemo && units.length) {
+      h += '<div class="card pad warnbox">' +
+        '<div class="t">Это демонстрационные данные</div>' +
+        '<div class="d">Вымышленная техника, смены и заправки — чтобы посмотреть, как всё считается. ' +
+        'Очистите их перед тем, как заносить своё.</div>' +
+        '<button class="btn sec sm full" data-act="demo-off">Очистить и начать с нуля</button></div>';
+    }
+
+    if (!units.length) {
+      h += V.empty('🚜', 'Автопарк пока пуст',
+        'Заведите технику — и приложение начнёт считать расход топлива по норме, ловить перерасход и напоминать про ТО.',
+        '<div style="margin-top:18px"><button class="btn" data-act="new-unit">Добавить технику</button>' +
+        '<button class="btn sec" style="margin-top:8px" data-act="import">Загрузить из таблицы</button>' +
+        '<button class="btn ghost" style="margin-top:8px" data-act="demo">Посмотреть на примере</button></div>');
+      return h + '</div>';
+    }
+
+    h += '<div class="hero">' +
+      '<div class="lbl">Топливо за ' + U.monthName(U.monthKey(to), true).toLowerCase() + '</div>' +
+      '<div class="amt num">' + U.liters(f.filled) + '</div>' +
+      '<div class="delta">' + U.money(f.money) + ' · ' +
+      U.cnt(f.fillCount, 'заправка', 'заправки', 'заправок') + '</div>' +
+      '<div class="delta">по норме ' + U.liters(f.norm) + ' на ' +
+      (f.workHours ? U.work(f.workHours, 'hours') : '') +
+      (f.workHours && f.workKm ? ' и ' : '') + (f.workKm ? U.work(f.workKm, 'km') : '') +
+      (!f.workHours && !f.workKm ? 'нулевой наработке' : ' наработки') + '</div>' +
+      '</div>';
+
+    /* перерасход — главная причина, ради которой всё это заводится */
+    if (f.problems.length) {
+      var lost = f.problems.reduce(function (a, p) { return a + p.problemLiters; }, 0);
+      var price = st.price || 0;
+      h += '<div class="card pad badbox">' +
+        '<div class="t">Перерасход: ' + U.liters(lost) + '</div>' +
+        '<div class="d">' + U.cnt(f.problems.length, 'единица', 'единицы', 'единиц') + ' техники расходует больше нормы' +
+        (price ? '. Это примерно <b>' + U.money(lost * price) + '</b> за месяц' : '') + '.</div>' +
+        '<div class="minilist">' +
+        f.problems.slice(0, 4).map(function (p) {
+          return '<button class="mini tap" data-act="unit" data-id="' + p.unit.id + '">' +
+            '<span>' + esc(p.unit.name) + '</span><b>' + U.liters(p.problemLiters) + '</b></button>';
+        }).join('') + '</div></div>';
+    }
+
+    h += '<div class="stats">' +
+      '<div class="stat"><div class="k"><span class="dot" style="background:var(--blue)"></span>Наработка</div>' +
+      '<div class="v num">' + (f.workHours ? U.work(f.workHours, 'hours') : U.work(f.workKm, 'km')) + '</div>' +
+      '<div class="k" style="margin-top:2px">' +
+      (f.workHours && f.workKm ? 'и ' + U.work(f.workKm, 'km') : U.cnt(f.shiftDays, 'смена', 'смены', 'смен')) + '</div></div>' +
+
+      '<div class="stat"><div class="k"><span class="dot" style="background:' + (f.deviation < -1 ? 'var(--red)' : 'var(--accent)') + '"></span>' +
+      (f.deviation ? 'По замерам' : 'Сверх нормы') + '</div>' +
+      '<div class="v num" style="color:' + ((f.deviation < -1 || (!f.deviation && f.over > 0)) ? 'var(--red)' : 'var(--accent)') + '">' +
+      (f.deviation ? U.liters(f.deviation, { sign: true }) : U.liters(f.over, { sign: true })) + '</div>' +
+      '<div class="k" style="margin-top:2px">' + (f.deviation ? 'недостача в баках' : 'залито минус норма') + '</div></div>' +
+
+      '<div class="stat"><div class="k"><span class="dot" style="background:var(--violet)"></span>Склад ГСМ</div>' +
+      '<div class="v num">' + U.liters(tank.left) + '</div>' +
+      '<div class="k" style="margin-top:2px">' + (tank.volume > 0
+        ? Math.round(tank.left / tank.volume * 100) + '% ёмкости' : 'остаток в ёмкости') + '</div></div>' +
+
+      '<div class="stat"><div class="k"><span class="dot" style="background:var(--orange)"></span>Нужно ТО</div>' +
+      '<div class="v num" style="color:' + (f.serviceOverdue.length ? 'var(--red)' : 'inherit') + '">' +
+      (f.serviceOverdue.length + f.serviceSoon.length || '—') + '</div>' +
+      '<div class="k" style="margin-top:2px">' + (f.serviceOverdue.length ? f.serviceOverdue.length + ' просрочено' : 'из ' + units.length + ' единиц') + '</div></div>' +
+      '</div>';
+
+    h += '<div class="btn-row"><button class="btn" data-act="new-fill">⛽ Заправка</button>' +
+      '<button class="btn sec" data-act="new-shift">🕒 Смена</button></div>';
+
+    if (f.serviceOverdue.length || f.serviceSoon.length) {
+      h += '<h2 class="sec">Обслуживание</h2><div class="list">';
+      f.serviceOverdue.concat(f.serviceSoon).slice(0, 6).forEach(function (s) {
+        var u = s.unit;
+        h += '<button class="row tap" data-act="unit" data-id="' + u.id + '">' + V.unitIcon(u) +
+          '<span class="grow"><span class="ttl">' + esc(u.name) + '</span>' +
+          '<span class="sub">' + (s.service.overdue
+            ? '<b style="color:var(--red)">переработано ' + U.work(-s.service.left, u.meter) + '</b>'
+            : 'осталось ' + U.work(s.service.left, u.meter)) +
+          ' · каждые ' + U.work(s.service.every, u.meter) + '</span></span>' +
+          '<span class="val"><span class="v1 num">' + U.work(s.meterNow, u.meter) + '</span>' +
+          '<span class="v2">счётчик</span></span>' +
+          '<span class="chev">' + V.ICON.chev + '</span></button>';
+      });
+      h += '</div>';
+    }
+
+    var feed = CALC.feed(6);
+    if (feed.length) {
+      h += '<h2 class="sec">Последние записи<button class="act" data-act="go-log">Весь журнал</button></h2><div class="list">';
+      feed.forEach(function (x) { h += V.opRow(x); });
+      h += '</div>';
+    }
+
+    if (!st.lastExport || U.diffDays(st.lastExport, U.today()) > 14) {
+      h += '<div class="card pad" style="margin-top:22px">' +
+        '<div style="font-weight:600;margin-bottom:4px">Сделайте резервную копию</div>' +
+        '<div style="font-size:14px;color:var(--text-2);line-height:1.4">База хранится только на этом телефоне. ' +
+        'Сохраните файл копии в «Файлы» или отправьте себе — тогда данные не пропадут при смене телефона.</div>' +
+        '<button class="btn sec sm full" style="margin-top:12px" data-act="export-json">Сохранить копию</button></div>';
+    }
+
+    return h + '</div>';
+  };
+
+  /* ============ ТЕХНИКА ============ */
+  V.unitsFilter = 'all';
+  V.unitsQuery = '';
+
+  V.units = function () {
+    var all = DB.units();
+    var from = U.monthStart(U.today()), to = U.today();
+    var over = all.filter(function (u) { return CALC.unitPeriod(u, from, to).problem; });
+    var serv = all.filter(function (u) {
+      var s = CALC.unitState(u).service;
+      return s.overdue || s.soon;
+    });
+    var work = all.filter(function (u) { return u.active !== false; });
+
+    var list = V.unitsFilter === 'over' ? over : V.unitsFilter === 'service' ? serv :
+      V.unitsFilter === 'work' ? work : all;
+
+    var q = V.unitsQuery.trim().toLowerCase();
+    if (q) {
+      list = list.filter(function (u) {
+        return (u.name + ' ' + (u.plate || '') + ' ' + (u.note || '')).toLowerCase().indexOf(q) >= 0;
+      });
+    }
+    list = list.slice().sort(function (a, b) {
+      var pa = CALC.unitPeriod(a, from, to), pb = CALC.unitPeriod(b, from, to);
+      if (pa.problem !== pb.problem) return pa.problem ? -1 : 1;
+      return a.name.localeCompare(b.name, 'ru');
+    });
+
+    var h = V.topbar('Техника', '<button data-act="new-unit" style="font-size:26px;font-weight:300">＋</button>');
+    h += '<div class="wrap"><h1 class="big">Техника</h1>';
+
+    if (!all.length) {
+      h += V.empty('🚜', 'Техники пока нет',
+        'Добавьте первую единицу: название, норма расхода и объём бака — этого достаточно, чтобы начать.',
+        '<div style="margin-top:18px"><button class="btn" data-act="new-unit">Добавить технику</button></div>');
+      return h + '</div>';
+    }
+
+    if (all.length > 5) {
+      h += '<div class="search">' + V.ICON.search +
+        '<input id="qu" type="search" placeholder="Название, госномер" value="' + esc(V.unitsQuery) + '" autocomplete="off"></div>';
+    }
+    h += '<div class="seg">' +
+      seg('all', 'Вся', all.length) +
+      seg('work', 'В работе', work.length) +
+      seg('over', 'Перерасход', over.length) +
+      seg('service', 'ТО', serv.length) + '</div>';
+
+    if (!list.length) {
+      h += V.empty('🔍', 'Ничего не найдено', q ? 'Попробуйте другой запрос.' : 'В этой вкладке пусто — и это хорошо.');
+    } else {
+      h += '<div class="list">';
+      list.forEach(function (u) { h += V.unitRow(u, from, to); });
+      h += '</div>';
+      h += '<div class="hint">Цифра справа — сколько залито за ' + U.monthName(U.monthKey(to), true).toLowerCase() + '.</div>';
+    }
+    return h + '</div>';
+
+    function seg(k, t, n) {
+      return '<button data-act="ufilter" data-f="' + k + '" class="' + (V.unitsFilter === k ? 'on' : '') + '">' +
+        t + (n ? ' <span class="cnt">' + n + '</span>' : '') + '</button>';
+    }
+  };
+
+  /* ============ ЖУРНАЛ ============ */
+  V.logFilter = 'all';
+  V.logQuery = '';
+  V.logLimit = 60;
+
+  V.log = function () {
+    var feed = CALC.feed();
+    var f = V.logFilter;
+    if (f !== 'all') {
+      feed = feed.filter(function (x) {
+        if (f === 'fill') return x.kind === 'fuel' && (x.op.type === 'fill');
+        if (f === 'shift') return x.kind === 'shift';
+        if (f === 'tank') return x.kind === 'fuel' && (x.op.type === 'intake' || x.op.type === 'tankcheck');
+        if (f === 'service') return x.kind === 'service';
+        return true;
+      });
+    }
+    var q = V.logQuery.trim().toLowerCase();
+    if (q) {
+      feed = feed.filter(function (x) {
+        var u = DB.unit(x.op.unitId);
+        var s = [u ? u.name : '', u ? u.plate : '', DB.driverName(x.op.driverId),
+          x.op.note || '', x.op.site || '', x.op.date].join(' ').toLowerCase();
+        return s.indexOf(q) >= 0;
+      });
+    }
+
+    var h = V.topbar('Журнал', '<button data-act="add-menu" style="font-size:26px;font-weight:300">＋</button>');
+    h += '<div class="wrap"><h1 class="big">Журнал</h1>';
+    h += '<div class="search">' + V.ICON.search +
+      '<input id="ql" type="search" placeholder="Техника, водитель, объект" value="' + esc(V.logQuery) + '" autocomplete="off"></div>';
+    h += '<div class="seg">' + sg('all', 'Всё') + sg('fill', 'Заправки') + sg('shift', 'Смены') +
+      sg('tank', 'Склад') + sg('service', 'ТО') + '</div>';
+
+    if (!feed.length) {
+      h += V.empty('📋', 'Записей нет',
+        q ? 'Попробуйте другой запрос.' : 'Внесите первую заправку или смену — они появятся здесь.',
+        q ? '' : '<div style="margin-top:18px"><button class="btn" data-act="new-fill">Внести заправку</button>' +
+        '<button class="btn sec" style="margin-top:8px" data-act="new-shift">Внести смену</button></div>');
+      return h + '</div>';
+    }
+
+    /* группировка по месяцам с итогом сверху */
+    var groups = {}, order = [];
+    feed.slice(0, V.logLimit).forEach(function (x) {
+      var k = U.monthKey(x.date);
+      if (!groups[k]) { groups[k] = []; order.push(k); }
+      groups[k].push(x);
+    });
+    var byM = CALC.byMonth();
+    order.forEach(function (k) {
+      var m = byM[k] || {};
+      var parts = [];
+      if (m.filled) parts.push('залито ' + U.liters(m.filled));
+      if (m.workHours) parts.push(U.work(m.workHours, 'hours'));
+      if (m.workKm) parts.push(U.work(m.workKm, 'km'));
+      h += '<h2 class="sec">' + esc(U.monthName(k)) +
+        (parts.length ? '<span class="act" style="color:var(--text-2)">' + parts.join(' · ') + '</span>' : '') + '</h2>';
+      h += '<div class="list">';
+      groups[k].forEach(function (x) { h += V.opRow(x); });
+      h += '</div>';
+    });
+    if (feed.length > V.logLimit) {
+      h += '<button class="btn sec" style="margin-top:14px" data-act="log-more">Показать ещё · осталось ' +
+        (feed.length - V.logLimit) + '</button>';
+    }
+    return h + '</div>';
+
+    function sg(k, t) {
+      return '<button data-act="lfilter" data-f="' + k + '" class="' + (V.logFilter === k ? 'on' : '') + '">' + t + '</button>';
+    }
+  };
+
+  /* ============ СКЛАД ГСМ ============ */
+  V.tank = function () {
+    var st = DB.data.settings;
+    var t = CALC.tankState();
+    var from = U.monthStart(U.today()), to = U.today();
+    var f = CALC.fleet(from, to);
+
+    var h = V.topbarBack('Склад ГСМ');
+    h += '<div class="wrap"><h1 class="big">Склад ГСМ</h1>';
+    h += '<div class="hero">' +
+      '<div class="lbl">' + esc(st.tankName || 'Ёмкость') + ' · остаток по расчёту</div>' +
+      '<div class="amt num">' + U.liters(t.left) + '</div>' +
+      (t.volume > 0 ? '<div class="delta">' + Math.round(t.left / t.volume * 100) + '% от ' + U.liters(t.volume) + '</div>' +
+        '<div class="bar"><i style="width:' + Math.round((t.pct || 0) * 100) + '%"></i></div>' : '') +
+      '</div>';
+
+    h += '<div class="btn-row"><button class="btn" data-act="new-intake">Приход топлива</button>' +
+      '<button class="btn sec" data-act="new-tankcheck">Замер остатка</button></div>';
+
+    h += '<h2 class="sec">За ' + U.monthName(U.monthKey(to), true).toLowerCase() + '</h2><div class="card pad">' +
+      V.kv('Пришло на склад', U.liters(f.intake)) +
+      V.kv('Выдано в технику', U.liters(f.rows.reduce(function (a, r) { return a + r.filledTank; }, 0))) +
+      V.kv('Заправлено на АЗС', U.liters(f.rows.reduce(function (a, r) { return a + r.filledAzs; }, 0))) +
+      V.kv('Куплено топлива на', U.money(f.intakeMoney)) +
+      '</div>';
+
+    if (t.checks.length) {
+      h += '<h2 class="sec">Замеры в ёмкости</h2><div class="list">';
+      t.checks.slice().reverse().forEach(function (c) {
+        h += '<button class="row tap" data-act="op-fuel" data-id="' + c.id + '">' +
+          '<span class="op-ic">📏</span><span class="grow"><span class="ttl">' + U.fmtDate(c.date, true) + '</span>' +
+          '<span class="sub">' + (c.hasBase
+            ? (c.deviation < -0.5 ? '<b style="color:var(--red)">недостача ' + U.liters(-c.deviation) + '</b>'
+              : c.deviation > 0.5 ? 'излишек ' + U.liters(c.deviation) : 'сходится')
+            : 'точка отсчёта') + '</span></span>' +
+          '<span class="val"><span class="v1 num">' + U.liters(c.found) + '</span>' +
+          '<span class="v2">по расчёту ' + U.liters(c.expected) + '</span></span></button>';
+      });
+      h += '</div>';
+      h += '<div class="hint">Замер — это точка опоры: после него расчёт начинается заново от реального остатка. ' +
+        'Разница между замером и расчётом и есть недостача.</div>';
+    } else {
+      h += '<div class="hint">Сделайте замер остатка в ёмкости — тогда приложение сможет показывать недостачу на складе.</div>';
+    }
+
+    var ops = CALC.feed().filter(function (x) {
+      return x.kind === 'fuel' && (x.op.type === 'intake' || x.op.type === 'tankcheck' ||
+        (x.op.type === 'fill' && x.op.source === 'tank'));
+    }).slice(0, 30);
+    if (ops.length) {
+      h += '<h2 class="sec">Движение топлива</h2><div class="list">';
+      ops.forEach(function (x) { h += V.opRow(x); });
+      h += '</div>';
+    }
+    return h + '</div>';
+  };
+
+  /* ============ ВОДИТЕЛИ ============ */
+  V.drivers = function () {
+    var from = U.monthStart(U.today()), to = U.today();
+    var rows = CALC.byDriver(from, to);
+    var map = {};
+    rows.forEach(function (r) { map[r.id] = r; });
+
+    var h = V.topbarBack('Водители', '<button data-act="new-driver" style="font-size:26px;font-weight:300">＋</button>');
+    h += '<div class="wrap"><h1 class="big">Водители</h1>';
+    var list = DB.drivers();
+    if (!list.length) {
+      h += V.empty('👷', 'Список пуст',
+        'Водитель создаётся сам, когда вы вписываете его в смену или заправку — или добавьте вручную.',
+        '<div style="margin-top:18px"><button class="btn" data-act="new-driver">Добавить водителя</button></div>');
+      return h + '</div>';
+    }
+    h += '<div class="list">';
+    list.slice().sort(function (a, b) {
+      var ra = map[a.id] || { norm: 0 }, rb = map[b.id] || { norm: 0 };
+      return rb.norm - ra.norm;
+    }).forEach(function (d) {
+      var r = map[d.id] || { shifts: 0, workHours: 0, workKm: 0, filled: 0 };
+      var wk = [];
+      if (r.workHours) wk.push(U.work(r.workHours, 'hours'));
+      if (r.workKm) wk.push(U.work(r.workKm, 'km'));
+      h += '<button class="row tap" data-act="driver" data-id="' + d.id + '">' + V.avatar(d.name) +
+        '<span class="grow"><span class="ttl">' + esc(d.name) + '</span>' +
+        '<span class="sub">' + (r.shifts ? U.cnt(r.shifts, 'смена', 'смены', 'смен') + ' за месяц' +
+          (wk.length ? ' · ' + wk.join(' · ') : '') : (d.phone ? esc(d.phone) : 'смен за месяц нет')) + '</span></span>' +
+        '<span class="val"><span class="v1 num">' + U.liters(r.filled) + '</span><span class="v2">залито</span></span>' +
+        '<span class="chev">' + V.ICON.chev + '</span></button>';
+    });
+    h += '</div>';
+    return h + '</div>';
+  };
+
+  /* ============ ОТЧЁТЫ ============ */
+  V.reportMonth = null;
+  V.reportTab = 'units';
+
+  V.report = function () {
+    var mk = V.reportMonth || U.monthKey(U.today());
+    var from = mk + '-01', to = U.monthEnd(from);
+    var f = CALC.fleet(from, to);
+    var byM = CALC.byMonth();
+
+    var h = V.topbarBack('Отчёт');
+    h += '<div class="wrap"><h1 class="big">Отчёт</h1>';
+
+    h += '<div class="monthnav"><button data-act="rep-month" data-d="-1">‹</button>' +
+      '<span>' + esc(U.monthName(mk)) + '</span>' +
+      '<button data-act="rep-month" data-d="1"' + (mk >= U.monthKey(U.today()) ? ' disabled' : '') + '>›</button></div>';
+
+    h += '<div class="card pad">' +
+      V.kv('Залито в технику', U.liters(f.filled), 'big') +
+      V.kv('Потрачено на топливо', U.money(f.money)) +
+      V.kv('По норме положено', U.liters(f.norm)) +
+      V.kv('Недостача по замерам', (f.deviation < -0.5
+        ? '<span style="color:var(--red)">' + U.liters(-f.deviation) + '</span>' : '—')) +
+      (f.workHours ? V.kv('Наработка, моточасы', U.work(f.workHours, 'hours')) : '') +
+      (f.workKm ? V.kv('Пробег', U.work(f.workKm, 'km')) : '') +
+      V.kv('Пришло на склад', U.liters(f.intake)) +
+      V.kv('ТО и ремонты', U.money(f.serviceCost)) +
+      '</div>';
+
+    h += '<div class="seg" style="margin-top:14px">' +
+      rt('units', 'Техника') + rt('drivers', 'Водители') + rt('sites', 'Объекты') + rt('months', 'Месяцы') + '</div>';
+
+    if (V.reportTab === 'units') {
+      var rows = f.rows.slice().filter(function (r) { return r.work > 0 || r.filled > 0; })
+        .sort(function (a, b) { return b.filled - a.filled; });
+      if (!rows.length) h += V.empty('📊', 'За этот месяц записей нет', 'Выберите другой месяц.');
+      else {
+        h += '<div class="list">';
+        rows.forEach(function (r) {
+          var u = r.unit;
+          var dev = r.checkCount ? r.deviation : null;
+          h += '<button class="row tap" data-act="unit" data-id="' + u.id + '">' + V.unitIcon(u) +
+            '<span class="grow"><span class="ttl">' + esc(u.name) + '</span>' +
+            '<span class="sub">' + U.work(r.work, u.meter) +
+            (r.actualRate ? ' · факт ' + U.normText(r.actualRate, u.meter) : ' · норма ' + U.liters(r.norm)) +
+            '</span></span>' +
+            '<span class="val"><span class="v1 num">' + U.liters(r.filled) + '</span>' +
+            '<span class="v2"' + (r.problem ? ' style="color:var(--red)"' : '') + '>' +
+            (dev != null ? (dev < -0.5 ? 'недостача ' + U.liters(-dev) : 'сходится') : U.moneyShort(r.money)) +
+            '</span></span><span class="chev">' + V.ICON.chev + '</span></button>';
+        });
+        h += '</div>';
+      }
+    } else if (V.reportTab === 'drivers') {
+      var dr = CALC.byDriver(from, to);
+      if (!dr.length) h += V.empty('👷', 'Смен за месяц нет', 'Выберите другой месяц.');
+      else {
+        h += '<div class="list">';
+        dr.forEach(function (r) {
+          var wk = [];
+          if (r.workHours) wk.push(U.work(r.workHours, 'hours'));
+          if (r.workKm) wk.push(U.work(r.workKm, 'km'));
+          h += '<div class="row">' + V.avatar(r.name) +
+            '<span class="grow"><span class="ttl">' + esc(r.name) + '</span>' +
+            '<span class="sub">' + U.cnt(r.shifts, 'смена', 'смены', 'смен') +
+            (wk.length ? ' · ' + wk.join(' · ') : '') + ' · норма ' + U.liters(r.norm) + '</span></span>' +
+            '<span class="val"><span class="v1 num">' + U.liters(r.filled) + '</span>' +
+            '<span class="v2"' + (r.over > Math.max(15, r.norm * 0.03) ? ' style="color:var(--red)"' : '') + '>' +
+            (r.filled ? U.liters(r.over, { sign: true }) + ' к норме' : 'заправок нет') + '</span></span></div>';
+        });
+        h += '</div>';
+        h += '<div class="hint">«К норме» — разница между тем, что водитель залил, и тем, что положено по его сменам. ' +
+          'Небольшой разброс — это остаток в баке, устойчивый плюс — повод проверить.</div>';
+      }
+    } else if (V.reportTab === 'sites') {
+      var si = CALC.bySite(from, to);
+      if (!si.length) h += V.empty('📍', 'Смен за месяц нет', 'Выберите другой месяц.');
+      else {
+        h += '<div class="list">';
+        si.forEach(function (r) {
+          var wk = [];
+          if (r.workHours) wk.push(U.work(r.workHours, 'hours'));
+          if (r.workKm) wk.push(U.work(r.workKm, 'km'));
+          h += '<div class="row"><span class="op-ic">📍</span>' +
+            '<span class="grow"><span class="ttl">' + esc(r.name) + '</span>' +
+            '<span class="sub">' + U.cnt(r.shifts, 'смена', 'смены', 'смен') + ' · ' +
+            U.cnt(r.unitCount, 'единица', 'единицы', 'единиц') + ' техники' +
+            (wk.length ? ' · ' + wk.join(' · ') : '') + '</span></span>' +
+            '<span class="val"><span class="v1 num">' + U.liters(r.norm) + '</span>' +
+            '<span class="v2">топлива по норме</span></span></div>';
+        });
+        h += '</div>';
+        h += '<div class="hint">Топливо распределяется по объектам пропорционально наработке техники на них — ' +
+          'это готовая цифра для списания на объект.</div>';
+      }
+    } else {
+      var keys = Object.keys(byM).sort().reverse().slice(0, 14);
+      if (!keys.length) h += V.empty('📅', 'Данных пока нет', 'Внесите заправки и смены.');
+      else {
+        h += '<div class="list">';
+        keys.forEach(function (k) {
+          var m = byM[k];
+          var wk = [];
+          if (m.workHours) wk.push(U.work(m.workHours, 'hours'));
+          if (m.workKm) wk.push(U.work(m.workKm, 'km'));
+          h += '<button class="row tap" data-act="rep-goto" data-m="' + k + '">' +
+            '<span class="grow"><span class="ttl">' + esc(U.monthName(k)) + '</span>' +
+            '<span class="sub">' + (wk.join(' · ') || 'смен не было') +
+            (m.deviation < -0.5 ? ' · <b style="color:var(--red)">недостача ' + U.liters(-m.deviation) + '</b>' : '') +
+            '</span></span>' +
+            '<span class="val"><span class="v1 num">' + U.liters(m.filled) + '</span>' +
+            '<span class="v2">' + U.moneyShort(m.money) + '</span></span></button>';
+        });
+        h += '</div>';
+      }
+    }
+
+    h += '<div class="btn-row" style="margin-top:16px">' +
+      '<button class="btn sec" data-act="export-report" data-from="' + from + '" data-to="' + to + '">Выгрузить в Excel</button></div>';
+    return h + '</div>';
+
+    function rt(k, t) {
+      return '<button data-act="rep-tab" data-t="' + k + '" class="' + (V.reportTab === k ? 'on' : '') + '">' + t + '</button>';
+    }
+  };
+
+  /* ============ ЕЩЁ ============ */
+  V.more = function () {
+    var st = DB.data.settings;
+    var from = U.monthStart(U.today()), to = U.today();
+    var f = CALC.fleet(from, to);
+
+    var h = V.topbar('Ещё');
+    h += '<div class="wrap"><h1 class="big">Ещё</h1>';
+
+    h += '<div class="card pad">' +
+      V.kv('Топлива за месяц', U.liters(f.filled), 'big') +
+      V.kv('Денег за месяц', U.money(f.money)) +
+      V.kv('Единиц техники', String(DB.units().length)) +
+      V.kv('Водителей', String(DB.drivers().length)) +
+      '</div>';
+
+    h += '<h2 class="sec">Разделы</h2><div class="list">' +
+      rowBtn('go-report', '📊', 'Отчёты', 'по технике, водителям, объектам и месяцам') +
+      rowBtn('go-tank', '🛢️', 'Склад ГСМ', 'приход, выдача, замеры остатка') +
+      rowBtn('go-drivers', '👷', 'Водители', U.cnt(DB.drivers().length, 'человек', 'человека', 'человек')) +
+      '</div>';
+
+    h += '<h2 class="sec">Настройки</h2><div class="list">' +
+      '<div class="field"><label>Валюта</label><input type="text" value="' + esc(st.currency) +
+      '" data-act="set" data-k="currency" maxlength="6"></div>' +
+      '<div class="field"><label>Цена литра</label><input type="text" inputmode="decimal" value="' +
+      (st.price || '') + '" placeholder="0" data-act="set" data-k="price"><span class="unit">' + esc(st.currency) + '</span></div>' +
+      '<div class="field"><label>Топливо</label><select data-act="set" data-k="fuel">' +
+      DB.FUELS.map(function (x) {
+        return '<option value="' + esc(x) + '"' + (st.fuel === x ? ' selected' : '') + '>' + esc(x) + '</option>';
+      }).join('') + '</select></div>' +
+      '<div class="field"><label>Ёмкость</label><input type="text" value="' + esc(st.tankName) +
+      '" data-act="set" data-k="tankName"></div>' +
+      '<div class="field"><label>Объём ёмкости</label><input type="text" inputmode="decimal" value="' +
+      (st.tankVolume || '') + '" placeholder="0" data-act="set" data-k="tankVolume"><span class="unit">л</span></div>' +
+      '<div class="field"><label>Предупредить о ТО</label><input type="text" inputmode="decimal" value="' +
+      st.serviceWarnPct + '" data-act="set" data-k="serviceWarnPct"><span class="unit">% до срока</span></div>' +
+      '<div class="field"><label>Оформление</label><select data-act="set" data-k="theme">' +
+      [['auto', 'Как в системе'], ['light', 'Светлое'], ['dark', 'Тёмное']].map(function (t) {
+        return '<option value="' + t[0] + '"' + (st.theme === t[0] ? ' selected' : '') + '>' + t[1] + '</option>';
+      }).join('') + '</select></div>' +
+      '</div><div class="hint">Цена литра и вид топлива подставляются в новую заправку — в самой заправке их можно поменять.</div>';
+
+    h += '<h2 class="sec">Защита</h2><div class="list">' +
+      '<button class="row tap" data-act="pin">' +
+      '<span class="grow"><span class="ttl">Код-пароль</span><span class="sub">' +
+      (st.pin ? 'включён — спрашивается при запуске' : 'выключен') + '</span></span>' +
+      '<span class="val"><span class="v1" style="color:var(--accent);font-size:15px">' +
+      (st.pin ? 'Изменить' : 'Включить') + '</span></span></button>' +
+      (st.pin ? '<button class="row tap" data-act="pin-off"><span class="grow"><span class="ttl" style="color:var(--red)">Отключить код</span></span></button>' : '') +
+      '</div>';
+
+    h += '<h2 class="sec">Данные</h2><div class="list">' +
+      rowBtn('export-json', '💾', 'Сохранить резервную копию',
+        st.lastExport ? 'последняя: ' + U.fmtDate(st.lastExport) : 'ещё ни разу') +
+      rowBtn('export-csv', '📄', 'Выгрузить журнал топлива', 'таблица CSV для Excel') +
+      rowBtn('export-shifts', '📄', 'Выгрузить смены', 'таблица CSV для Excel') +
+      rowBtn('import', '📥', 'Загрузить базу', 'копия приложения или таблица CSV') +
+      '<button class="row tap" data-act="wipe"><span class="op-ic">🗑️</span>' +
+      '<span class="grow"><span class="ttl" style="color:var(--red)">Стереть все данные</span></span></button>' +
+      '</div>';
+    h += '<div class="hint">Всё хранится <b>только на этом телефоне</b>, без сервера и интернета. ' +
+      'Делайте копию хотя бы раз в месяц.</div>';
+
+    if (!DB.data.isDemo && !DB.units().length) {
+      h += '<div class="btn-row"><button class="btn sec" data-act="demo">Посмотреть на примере</button></div>';
+    }
+    if (DB.data.isDemo) {
+      h += '<div class="btn-row"><button class="btn danger" data-act="demo-off">Очистить демо-данные</button></div>';
+    }
+
+    h += '<h2 class="sec">Установка на iPhone</h2><div class="card pad" style="font-size:15px;line-height:1.5;color:var(--text-2)">' +
+      '1. Откройте эту страницу в Safari.<br>2. Нажмите «Поделиться» (квадрат со стрелкой).<br>' +
+      '3. Выберите «На экран «Домой»».<br>4. Запускайте с иконки — приложение работает без интернета.</div>';
+
+    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Автопарк · версия 1.0</div>';
+    return h + '</div>';
+
+    function rowBtn(act, ic, t, sub) {
+      return '<button class="row tap" data-act="' + act + '"><span class="op-ic">' + ic + '</span>' +
+        '<span class="grow"><span class="ttl">' + t + '</span>' +
+        (sub ? '<span class="sub">' + esc(sub) + '</span>' : '') + '</span>' +
+        '<span class="chev">' + V.ICON.chev + '</span></button>';
+    }
+  };
+
+  w.V = V;
+})(window);
+
+/* Карточка техники, карточка водителя и все формы ввода */
+(function (w) {
+  'use strict';
+  var esc = U.esc;
+
+  /* ============ КАРТОЧКА ТЕХНИКИ ============ */
+  V.unitDetail = function (id) {
+    var u = DB.unit(id);
+    if (!u) return V.topbarBack('Техника') + '<div class="wrap">' +
+      V.empty('🤷', 'Техника не найдена', 'Возможно, её удалили.') + '</div>';
+
+    var st = CALC.unitState(u);
+    var from = U.monthStart(U.today()), to = U.today();
+    var p = CALC.unitPeriod(u, from, to);
+    var mi = U.meterInfo(u.meter);
+    var kind = DB.kind(u.kind);
+
+    var h = V.topbarBack(u.name, '<button data-act="edit-unit" data-id="' + u.id + '">Изменить</button>');
+    h += '<div class="wrap">';
+
+    h += '<div class="unit-head">' + V.unitIcon(u) +
+      '<div style="min-width:0"><div class="unit-name">' + esc(u.name) + '</div>' +
+      '<div class="unit-sub">' + esc(kind.n) + (u.plate ? ' · ' + esc(u.plate) : '') + '</div></div></div>';
+
+    /* остаток в баке */
+    h += '<div class="hero">' +
+      '<div class="lbl">Расчётный остаток в баке</div>' +
+      '<div class="amt num"' + (st.tankNegative ? ' style="color:var(--red)"' : '') + '>' + U.liters(st.tankLeft) + '</div>' +
+      (U.num(u.tank) > 0 ? '<div class="delta">из ' + U.liters(u.tank) + '</div>' +
+        '<div class="bar"><i style="width:' + Math.round((st.tankPct || 0) * 100) + '%"></i></div>' : '') +
+      '<div class="delta" style="margin-top:8px">' +
+      (p.problem ? '<span class="badge bad">Перерасход</span>'
+        : (V.unitBadge(u, p) || '<span class="badge ok">В норме</span>')) + '</div>' +
+      (st.tankBase.fromCheck
+        ? '<div class="delta">от замера ' + U.fmtDate(st.tankBase.date, true) + '</div>'
+        : '<div class="delta">замеров ещё не было — расчёт от стартового остатка</div>') +
+      '</div>';
+
+    if (p.problem) {
+      h += '<div class="card pad badbox">' +
+        '<div class="t">Перерасход ' + U.liters(p.problemLiters) + ' за месяц</div>' +
+        '<div class="d">' + (p.checkCount
+          ? 'Замер показал в баке меньше, чем должно быть по норме и заправкам. ' +
+            'Причины обычно три: слив, занижённая норма или приписки в наработке.'
+          : 'Залито заметно больше, чем положено по наработке. Сделайте замер бака — он покажет точную недостачу.') +
+        '</div>' +
+        (DB.data.settings.price ? '<div class="d">В деньгах это примерно <b>' +
+          U.money(p.problemLiters * DB.data.settings.price) + '</b>.</div>' : '') +
+        '<button class="btn sec sm full" data-act="new-check" data-id="' + u.id + '">Сделать замер бака</button></div>';
+    }
+
+    h += '<div class="btn-row"><button class="btn" data-act="new-fill" data-id="' + u.id + '">⛽ Заправка</button>' +
+      '<button class="btn sec" data-act="new-shift" data-id="' + u.id + '">🕒 Смена</button></div>' +
+      '<div class="btn-row"><button class="btn sec" data-act="new-check" data-id="' + u.id + '">📏 Замер бака</button>' +
+      '<button class="btn sec" data-act="new-service" data-id="' + u.id + '">🔧 ТО / ремонт</button></div>';
+
+    /* месяц */
+    h += '<h2 class="sec">За ' + U.monthName(U.monthKey(to), true).toLowerCase() + '</h2><div class="card pad">' +
+      V.kv('Наработка', U.work(p.work, u.meter) + ' <span style="color:var(--text-2);font-weight:400">за ' +
+        U.cnt(p.days, 'смену', 'смены', 'смен') + '</span>') +
+      V.kv('Положено по норме', U.liters(p.norm)) +
+      V.kv('Залито фактически', U.liters(p.filled)) +
+      (p.checkCount
+        ? V.kv('Недостача по замерам', p.deviation < -0.5
+          ? '<span style="color:var(--red)">' + U.liters(-p.deviation) + '</span>'
+          : '<span style="color:var(--accent)">нет</span>')
+        : V.kv('Залито сверх нормы', p.over > 0
+          ? '<span style="color:' + (p.problem ? 'var(--red)' : 'inherit') + '">' + U.liters(p.over) + '</span>'
+          : U.liters(p.over))) +
+      (p.actualRate ? V.kv('Фактический расход', U.normText(p.actualRate, u.meter) +
+        ' <span style="color:var(--text-2);font-weight:400">норма ' + U.dec(u.norm, 1) + '</span>') : '') +
+      V.kv('Потрачено на топливо', U.money(p.money)) +
+      (p.serviceCost ? V.kv('ТО и ремонты', U.money(p.serviceCost)) : '') +
+      '</div>';
+
+    /* ТО */
+    if (U.num(u.serviceEvery) > 0) {
+      var s = st.service;
+      h += '<h2 class="sec">Обслуживание</h2><div class="card pad">' +
+        '<div class="kv big"><span class="k">' + (s.overdue ? 'ТО просрочено на' : 'До ТО осталось') + '</span>' +
+        '<span class="v num"' + (s.overdue ? ' style="color:var(--red)"' : s.soon ? ' style="color:var(--orange)"' : '') + '>' +
+        U.work(Math.abs(s.left), u.meter) + '</span></div>' +
+        '<div class="bar"><i style="width:' + Math.round((s.pct || 0) * 100) + '%;background:' +
+        (s.overdue ? 'var(--red)' : s.soon ? 'var(--orange)' : 'var(--accent)') + '"></i></div>' +
+        V.kv('Наработка после ТО', U.work(s.since, u.meter)) +
+        V.kv('Периодичность', 'каждые ' + U.work(s.every, u.meter)) +
+        (s.last ? V.kv('Последнее ТО', U.fmtDate(s.last.date, true) +
+          (s.last.meter != null ? ' <span style="color:var(--text-2);font-weight:400">на ' + U.work(s.last.meter, u.meter) + '</span>' : '')) : '') +
+        '</div>';
+    }
+
+    /* замеры */
+    if (st.checks.length) {
+      h += '<h2 class="sec">Замеры бака</h2><div class="list">';
+      st.checks.slice().reverse().slice(0, 8).forEach(function (c) {
+        h += '<button class="row tap" data-act="op-fuel" data-id="' + c.id + '">' +
+          '<span class="op-ic">📏</span>' +
+          '<span class="grow"><span class="ttl">' + U.fmtDate(c.date, true) + '</span>' +
+          '<span class="sub">' + (c.hasBase
+            ? (c.deviation < -0.5 ? '<b style="color:var(--red)">недостача ' + U.liters(-c.deviation) + '</b>'
+              : c.deviation > 0.5 ? 'излишек ' + U.liters(c.deviation) : 'сходится')
+            : 'точка отсчёта') + '</span></span>' +
+          '<span class="val"><span class="v1 num">' + U.liters(c.found) + '</span>' +
+          '<span class="v2">по расчёту ' + U.liters(c.expected) + '</span></span></button>';
+      });
+      h += '</div>';
+    } else {
+      h += '<div class="hint" style="margin-top:14px">Пока не было ни одного замера бака. ' +
+        'Замер — единственный способ узнать <b>настоящую</b> недостачу: приложение сравнит его со своим расчётом.</div>';
+    }
+
+    /* паспорт */
+    h += '<h2 class="sec">Паспорт</h2><div class="card pad">' +
+      V.kv('Тип', esc(kind.n)) +
+      (u.plate ? V.kv('Госномер', esc(u.plate)) : '') +
+      V.kv('Счётчик', U.work(st.meterNow, u.meter) + ' <span style="color:var(--text-2);font-weight:400">' + esc(mi.long) + '</span>') +
+      V.kv('Норма расхода', U.normText(u.norm, u.meter)) +
+      (U.num(u.tank) ? V.kv('Объём бака', U.liters(u.tank)) : '') +
+      V.kv('Топливо', esc(u.fuel || DB.data.settings.fuel)) +
+      (u.driverId ? V.kv('Закреплён', esc(DB.driverName(u.driverId))) : '') +
+      (u.note ? V.kv('Заметка', esc(u.note)) : '') +
+      '</div>';
+
+    /* история */
+    var feed = CALC.feed(20, u.id);
+    if (feed.length) {
+      h += '<h2 class="sec">История</h2><div class="list">';
+      feed.forEach(function (x) { h += V.opRow(x, { hideUnit: true }); });
+      h += '</div>';
+    }
+
+    h += '<div class="btn-row" style="margin-top:18px">' +
+      '<button class="btn danger" data-act="del-unit" data-id="' + u.id + '">Удалить технику</button></div>';
+    return h + '</div>';
+  };
+
+  /* ============ КАРТОЧКА ВОДИТЕЛЯ ============ */
+  V.driverDetail = function (id) {
+    var d = DB.driver(id);
+    if (!d) return V.topbarBack('Водитель') + '<div class="wrap">' +
+      V.empty('🤷', 'Водитель не найден', 'Возможно, его удалили.') + '</div>';
+
+    var from = U.monthStart(U.today()), to = U.today();
+    var rows = CALC.byDriver(from, to).filter(function (r) { return r.id === d.id; });
+    var r = rows[0] || { shifts: 0, workHours: 0, workKm: 0, norm: 0, filled: 0, money: 0, over: 0, units: {} };
+
+    var h = V.topbarBack(d.name, '<button data-act="edit-driver" data-id="' + d.id + '">Изменить</button>');
+    h += '<div class="wrap">';
+    h += '<div class="unit-head">' + V.avatar(d.name) +
+      '<div style="min-width:0"><div class="unit-name">' + esc(d.name) + '</div>' +
+      '<div class="unit-sub">' + (d.phone ? esc(d.phone) : 'телефон не указан') + '</div></div></div>';
+
+    if (d.phone) {
+      h += '<div class="btn-row"><a class="btn sec" href="' + U.telHref(d.phone) + '">Позвонить</a>' +
+        '<a class="btn sec" href="' + U.waHref(d.phone) + '" target="_blank" rel="noopener">WhatsApp</a></div>';
+    }
+
+    h += '<h2 class="sec">За ' + U.monthName(U.monthKey(to), true).toLowerCase() + '</h2><div class="card pad">' +
+      V.kv('Смен отработано', String(r.shifts), 'big') +
+      (r.workHours ? V.kv('Моточасы', U.work(r.workHours, 'hours')) : '') +
+      (r.workKm ? V.kv('Пробег', U.work(r.workKm, 'km')) : '') +
+      V.kv('Положено топлива', U.liters(r.norm)) +
+      V.kv('Залито', U.liters(r.filled)) +
+      V.kv('Разница', (r.filled
+        ? '<span style="color:' + (r.over > Math.max(15, r.norm * 0.03) ? 'var(--red)' : 'var(--accent)') + '">' +
+          U.liters(r.over, { sign: true }) + '</span>' : '—')) +
+      '</div>';
+    h += '<div class="hint">Разница гуляет из-за остатка в баке: важен не один месяц, а устойчивый плюс.</div>';
+
+    var units = DB.units().filter(function (u) {
+      return u.driverId === d.id || Object.keys(r.units || {}).indexOf(u.id) >= 0;
+    });
+    if (units.length) {
+      h += '<h2 class="sec">Работает на технике</h2><div class="list">';
+      units.forEach(function (u) { h += V.unitRow(u, from, to); });
+      h += '</div>';
+    }
+
+    var feed = CALC.feed().filter(function (x) { return x.op.driverId === d.id; }).slice(0, 20);
+    if (feed.length) {
+      h += '<h2 class="sec">Последние записи</h2><div class="list">';
+      feed.forEach(function (x) { h += V.opRow(x); });
+      h += '</div>';
+    }
+    if (d.note) h += '<div class="hint">' + esc(d.note) + '</div>';
+
+    h += '<div class="btn-row" style="margin-top:18px">' +
+      '<button class="btn danger" data-act="del-driver" data-id="' + d.id + '">Удалить водителя</button></div>';
+    return h + '</div>';
+  };
+
+  /* ============================================================
+     ФОРМЫ
+     ============================================================ */
+  var F = {};
+
+  /* общий кусок: выбор техники */
+  function unitSelect(sel, id) {
+    var list = DB.units();
+    return '<div class="field"><label>Техника</label><select id="' + (id || 'f-unit') + '">' +
+      list.map(function (u) {
+        return '<option value="' + u.id + '"' + (sel === u.id ? ' selected' : '') + '>' +
+          esc(u.name) + (u.plate ? ' · ' + esc(u.plate) : '') + '</option>';
+      }).join('') + '</select></div>';
+  }
+  /* общий кусок: выбор водителя */
+  function driverSelect(sel) {
+    return '<div class="field"><label>Водитель</label><select id="f-driver">' +
+      '<option value="">— не указан —</option>' +
+      DB.drivers().map(function (d) {
+        return '<option value="' + d.id + '"' + (sel === d.id ? ' selected' : '') + '>' + esc(d.name) + '</option>';
+      }).join('') +
+      '<option value="__new">＋ Новый водитель</option></select></div>' +
+      '<div id="new-driver-fields" style="display:none">' +
+      '<div class="field"><label>Имя</label><input id="f-dname" placeholder="Рустам Хайдаров" autocomplete="off"></div>' +
+      '<div class="field"><label>Телефон</label><input id="f-dphone" type="tel" inputmode="tel" placeholder="+998 90 000-00-00"></div>' +
+      '</div>';
+  }
+  /* если выбран «новый водитель» — создать и вернуть id */
+  function resolveDriver(bd) {
+    var sel = bd.querySelector('#f-driver');
+    if (!sel) return null;
+    if (sel.value !== '__new') return sel.value || null;
+    var nm = bd.querySelector('#f-dname').value.trim();
+    if (!nm) return '__error';
+    var ex = DB.driverByName(nm);
+    return ex ? ex.id : DB.addDriver({ name: nm, phone: bd.querySelector('#f-dphone').value.trim() }).id;
+  }
+  function watchDriverSelect(bd) {
+    var sel = bd.querySelector('#f-driver');
+    if (!sel) return;
+    var box = bd.querySelector('#new-driver-fields');
+    var upd = function () { box.style.display = sel.value === '__new' ? '' : 'none'; };
+    sel.addEventListener('change', upd);
+    upd();
+  }
+
+  /* ---------- меню «＋» ---------- */
+  F.addMenu = function () {
+    var items = [
+      ['new-fill', '⛽', 'Заправка', 'выдать топливо в технику'],
+      ['new-shift', '🕒', 'Смена', 'наработка за день, путевой лист'],
+      ['new-check', '📏', 'Замер бака', 'сколько топлива реально в баке'],
+      ['new-service', '🔧', 'ТО или ремонт', 'с показаниями счётчика'],
+      ['new-intake', '🛢️', 'Приход на склад', 'привезли топливо в ёмкость'],
+      ['new-tankcheck', '📐', 'Замер склада', 'сколько осталось в ёмкости'],
+      ['new-unit', '🚜', 'Техника', 'новая единица в парке'],
+      ['new-driver', '👷', 'Водитель', 'новый человек']
+    ];
+    App.sheet({
+      title: 'Что добавить',
+      html: '<div class="list">' + items.map(function (x) {
+        return '<button class="row tap" data-menu="' + x[0] + '"><span class="op-ic">' + x[1] + '</span>' +
+          '<span class="grow"><span class="ttl">' + x[2] + '</span><span class="sub">' + x[3] + '</span></span>' +
+          '<span class="chev">' + V.ICON.chev + '</span></button>';
+      }).join('') + '</div>',
+      onOpen: function (bd) {
+        bd.addEventListener('click', function (e) {
+          var b = e.target.closest('[data-menu]');
+          if (!b) return;
+          var act = b.dataset.menu;
+          App.closeSheet();
+          setTimeout(function () { App.run(act, {}); }, 320);
+        });
+      }
+    });
+  };
+
+  /* ---------- ТЕХНИКА ---------- */
+  F.unitForm = function (unitId) {
+    var u = unitId ? DB.unit(unitId) : null;
+    var st = DB.data.settings;
+    var d = u || {
+      name: '', plate: '', kind: 'excavator', meter: 'hours', norm: '', tank: '',
+      tankStart: '', fuel: st.fuel, driverId: '', serviceEvery: '', meterStart: '', note: '', active: true
+    };
+    var meterNow = u ? CALC.meterNow(u) : 0;
+
+    var h = '<div class="list">' +
+      '<div class="field"><label>Название</label><input id="f-name" placeholder="Экскаватор Hitachi" value="' +
+      esc(d.name) + '" autocomplete="off"></div>' +
+      '<div class="field"><label>Госномер</label><input id="f-plate" placeholder="01 A 123 BA" value="' +
+      esc(d.plate || '') + '" autocomplete="off"></div>' +
+      '<div class="field"><label>Тип</label><select id="f-kind">' +
+      DB.KINDS.map(function (k) {
+        return '<option value="' + k.k + '"' + (d.kind === k.k ? ' selected' : '') + '>' + k.ic + ' ' + esc(k.n) + '</option>';
+      }).join('') + '</select></div>' +
+      '</div>';
+
+    h += '<h2 class="sec">Счётчик и норма</h2>' +
+      '<div class="seg" id="f-meter">' +
+      '<button data-m="hours" class="' + (d.meter !== 'km' ? 'on' : '') + '">Моточасы</button>' +
+      '<button data-m="km" class="' + (d.meter === 'km' ? 'on' : '') + '">Километры</button></div>' +
+      '<div class="list">' +
+      '<div class="field"><label>Показания</label><input id="f-meterstart" type="text" inputmode="decimal" placeholder="0" value="' +
+      (u ? U.dec(meterNow, 1) : '') + '"><span class="unit" id="u-meter">' + U.meterInfo(d.meter).unit + '</span></div>' +
+      '<div class="field"><label>Норма</label><input id="f-norm" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.norm || '') + '"><span class="unit" id="u-norm">' + U.meterInfo(d.meter).norm + '</span></div>' +
+      '<div class="field"><label>ТО каждые</label><input id="f-every" type="text" inputmode="decimal" placeholder="не следить" value="' +
+      (d.serviceEvery || '') + '"><span class="unit" id="u-every">' + U.meterInfo(d.meter).unit + '</span></div>' +
+      '</div><div class="hint" id="norm-hint"></div>';
+
+    h += '<h2 class="sec">Топливо</h2><div class="list">' +
+      '<div class="field"><label>Вид</label><select id="f-fuel">' +
+      DB.FUELS.map(function (x) {
+        return '<option value="' + esc(x) + '"' + ((d.fuel || st.fuel) === x ? ' selected' : '') + '>' + esc(x) + '</option>';
+      }).join('') + '</select></div>' +
+      '<div class="field"><label>Объём бака</label><input id="f-tank" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.tank || '') + '"><span class="unit">л</span></div>' +
+      (u ? '' : '<div class="field"><label>Сейчас в баке</label><input id="f-tankstart" type="text" inputmode="decimal" placeholder="0" value="' +
+        (d.tankStart || '') + '"><span class="unit">л</span></div>') +
+      '</div>' +
+      (u ? '' : '<div class="hint">«Сейчас в баке» — сколько топлива в машине на момент начала учёта. ' +
+        'Это точка отсчёта: от неё пойдёт расчёт остатка.</div>');
+
+    h += '<h2 class="sec">Прочее</h2><div class="list">' +
+      '<div class="field"><label>Закрепить за</label><select id="f-driver2">' +
+      '<option value="">— никем —</option>' +
+      DB.drivers().map(function (x) {
+        return '<option value="' + x.id + '"' + (d.driverId === x.id ? ' selected' : '') + '>' + esc(x.name) + '</option>';
+      }).join('') + '</select></div>' +
+      '<div class="field"><label style="min-width:auto;flex:1;font-size:16px">Техника в работе</label>' +
+      '<input id="f-active" type="checkbox" class="cb"' + (d.active !== false ? ' checked' : '') + '></div>' +
+      '<div class="field col"><label>Заметка</label><textarea id="f-note" placeholder="Год, серийный номер, особенности…">' +
+      esc(d.note || '') + '</textarea></div></div>';
+
+    App.sheet({
+      title: u ? 'Изменить технику' : 'Новая техника',
+      html: h, save: 'Сохранить',
+      onOpen: function (bd) {
+        function meter() { var b = bd.querySelector('#f-meter .on'); return b ? b.dataset.m : 'hours'; }
+        function sync() {
+          var mi = U.meterInfo(meter());
+          bd.querySelector('#u-meter').textContent = mi.unit;
+          bd.querySelector('#u-norm').textContent = mi.norm;
+          bd.querySelector('#u-every').textContent = mi.unit;
+          var n = U.num(bd.querySelector('#f-norm').value);
+          var hint = bd.querySelector('#norm-hint');
+          if (!n) hint.innerHTML = 'Норма — сколько литров машина тратит на единицу наработки. ' +
+            'Возьмите её из паспорта техники или посчитайте по прошлым месяцам.';
+          else if (meter() === 'km') hint.innerHTML = 'При таком расходе смена в 200 км съедает <b>' +
+            U.liters(2 * n) + '</b>.';
+          else hint.innerHTML = 'При таком расходе смена в 8 моточасов съедает <b>' + U.liters(8 * n) + '</b>.';
+        }
+        bd.addEventListener('click', function (e) {
+          var b = e.target.closest('#f-meter [data-m]');
+          if (!b) return;
+          U.$$('#f-meter button', bd).forEach(function (x) { x.classList.remove('on'); });
+          b.classList.add('on');
+          sync();
+        });
+        bd.addEventListener('input', sync);
+        sync();
+        if (!u) setTimeout(function () { bd.querySelector('#f-name').focus(); }, 380);
+      },
+      onSave: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        var name = $('#f-name').value.trim();
+        if (!name) { U.toast('Введите название техники'); return false; }
+        var mb = bd.querySelector('#f-meter .on');
+        var patch = {
+          name: name,
+          plate: $('#f-plate').value.trim(),
+          kind: $('#f-kind').value,
+          meter: mb ? mb.dataset.m : 'hours',
+          norm: U.num($('#f-norm').value),
+          tank: U.num($('#f-tank').value),
+          fuel: $('#f-fuel').value,
+          driverId: $('#f-driver2').value || null,
+          serviceEvery: U.num($('#f-every').value),
+          meterStart: U.num($('#f-meterstart').value),
+          active: $('#f-active').checked,
+          note: $('#f-note').value.trim()
+        };
+        if (!u) patch.tankStart = U.num($('#f-tankstart').value);
+        if (u) {
+          /* показания могли исправить вручную — не даём им уехать назад из-за смен */
+          DB.updUnit(u.id, patch);
+          U.toast('Сохранено');
+          App.render();
+        } else {
+          var nu = DB.addUnit(patch);
+          U.toast('Техника добавлена');
+          App.go('#/unit/' + nu.id);
+        }
+        return true;
+      }
+    });
+  };
+
+  /* ---------- ВОДИТЕЛЬ ---------- */
+  F.driverForm = function (driverId) {
+    var d = driverId ? DB.driver(driverId) : null;
+    var h = '<div class="list">' +
+      '<div class="field"><label>Имя</label><input id="d-name" placeholder="Рустам Хайдаров" value="' +
+      esc(d ? d.name : '') + '" autocomplete="off"></div>' +
+      '<div class="field"><label>Телефон</label><input id="d-phone" type="tel" inputmode="tel" placeholder="+998 90 000-00-00" value="' +
+      esc(d ? d.phone || '' : '') + '"></div>' +
+      '<div class="field col"><label>Заметка</label><textarea id="d-note" placeholder="Категория прав, стаж, на какой технике работает…">' +
+      esc(d ? d.note || '' : '') + '</textarea></div></div>';
+    App.sheet({
+      title: d ? 'Изменить водителя' : 'Новый водитель',
+      html: h, save: 'Сохранить',
+      onOpen: function (bd) { setTimeout(function () { bd.querySelector('#d-name').focus(); }, 380); },
+      onSave: function (bd) {
+        var name = bd.querySelector('#d-name').value.trim();
+        if (!name) { U.toast('Введите имя'); return false; }
+        var patch = {
+          name: name,
+          phone: bd.querySelector('#d-phone').value.trim(),
+          note: bd.querySelector('#d-note').value.trim()
+        };
+        if (d) { DB.updDriver(d.id, patch); U.toast('Сохранено'); App.render(); }
+        else { var nd = DB.addDriver(patch); U.toast('Водитель добавлен'); App.go('#/driver/' + nd.id); }
+        return true;
+      }
+    });
+  };
+
+  /* ---------- ЗАПРАВКА ---------- */
+  F.fillForm = function (opId, unitId) {
+    if (!DB.units().length) { U.toast('Сначала добавьте технику'); return F.unitForm(); }
+    var op = opId ? DB.fuelOp(opId) : null;
+    var st = DB.data.settings;
+    var d = op || {
+      unitId: unitId || DB.units()[0].id, driverId: null, date: U.today(),
+      liters: '', price: st.price || '', source: 'tank', meter: '', fuel: st.fuel, note: ''
+    };
+    if (!op && d.unitId) {
+      var uu = DB.unit(d.unitId);
+      if (uu) { d.driverId = uu.driverId; d.fuel = uu.fuel || st.fuel; }
+    }
+
+    var h = '<div class="list">' + unitSelect(d.unitId) + driverSelect(d.driverId) +
+      '<div class="field"><label>Дата</label><input id="f-date" type="date" value="' + esc(d.date) + '"></div>' +
+      '</div>';
+
+    h += '<h2 class="sec">Топливо</h2><div class="list">' +
+      '<div class="field"><label>Литров</label><input id="f-liters" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.liters || '') + '"><span class="unit">л</span></div>' +
+      '<div class="field"><label>Цена за литр</label><input id="f-price" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.price || '') + '"><span class="unit">' + esc(st.currency) + '</span></div>' +
+      '<div class="field"><label>Вид</label><select id="f-fuel">' +
+      DB.FUELS.map(function (x) {
+        return '<option value="' + esc(x) + '"' + ((d.fuel || st.fuel) === x ? ' selected' : '') + '>' + esc(x) + '</option>';
+      }).join('') + '</select></div>' +
+      '<div class="field"><label>Счётчик</label><input id="f-meter" type="text" inputmode="decimal" placeholder="необязательно" value="' +
+      (d.meter != null && d.meter !== '' ? d.meter : '') + '"><span class="unit" id="u-m">м·ч</span></div>' +
+      '</div>';
+
+    h += '<div class="seg" id="f-source" style="margin-top:12px">' +
+      '<button data-s="tank" class="' + (d.source !== 'azs' ? 'on' : '') + '">Со склада</button>' +
+      '<button data-s="azs" class="' + (d.source === 'azs' ? 'on' : '') + '">На АЗС</button></div>';
+
+    h += '<div class="list"><div class="field col"><label>Заметка</label>' +
+      '<textarea id="f-note" placeholder="Номер талона, чек, кто выдал…">' + esc(d.note || '') + '</textarea></div></div>';
+
+    h += '<div class="card pad" id="preview" style="margin-top:16px"></div>';
+
+    App.sheet({
+      title: op ? 'Изменить заправку' : 'Заправка',
+      html: h, save: op ? 'Сохранить' : 'Записать',
+      onOpen: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        watchDriverSelect(bd);
+        function source() { var b = bd.querySelector('#f-source .on'); return b ? b.dataset.s : 'tank'; }
+        function preview() {
+          var u = DB.unit($('#f-unit').value);
+          if (!u) return;
+          $('#u-m').textContent = U.meterInfo(u.meter).unit;
+          var lit = U.num($('#f-liters').value), price = U.num($('#f-price').value);
+          var before = CALC.tankLeft(u, $('#f-date').value).left;
+          if (op) before -= U.num(op.liters);            // при правке не считаем саму себя дважды
+          var after = before + lit;
+          var over = U.num(u.tank) > 0 && after > U.num(u.tank) * 1.03;
+          var tank = CALC.tankState();
+          var html = V.kv('Сумма', U.money(lit * price), 'big') +
+            V.kv('В баке было', U.liters(before)) +
+            V.kv('Станет', (over ? '<span style="color:var(--orange)">' + U.liters(after) + '</span>' : U.liters(after)) +
+              (U.num(u.tank) ? ' <span style="color:var(--text-2);font-weight:400">из ' + U.liters(u.tank) + '</span>' : ''));
+          if (source() === 'tank') html += V.kv('Останется на складе', U.liters(tank.left - lit + (op && op.source === 'tank' ? U.num(op.liters) : 0)));
+          if (over) html += '<div class="hint" style="padding:8px 0 0"><b>В бак столько не влезет.</b> ' +
+            'Либо в баке было меньше, чем считает приложение, либо часть топлива уходит мимо — стоит сделать замер.</div>';
+          $('#preview').innerHTML = html;
+        }
+        bd.addEventListener('input', preview);
+        bd.addEventListener('change', function (e) {
+          if (e.target.id === 'f-unit') {
+            var u = DB.unit(e.target.value);
+            if (u && !op) {
+              if (u.driverId) $('#f-driver').value = u.driverId;
+              if (u.fuel) $('#f-fuel').value = u.fuel;
+            }
+          }
+          preview();
+        });
+        bd.addEventListener('click', function (e) {
+          var b = e.target.closest('#f-source [data-s]');
+          if (!b) return;
+          U.$$('#f-source button', bd).forEach(function (x) { x.classList.remove('on'); });
+          b.classList.add('on');
+          preview();
+        });
+        preview();
+        if (!op) setTimeout(function () { $('#f-liters').focus(); }, 380);
+      },
+      onSave: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        var lit = U.num($('#f-liters').value);
+        if (lit <= 0) { U.toast('Сколько литров залили?'); return false; }
+        var drv = resolveDriver(bd);
+        if (drv === '__error') { U.toast('Введите имя водителя'); return false; }
+        var sb = bd.querySelector('#f-source .on');
+        var rec = {
+          type: 'fill', unitId: $('#f-unit').value, driverId: drv,
+          date: $('#f-date').value || U.today(),
+          liters: lit, price: U.num($('#f-price').value),
+          sum: lit * U.num($('#f-price').value),
+          source: sb ? sb.dataset.s : 'tank',
+          meter: $('#f-meter').value !== '' ? U.num($('#f-meter').value) : null,
+          fuel: $('#f-fuel').value, note: $('#f-note').value.trim()
+        };
+        if (op) { DB.updFuel(op.id, rec); U.toast('Заправка изменена'); }
+        else { DB.addFuel(rec); U.toast('Записано: ' + U.liters(lit)); }
+        App.render();
+        return true;
+      }
+    });
+  };
+
+  /* ---------- СМЕНА ---------- */
+  F.shiftForm = function (opId, unitId) {
+    if (!DB.units().length) { U.toast('Сначала добавьте технику'); return F.unitForm(); }
+    var op = opId ? DB.shift(opId) : null;
+    var d = op || {
+      unitId: unitId || DB.units()[0].id, driverId: null, date: U.today(),
+      start: '', end: '', work: '', site: '', note: ''
+    };
+    if (!op) {
+      var uu = DB.unit(d.unitId);
+      if (uu) { d.driverId = uu.driverId; d.start = U.dec(CALC.meterNow(uu), 1); }
+    }
+    var mode = op ? (op.start != null && op.start !== '' ? 'meter' : 'work') : 'meter';
+
+    var h = '<div class="list">' + unitSelect(d.unitId) + driverSelect(d.driverId) +
+      '<div class="field"><label>Дата</label><input id="f-date" type="date" value="' + esc(d.date) + '"></div>' +
+      '<div class="field"><label>Объект</label><input id="f-site" list="sites" placeholder="Карьер, ЖК, трасса…" value="' +
+      esc(d.site || '') + '" autocomplete="off"></div></div>' +
+      '<datalist id="sites">' + DB.sites().map(function (s) {
+        return '<option value="' + esc(s) + '"></option>';
+      }).join('') + '</datalist>';
+
+    h += '<h2 class="sec">Наработка</h2>' +
+      '<div class="seg" id="f-mode">' +
+      '<button data-m="meter" class="' + (mode === 'meter' ? 'on' : '') + '">По счётчику</button>' +
+      '<button data-m="work" class="' + (mode === 'work' ? 'on' : '') + '">Сразу итогом</button></div>' +
+      '<div class="list" id="box-meter"' + (mode !== 'meter' ? ' style="display:none"' : '') + '>' +
+      '<div class="field"><label>На начало</label><input id="f-start" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.start != null ? d.start : '') + '"><span class="unit mu">м·ч</span></div>' +
+      '<div class="field"><label>На конец</label><input id="f-end" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.end != null ? d.end : '') + '"><span class="unit mu">м·ч</span></div></div>' +
+      '<div class="list" id="box-work"' + (mode === 'meter' ? ' style="display:none"' : '') + '>' +
+      '<div class="field"><label>Отработано</label><input id="f-work" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.work || '') + '"><span class="unit mu">м·ч</span></div></div>';
+
+    h += '<div class="list" style="margin-top:12px"><div class="field col"><label>Заметка</label>' +
+      '<textarea id="f-note" placeholder="Что делали, простои, поломки…">' + esc(d.note || '') + '</textarea></div></div>';
+    h += '<div class="card pad" id="preview" style="margin-top:16px"></div>';
+
+    App.sheet({
+      title: op ? 'Изменить смену' : 'Смена',
+      html: h, save: op ? 'Сохранить' : 'Записать',
+      onOpen: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        watchDriverSelect(bd);
+        function mode2() { var b = bd.querySelector('#f-mode .on'); return b ? b.dataset.m : 'meter'; }
+        function draft() {
+          return { start: $('#f-start').value, end: $('#f-end').value, work: $('#f-work').value };
+        }
+        function preview() {
+          var u = DB.unit($('#f-unit').value);
+          if (!u) return;
+          U.$$('.mu', bd).forEach(function (x) { x.textContent = U.meterInfo(u.meter).unit; });
+          $('#box-meter').style.display = mode2() === 'meter' ? '' : 'none';
+          $('#box-work').style.display = mode2() === 'work' ? '' : 'none';
+          var s = draft();
+          var wk = mode2() === 'meter'
+            ? Math.max(0, U.num(s.end) - U.num(s.start))
+            : Math.max(0, U.num(s.work));
+          var norm = CALC.normFor(u, wk);
+          var left = CALC.tankLeft(u, $('#f-date').value).left;
+          if (op) left += CALC.normFor(u, CALC.shiftWork(op));
+          var html = V.kv('Наработка', U.work(wk, u.meter), 'big') +
+            V.kv('Спишется по норме', U.liters(norm)) +
+            V.kv('Останется в баке', (left - norm < 0
+              ? '<span style="color:var(--orange)">' + U.liters(left - norm) + '</span>'
+              : U.liters(left - norm)));
+          if (left - norm < 0) html += '<div class="hint" style="padding:8px 0 0">Расчётный остаток уходит в минус: ' +
+            'скорее всего, какие-то заправки ещё не внесены.</div>';
+          $('#preview').innerHTML = html;
+        }
+        bd.addEventListener('input', preview);
+        bd.addEventListener('change', function (e) {
+          if (e.target.id === 'f-unit' && !op) {
+            var u = DB.unit(e.target.value);
+            if (u) {
+              $('#f-start').value = U.dec(CALC.meterNow(u), 1);
+              if (u.driverId) $('#f-driver').value = u.driverId;
+            }
+          }
+          preview();
+        });
+        bd.addEventListener('click', function (e) {
+          var b = e.target.closest('#f-mode [data-m]');
+          if (!b) return;
+          U.$$('#f-mode button', bd).forEach(function (x) { x.classList.remove('on'); });
+          b.classList.add('on');
+          preview();
+        });
+        preview();
+        if (!op) setTimeout(function () { $('#f-end').focus(); }, 380);
+      },
+      onSave: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        var mb = bd.querySelector('#f-mode .on');
+        var byMeter = (mb ? mb.dataset.m : 'meter') === 'meter';
+        var wk = byMeter ? U.num($('#f-end').value) - U.num($('#f-start').value) : U.num($('#f-work').value);
+        if (!(wk > 0)) { U.toast(byMeter ? 'Показания на конец должны быть больше' : 'Укажите наработку'); return false; }
+        var drv = resolveDriver(bd);
+        if (drv === '__error') { U.toast('Введите имя водителя'); return false; }
+        var rec = {
+          unitId: $('#f-unit').value, driverId: drv, date: $('#f-date').value || U.today(),
+          start: byMeter ? U.num($('#f-start').value) : null,
+          end: byMeter ? U.num($('#f-end').value) : null,
+          work: byMeter ? null : wk,
+          site: $('#f-site').value.trim(), note: $('#f-note').value.trim()
+        };
+        if (op) { DB.updShift(op.id, rec); U.toast('Смена изменена'); }
+        else { DB.addShift(rec); U.toast('Смена записана'); }
+        App.render();
+        return true;
+      }
+    });
+  };
+
+  /* ---------- ЗАМЕР БАКА ---------- */
+  F.checkForm = function (opId, unitId) {
+    if (!DB.units().length) { U.toast('Сначала добавьте технику'); return F.unitForm(); }
+    var op = opId ? DB.fuelOp(opId) : null;
+    var d = op || { unitId: unitId || DB.units()[0].id, date: U.today(), liters: '', meter: '', note: '' };
+
+    var h = '<div class="hint" style="padding:0 4px 12px">Замер — точка опоры. Приложение сравнит его со своим расчётом ' +
+      'и покажет недостачу, а дальше начнёт считать остаток заново от реальной цифры.</div>' +
+      '<div class="list">' + unitSelect(d.unitId) +
+      '<div class="field"><label>Дата</label><input id="f-date" type="date" value="' + esc(d.date) + '"></div>' +
+      '<div class="field"><label>В баке</label><input id="f-liters" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.liters !== '' && d.liters != null ? d.liters : '') + '"><span class="unit">л</span></div>' +
+      '<div class="field"><label>Счётчик</label><input id="f-meter" type="text" inputmode="decimal" placeholder="необязательно" value="' +
+      (d.meter != null && d.meter !== '' ? d.meter : '') + '"><span class="unit" id="u-m">м·ч</span></div>' +
+      '<div class="field col"><label>Заметка</label><textarea id="f-note" placeholder="Кто замерял, чем…">' +
+      esc(d.note || '') + '</textarea></div></div>' +
+      '<div class="card pad" id="preview" style="margin-top:16px"></div>';
+
+    App.sheet({
+      title: op ? 'Изменить замер' : 'Замер бака',
+      html: h, save: op ? 'Сохранить' : 'Записать',
+      onOpen: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        function preview() {
+          var u = DB.unit($('#f-unit').value);
+          if (!u) return;
+          $('#u-m').textContent = U.meterInfo(u.meter).unit;
+          var expected = CALC.tankLeft(u, $('#f-date').value).left;
+          var found = U.num($('#f-liters').value);
+          var dev = found - expected;
+          var html = V.kv('По расчёту должно быть', U.liters(expected), 'big');
+          if ($('#f-liters').value !== '') {
+            html += V.kv('Разница', (dev < -0.5
+              ? '<span style="color:var(--red)">недостача ' + U.liters(-dev) + '</span>'
+              : dev > 0.5 ? '<span style="color:var(--accent)">излишек ' + U.liters(dev) + '</span>'
+                : 'сходится'));
+            if (dev < -0.5 && DB.data.settings.price) {
+              html += V.kv('В деньгах', U.money(-dev * DB.data.settings.price));
+            }
+          }
+          $('#preview').innerHTML = html;
+        }
+        bd.addEventListener('input', preview);
+        bd.addEventListener('change', preview);
+        preview();
+        if (!op) setTimeout(function () { $('#f-liters').focus(); }, 380);
+      },
+      onSave: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        if ($('#f-liters').value === '') { U.toast('Сколько литров в баке?'); return false; }
+        var rec = {
+          type: 'check', unitId: $('#f-unit').value, date: $('#f-date').value || U.today(),
+          liters: U.num($('#f-liters').value), price: 0, sum: 0,
+          meter: $('#f-meter').value !== '' ? U.num($('#f-meter').value) : null,
+          note: $('#f-note').value.trim()
+        };
+        if (op) { DB.updFuel(op.id, rec); U.toast('Замер изменён'); }
+        else { DB.addFuel(rec); U.toast('Замер записан'); }
+        App.render();
+        return true;
+      }
+    });
+  };
+
+  /* ---------- ПРИХОД НА СКЛАД ---------- */
+  F.intakeForm = function (opId) {
+    var op = opId ? DB.fuelOp(opId) : null;
+    var st = DB.data.settings;
+    var d = op || { date: U.today(), liters: '', price: st.price || '', fuel: st.fuel, note: '' };
+
+    var h = '<div class="list">' +
+      '<div class="field"><label>Дата</label><input id="f-date" type="date" value="' + esc(d.date) + '"></div>' +
+      '<div class="field"><label>Литров</label><input id="f-liters" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.liters || '') + '"><span class="unit">л</span></div>' +
+      '<div class="field"><label>Цена за литр</label><input id="f-price" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.price || '') + '"><span class="unit">' + esc(st.currency) + '</span></div>' +
+      '<div class="field"><label>Вид</label><select id="f-fuel">' +
+      DB.FUELS.map(function (x) {
+        return '<option value="' + esc(x) + '"' + ((d.fuel || st.fuel) === x ? ' selected' : '') + '>' + esc(x) + '</option>';
+      }).join('') + '</select></div>' +
+      '<div class="field col"><label>Заметка</label><textarea id="f-note" placeholder="Поставщик, номер накладной…">' +
+      esc(d.note || '') + '</textarea></div></div>' +
+      '<div class="card pad" id="preview" style="margin-top:16px"></div>';
+
+    App.sheet({
+      title: op ? 'Изменить приход' : 'Приход топлива',
+      html: h, save: op ? 'Сохранить' : 'Записать',
+      onOpen: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        function preview() {
+          var lit = U.num($('#f-liters').value), price = U.num($('#f-price').value);
+          var t = CALC.tankState();
+          var was = t.left - (op ? U.num(op.liters) : 0);
+          $('#preview').innerHTML = V.kv('Сумма', U.money(lit * price), 'big') +
+            V.kv('На складе было', U.liters(was)) +
+            V.kv('Станет', U.liters(was + lit) +
+              (U.num(DB.data.settings.tankVolume) ? ' <span style="color:var(--text-2);font-weight:400">из ' +
+                U.liters(DB.data.settings.tankVolume) + '</span>' : ''));
+        }
+        bd.addEventListener('input', preview);
+        preview();
+        if (!op) setTimeout(function () { $('#f-liters').focus(); }, 380);
+      },
+      onSave: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        var lit = U.num($('#f-liters').value);
+        if (lit <= 0) { U.toast('Сколько литров привезли?'); return false; }
+        var rec = {
+          type: 'intake', unitId: null, date: $('#f-date').value || U.today(),
+          liters: lit, price: U.num($('#f-price').value), sum: lit * U.num($('#f-price').value),
+          fuel: $('#f-fuel').value, note: $('#f-note').value.trim()
+        };
+        if (op) { DB.updFuel(op.id, rec); U.toast('Приход изменён'); }
+        else { DB.addFuel(rec); U.toast('Принято ' + U.liters(lit)); }
+        App.render();
+        return true;
+      }
+    });
+  };
+
+  /* ---------- ЗАМЕР СКЛАДА ---------- */
+  F.tankCheckForm = function (opId) {
+    var op = opId ? DB.fuelOp(opId) : null;
+    var d = op || { date: U.today(), liters: '', note: '' };
+    var h = '<div class="hint" style="padding:0 4px 12px">Сколько топлива реально осталось в ёмкости. ' +
+      'Приложение сравнит с расчётом и покажет, не утекло ли что-то мимо учёта.</div>' +
+      '<div class="list">' +
+      '<div class="field"><label>Дата</label><input id="f-date" type="date" value="' + esc(d.date) + '"></div>' +
+      '<div class="field"><label>В ёмкости</label><input id="f-liters" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.liters !== '' && d.liters != null ? d.liters : '') + '"><span class="unit">л</span></div>' +
+      '<div class="field col"><label>Заметка</label><textarea id="f-note" placeholder="Кто замерял…">' +
+      esc(d.note || '') + '</textarea></div></div>' +
+      '<div class="card pad" id="preview" style="margin-top:16px"></div>';
+
+    App.sheet({
+      title: op ? 'Изменить замер' : 'Замер склада',
+      html: h, save: op ? 'Сохранить' : 'Записать',
+      onOpen: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        function preview() {
+          var t = CALC.tankState($('#f-date').value);
+          var found = U.num($('#f-liters').value), dev = found - t.left;
+          var html = V.kv('По расчёту должно быть', U.liters(t.left), 'big');
+          if ($('#f-liters').value !== '') {
+            html += V.kv('Разница', dev < -0.5
+              ? '<span style="color:var(--red)">недостача ' + U.liters(-dev) + '</span>'
+              : dev > 0.5 ? '<span style="color:var(--accent)">излишек ' + U.liters(dev) + '</span>' : 'сходится');
+          }
+          $('#preview').innerHTML = html;
+        }
+        bd.addEventListener('input', preview);
+        bd.addEventListener('change', preview);
+        preview();
+        if (!op) setTimeout(function () { $('#f-liters').focus(); }, 380);
+      },
+      onSave: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        if ($('#f-liters').value === '') { U.toast('Сколько литров в ёмкости?'); return false; }
+        var rec = {
+          type: 'tankcheck', unitId: null, date: $('#f-date').value || U.today(),
+          liters: U.num($('#f-liters').value), price: 0, sum: 0, note: $('#f-note').value.trim()
+        };
+        if (op) { DB.updFuel(op.id, rec); U.toast('Замер изменён'); }
+        else { DB.addFuel(rec); U.toast('Замер записан'); }
+        App.render();
+        return true;
+      }
+    });
+  };
+
+  /* ---------- ТО И РЕМОНТ ---------- */
+  F.serviceForm = function (opId, unitId) {
+    if (!DB.units().length) { U.toast('Сначала добавьте технику'); return F.unitForm(); }
+    var op = opId ? DB.service(opId) : null;
+    var d = op || { unitId: unitId || DB.units()[0].id, date: U.today(), kind: 'to', meter: '', sum: '', note: '' };
+    if (!op) {
+      var uu = DB.unit(d.unitId);
+      if (uu) d.meter = U.dec(CALC.meterNow(uu), 1);
+    }
+
+    var h = '<div class="seg" id="f-kind">' +
+      '<button data-k="to" class="' + (d.kind !== 'repair' ? 'on' : '') + '">ТО по регламенту</button>' +
+      '<button data-k="repair" class="' + (d.kind === 'repair' ? 'on' : '') + '">Ремонт</button></div>' +
+      '<div class="list">' + unitSelect(d.unitId) +
+      '<div class="field"><label>Дата</label><input id="f-date" type="date" value="' + esc(d.date) + '"></div>' +
+      '<div class="field"><label>Счётчик</label><input id="f-meter" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.meter != null ? d.meter : '') + '"><span class="unit" id="u-m">м·ч</span></div>' +
+      '<div class="field"><label>Стоимость</label><input id="f-sum" type="text" inputmode="decimal" placeholder="0" value="' +
+      (d.sum || '') + '"><span class="unit">' + esc(DB.data.settings.currency) + '</span></div>' +
+      '<div class="field col"><label>Что делали</label><textarea id="f-note" placeholder="Масло, фильтры, замена шланга…">' +
+      esc(d.note || '') + '</textarea></div></div>' +
+      '<div class="card pad" id="preview" style="margin-top:16px"></div>';
+
+    App.sheet({
+      title: op ? 'Изменить запись' : 'ТО или ремонт',
+      html: h, save: op ? 'Сохранить' : 'Записать',
+      onOpen: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        function kind() { var b = bd.querySelector('#f-kind .on'); return b ? b.dataset.k : 'to'; }
+        function preview() {
+          var u = DB.unit($('#f-unit').value);
+          if (!u) return;
+          $('#u-m').textContent = U.meterInfo(u.meter).unit;
+          var html = '';
+          if (kind() === 'to' && U.num(u.serviceEvery) > 0) {
+            var next = U.num($('#f-meter').value) + U.num(u.serviceEvery);
+            html = V.kv('Следующее ТО на', U.work(next, u.meter), 'big') +
+              V.kv('Периодичность', 'каждые ' + U.work(u.serviceEvery, u.meter));
+          } else if (kind() === 'to') {
+            html = '<div class="hint" style="padding:0">У этой техники не задана периодичность ТО — ' +
+              'укажите её в карточке, тогда приложение начнёт напоминать.</div>';
+          } else {
+            html = V.kv('Ремонт', 'счётчик ТО не сбрасывается', 'big');
+          }
+          $('#preview').innerHTML = html;
+        }
+        bd.addEventListener('input', preview);
+        bd.addEventListener('change', function (e) {
+          if (e.target.id === 'f-unit' && !op) {
+            var u = DB.unit(e.target.value);
+            if (u) $('#f-meter').value = U.dec(CALC.meterNow(u), 1);
+          }
+          preview();
+        });
+        bd.addEventListener('click', function (e) {
+          var b = e.target.closest('#f-kind [data-k]');
+          if (!b) return;
+          U.$$('#f-kind button', bd).forEach(function (x) { x.classList.remove('on'); });
+          b.classList.add('on');
+          preview();
+        });
+        preview();
+      },
+      onSave: function (bd) {
+        var $ = function (x) { return bd.querySelector(x); };
+        var kb = bd.querySelector('#f-kind .on');
+        var rec = {
+          unitId: $('#f-unit').value, date: $('#f-date').value || U.today(),
+          kind: kb ? kb.dataset.k : 'to',
+          meter: $('#f-meter').value !== '' ? U.num($('#f-meter').value) : null,
+          sum: U.num($('#f-sum').value), note: $('#f-note').value.trim()
+        };
+        if (op) { DB.updService(op.id, rec); U.toast('Запись изменена'); }
+        else { DB.addService(rec); U.toast(rec.kind === 'to' ? 'ТО записано' : 'Ремонт записан'); }
+        App.render();
+        return true;
+      }
+    });
+  };
+
+  /* ---------- ИМПОРТ ---------- */
+  F.importSheet = function () {
+    var h = '<div class="hint" style="padding:0 4px 14px">Выберите файл резервной копии <b>.json</b> ' +
+      'или таблицу <b>.csv</b>. Можно вставить текст прямо в поле ниже.</div>' +
+      '<div class="list">' +
+      '<button class="row tap" id="pick"><span class="op-ic">📁</span><span class="grow">' +
+      '<span class="ttl" style="color:var(--accent)">Выбрать файл</span>' +
+      '<span class="sub">.json или .csv</span></span></button></div>' +
+      '<input type="file" id="file" accept=".json,.csv,.txt,application/json,text/csv" style="display:none">' +
+      '<h2 class="sec">Или вставьте текст</h2>' +
+      '<div class="list"><div class="field col"><textarea id="paste" style="min-height:130px;font-size:14px" ' +
+      'placeholder="Экскаватор Hitachi;EX 2201;Экскаватор;моточасы;14,5;400;ДТ;250"></textarea></div></div>' +
+      '<div class="hint">Таблица техники: <b>Название;Госномер;Тип;Счётчик;Норма;Бак;Топливо;ТО через</b>.<br>' +
+      'Таблица заправок: <b>Дата;Техника;Водитель;Литров;Цена;Счётчик;Заметка</b>.<br>' +
+      'Разделитель — точка с запятой, строка заголовков не обязательна. ' +
+      'Технику загружайте первой: заправки привяжутся к ней по названию или госномеру.</div>' +
+      '<h2 class="sec">Как загружать</h2>' +
+      '<div class="seg" id="mode"><button data-m="merge" class="on">Добавить к текущим</button>' +
+      '<button data-m="replace">Заменить всё</button></div>';
+
+    App.sheet({
+      title: 'Загрузка базы', html: h, save: 'Загрузить',
+      onOpen: function (bd) {
+        bd.querySelector('#pick').addEventListener('click', function () { bd.querySelector('#file').click(); });
+        bd.querySelector('#file').addEventListener('change', function (e) {
+          var f = e.target.files[0];
+          if (!f) return;
+          var fr = new FileReader();
+          fr.onload = function () { bd.querySelector('#paste').value = fr.result; U.toast('Файл прочитан: ' + f.name); };
+          fr.readAsText(f);
+        });
+        bd.addEventListener('click', function (e) {
+          var m = e.target.closest('#mode [data-m]');
+          if (m) { U.$$('#mode button', bd).forEach(function (b) { b.classList.remove('on'); }); m.classList.add('on'); }
+        });
+      },
+      onSave: function (bd) {
+        var text = bd.querySelector('#paste').value.trim();
+        if (!text) { U.toast('Не выбран файл и не вставлен текст'); return false; }
+        var mode = bd.querySelector('#mode .on').dataset.m;
+
+        function run() {
+          try {
+            if (text[0] === '{') {
+              var res = DB.importJSON(text, mode);
+              U.toast('Загружено: ' + res.units + ' единиц техники');
+            } else {
+              if (mode === 'replace') { DB.data = DB.empty(); DB.save(); }
+              var r = DB.importCSV(text);
+              DB.save();
+              U.toast(r.added
+                ? (r.kind === 'fuel' ? 'Добавлено заправок: ' : 'Добавлено техники: ') + r.added
+                : 'Ни одной строки не распознано');
+            }
+            App.closeSheet();
+            App.go('#/');
+          } catch (err) {
+            U.toast('Ошибка: ' + err.message);
+          }
+        }
+
+        if (mode === 'replace') {
+          App.ask({
+            title: 'Заменить всю базу?',
+            text: 'Техника, смены, заправки и ТО будут стёрты и заменены загружаемыми.',
+            ok: 'Заменить', danger: true, onOk: run
+          });
+        } else run();
+        return false;
+      }
+    });
+  };
+
+  /* ---------- КОД-ПАРОЛЬ ---------- */
+  F.pinSheet = function () {
+    var h = '<div class="hint" style="padding:0 4px 14px">Код из 4 цифр будет спрашиваться при каждом запуске.</div>' +
+      '<div class="list"><div class="field"><label>Новый код</label>' +
+      '<input id="pin1" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••" style="letter-spacing:6px"></div>' +
+      '<div class="field"><label>Ещё раз</label>' +
+      '<input id="pin2" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="••••" style="letter-spacing:6px"></div></div>' +
+      '<div class="hint">Код закрывает вход от чужих глаз, но не шифрует базу — это защита от случайного взгляда, ' +
+      'а не от специалиста с доступом к телефону.</div>';
+    App.sheet({
+      title: 'Код-пароль', html: h, save: 'Включить',
+      onOpen: function (bd) { setTimeout(function () { bd.querySelector('#pin1').focus(); }, 380); },
+      onSave: function (bd) {
+        var a = bd.querySelector('#pin1').value.trim(), b = bd.querySelector('#pin2').value.trim();
+        if (!/^\d{4}$/.test(a)) { U.toast('Нужен код из 4 цифр'); return false; }
+        if (a !== b) { U.toast('Коды не совпадают'); return false; }
+        DB.data.settings.pin = App.hash(a);
+        DB.save(); U.toast('Код включён'); App.render();
+        return true;
+      }
+    });
+  };
+
+  w.F = F;
+})(window);
+
+/* Запуск, навигация, модальные листы, действия */
+(function (w) {
+  'use strict';
+
+  var App = { route: '#/', lastRoute: null };
+
+  /* ---------- простая хэш-функция для кода-пароля ---------- */
+  App.hash = function (s) {
+    var h = 5381, str = 'fleet.' + s;
+    for (var i = 0; i < str.length; i++) h = ((h * 33) ^ str.charCodeAt(i)) >>> 0;
+    return h.toString(36);
+  };
+
+  /* ---------- навигация ---------- */
+  App.go = function (hash) {
+    if (location.hash === hash) App.render();
+    else location.hash = hash;
+  };
+
+  App.render = function () {
+    var r = location.hash || '#/';
+    App.route = r;
+    var scr = U.$('#screen'), html = '';
+
+    if (r.indexOf('#/unit/') === 0) html = V.unitDetail(r.slice(7));
+    else if (r.indexOf('#/driver/') === 0) html = V.driverDetail(r.slice(9));
+    else if (r === '#/units') html = V.units();
+    else if (r === '#/log') html = V.log();
+    else if (r === '#/more') html = V.more();
+    else if (r === '#/report') html = V.report();
+    else if (r === '#/tank') html = V.tank();
+    else if (r === '#/drivers') html = V.drivers();
+    else html = V.home();
+
+    scr.innerHTML = html;
+    var wrap = scr.querySelector('.wrap');
+    if (wrap) wrap.classList.add('fade');
+
+    if ((r === '#/log' || r === '#/units') && DB.units().length) {
+      var fab = document.createElement('button');
+      fab.className = 'fab';
+      fab.setAttribute('data-act', r === '#/units' ? 'new-unit' : 'add-menu');
+      fab.textContent = '＋';
+      scr.appendChild(fab);
+    }
+
+    U.$$('.tabbar a').forEach(function (a) {
+      var base = r.indexOf('#/unit/') === 0 ? '#/units'
+        : (r.indexOf('#/driver') === 0 || r === '#/report' || r === '#/tank' || r === '#/drivers') ? '#/more'
+          : r;
+      a.classList.toggle('on', a.getAttribute('href') === base);
+    });
+
+    if (App.lastRoute !== r) { w.scrollTo(0, 0); App.lastRoute = r; }
+    App.onScroll();
+  };
+
+  App.onScroll = function () {
+    var tb = U.$('#topbar');
+    if (tb) tb.classList.toggle('solid', w.scrollY > 26);
+  };
+
+  /* ---------- модальный лист ---------- */
+  App.sheet = function (opt) {
+    App.closeSheet(true);
+    var bg = document.createElement('div');
+    bg.className = 'sheet-bg';
+    var sh = document.createElement('div');
+    sh.className = 'sheet';
+    sh.innerHTML = '<div class="grabber"></div>' +
+      '<div class="sheet-hd"><button data-sheet="cancel">Отмена</button>' +
+      '<span class="t">' + U.esc(opt.title || '') + '</span>' +
+      (opt.save ? '<button class="strong" data-sheet="save">' + U.esc(opt.save) + '</button>'
+        : '<span style="min-width:64px"></span>') + '</div>' +
+      '<div class="sheet-bd"></div>';
+    var bd = sh.querySelector('.sheet-bd');
+    bd.innerHTML = opt.html || '';
+    document.body.appendChild(bg);
+    document.body.appendChild(sh);
+    document.body.classList.add('no-scroll');
+
+    requestAnimationFrame(function () { bg.classList.add('in'); sh.classList.add('in'); });
+
+    bg.addEventListener('click', function () { App.closeSheet(); });
+    sh.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-sheet]');
+      if (!b) return;
+      if (b.dataset.sheet === 'cancel') return App.closeSheet();
+      if (b.dataset.sheet === 'save') {
+        if (!opt.onSave || opt.onSave(bd) !== false) App.closeSheet();
+      }
+    });
+    App._sheet = { bg: bg, sh: sh };
+    if (opt.onOpen) opt.onOpen(bd);
+  };
+
+  App.closeSheet = function (now) {
+    var s = App._sheet;
+    if (!s) return;
+    App._sheet = null;
+    document.body.classList.remove('no-scroll');
+    if (now) { s.bg.remove(); s.sh.remove(); return; }
+    s.bg.classList.remove('in'); s.sh.classList.remove('in');
+    setTimeout(function () { s.bg.remove(); s.sh.remove(); }, 340);
+  };
+
+  /* ---------- диалог подтверждения (вместо системного confirm) ---------- */
+  App.ask = function (opt) {
+    var bg = document.createElement('div');
+    bg.className = 'ask-bg';
+    bg.innerHTML = '<div class="ask"><div class="ask-t">' + U.esc(opt.title) + '</div>' +
+      (opt.text ? '<div class="ask-d">' + U.esc(opt.text) + '</div>' : '<div style="height:16px"></div>') +
+      '<div class="ask-btns"><button data-a="no">' + U.esc(opt.cancel || 'Отмена') + '</button>' +
+      '<button data-a="yes" class="' + (opt.danger ? 'danger' : '') + '">' + U.esc(opt.ok || 'Да') + '</button></div></div>';
+    document.body.appendChild(bg);
+    requestAnimationFrame(function () { bg.classList.add('in'); });
+
+    function close(yes) {
+      bg.classList.remove('in');
+      setTimeout(function () { bg.remove(); }, 220);
+      if (yes && opt.onOk) opt.onOk();
+      if (!yes && opt.onCancel) opt.onCancel();
+    }
+    bg.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-a]');
+      if (b) return close(b.dataset.a === 'yes');
+      if (e.target === bg) close(false);
+    });
+  };
+
+  /* ---------- сохранение файла ----------
+     Порядок попыток: среда Artifact (claude.use) → «Поделиться» на iOS →
+     обычное скачивание → показать текст для копирования вручную.        */
+  App.saveFile = function (name, text, mime, done) {
+    done = done || function () { };
+
+    if (w.claude && typeof w.claude.use === 'function') {
+      App._dlp = App._dlp || w.claude.use('downloads');
+      App._dlp.then(function (dl) {
+        if (!dl) return App.copyFallback(name, text, done);
+        dl.save({ filename: name, data: text })
+          .then(function () { done(true); })
+          .catch(function (e) {
+            if (e && e.code === 'declined') { done(false); return; }
+            App.copyFallback(name, text, done);
+          });
+      }, function () { App.copyFallback(name, text, done); });
+      return;
+    }
+
+    try {
+      if (w.File && navigator.canShare) {
+        var f = new File([text], name, { type: mime });
+        if (navigator.canShare({ files: [f] })) {
+          navigator.share({ files: [f], title: name })
+            .then(function () { done(true); })
+            .catch(function () { done(false); });
+          return;
+        }
+      }
+    } catch (e) { }
+
+    try {
+      var blob = new Blob([text], { type: mime });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      done(true);
+      return;
+    } catch (e) { }
+
+    App.copyFallback(name, text, done);
+  };
+
+  App.copyFallback = function (name, text, done) {
+    App.sheet({
+      title: 'Скопируйте копию',
+      html: '<div class="hint" style="padding:0 4px 12px">Здесь сохранить файл нельзя. Скопируйте текст и вставьте ' +
+        'его в заметку, письмо или мессенджер — из него база восстанавливается целиком через «Загрузить базу».</div>' +
+        '<button class="btn" id="cp">Скопировать всё</button>' +
+        '<div class="list" style="margin-top:12px"><div class="field col">' +
+        '<label>' + U.esc(name) + '</label>' +
+        '<textarea id="dump" readonly style="min-height:220px;font-size:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace"></textarea>' +
+        '</div></div>',
+      onOpen: function (bd) {
+        var ta = bd.querySelector('#dump');
+        ta.value = text;
+        bd.querySelector('#cp').addEventListener('click', function () {
+          ta.focus(); ta.setSelectionRange(0, ta.value.length);
+          var ok = false;
+          try { ok = document.execCommand('copy'); } catch (e) { }
+          if (ok) { U.toast('Скопировано'); done(true); return; }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text)
+              .then(function () { U.toast('Скопировано'); done(true); })
+              .catch(function () { U.toast('Скопируйте выделенный текст вручную'); });
+          } else U.toast('Скопируйте выделенный текст вручную');
+        });
+      }
+    });
+  };
+
+  /* ---------- меню операции: изменить или удалить ---------- */
+  App.opMenu = function (kind, id) {
+    var titles = { fuel: 'Запись о топливе', shift: 'Смена', service: 'ТО или ремонт' };
+    var op = kind === 'fuel' ? DB.fuelOp(id) : kind === 'shift' ? DB.shift(id) : DB.service(id);
+    if (!op) return;
+    App.sheet({
+      title: titles[kind],
+      html: '<div class="list">' +
+        '<button class="row tap" data-o="edit"><span class="op-ic">✏️</span>' +
+        '<span class="grow"><span class="ttl">Изменить</span></span></button>' +
+        '<button class="row tap" data-o="del"><span class="op-ic">🗑️</span>' +
+        '<span class="grow"><span class="ttl" style="color:var(--red)">Удалить</span></span></button></div>' +
+        '<div class="hint">' + U.esc(U.fmtDateFull(op.date)) + '</div>',
+      onOpen: function (bd) {
+        bd.addEventListener('click', function (e) {
+          var b = e.target.closest('[data-o]');
+          if (!b) return;
+          var what = b.dataset.o;
+          App.closeSheet();
+          setTimeout(function () {
+            if (what === 'edit') {
+              if (kind === 'shift') F.shiftForm(id);
+              else if (kind === 'service') F.serviceForm(id);
+              else if (op.type === 'fill') F.fillForm(id);
+              else if (op.type === 'check') F.checkForm(id);
+              else if (op.type === 'intake') F.intakeForm(id);
+              else F.tankCheckForm(id);
+              return;
+            }
+            App.ask({
+              title: 'Удалить запись?',
+              text: 'От ' + U.fmtDateFull(op.date) + '. Все расчёты пересчитаются заново.',
+              ok: 'Удалить', danger: true,
+              onOk: function () {
+                if (kind === 'shift') DB.delShift(id);
+                else if (kind === 'service') DB.delService(id);
+                else DB.delFuel(id);
+                U.toast('Запись удалена');
+                App.render();
+              }
+            });
+          }, 320);
+        });
+      }
+    });
+  };
+
+  /* ---------- действия ---------- */
+  var ACTIONS = {
+    back: function () { history.length > 1 ? history.back() : App.go('#/'); },
+    unit: function (d) { App.go('#/unit/' + d.id); },
+    driver: function (d) { App.go('#/driver/' + d.id); },
+
+    'add-menu': function () { F.addMenu(); },
+    'new-unit': function () { F.unitForm(); },
+    'edit-unit': function (d) { F.unitForm(d.id); },
+    'new-driver': function () { F.driverForm(); },
+    'edit-driver': function (d) { F.driverForm(d.id); },
+    'new-fill': function (d) { F.fillForm(null, d.id || null); },
+    'new-shift': function (d) { F.shiftForm(null, d.id || null); },
+    'new-check': function (d) { F.checkForm(null, d.id || null); },
+    'new-service': function (d) { F.serviceForm(null, d.id || null); },
+    'new-intake': function () { F.intakeForm(); },
+    'new-tankcheck': function () { F.tankCheckForm(); },
+
+    'op-fuel': function (d) { App.opMenu('fuel', d.id); },
+    'op-shift': function (d) { App.opMenu('shift', d.id); },
+    'op-service': function (d) { App.opMenu('service', d.id); },
+
+    'del-unit': function (d) {
+      var u = DB.unit(d.id);
+      if (!u) return;
+      var n = CALC.feed(null, u.id).length;
+      App.ask({
+        title: 'Удалить ' + u.name + '?',
+        text: n ? 'Вместе со всеми записями по ней (' + n + '): смены, заправки, ТО. Отменить это будет нельзя.'
+          : 'Отменить это будет нельзя.',
+        ok: 'Удалить', danger: true,
+        onOk: function () { DB.delUnit(d.id); U.toast('Техника удалена'); App.go('#/units'); }
+      });
+    },
+    'del-driver': function (d) {
+      var dr = DB.driver(d.id);
+      App.ask({
+        title: 'Удалить ' + (dr ? dr.name : 'водителя') + '?',
+        text: 'Смены и заправки останутся, но будут без водителя.',
+        ok: 'Удалить', danger: true,
+        onOk: function () { DB.delDriver(d.id); U.toast('Водитель удалён'); App.go('#/drivers'); }
+      });
+    },
+
+    ufilter: function (d) { V.unitsFilter = d.f; App.render(); },
+    lfilter: function (d) { V.logFilter = d.f; V.logLimit = 60; App.render(); },
+    'log-more': function () { V.logLimit += 100; App.render(); },
+    'go-log': function () { App.go('#/log'); },
+    'go-report': function () { App.go('#/report'); },
+    'go-tank': function () { App.go('#/tank'); },
+    'go-drivers': function () { App.go('#/drivers'); },
+
+    'rep-month': function (d) {
+      var cur = V.reportMonth || U.monthKey(U.today());
+      var next = U.monthKey(U.addMonths(cur + '-01', +d.d));
+      if (next > U.monthKey(U.today())) return;
+      V.reportMonth = next;
+      App.render();
+    },
+    'rep-tab': function (d) { V.reportTab = d.t; App.render(); },
+    'rep-goto': function (d) { V.reportMonth = d.m; V.reportTab = 'units'; App.render(); },
+
+    demo: function () {
+      DB.data = DB.demo();
+      DB.save();
+      U.toast('Загружен пример: 6 единиц техники за два месяца');
+      App.go('#/');
+    },
+    'demo-off': function () {
+      App.ask({
+        title: 'Очистить пример?',
+        text: 'Демонстрационная техника, смены и заправки будут удалены, приложение станет пустым.',
+        ok: 'Очистить',
+        onOk: function () { DB.data = DB.empty(); DB.save(); U.toast('Готово — можно заносить своё'); App.go('#/'); }
+      });
+    },
+
+    'export-json': function () {
+      var name = 'avtopark-' + U.today() + '.json';
+      App.saveFile(name, DB.exportJSON(), 'application/json', function (ok) {
+        if (!ok) return;
+        DB.data.settings.lastExport = U.today();
+        DB.save();
+        U.toast('Копия сохранена: ' + name);
+        if (App.route === '#/more' || App.route === '#/') App.render();
+      });
+    },
+    'export-csv': function () {
+      App.saveFile('avtopark-toplivo-' + U.today() + '.csv', DB.exportCSV(), 'text/csv;charset=utf-8',
+        function (ok) { if (ok) U.toast('Журнал топлива сохранён'); });
+    },
+    'export-shifts': function () {
+      App.saveFile('avtopark-smeny-' + U.today() + '.csv', DB.exportShiftsCSV(), 'text/csv;charset=utf-8',
+        function (ok) { if (ok) U.toast('Смены сохранены'); });
+    },
+    'export-report': function (d) {
+      App.saveFile('avtopark-otchet-' + d.from.slice(0, 7) + '.csv', DB.exportReportCSV(d.from, d.to),
+        'text/csv;charset=utf-8', function (ok) { if (ok) U.toast('Отчёт сохранён'); });
+    },
+    import: function () { F.importSheet(); },
+
+    wipe: function () {
+      App.ask({
+        title: 'Стереть все данные?',
+        text: 'Техника, смены, заправки и ТО будут удалены. Восстановить их можно будет только из резервной копии.',
+        ok: 'Стереть', danger: true,
+        onOk: function () {
+          App.ask({
+            title: 'Точно стереть?', text: 'Последнее предупреждение.',
+            ok: 'Да, стереть', danger: true,
+            onOk: function () { DB.data = DB.empty(); DB.save(); U.toast('Все данные стёрты'); App.go('#/'); }
+          });
+        }
+      });
+    },
+    pin: function () { F.pinSheet(); },
+    'pin-off': function () {
+      App.ask({
+        title: 'Отключить код-пароль?',
+        text: 'Приложение будет открываться без кода.',
+        ok: 'Отключить',
+        onOk: function () { DB.data.settings.pin = null; DB.save(); U.toast('Код отключён'); App.render(); }
+      });
+    }
+  };
+
+  /* вызвать действие по имени — этим пользуется меню «＋» */
+  App.run = function (name, data) {
+    var f = ACTIONS[name];
+    if (f) f(data || {});
+  };
+
+  /* ---------- тема ---------- */
+  App.applyTheme = function () {
+    var t = DB.data.settings.theme || 'auto';
+    if (t === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', t);
+    var meta = U.$('#theme-color');
+    if (meta) {
+      var dark = t === 'dark' || (t === 'auto' && w.matchMedia('(prefers-color-scheme:dark)').matches);
+      meta.setAttribute('content', dark ? '#000000' : '#f2f2f7');
+    }
+  };
+
+  /* ---------- экран блокировки ---------- */
+  App.lock = function (done) {
+    var buf = '';
+    var el = document.createElement('div');
+    el.className = 'lock';
+    el.innerHTML = '<div style="font-size:44px">🔐</div>' +
+      '<div style="font-size:19px;font-weight:600">Введите код</div>' +
+      '<div class="pin-dots" id="dots"><i></i><i></i><i></i><i></i></div>' +
+      '<div class="keypad" style="margin-top:8px">' +
+      [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return '<button data-n="' + n + '">' + n + '</button>'; }).join('') +
+      '<button class="blank"></button><button data-n="0">0</button>' +
+      '<button data-n="del" style="font-size:20px">⌫</button></div>';
+    document.body.appendChild(el);
+
+    function draw() {
+      U.$$('#dots i', el).forEach(function (d, i) { d.classList.toggle('on', i < buf.length); });
+    }
+    el.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-n]');
+      if (!b) return;
+      if (b.dataset.n === 'del') { buf = buf.slice(0, -1); draw(); return; }
+      if (buf.length >= 4) return;
+      buf += b.dataset.n;
+      draw();
+      if (buf.length === 4) {
+        if (App.hash(buf) === DB.data.settings.pin) {
+          el.style.opacity = '0';
+          el.style.transition = 'opacity .25s';
+          setTimeout(function () { el.remove(); }, 260);
+          done();
+        } else {
+          el.classList.add('shake');
+          setTimeout(function () { el.classList.remove('shake'); buf = ''; draw(); }, 420);
+        }
+      }
+    });
+  };
+
+  /* ---------- старт ---------- */
+  App.start = function () {
+    DB.load();
+    App.applyTheme();
+
+    var run = function () {
+      App.render();
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () { });
+    };
+
+    if (DB.data.settings.pin) App.lock(run);
+    else run();
+
+    w.addEventListener('hashchange', App.render);
+    w.addEventListener('scroll', App.onScroll, { passive: true });
+    var mq = w.matchMedia('(prefers-color-scheme:dark)');
+    if (mq.addEventListener) mq.addEventListener('change', App.applyTheme);
+
+    /* сутки могли смениться, пока приложение висело в фоне */
+    var day = U.today();
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden && U.today() !== day) { day = U.today(); App.render(); }
+    });
+
+    /* делегирование кликов */
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('.sheet')) return;
+      var b = e.target.closest('[data-act]');
+      if (!b) return;
+      var act = ACTIONS[b.dataset.act];
+      if (act) { e.preventDefault(); act(b.dataset, b); }
+    });
+
+    /* поиск */
+    var tmr;
+    document.addEventListener('input', function (e) {
+      if (e.target.closest('.sheet')) return;
+      var t = e.target;
+      if (t.id === 'qu' || t.id === 'ql') {
+        V[t.id === 'qu' ? 'unitsQuery' : 'logQuery'] = t.value;
+        clearTimeout(tmr);
+        tmr = setTimeout(function () {
+          App.render();
+          var i = U.$('#' + t.id);
+          if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); }
+        }, 160);
+      }
+    });
+
+    /* настройки */
+    document.addEventListener('change', function (e) {
+      if (e.target.closest('.sheet')) return;
+      var t = e.target;
+      if (!t.dataset || t.dataset.act !== 'set') return;
+      var k = t.dataset.k;
+      var v = ['price', 'tankVolume', 'serviceWarnPct'].indexOf(k) >= 0 ? U.num(t.value) : t.value;
+      if (k === 'currency' && !String(v).trim()) v = 'сум';
+      DB.data.settings[k] = v;
+      DB.save();
+      if (k === 'theme') App.applyTheme();
+      U.toast('Сохранено');
+      if (['theme', 'currency', 'tankVolume', 'tankName', 'serviceWarnPct'].indexOf(k) >= 0) App.render();
+    });
+  };
+
+  w.App = App;
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', App.start);
+  else App.start();
+})(window);
+
+['home','units','log','more'].forEach(function(k){
+  document.getElementById('i-'+k).innerHTML = V.ICON[k];
+});
+</script>
+</body>
+</html>
