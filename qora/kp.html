@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QORA — коммерческое предложение</title>
+<meta name="description" content="Сайт для кафе и ресторана за 24 часа. Приём заказов напрямую, без комиссии агрегаторов. Ташкент.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%231a1a1e'/><text x='16' y='23' font-size='19' font-family='sans-serif' font-weight='600' text-anchor='middle' fill='%23fff'>Q</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16161a;--ink2:#3d3d46;--muted:#71717e;--line:#e2e0da;--paper:#fdfcfa;--gold:#9a7b1a;--ok:#2f7d55}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#eceae5;color:var(--ink);font-family:"Manrope","Helvetica Neue",-apple-system,sans-serif;
+ font-weight:400;line-height:1.62;padding:26px 14px 60px;-webkit-font-smoothing:antialiased}
+.sheet{max-width:830px;margin:0 auto;background:var(--paper);border:1px solid var(--line);
+ border-radius:4px;padding:clamp(28px,5.5vw,62px);box-shadow:0 14px 44px rgba(20,20,26,.09)}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;
+ padding-bottom:22px;border-bottom:2px solid var(--ink)}
+.logo{font-size:23px;font-weight:700;letter-spacing:.22em}
+.logo small{display:block;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);
+ font-weight:500;margin-top:6px;letter-spacing:.14em}
+.meta{text-align:right;font-size:13px;color:var(--muted);line-height:1.75}
+h1{font-size:clamp(26px,4.4vw,38px);font-weight:300;letter-spacing:-.025em;line-height:1.15;margin:36px 0 0}
+h1 b{font-weight:600}
+.forwho{margin-top:14px;font-size:16px;color:var(--ink2)}
+.forwho b{font-weight:600;color:var(--ink)}
+h2{font-size:12px;letter-spacing:.19em;text-transform:uppercase;color:var(--gold);font-weight:600;
+ margin:42px 0 16px;padding-top:26px;border-top:1px solid var(--line)}
+p{color:var(--ink2);margin-bottom:13px}
+p.big{font-size:17px;color:var(--ink)}
+.facts{display:grid;gap:14px;margin:22px 0}
+@media(min-width:640px){.facts{grid-template-columns:repeat(3,1fr)}}
+.fact{border:1px solid var(--line);border-radius:6px;padding:18px}
+.fact b{display:block;font-size:29px;font-weight:600;color:var(--gold);letter-spacing:-.02em;line-height:1.1}
+.fact span{font-size:13.5px;color:var(--muted);display:block;margin-top:7px}
+table{width:100%;border-collapse:collapse;margin:6px 0 4px;font-size:15px}
+th{text-align:left;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+ font-weight:600;padding:9px 10px;border-bottom:2px solid var(--ink)}
+td{padding:11px 10px;border-bottom:1px solid var(--line);color:var(--ink2);vertical-align:top}
+td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:600}
+tr.hot td{background:#faf6e9}
+ul{list-style:none;margin:6px 0 14px}
+li{padding-left:24px;position:relative;color:var(--ink2);margin-bottom:9px}
+li:before{content:"";position:absolute;left:0;top:11px;width:12px;height:2px;background:var(--gold)}
+.steps{counter-reset:s;margin-top:8px}
+.st{counter-increment:s;padding-left:46px;position:relative;margin-bottom:19px}
+.st:before{content:counter(s);position:absolute;left:0;top:-1px;width:30px;height:30px;border-radius:50%;
+ border:1.5px solid var(--ink);display:grid;place-items:center;font-size:13px;font-weight:600}
+.st b{display:block;font-weight:600;margin-bottom:3px}
+.st span{color:var(--ink2);font-size:15px}
+.st em{font-style:normal;display:block;font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-top:5px}
+.guar{border:1.5px solid var(--ok);border-radius:6px;padding:22px 24px;margin-top:22px;background:#f3faf6}
+.guar b{display:block;font-size:17px;font-weight:600;color:var(--ok);margin-bottom:7px}
+.guar p{margin:0;color:var(--ink2)}
+.foot{margin-top:44px;padding-top:24px;border-top:2px solid var(--ink);display:flex;
+ justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:14px}
+.foot b{display:block;font-weight:600;margin-bottom:5px}
+.foot span{color:var(--muted);display:block;line-height:1.8}
+.foot a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--gold)}
+.bar{max-width:830px;margin:0 auto 16px;display:flex;gap:9px;justify-content:flex-end;flex-wrap:wrap}
+.bar button,.bar a{padding:10px 18px;border-radius:8px;border:1px solid #cbc8c1;background:#fff;color:var(--ink);
+ font:inherit;font-size:13.5px;cursor:pointer;text-decoration:none;transition:.15s}
+.bar button:hover,.bar a:hover{border-color:var(--ink)}
+.note{font-size:13px;color:var(--muted);margin-top:9px}
+@media print{
+  body{background:#fff;padding:0}
+  .sheet{border:0;box-shadow:none;max-width:100%;padding:0}
+  .bar{display:none}
+  h2{page-break-after:avoid}
+  .st,.fact,tr,.guar{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <button onclick="print()">Сохранить в PDF / распечатать</button>
+  <a href="./">К портфолио</a>
+</div>
+
+<div class="sheet">
+  <div class="top">
+    <div class="logo">QORA<small>Сайты для заведений · Ташкент</small></div>
+    <div class="meta">Коммерческое предложение<br><span id="date"></span><br>Действительно 14 дней</div>
+  </div>
+
+  <h1>Сайт вашего заведения<br><b>за 24 часа</b></h1>
+  <p class="forwho" id="forwho">Меню с ценами, приём заказов напрямую в ваш WhatsApp без комиссии агрегаторов, бронь стола и QR-меню для зала.</p>
+
+  <h2>Что происходит сейчас</h2>
+  <div class="facts">
+    <div class="fact"><b>до 30%</b><span>чека уходит агрегатору с каждого заказа — включая заказы постоянных гостей, которые пришли бы и так</span></div>
+    <div class="fact"><b>8 из 10</b><span>заведений в Ташкенте живут только в Instagram: меню, цены и часы работы приходится выяснять в переписке</span></div>
+    <div class="fact"><b>0</b><span>результатов, когда гость ищет вас по названию в Google или Яндексе — имя работает на чужую площадку</span></div>
+  </div>
+  <p>После того как Yandex Eats объединился с активами Express24, а Uzum Tezkor признан доминирующим оператором, выбирать между агрегаторами стало почти не из чего — а комиссии вниз не идут. Собственный канал заказов не заменяет агрегатор: он забирает у него ту часть, где вы платите зря.</p>
+
+  <h2>Что входит</h2>
+  <table>
+    <tr><th>Что</th><th>Зачем это вам</th></tr>
+    <tr><td><b>Меню с ценами</b></td><td>Разделы, фото, состав. Гость видит всё сразу, без переписки в директе</td></tr>
+    <tr><td><b>Приём заказов</b></td><td>Гость собирает корзину — заказ падает вам в WhatsApp готовым списком с именем, телефоном и адресом. Без комиссии и посредника</td></tr>
+    <tr><td><b>Бронь стола</b></td><td>Дата, время, количество гостей и повод приходят тем же способом</td></tr>
+    <tr><td><b>QR-меню для зала</b></td><td>Тот же сайт открывается по коду на столе. Меняются цены — печатать заново не нужно</td></tr>
+    <tr><td><b>Разметка для поиска</b></td><td>Адрес, телефон и часы работы размечены так, чтобы Google и Яндекс показывали вас карточкой</td></tr>
+    <tr><td><b>Домен и размещение</b></td><td>Первый год за наш счёт. Ежемесячных счетов за хостинг у вас не будет</td></tr>
+  </table>
+
+  <h2>Стоимость</h2>
+  <table>
+    <tr><th>Пакет</th><th>Что внутри</th><th class="n">Сум</th></tr>
+    <tr><td><b>Витрина</b></td><td>Меню, о заведении, контакты, маршрут, QR-меню</td><td class="n">1 200 000</td></tr>
+    <tr class="hot"><td><b>Сайт с заказами</b><br><span style="font-size:12px;color:var(--gold);font-weight:600">выбирают чаще всего</span></td>
+      <td>Всё из «Витрины» + корзина и приём заказов, бронь стола, разметка для поиска, домен и размещение на год, две правки меню</td><td class="n">1 900 000</td></tr>
+    <tr><td><b>Несколько точек</b></td><td>Выбор точки, своё меню, телефон и зона доставки под каждую, страница вакансий</td><td class="n">от 3 400 000</td></tr>
+    <tr><td>Сопровождение <span style="color:var(--muted)">(по желанию)</span></td><td>Правки меню и цен, продление домена, размещение, помощь с заказами</td><td class="n">300 000 / мес</td></tr>
+  </table>
+  <p class="note">Для сравнения: студии в Ташкенте берут за лендинг от 2 300 000 до 3 000 000 сум и делают его две-три недели, с предоплатой.</p>
+
+  <h2>Как это происходит</h2>
+  <div class="steps">
+    <div class="st"><b>Вы присылаете меню</b><span>Фото листа из зала или ссылка на Instagram — этого достаточно. Ещё нужен номер, на который должны приходить заказы.</span><em>5 минут вашего времени</em></div>
+    <div class="st"><b>Мы собираем сайт</b><span>Переносим меню, пишем тексты, настраиваем приём заказов на ваш номер. Вопросов почти не задаём.</span><em>В тот же день</em></div>
+    <div class="st"><b>Вы смотрите готовое</b><span>Присылаем ссылку. Открываете, пробуете заказать сами, говорите, что поправить. Правим.</span><em>До 24 часов</em></div>
+    <div class="st"><b>Оплата и передача</b><span>Понравилось — оплачиваете, привязываем домен, отдаём доступы. Сайт ваш.</span><em>Payme · Click · перевод</em></div>
+  </div>
+
+  <div class="guar">
+    <b>Вы ничего не платите вперёд</b>
+    <p>Мы показываем готовый работающий сайт до оплаты. Не понравился — расходимся, вы не должны ничего. Именно поэтому срок сутки, а не три недели: риск здесь наш, а не ваш. Домен оформляется на вас, файлы отдаём — если решите уйти к другому подрядчику, забираете всё и уходите.</p>
+  </div>
+
+  <h2>Посмотреть, как это выглядит</h2>
+  <ul>
+    <li><b>KYOTO</b> — японский ресторан с доставкой: <a href="../demo/kyoto/" style="color:var(--ink)">demo/kyoto</a></li>
+    <li><b>QOZON</b> — чайхана и национальная кухня: <a href="../demo/qozon/" style="color:var(--ink)">demo/qozon</a></li>
+    <li><b>KUNDUZ</b> — кофейня и завтраки: <a href="../demo/kunduz/" style="color:var(--ink)">demo/kunduz</a></li>
+  </ul>
+  <p class="note">Это рабочие страницы, а не картинки: соберите заказ и нажмите «отправить» — увидите, что придёт вам в мессенджер.</p>
+
+  <div class="foot">
+    <div><b>QORA</b><span>Сайты для кафе, ресторанов<br>и небольших компаний · Ташкент</span></div>
+    <div><b>Связь</b><span id="contacts">Заполните контакты в kp.html</span></div>
+    <div><b>Оформление</b><span>Самозанятый · 1% с оборота<br>Чек и договор по запросу</span></div>
+  </div>
+</div>
+
+<script>
+/* Контакты — те же, что на лендинге. Впишите один раз. */
+const QORA = { whatsapp: "998900000000", telegram: "qora_uz" };
+
+document.getElementById("date").textContent =
+  new Date().toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+
+/* Персонализация: kp.html?client=Breadly — имя подставится в шапку.
+   Отправлять безымянное КП можно, но именное читают заметно чаще. */
+const client = new URLSearchParams(location.search).get("client");
+if (client) {
+  const safe = client.slice(0, 80);
+  const p = document.getElementById("forwho");
+  p.textContent = "";
+  p.append("Для ");
+  const b = document.createElement("b"); b.textContent = safe; p.append(b);
+  p.append(". Меню с ценами, приём заказов напрямую в ваш WhatsApp без комиссии агрегаторов, бронь стола и QR-меню для зала.");
+  document.title = "QORA — коммерческое предложение для " + safe;
+}
+
+const c = document.getElementById("contacts");
+c.textContent = "";
+const wa = document.createElement("a");
+wa.href = "https://wa.me/" + QORA.whatsapp; wa.target = "_blank"; wa.rel = "noopener";
+wa.textContent = "WhatsApp";
+const tg = document.createElement("a");
+tg.href = "https://t.me/" + QORA.telegram; tg.target = "_blank"; tg.rel = "noopener";
+tg.textContent = "Telegram";
+c.append(wa, document.createElement("br"), tg);
+</script>
+</body>
+</html>
