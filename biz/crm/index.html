@@ -515,8 +515,9 @@ $("#bSeed").onclick = async () => {
     let n = 0;
     for (const s of d.leads) {
       if (have.has(s.name.toLowerCase())) continue;
-      DB.leads.push({ id: uid(), name: s.name, seg: s.segment, prio: s.priority, stage: "new",
-        check: s.check, offer: s.offer, pain: s.pain, note: "Источник: " + s.source,
+      DB.leads.push({ id: uid(), name: s.name, seg: s.segment, prio: s.priority,
+        check: s.check, offer: s.offer, pain: s.pain, demoUrl: s.demo || "", note: "Источник: " + s.source,
+        stage: s.demo ? "demo" : "new",
         hist: [], createdAt: today() });
       n++;
     }
