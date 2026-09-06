@@ -2940,30 +2940,45 @@ id="toast"
    TELEGRAM CONFIG
 ===================================================== */
 
-const TG_CONFIG = {
-    token: "8658645102:AAHzM__XGU6Tqa3I2YYuTPNKAe4tnElt6FM",
-    chatId: "689217749"
+/* ─────────────────────────────────────────────────────────────
+   КУДА ПРИХОДЯТ ЗАКАЗЫ И БРОНЬ
+
+   Здесь НЕТ и не должно быть токена бота. Страница публичная:
+   всё, что в неё вписано, видно любому, кто откроет исходный код.
+   Заказ уходит deep-link'ом в ваш собственный мессенджер —
+   ни сервера, ни секретов, ни ежемесячной платы.
+
+   Впишите свой номер (только цифры) или username в Telegram.
+   ───────────────────────────────────────────────────────────── */
+
+const ORDER_TO = {
+    whatsapp: "",        // напр. "998901234567" — международный формат, только цифры
+    telegram: ""         // напр. "kyoto_tashkent" — username без @
 };
 
-async function sendTelegramMessage(text) {
-    const url = `https://api.telegram.org/bot${TG_CONFIG.token}/sendMessage`;
+/* Собирает сообщение и открывает чат. Если контакт не заполнен —
+   не молчит и не теряет заказ, а копирует текст, чтобы гость мог его переслать. */
+async function sendOrderMessage(text) {
+    const plain = text.replace(/<\/?b>/g, "");
+
+    if (ORDER_TO.whatsapp) {
+        window.open("https://wa.me/" + ORDER_TO.whatsapp + "?text=" + encodeURIComponent(plain), "_blank", "noopener");
+        return true;
+    }
+    if (ORDER_TO.telegram) {
+        window.open("https://t.me/" + ORDER_TO.telegram + "?text=" + encodeURIComponent(plain), "_blank", "noopener");
+        return true;
+    }
+
     try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                chat_id: TG_CONFIG.chatId,
-                text: text,
-                parse_mode: "HTML"
-            })
-        });
-        return response.ok;
-    } catch (error) {
-        console.error("Telegram send error:", error);
+        await navigator.clipboard.writeText(plain);
+        showToast("ЗАКАЗ СКОПИРОВАН — ОТПРАВЬТЕ НАМ В МЕССЕНДЖЕР");
+        return true;
+    } catch (e) {
+        showToast("УКАЖИТЕ КОНТАКТ В ORDER_TO");
         return false;
     }
 }
-
 
 /* =====================================================
    HELPERS
@@ -4385,7 +4400,7 @@ document
             btn.disabled = true;
             btn.textContent = "ОТПРАВКА...";
 
-            const sent = await sendTelegramMessage(message);
+            const sent = await sendOrderMessage(message);
 
             if(sent) {
                 cart = {};
@@ -4550,7 +4565,7 @@ reservationForm.addEventListener(
         const submitBtn = document.getElementById("reserveBtn");
         submitBtn.disabled = true;
 
-        const sent = await sendTelegramMessage(message);
+        const sent = await sendOrderMessage(message);
 
         if(sent) {
             reservationForm.style.display = "none";

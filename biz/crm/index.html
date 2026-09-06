@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>QORA CRM — продажи и деньги</title>
+<meta name="theme-color" content="#0b0b0e">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23c9a227'/><text x='16' y='23' font-size='18' font-family='sans-serif' font-weight='700' text-anchor='middle' fill='%230b0b0e'>Q</text></svg>">
+<style>
+:root{--bg:#0b0b0e;--bg2:#111116;--card:#16161c;--line:rgba(235,232,226,.11);
+ --fg:#ebe8e2;--muted:rgba(235,232,226,.5);--muted2:rgba(235,232,226,.3);
+ --gold:#c9a227;--ok:#4ea87b;--warn:#d99b3c;--bad:#c25b52;--blue:#5b8fc2}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--fg);font:400 15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+ -webkit-font-smoothing:antialiased;padding-bottom:40px}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--gold);text-decoration:none}
+.wrap{max-width:1500px;margin:0 auto;padding:0 16px}
+
+header{position:sticky;top:0;z-index:40;background:rgba(11,11,14,.94);backdrop-filter:blur(14px);
+ border-bottom:1px solid var(--line);padding:12px 0}
+.hrow{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.14em;font-size:15px}
+.logo i{width:7px;height:7px;border-radius:50%;background:var(--gold)}
+.sp{flex:1}
+.b{padding:9px 16px;border-radius:9px;border:1px solid var(--line);background:transparent;cursor:pointer;
+ font-size:13.5px;transition:.15s;white-space:nowrap}
+.b:hover{border-color:var(--gold);background:rgba(201,162,39,.1)}
+.b.p{background:var(--gold);border-color:var(--gold);color:#0b0b0e;font-weight:600}
+.b.p:hover{filter:brightness(1.08)}
+.b.d{border-color:rgba(194,91,82,.4);color:var(--bad)}
+
+/* metrics */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:1px;background:var(--line);
+ border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:18px 0}
+.m{background:var(--bg2);padding:15px 16px}
+.m span{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted2);display:block}
+.m b{font-size:22px;font-weight:600;letter-spacing:-.01em;display:block;margin-top:5px}
+.m b.g{color:var(--ok)}.m b.r{color:var(--bad)}.m b.y{color:var(--gold)}
+
+.bar{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.bar input,.bar select{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:9px 13px;font-size:14px}
+.bar input:focus,.bar select:focus{outline:none;border-color:var(--gold)}
+.chip{padding:8px 14px;border-radius:100px;border:1px solid var(--line);background:transparent;cursor:pointer;font-size:13px;color:var(--muted);transition:.15s}
+.chip.on{border-color:var(--gold);background:rgba(201,162,39,.13);color:var(--fg)}
+
+/* board */
+.board{display:grid;grid-auto-flow:column;grid-auto-columns:290px;gap:12px;overflow-x:auto;padding-bottom:14px;align-items:start}
+.col{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:11px;min-height:110px}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 3px}
+.ch b{font-size:12.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.ch i{font-style:normal;font-size:11.5px;color:var(--muted2);background:var(--card);padding:2px 8px;border-radius:100px}
+.card{background:var(--card);border:1px solid var(--line);border-left-width:3px;border-radius:10px;padding:12px;
+ margin-bottom:9px;cursor:pointer;transition:.15s}
+.card:hover{border-color:var(--gold);transform:translateY(-1px)}
+.card.hot{border-left-color:var(--bad)}
+.card.warm{border-left-color:var(--warn)}
+.card.cold{border-left-color:var(--muted2)}
+.card b{display:block;font-size:14.5px;font-weight:600;margin-bottom:3px}
+.card .seg{font-size:12.5px;color:var(--muted)}
+.card .row{display:flex;justify-content:space-between;align-items:center;margin-top:9px;font-size:12px;color:var(--muted2)}
+.card .amt{color:var(--gold);font-weight:600;font-size:13px}
+.card .due{color:var(--warn)}
+.card .due.now{color:var(--bad);font-weight:600}
+.card .miss{display:inline-block;margin-top:7px;font-size:11px;color:var(--warn);border:1px solid rgba(217,155,60,.35);
+ padding:1px 7px;border-radius:100px}
+
+/* modal */
+.scrim{position:fixed;inset:0;background:rgba(4,4,6,.76);backdrop-filter:blur(4px);z-index:50;display:none}
+.scrim.on{display:block}
+.modal{position:fixed;z-index:51;inset:auto 0 0 0;max-height:92vh;background:var(--bg2);border-top:1px solid var(--line);
+ border-radius:16px 16px 0 0;overflow-y:auto;display:none}
+.modal.on{display:block}
+@media(min-width:800px){.modal{inset:50% auto auto 50%;transform:translate(-50%,-50%);width:min(680px,94vw);
+ border-radius:16px;border:1px solid var(--line);max-height:88vh}}
+.mh{position:sticky;top:0;background:var(--bg2);padding:16px 18px;border-bottom:1px solid var(--line);
+ display:flex;align-items:center;gap:12px;z-index:2}
+.mh b{flex:1;font-size:16px;font-weight:600}
+.mb{padding:18px}
+.g2{display:grid;gap:12px}
+@media(min-width:560px){.g2{grid-template-columns:1fr 1fr}}
+.f{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.f label{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted2)}
+.f input,.f select,.f textarea{background:var(--card);border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-size:14.5px;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{outline:none;border-color:var(--gold)}
+.f textarea{resize:vertical;min-height:70px}
+.sub{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);margin:22px 0 12px;
+ padding-top:16px;border-top:1px solid var(--line)}
+.sub:first-child{margin-top:0;padding-top:0;border:0}
+.msg{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;white-space:pre-wrap;
+ font-size:14px;line-height:1.55;max-height:290px;overflow-y:auto}
+.acts{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
+.hist{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+.hi{font-size:13px;color:var(--muted);padding-left:14px;border-left:2px solid var(--line)}
+.hi i{font-style:normal;color:var(--muted2);font-size:11.5px;display:block}
+.empty{color:var(--muted2);text-align:center;padding:44px 0;font-size:14px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,150%);background:var(--fg);color:#0b0b0e;
+ padding:12px 24px;border-radius:100px;font-size:13.5px;font-weight:600;z-index:90;opacity:0;visibility:hidden;
+ transition:transform .35s cubic-bezier(.3,1.4,.5,1),opacity .25s,visibility .25s;max-width:92vw;text-align:center}
+.toast.on{transform:translate(-50%,0);opacity:1;visibility:visible}
+.tabs{display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:4px}
+.hint{font-size:12.5px;color:var(--muted2);margin-top:7px;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+th{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);font-weight:500}
+td.n{text-align:right;font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+
+<header><div class="wrap hrow">
+  <div class="logo"><i></i>QORA CRM</div>
+  <div class="sp"></div>
+  <button class="b" id="bImport">Импорт из 2ГИС</button>
+  <button class="b" id="bMoney">Деньги</button>
+  <button class="b" id="bBackup">Бэкап</button>
+  <button class="b p" id="bAdd">+ Лид</button>
+</div></header>
+
+<div class="wrap">
+  <div class="metrics" id="metrics"></div>
+
+  <div class="bar">
+    <input id="q" placeholder="Поиск по названию…" style="min-width:190px;flex:1">
+    <button class="chip on" data-p="">Все</button>
+    <button class="chip" data-p="hot">🔥 Горячие</button>
+    <button class="chip" data-p="warm">🟡 Тёплые</button>
+    <button class="chip" data-p="cold">⚪ Холодные</button>
+    <button class="chip" data-p="due">⏰ Написать сегодня</button>
+  </div>
+
+  <div class="board" id="board"></div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<!-- ЛИД -->
+<div class="modal" id="mLead"><div class="mh"><b id="leadTitle">Лид</b>
+  <button class="b d" id="bDel">Удалить</button><button class="b" data-close>Закрыть</button></div>
+<div class="mb">
+  <div class="sub">Заведение</div>
+  <div class="g2">
+    <div class="f"><label>Название</label><input id="lName"></div>
+    <div class="f"><label>Сегмент</label><input id="lSeg" placeholder="Кофейня, чайхана, суши…"></div>
+    <div class="f"><label>Район</label><input id="lDist" placeholder="Мирабадский"></div>
+    <div class="f"><label>Приоритет</label><select id="lPrio">
+      <option value="hot">🔥 Горячий</option><option value="warm">🟡 Тёплый</option><option value="cold">⚪ Холодный</option></select></div>
+  </div>
+
+  <div class="sub">Контакты</div>
+  <div class="g2">
+    <div class="f"><label>Телефон / WhatsApp</label><input id="lPhone" placeholder="+998 90 123 45 67"></div>
+    <div class="f"><label>Telegram</label><input id="lTg" placeholder="@username"></div>
+    <div class="f"><label>Instagram</label><input id="lIg" placeholder="@username"></div>
+    <div class="f"><label>Сайт (если есть)</label><input id="lSite" placeholder="нет"></div>
+  </div>
+
+  <div class="sub">Сделка</div>
+  <div class="g2">
+    <div class="f"><label>Этап</label><select id="lStage"></select></div>
+    <div class="f"><label>Сумма, сум</label><input id="lCheck" type="number" inputmode="numeric"></div>
+    <div class="f"><label>Что предлагаем</label><input id="lOffer" placeholder="Сайт с заказами"></div>
+    <div class="f"><label>Написать снова</label><input id="lNext" type="date"></div>
+  </div>
+  <div class="f"><label>Боль — что у них не так</label><textarea id="lPain"></textarea></div>
+  <div class="f"><label>Ссылка на демо</label><input id="lDemo" placeholder="…/demo/название/"></div>
+  <div class="f"><label>Заметка</label><textarea id="lNote"></textarea></div>
+
+  <div class="sub">Сообщение</div>
+  <div class="tabs" id="tplTabs"></div>
+  <div class="msg" id="msgBox"></div>
+  <div class="acts">
+    <button class="b p" id="bWa">WhatsApp</button>
+    <button class="b" id="bTg">Telegram</button>
+    <button class="b" id="bCopy">Скопировать</button>
+    <button class="b" id="bSent">Отметить «отправлено»</button>
+  </div>
+  <p class="hint" id="chanHint"></p>
+
+  <div class="sub">История</div>
+  <div class="hist" id="hist"></div>
+  <div class="acts"><button class="b p" id="bSave">Сохранить</button></div>
+</div></div>
+
+<!-- ИМПОРТ -->
+<div class="modal" id="mImport"><div class="mh"><b>Импорт лидов</b><button class="b" data-close>Закрыть</button></div>
+<div class="mb">
+  <p class="hint" style="margin-bottom:14px">Откройте <a href="https://2gis.uz/tashkent" target="_blank" rel="noopener">2ГИС Ташкент</a>, найдите «кофейни» / «суши-бары» / «чайхана», выделите список и скопируйте. Вставьте сюда — разберём построчно.<br><br>
+  Понимаем и ручной формат, по одной записи в строке:<br><code>Название | сегмент | телефон | @instagram | район</code></p>
+  <div class="f"><textarea id="impText" style="min-height:190px" placeholder="Tim's Coffee & Roastery | Кофейня | +998 90 123 45 67 | @timscoffee | Мирабадский&#10;Breadly | Пекарня | +998 71 200 00 00 | @breadly.uz"></textarea></div>
+  <div class="f"><label>Приоритет для всех добавленных</label><select id="impPrio">
+    <option value="hot">🔥 Горячий</option><option value="warm" selected>🟡 Тёплый</option><option value="cold">⚪ Холодный</option></select></div>
+  <div class="acts">
+    <button class="b p" id="bDoImport">Разобрать и добавить</button>
+    <button class="b" id="bSeed">Загрузить посевную базу (31 заведение)</button>
+  </div>
+  <p class="hint" id="impHint"></p>
+</div></div>
+
+<!-- ДЕНЬГИ -->
+<div class="modal" id="mMoney"><div class="mh"><b>Деньги</b><button class="b" data-close>Закрыть</button></div>
+<div class="mb">
+  <div class="sub">Расходы</div>
+  <div class="g2">
+    <div class="f"><label>На что</label><input id="eName" placeholder="Домен .uz"></div>
+    <div class="f"><label>Сумма, сум</label><input id="eAmt" type="number" inputmode="numeric"></div>
+  </div>
+  <div class="acts"><button class="b p" id="bAddExp">Добавить расход</button></div>
+  <table id="expTable" style="margin-top:18px"></table>
+  <div class="sub">Отчёт</div>
+  <table id="repTable"></table>
+  <p class="hint">Оплата считается по лидам на этапе «Оплачен» — сумма берётся из карточки. Налог самозанятого (1% с оборота) посчитан отдельной строкой.</p>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= МОДЕЛЬ ================= */
+const STAGES = [
+  { id:"new",      name:"Новый" },
+  { id:"demo",     name:"Демо готово" },
+  { id:"sent",     name:"Отправлено" },
+  { id:"replied",  name:"Ответил" },
+  { id:"meeting",  name:"Встреча" },
+  { id:"invoice",  name:"Счёт выставлен" },
+  { id:"paid",     name:"Оплачен" },
+  { id:"lost",     name:"Отказ" },
+];
+const RANK = Object.fromEntries(STAGES.map((s,i)=>[s.id,i]));
+const KEY = "qora_crm_v1";
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const fmt = n => new Intl.NumberFormat("ru-RU").format(Math.round(n||0));
+const today = () => new Date().toISOString().slice(0,10);
+
+let DB = { leads: [], expenses: [] };
+try { const r = localStorage.getItem(KEY); if (r) DB = JSON.parse(r); } catch(e){}
+DB.leads ||= []; DB.expenses ||= [];
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(DB)); } catch(e){ toast("Не удалось сохранить — проверьте память браузера"); } };
+
+let tT; function toast(m){ const t=$("#toast"); t.textContent=m; t.classList.add("on"); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove("on"),2800); }
+
+/* ================= ШАБЛОНЫ СООБЩЕНИЙ ================= */
+/* Персонализация обязательна: общий текст на всех — это спам, он убивает номер и репутацию. */
+const TPL = [
+ { id:"demo", name:"Первое касание (демо готово)", text: l => `Здравствуйте! Меня зовут [ВАШЕ ИМЯ], я делаю сайты для заведений в Ташкенте.
+
+Я заметил, что у ${l.name} есть ${l.ig ? "аккаунт " + l.ig : "активный Instagram"}, но нет сайта — гость, который ищет вас в Google или хочет посмотреть меню с ценами, упирается в пустоту или в карточку агрегатора.
+
+Я не стал ничего предлагать на словах и просто собрал сайт для вас:
+${l.demoUrl || "[ССЫЛКА НА ДЕМО]"}
+
+Откройте — там меню, корзина и заказ, который приходит прямо к вам в WhatsApp, без комиссии агрегатора. Это рабочая страница, не картинка.
+
+Если понравится — доведу под ваше настоящее меню и запущу за сутки, 1 900 000 сум. Если нет — просто закройте, вы мне ничего не должны.` },
+
+ { id:"cold", name:"Первое касание (без демо)", text: l => `Здравствуйте! Я [ВАШЕ ИМЯ], делаю сайты для кафе и ресторанов в Ташкенте.
+
+Посмотрел ${l.name}${l.seg ? " — " + l.seg.toLowerCase() : ""}. ${l.pain || "Сайта у вас нет, и весь трафик по названию уходит на агрегаторы."}
+
+Могу за сутки собрать сайт: меню с ценами, заказ прямо в ваш WhatsApp без комиссии, бронь и QR-меню для зала.
+
+Работаю так: сначала показываю готовый сайт, и только если он вам нравится — вы платите. 1 900 000 сум под ключ.
+
+Показать, как это выглядит? Пришлю пару работ.` },
+
+ { id:"ig", name:"Instagram Direct (коротко)", text: l => `Здравствуйте! Собрал сайт для ${l.name} — с меню и заказом прямо в WhatsApp, без комиссии агрегаторов.
+
+${l.demoUrl || "[ССЫЛКА НА ДЕМО]"}
+
+Посмотрите, это рабочая страница. Понравится — доведу под ваше меню за сутки. Нет — вы ничего не должны.` },
+
+ { id:"fup1", name:"Напоминание №1 (через 2 дня)", text: l => `Здравствуйте! Напомню про сайт для ${l.name} — вот он: ${l.demoUrl || "[ССЫЛКА]"}
+
+Понимаю, что сейчас может быть не до этого. Скажите одно слово — «интересно» или «нет», и я либо доведу до конца, либо больше не буду писать.` },
+
+ { id:"fup2", name:"Напоминание №2 (через неделю)", text: l => `Здравствуйте! Последний раз по поводу сайта для ${l.name}.
+
+Демо ещё живёт: ${l.demoUrl || "[ССЫЛКА]"}
+
+Если тема неактуальна — так и напишите, я удалю страницу и не буду беспокоить. Если актуальна, но позже — скажите когда, вернусь ровно тогда.` },
+
+ { id:"kp", name:"После интереса — условия", text: l => `Спасибо! Тогда по делу.
+
+Что делаю для ${l.name}:
+• Сайт: меню с ценами, фото, описания
+• Заказ прямо в ваш WhatsApp — без комиссии агрегаторов
+• Бронь стола
+• QR-меню для зала: цены меняются — печатать заново не надо
+• Разметка для Google и Яндекса, чтобы вас находили по названию
+• Домен и размещение — первый год мой
+
+Цена: ${fmt(l.check || 1900000)} сум под ключ.
+Срок: сутки с момента, как пришлёте меню.
+Оплата: после того, как посмотрите готовый сайт. Не понравился — не платите.
+
+От вас нужно только: меню (фото листа сойдёт), номер для заказов и пара фото зала. Всё остальное на мне.
+
+Начинаем?` },
+
+ { id:"invoice", name:"Счёт и реквизиты", text: l => `${l.name} — сайт готов и работает: ${l.demoUrl || "[ССЫЛКА]"}
+
+К оплате: ${fmt(l.check || 1900000)} сум.
+Реквизиты: [PAYME / CLICK / КАРТА]
+
+Как оплата пройдёт — привязываю домен и передаю вам доступы. Дальше по желанию сопровождение 300 000 сум/мес: правки меню и цен, продление домена, помощь с заказами.` },
+
+ { id:"upsell", name:"Допродажа после запуска", text: l => `${l.name}, как вам сайт в работе? Заказы доходят?
+
+Если всё ровно — есть две вещи, которые обычно дают следующий рост:
+1. Ведение Instagram и Telegram: контент-план, тексты, сторис, сценарии для Reels — 1 800 000 сум/мес
+2. QR-таблички на столы, чтобы гости в зале сами открывали меню — 400 000 сум разово
+
+Ничего не навязываю, просто скажите, если интересно.` },
+];
+let tpl = TPL[0].id;
+
+/* ================= МЕТРИКИ ================= */
+function metrics(){
+  const L = DB.leads;
+  const at = id => L.filter(l => l.stage !== "lost" && RANK[l.stage] >= RANK[id]).length;
+  const paid = L.filter(l => l.stage === "paid");
+  const got = paid.reduce((s,l) => s + (+l.check || 0), 0);
+  const spent = DB.expenses.reduce((s,e) => s + (+e.amt || 0), 0);
+  const sent = at("sent"), clients = paid.length;
+  const conv = sent ? (clients / sent * 100) : 0;
+  const pipe = L.filter(l => l.stage !== "lost" && l.stage !== "paid").reduce((s,l) => s + (+l.check || 0), 0);
+  return { got, spent, profit: got - spent, leads: L.length, sent, replied: at("replied"),
+           meetings: at("meeting"), clients, conv, pipe };
+}
+function renderMetrics(){
+  const m = metrics();
+  $("#metrics").innerHTML = [
+    ["Получено", fmt(m.got) + " сум", m.got ? "g" : ""],
+    ["Потрачено", fmt(m.spent) + " сум", m.spent ? "r" : ""],
+    ["Прибыль", fmt(m.profit) + " сум", m.profit > 0 ? "g" : m.profit < 0 ? "r" : ""],
+    ["В работе", fmt(m.pipe) + " сум", "y"],
+    ["Лидов", m.leads, ""],
+    ["Отправлено", m.sent, ""],
+    ["Ответов", m.replied, ""],
+    ["Встреч", m.meetings, ""],
+    ["Клиентов", m.clients, m.clients ? "g" : ""],
+    ["Конверсия", m.conv.toFixed(1) + "%", ""],
+  ].map(([k,v,c]) => `<div class="m"><span>${k}</span><b class="${c}">${v}</b></div>`).join("");
+}
+
+/* ================= ДОСКА ================= */
+let filterP = "", q = "";
+function visible(){
+  return DB.leads.filter(l => {
+    if (q && !(l.name + " " + (l.seg||"")).toLowerCase().includes(q)) return false;
+    if (filterP === "due") return l.next && l.next <= today() && l.stage !== "paid" && l.stage !== "lost";
+    if (filterP && l.prio !== filterP) return false;
+    return true;
+  });
+}
+function renderBoard(){
+  const L = visible();
+  $("#board").innerHTML = STAGES.map(s => {
+    const items = L.filter(l => l.stage === s.id);
+    return `<div class="col"><div class="ch"><b>${s.name}</b><i>${items.length}</i></div>`
+      + (items.map(l => {
+          const due = l.next && l.next <= today();
+          const noContact = !l.phone && !l.tg && !l.ig;
+          return `<div class="card ${l.prio}" data-id="${l.id}">
+            <b>${escape_(l.name)}</b>
+            <div class="seg">${escape_(l.seg || "—")}${l.dist ? " · " + escape_(l.dist) : ""}</div>
+            ${noContact ? '<span class="miss">нет контакта</span>' : ""}
+            <div class="row"><span class="amt">${l.check ? fmt(l.check) + " сум" : "—"}</span>
+              ${l.next ? `<span class="due ${due ? "now" : ""}">${due ? "написать сегодня" : l.next}</span>` : "<span></span>"}</div>
+          </div>`;
+        }).join("") || '<div class="empty" style="padding:18px 0;font-size:13px">пусто</div>')
+      + `</div>`;
+  }).join("");
+}
+const escape_ = s => String(s ?? "").replace(/[<>&]/g, c => ({"<":"&lt;",">":"&gt;","&":"&amp;"}[c]));
+
+function render(){ renderMetrics(); renderBoard(); }
+
+/* ================= КАРТОЧКА ================= */
+let cur = null;
+function openLead(id){
+  cur = DB.leads.find(l => l.id === id); if (!cur) return;
+  $("#leadTitle").textContent = cur.name || "Лид";
+  $("#lName").value = cur.name || ""; $("#lSeg").value = cur.seg || ""; $("#lDist").value = cur.dist || "";
+  $("#lPrio").value = cur.prio || "warm";
+  $("#lPhone").value = cur.phone || ""; $("#lTg").value = cur.tg || ""; $("#lIg").value = cur.ig || ""; $("#lSite").value = cur.site || "";
+  $("#lStage").value = cur.stage || "new"; $("#lCheck").value = cur.check || ""; $("#lOffer").value = cur.offer || "";
+  $("#lNext").value = cur.next || ""; $("#lPain").value = cur.pain || ""; $("#lDemo").value = cur.demoUrl || ""; $("#lNote").value = cur.note || "";
+  renderMsg(); renderHist();
+  show("#mLead");
+}
+function collect(){
+  if (!cur) return;
+  Object.assign(cur, {
+    name: $("#lName").value.trim(), seg: $("#lSeg").value.trim(), dist: $("#lDist").value.trim(),
+    prio: $("#lPrio").value, phone: $("#lPhone").value.trim(), tg: $("#lTg").value.trim(),
+    ig: $("#lIg").value.trim(), site: $("#lSite").value.trim(), stage: $("#lStage").value,
+    check: +$("#lCheck").value || 0, offer: $("#lOffer").value.trim(), next: $("#lNext").value,
+    pain: $("#lPain").value.trim(), demoUrl: $("#lDemo").value.trim(), note: $("#lNote").value.trim(),
+  });
+}
+function renderMsg(){
+  collect();
+  const t = TPL.find(x => x.id === tpl);
+  $("#msgBox").textContent = t.text(cur);
+  $("#tplTabs").innerHTML = TPL.map(x => `<button class="chip ${x.id===tpl?"on":""}" data-tpl="${x.id}">${x.name}</button>`).join("");
+  const c = [];
+  if (!cur.phone) c.push("нет телефона"); if (!cur.tg) c.push("нет Telegram"); if (!cur.ig) c.push("нет Instagram");
+  $("#chanHint").textContent = c.length ? "Не заполнено: " + c.join(", ") + ". Кнопка канала без контакта не сработает."
+    : "Текст откроется в мессенджере готовым — останется нажать «отправить».";
+}
+function renderHist(){
+  $("#hist").innerHTML = (cur.hist || []).slice().reverse().map(h =>
+    `<div class="hi"><i>${h.t}</i>${escape_(h.text)}</div>`).join("") || '<div class="hint">Пока пусто.</div>';
+}
+function log(text){ (cur.hist ||= []).push({ t: new Date().toLocaleString("ru-RU"), text }); }
+
+/* ================= МОДАЛКИ ================= */
+function show(sel){ $("#scrim").classList.add("on"); $(sel).classList.add("on"); document.body.style.overflow = "hidden"; }
+function hideAll(){ $("#scrim").classList.remove("on"); document.querySelectorAll(".modal").forEach(m => m.classList.remove("on")); document.body.style.overflow = ""; }
+$("#scrim").onclick = hideAll;
+document.addEventListener("click", e => { if (e.target.closest("[data-close]")) hideAll(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") hideAll(); });
+
+/* ================= СОБЫТИЯ ================= */
+$("#lStage").innerHTML = STAGES.map(s => `<option value="${s.id}">${s.name}</option>`).join("");
+
+$("#board").addEventListener("click", e => { const c = e.target.closest(".card"); if (c) openLead(c.dataset.id); });
+$("#tplTabs").addEventListener("click", e => { const b = e.target.closest("[data-tpl]"); if (b) { tpl = b.dataset.tpl; renderMsg(); } });
+document.querySelectorAll(".bar .chip").forEach(c => c.onclick = () => {
+  document.querySelectorAll(".bar .chip").forEach(x => x.classList.remove("on")); c.classList.add("on");
+  filterP = c.dataset.p; renderBoard();
+});
+$("#q").oninput = e => { q = e.target.value.trim().toLowerCase(); renderBoard(); };
+
+$("#bAdd").onclick = () => {
+  const l = { id: uid(), name: "Новое заведение", prio: "warm", stage: "new", check: 1900000, hist: [], createdAt: today() };
+  DB.leads.unshift(l); save(); render(); openLead(l.id);
+};
+$("#bSave").onclick = () => { collect(); save(); render(); hideAll(); toast("Сохранено"); };
+$("#bDel").onclick = () => {
+  if (!cur || !confirm("Удалить «" + cur.name + "»? Это необратимо.")) return;
+  DB.leads = DB.leads.filter(l => l.id !== cur.id); save(); render(); hideAll(); toast("Удалён");
+};
+["#lName","#lSeg","#lPain","#lDemo","#lCheck","#lIg","#lPhone"].forEach(s => $(s).addEventListener("input", renderMsg));
+
+function openChan(kind){
+  collect();
+  const text = $("#msgBox").textContent;
+  let url;
+  if (kind === "wa") {
+    const d = (cur.phone || "").replace(/\D/g, "");
+    if (!d) { toast("Сначала впишите телефон"); return; }
+    url = "https://wa.me/" + d + "?text=" + encodeURIComponent(text);
+  } else {
+    const u = (cur.tg || "").replace(/^@/, "");
+    if (!u) { toast("Сначала впишите Telegram"); return; }
+    url = "https://t.me/" + u + "?text=" + encodeURIComponent(text);
+  }
+  window.open(url, "_blank", "noopener");
+  log("Открыт чат (" + (kind === "wa" ? "WhatsApp" : "Telegram") + "), шаблон: " + TPL.find(t => t.id === tpl).name);
+  if (RANK[cur.stage] < RANK.sent) cur.stage = "sent";
+  if (!cur.next) { const d = new Date(); d.setDate(d.getDate() + 2); cur.next = d.toISOString().slice(0,10); }
+  save(); render(); renderHist(); $("#lStage").value = cur.stage; $("#lNext").value = cur.next;
+}
+$("#bWa").onclick = () => openChan("wa");
+$("#bTg").onclick = () => openChan("tg");
+$("#bCopy").onclick = async () => {
+  try { await navigator.clipboard.writeText($("#msgBox").textContent); toast("Текст скопирован"); }
+  catch(e){ toast("Не вышло скопировать — выделите текст вручную"); }
+};
+$("#bSent").onclick = () => {
+  collect(); if (RANK[cur.stage] < RANK.sent) cur.stage = "sent";
+  log("Отмечено отправленным: " + TPL.find(t => t.id === tpl).name);
+  const d = new Date(); d.setDate(d.getDate() + 2); cur.next = d.toISOString().slice(0,10);
+  save(); render(); renderHist(); $("#lStage").value = cur.stage; $("#lNext").value = cur.next; toast("Отмечено. Напомним через 2 дня");
+};
+
+/* ---- импорт ---- */
+$("#bImport").onclick = () => { $("#impHint").textContent = ""; show("#mImport"); };
+$("#bDoImport").onclick = () => {
+  const prio = $("#impPrio").value;
+  const lines = $("#impText").value.split("\n").map(s => s.trim()).filter(Boolean);
+  let added = 0, skipped = 0;
+  const have = new Set(DB.leads.map(l => (l.name || "").toLowerCase()));
+  for (const line of lines) {
+    const p = line.split(/\s*[|;\t]\s*/);
+    let name = p[0], seg = p[1] || "", phone = "", ig = "", dist = "";
+    for (const part of p.slice(1)) {
+      if (/^\+?\d[\d\s()\-]{7,}$/.test(part)) phone = part;
+      else if (/^@/.test(part)) ig = part;
+      else if (part && part !== seg) dist = part;
+    }
+    // если формат не наш — вытащим телефон и @ из свободного текста
+    if (!phone) { const m = line.match(/\+?998[\d\s()\-]{7,}/); if (m) phone = m[0].trim(); }
+    if (!ig) { const m = line.match(/@[A-Za-z0-9_.]{2,}/); if (m) ig = m[0]; }
+    name = name.replace(/\s*\+?998[\d\s()\-]{7,}/, "").replace(/@[A-Za-z0-9_.]{2,}/, "").trim();
+    if (!name || name.length < 2) { skipped++; continue; }
+    if (have.has(name.toLowerCase())) { skipped++; continue; }
+    have.add(name.toLowerCase());
+    DB.leads.push({ id: uid(), name, seg, dist, phone, ig, prio, stage: "new",
+                    check: 1900000, offer: "Сайт с заказами", hist: [], createdAt: today() });
+    added++;
+  }
+  save(); render();
+  $("#impHint").textContent = `Добавлено: ${added}. Пропущено (дубли или мусор): ${skipped}.`;
+  if (added) { $("#impText").value = ""; toast("Добавлено лидов: " + added); }
+};
+$("#bSeed").onclick = async () => {
+  try {
+    const r = await fetch("../leads/leads-seed.json");
+    const d = await r.json();
+    const have = new Set(DB.leads.map(l => (l.name || "").toLowerCase()));
+    let n = 0;
+    for (const s of d.leads) {
+      if (have.has(s.name.toLowerCase())) continue;
+      DB.leads.push({ id: uid(), name: s.name, seg: s.segment, prio: s.priority, stage: "new",
+        check: s.check, offer: s.offer, pain: s.pain, note: "Источник: " + s.source,
+        hist: [], createdAt: today() });
+      n++;
+    }
+    save(); render(); $("#impHint").textContent = "Загружено из посевной базы: " + n + ". Контакты не заполнены — это честно, их надо взять из 2ГИС.";
+    toast("Загружено: " + n);
+  } catch(e) { $("#impHint").textContent = "Не удалось прочитать leads-seed.json. Откройте CRM через веб-сервер или GitHub Pages, а не как локальный файл."; }
+};
+
+/* ---- деньги ---- */
+$("#bMoney").onclick = () => { renderMoney(); show("#mMoney"); };
+$("#bAddExp").onclick = () => {
+  const n = $("#eName").value.trim(), a = +$("#eAmt").value || 0;
+  if (!n || !a) { toast("Впишите название и сумму"); return; }
+  DB.expenses.push({ id: uid(), name: n, amt: a, d: today() });
+  $("#eName").value = ""; $("#eAmt").value = "";
+  save(); renderMoney(); render(); toast("Расход добавлен");
+};
+function renderMoney(){
+  $("#expTable").innerHTML = DB.expenses.length
+    ? "<tr><th>Дата</th><th>На что</th><th class='n'>Сумма</th><th></th></tr>" + DB.expenses.map(e =>
+      `<tr><td>${e.d}</td><td>${escape_(e.name)}</td><td class="n">${fmt(e.amt)}</td>
+       <td class="n"><button class="b d" data-exp="${e.id}" style="padding:3px 9px;font-size:12px">×</button></td></tr>`).join("")
+    : "<tr><td class='hint' style='padding:14px 0'>Расходов пока нет. И это правильно — бизнес не должен есть деньги до первой выручки.</td></tr>";
+  const m = metrics();
+  const tax = m.got * 0.01;
+  $("#repTable").innerHTML = "<tr><th>Показатель</th><th class='n'>Значение</th></tr>" + [
+    ["Получено", fmt(m.got) + " сум"], ["Потрачено", fmt(m.spent) + " сум"],
+    ["Налог самозанятого (1%)", fmt(tax) + " сум"],
+    ["Прибыль после налога", fmt(m.profit - tax) + " сум"],
+    ["Лидов", m.leads], ["Отправлено", m.sent], ["Ответов", m.replied],
+    ["Встреч", m.meetings], ["Клиентов", m.clients],
+    ["Конверсия отправлено → клиент", m.conv.toFixed(1) + "%"],
+    ["В работе (не оплачено)", fmt(m.pipe) + " сум"],
+  ].map(([k,v]) => `<tr><td>${k}</td><td class="n">${v}</td></tr>`).join("");
+}
+$("#expTable").addEventListener("click", e => {
+  const b = e.target.closest("[data-exp]"); if (!b) return;
+  DB.expenses = DB.expenses.filter(x => x.id !== b.dataset.exp); save(); renderMoney(); render();
+});
+
+/* ---- бэкап ---- */
+$("#bBackup").onclick = () => {
+  const blob = new Blob([JSON.stringify(DB, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "qora-crm-" + today() + ".json";
+  a.click(); URL.revokeObjectURL(a.href);
+  toast("Файл сохранён. Данные живут только на этом устройстве — делайте бэкап");
+};
+
+render();
+if (!DB.leads.length) toast("База пуста — нажмите «Импорт из 2ГИС» → «Загрузить посевную базу»");
+</script>
+</body>
+</html>
