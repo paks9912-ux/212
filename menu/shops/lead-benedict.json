@@ -1,0 +1,34 @@
+{
+  "id": "lead-benedict",
+  "name": "BENEDICT",
+  "tagline": "Кафе · доставка по Ташкенту",
+  "emoji": "🍽",
+  "accent": "#ff5a3c",
+  "currency": "сум",
+  "phone": "+998 33 888 88 07",
+  "whatsapp": "998338888807",
+  "instagram": "benedict_cafe_tashkent",
+  "hours": {
+    "from": "10:00",
+    "to": "23:00"
+  },
+  "delivery": {
+    "fee": 15000,
+    "freeFrom": 200000,
+    "minOrder": 0,
+    "time": "40–60 мин",
+    "zone": "Ташкент"
+  },
+  "categories": [
+    {
+      "name": "Меню",
+      "items": [
+        {
+          "id": "i0_0",
+          "name": "Позиция 1 — заменить",
+          "price": 50000
+        }
+      ]
+    }
+  ]
+}

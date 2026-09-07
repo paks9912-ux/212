@@ -1,5 +1,5 @@
 {
-  "id": "sakura",
+  "id": "sakura-demo",
   "name": "SAKURA",
   "tagline": "Суши и роллы · доставка по Ташкенту",
   "emoji": "🍣",
@@ -147,5 +147,6 @@
         }
       ]
     }
-  ]
+  ],
+  "demo": true
 }

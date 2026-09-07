@@ -46,7 +46,9 @@ function build(shopFile) {
 
 const args = process.argv.slice(2);
 const files = args.length ? args
-  : fs.readdirSync(path.join(ROOT, 'shops')).filter(f => f.endsWith('.json')).map(f => path.join(ROOT, 'shops', f));
+  : fs.readdirSync(path.join(ROOT, 'shops'))
+      .filter(f => f.endsWith('.json') && !f.startsWith('lead-'))   // lead-* — заготовки под демо, собираются по требованию
+      .map(f => path.join(ROOT, 'shops', f));
 let ok = 0;
 for (const f of files) {
   try { const r = build(f); console.log('OK  ' + path.relative(ROOT, r.out) + '  (' + r.n + ' позиций, ' + r.kb + ' KB)'); ok++; }

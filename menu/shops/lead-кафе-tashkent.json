@@ -1,0 +1,34 @@
+{
+  "id": "lead-кафе-tashkent",
+  "name": "Кафе TASHKENT",
+  "tagline": "Кафе · доставка по Ташкенту",
+  "emoji": "🍽",
+  "accent": "#ff5a3c",
+  "currency": "сум",
+  "phone": "+998 95 837 55 00",
+  "whatsapp": "998958375500",
+  "instagram": "cafe.tashkent",
+  "hours": {
+    "from": "10:00",
+    "to": "23:00"
+  },
+  "delivery": {
+    "fee": 15000,
+    "freeFrom": 200000,
+    "minOrder": 0,
+    "time": "40–60 мин",
+    "zone": "Ташкент"
+  },
+  "categories": [
+    {
+      "name": "Меню",
+      "items": [
+        {
+          "id": "i0_0",
+          "name": "Позиция 1 — заменить",
+          "price": 50000
+        }
+      ]
+    }
+  ]
+}

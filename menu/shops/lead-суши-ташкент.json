@@ -1,0 +1,34 @@
+{
+  "id": "lead-суши-ташкент",
+  "name": "СУШИ ТАШКЕНТ",
+  "tagline": "Суши · доставка по Ташкенту",
+  "emoji": "🍣",
+  "accent": "#ff5a3c",
+  "currency": "сум",
+  "phone": "+998 77 380-80-80",
+  "whatsapp": "998773808080",
+  "instagram": "sushimotouz",
+  "hours": {
+    "from": "10:00",
+    "to": "23:00"
+  },
+  "delivery": {
+    "fee": 15000,
+    "freeFrom": 200000,
+    "minOrder": 0,
+    "time": "40–60 мин",
+    "zone": "Ташкент"
+  },
+  "categories": [
+    {
+      "name": "Меню",
+      "items": [
+        {
+          "id": "i0_0",
+          "name": "Позиция 1 — заменить",
+          "price": 50000
+        }
+      ]
+    }
+  ]
+}

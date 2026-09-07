@@ -1,0 +1,34 @@
+{
+  "id": "lead-acafe",
+  "name": "ACAFE",
+  "tagline": "Ресторан · доставка по Ташкенту",
+  "emoji": "🍽",
+  "accent": "#ff5a3c",
+  "currency": "сум",
+  "phone": "+998 99 111 0990",
+  "whatsapp": "998991110990",
+  "instagram": "acafe_uzbekistan",
+  "hours": {
+    "from": "10:00",
+    "to": "23:00"
+  },
+  "delivery": {
+    "fee": 15000,
+    "freeFrom": 200000,
+    "minOrder": 0,
+    "time": "40–60 мин",
+    "zone": "Ташкент"
+  },
+  "categories": [
+    {
+      "name": "Меню",
+      "items": [
+        {
+          "id": "i0_0",
+          "name": "Позиция 1 — заменить",
+          "price": 50000
+        }
+      ]
+    }
+  ]
+}

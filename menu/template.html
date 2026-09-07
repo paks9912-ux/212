@@ -468,6 +468,20 @@ function copy(t) {
 function send(how) {
   if (!validate()) return;
   var t = orderText();
+  if (S.demo) {
+    /* Демонстрация: показываем сам заказ вместо перехода в мессенджер —
+       так видно, что именно получит заведение. */
+    openSheet('done', 'Вот что придёт вам в WhatsApp');
+    $('sheetBody').innerHTML = '<div class="hint" style="margin-top:0">Это демонстрация. В рабочей версии ' +
+      'этот текст уходит прямо в WhatsApp или Telegram заведения — одним сообщением, ничего не набирая руками.</div>' +
+      '<pre style="white-space:pre-wrap;word-break:break-word;background:var(--card);border:1px solid var(--line);' +
+      'border-radius:12px;padding:14px;font:12.5px/1.55 ui-monospace,Menlo,Consolas,monospace;margin:0">' +
+      esc(t) + '</pre>';
+    $('sheetFoot').innerHTML = '<button class="btn" id="demoCopy">Скопировать заказ</button>';
+    $('demoCopy').onclick = function () { copy(t); toast('Скопировано'); };
+    CART = {}; saveCart(); renderMenu(); renderBar();
+    return;
+  }
   if (how === 'wa') {
     var ph = String(S.whatsapp).replace(/\D/g, '');
     window.open('https://wa.me/' + ph + '?text=' + encodeURIComponent(t), '_blank');
