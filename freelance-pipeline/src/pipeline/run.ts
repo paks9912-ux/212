@@ -6,6 +6,7 @@ import { prefilter } from './prefilter.js';
 import { rank } from './rank.js';
 import { scoreWithLlm, describeError } from '../llm.js';
 import { itemFromInput } from '../sources/manual.js';
+import { loadCalibration } from '../calibrate/index.js';
 import type { Opportunity, Scored } from '../types.js';
 import { log } from '../log.js';
 
@@ -58,6 +59,7 @@ export async function scorePending(ctx: SourceContext, limit = 40): Promise<{ sc
 }
 
 export async function scoreOne(ctx: SourceContext, opp: Opportunity): Promise<Scored> {
+  ctx.config.calibration = loadCalibration(ctx.db);
   const { score, costUsd, model } = await scoreWithLlm(opp, ctx.config);
   const ranked = rank(opp, score, ctx.config, { model, costUsd });
   ctx.db.saveScore(ranked);

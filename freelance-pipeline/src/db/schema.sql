@@ -97,6 +97,18 @@ CREATE TABLE IF NOT EXISTS projects (
   updated_at     TEXT NOT NULL
 );
 
+-- Задачи проекта из разбора ТЗ
+CREATE TABLE IF NOT EXISTS tasks (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  title      TEXT NOT NULL,
+  est_hours  REAL,
+  ai_share   REAL,
+  done       INTEGER NOT NULL DEFAULT 0,
+  sort       INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS time_entries (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,

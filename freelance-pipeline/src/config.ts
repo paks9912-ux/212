@@ -85,7 +85,8 @@ export interface Config {
   filters: Filters;
   sources: Sources;
   cases: CaseFile[];
-  prompts: { score: string; proposal: string; reply: string };
+  prompts: { score: string; proposal: string; reply: string; plan: string; deliver: string };
+  calibration?: import('./calibrate/index.js').Calibration | null;
   models: { score: string; proposal: string; reply: string };
   env: {
     anthropicKey: string | undefined;
@@ -136,7 +137,7 @@ export function loadConfig(force = false): Config {
     filters: readYaml(FiltersSchema, 'filters.yml'),
     sources: readYaml(SourcesSchema, 'sources.yml'),
     cases: loadCases(),
-    prompts: { score: prompts('score'), proposal: prompts('proposal'), reply: prompts('reply') },
+    prompts: { score: prompts('score'), proposal: prompts('proposal'), reply: prompts('reply'), plan: prompts('plan'), deliver: prompts('deliver') },
     models: {
       /* Поток скоринга — дешёвая модель; тексты для клиента — сильная.
          Оба меняются через переменные окружения без правки кода. */

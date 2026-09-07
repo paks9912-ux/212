@@ -144,6 +144,16 @@ export class DB {
     const set = keys.map(k => `${k} = ?`).join(', ');
     this.db.prepare(`UPDATE projects SET ${set}, updated_at = ? WHERE id = ?`).run(...keys.map(k => patch[k] as never), now(), id);
   }
+  replaceTasks(projectId: number, list: Array<{ title: string; estHours?: number | null; aiShare?: number | null }>) {
+    this.db.prepare('DELETE FROM tasks WHERE project_id = ? AND done = 0').run(projectId);
+    const ins = this.db.prepare('INSERT INTO tasks (project_id, title, est_hours, ai_share, sort, created_at) VALUES (?,?,?,?,?,?)');
+    list.forEach((t, i) => ins.run(projectId, t.title, t.estHours ?? null, t.aiShare ?? null, i, now()));
+  }
+  tasks(projectId: number): Array<{ id: number; title: string; estHours: number | null; aiShare: number | null; done: boolean }> {
+    return (this.db.prepare('SELECT * FROM tasks WHERE project_id = ? ORDER BY done, sort, id').all(projectId) as Row[])
+      .map(r => ({ id: Number(r.id), title: String(r.title), estHours: r.est_hours as number | null, aiShare: r.ai_share as number | null, done: !!r.done }));
+  }
+  setTaskDone(id: number, done: boolean) { this.db.prepare('UPDATE tasks SET done = ? WHERE id = ?').run(done ? 1 : 0, id); }
   addTime(projectId: number, minutes: number, note?: string) {
     this.db.prepare('INSERT INTO time_entries (project_id, minutes, note, at) VALUES (?,?,?,?)').run(projectId, minutes, note ?? null, now());
   }

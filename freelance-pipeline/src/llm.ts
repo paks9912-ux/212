@@ -40,6 +40,19 @@ export const ReplySchema = z.object({
   intent: z.string(), needs_answer: z.array(z.string()), risk: z.enum(['low', 'medium', 'high']), risk_note: z.string(), reply: z.string(),
 });
 export type ReplyAnalysis = z.infer<typeof ReplySchema>;
+export const PlanSchema = z.object({
+  summary: z.string(),
+  missing_info: z.array(z.string()),
+  questions_for_client: z.array(z.string()),
+  approach: z.string(),
+  steps: z.array(z.object({ title: z.string(), est_hours: z.number().min(0), ai_share: z.number().min(0).max(1), notes: z.string() })),
+  risks: z.array(z.string()),
+  deliverables: z.array(z.string()),
+  definition_of_done: z.array(z.string()),
+});
+export type Plan = z.infer<typeof PlanSchema>;
+export const DeliverySchema = z.object({ message: z.string(), checklist: z.array(z.string()), upsell: z.string() });
+export type Delivery = z.infer<typeof DeliverySchema>;
 
 let client: Anthropic | null = null;
 function api(cfg: Config): Anthropic {
@@ -145,6 +158,39 @@ export async function analyzeReply(projectContext: string, clientMessage: string
   if (r.stop_reason === 'refusal') throw new Error('модель отказалась разбирать сообщение');
   const text = r.content.filter(b => b.type === 'text').map(b => (b as { text: string }).text).join('');
   return { analysis: ReplySchema.parse(JSON.parse(text)), costUsd: costOf(model, r.usage) };
+}
+
+/* Разбор ТЗ → план работ. Сильная модель, думает подольше: от плана зависит оценка часов */
+export async function planProject(projectContext: string, cfg: Config): Promise<{ plan: Plan; costUsd: number }> {
+  const model = cfg.models.proposal;
+  const r = await api(cfg).beta.messages.create({
+    model, max_tokens: 6000,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    thinking: { type: 'adaptive' },
+    output_config: { effort: 'high', format: zodOutputFormat(PlanSchema) },
+    system: [{ type: 'text', text: cfg.prompts.plan + '\n\n' + profileBlock(cfg), cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: projectContext }],
+  });
+  if (r.stop_reason === 'refusal') throw new Error('модель отказалась разбирать это ТЗ');
+  const text = r.content.filter(b => b.type === 'text').map(b => (b as { text: string }).text).join('');
+  return { plan: PlanSchema.parse(JSON.parse(text)), costUsd: costOf(model, r.usage) };
+}
+
+export async function deliveryMessage(projectContext: string, cfg: Config): Promise<{ delivery: Delivery; costUsd: number }> {
+  const model = cfg.models.proposal;
+  const r = await api(cfg).beta.messages.create({
+    model, max_tokens: 3000,
+    betas: ['server-side-fallback-2026-07-01'],
+    fallbacks: 'default',
+    thinking: { type: 'adaptive' },
+    output_config: { effort: 'medium', format: zodOutputFormat(DeliverySchema) },
+    system: [{ type: 'text', text: cfg.prompts.deliver + '\n\n' + profileBlock(cfg), cache_control: { type: 'ephemeral' } }],
+    messages: [{ role: 'user', content: projectContext }],
+  });
+  if (r.stop_reason === 'refusal') throw new Error('модель отказалась писать сообщение о сдаче');
+  const text = r.content.filter(b => b.type === 'text').map(b => (b as { text: string }).text).join('');
+  return { delivery: DeliverySchema.parse(JSON.parse(text)), costUsd: costOf(model, r.usage) };
 }
 
 /* Ошибки API — понятным языком, без ключей */

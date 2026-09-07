@@ -4,3 +4,4 @@ data/*.db-journal
 data/backups/
 .env
 *.log
+qa-reports/

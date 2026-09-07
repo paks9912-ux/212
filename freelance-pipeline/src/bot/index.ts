@@ -7,6 +7,7 @@ import { ingestManual } from '../pipeline/run.js';
 import { writeProposals, analyzeReply, describeError } from '../llm.js';
 import { textReport } from '../ledger/report.js';
 import { calibrationReport } from '../calibrate/index.js';
+import { makePlan, makeDelivery, renderPlan } from '../sales/project.js';
 import { log } from '../log.js';
 
 const L = log('bot');
@@ -68,7 +69,8 @@ export function createBot(ctx: SourceContext) {
     '/won <id> · /lost <id> — исход отклика', '/projects — активные проекты',
     '/time <проект> <минуты> — учесть время', '/paid <проект> <сумма> [валюта] [комиссия]',
     '/status <проект> <STATUS> — сменить статус', '/reply <проект> <текст клиента> — разобрать сообщение',
-    '/calib — что говорят исходы',
+    '/plan <проект> — разобрать ТЗ в план и задачи', '/tasks <проект> · /done <задача> — список и отметка',
+    '/deliver <проект> — сообщение о сдаче и чек-лист', '/calib — что говорят исходы',
   ].join('\n')));
 
   bot.command('add', async c => {
@@ -90,7 +92,42 @@ export function createBot(ctx: SourceContext) {
     for (const { opp, score } of q) await send(card(opp, score), decisionKb(opp.id));
   });
   bot.command('today', c => c.reply('<pre>' + esc(textReport(ctx.db, ctx.config)) + '</pre>', { parse_mode: 'HTML' }));
-  bot.command('calib', c => c.reply('<pre>' + esc(calibrationReport(ctx.db)) + '</pre>', { parse_mode: 'HTML' }));
+  bot.command('calib', c => c.reply('<pre>' + esc(calibrationReport(ctx.db, ctx.config)) + '</pre>', { parse_mode: 'HTML' }));
+  bot.command('plan', async c => {
+    const pid = Number((c.match || '').trim());
+    if (!pid || !ctx.db.project(pid)) return c.reply('/plan <номер проекта>');
+    const wait = await c.reply('Разбираю ТЗ, это минута-две…');
+    try {
+      const plan = await makePlan(ctx, pid);
+      await c.api.deleteMessage(c.chat.id, wait.message_id).catch(() => {});
+      await c.reply('<pre>' + esc(renderPlan(plan)) + '</pre>', { parse_mode: 'HTML' });
+      if (plan.questions_for_client.length) await c.reply('Вопросы клиенту — скопируйте и отправьте:\n\n' + plan.questions_for_client.map((q, i) => `${i + 1}. ${q}`).join('\n'));
+    } catch (e) { await c.reply('Не вышло: ' + describeError(e)); }
+  });
+  bot.command('tasks', c => {
+    const pid = Number((c.match || '').trim());
+    const list = pid ? ctx.db.tasks(pid) : [];
+    if (!list.length) return c.reply('Задач нет. Сначала /plan <проект>');
+    return c.reply(list.map(t => `${t.done ? '✅' : '▫️'} ${t.id}. ${esc(t.title)}${t.estHours != null ? ` · ${t.estHours} ч` : ''}`).join('\n') + '\n\nОтметить: /done <номер задачи>', { parse_mode: 'HTML' });
+  });
+  bot.command('done', c => {
+    const id = Number((c.match || '').trim());
+    if (!id) return c.reply('/done <номер задачи>');
+    ctx.db.setTaskDone(id, true);
+    return c.reply('Отмечено');
+  });
+  bot.command('deliver', async c => {
+    const pid = Number((c.match || '').trim());
+    if (!pid || !ctx.db.project(pid)) return c.reply('/deliver <номер проекта>');
+    const wait = await c.reply('Пишу сообщение о сдаче…');
+    try {
+      const d = await makeDelivery(ctx, pid);
+      await c.api.deleteMessage(c.chat.id, wait.message_id).catch(() => {});
+      await c.reply('<b>Проверить перед отправкой:</b>\n' + d.checklist.map(x => '• ' + esc(x)).join('\n') + (d.upsell ? `\n\n<b>Следующая работа:</b> ${esc(d.upsell)}` : ''), { parse_mode: 'HTML' });
+      await c.reply(d.message);
+      await c.reply('Отправляете вы. После приёмки: /status ' + pid + ' DELIVERED, после оплаты: /paid ' + pid + ' <сумма>');
+    } catch (e) { await c.reply('Не вышло: ' + describeError(e)); }
+  });
   bot.command('pause', c => { ctx.db.setSetting('paused', '1'); return c.reply('Алерты остановлены. /resume — включить.'); });
   bot.command('resume', c => { ctx.db.setSetting('paused', '0'); return c.reply('Алерты включены.'); });
 

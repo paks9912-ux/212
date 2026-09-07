@@ -7,6 +7,11 @@ const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 export function effectiveWeights(cfg: Config) {
   const w = { ...cfg.weights };
   if (cfg.profile.mode === 'reviews') Object.assign(w, cfg.weights.reviews_mode_overrides);
+  const sc = cfg.calibration?.weightScale;
+  if (sc) {
+    for (const k of ['fit', 'money', 'ai_leverage', 'client', 'speed', 'competition', 'repeat'] as const) w[k] *= sc[k] ?? 1;
+    w.risk_penalty *= sc.risk ?? 1;
+  }
   return w;
 }
 
@@ -21,7 +26,7 @@ export function scoreFrom(factors: ScoreFactors, cfg: Config): number {
 /* Вероятность победы: априорная по источнику × конкуренция × попадание × свежесть.
    Первые 50 откликов это оценка «на глаз», дальше её заменяет калибровка по исходам. */
 export function pWin(o: Opportunity, s: LlmScore, cfg: Config, nowMs = Date.now()): number {
-  const prior = cfg.weights.p_win_prior[o.source] ?? 0.2;
+  const prior = cfg.calibration?.pWinPrior[o.source] ?? cfg.weights.p_win_prior[o.source] ?? 0.2;
   const n = o.proposals ?? Math.round((1 - s.factors.competition) * 20);
   const comp = 1 / (1 + n / 8);
   const fit = 0.5 + 0.5 * s.factors.fit;

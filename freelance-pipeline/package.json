@@ -16,12 +16,18 @@
     "report": "node --experimental-sqlite --import tsx src/index.ts report",
     "tg:login": "node --import tsx src/sources/telegram-login.ts",
     "test": "node --experimental-sqlite --import tsx --test tests/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "doctor": "node --experimental-sqlite --import tsx src/index.ts doctor",
+    "qa": "node --import tsx src/qa/index.ts",
+    "plan": "node --experimental-sqlite --import tsx src/index.ts plan",
+    "deliver": "node --experimental-sqlite --import tsx src/index.ts deliver",
+    "calibrate": "node --experimental-sqlite --import tsx src/index.ts calibrate"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",
     "fast-xml-parser": "^4.5.0",
     "grammy": "^1.30.0",
+    "playwright": "^1.63.0",
     "teleproto": "^1.229.0",
     "yaml": "^2.5.0",
     "zod": "^4.5.4"
