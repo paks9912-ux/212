@@ -167,279 +167,355 @@ a{
 
 .hero{
     position:relative;
-    height:600vh;
-}
-
-.scene{
-    position:sticky;
-    top:0;
-    width:100%;
-    height:100vh;
+    min-height:100vh;
+    min-height:100svh;
     overflow:hidden;
     background:var(--bg);
-    perspective:1600px;
 }
 
-.geometry{
+.hero-stage{
+    position:relative;
+    height:100vh;
+    height:100svh;
+    min-height:640px;
+    overflow:hidden;
+    opacity:0;
+    animation:heroStageIn 1.4s ease forwards;
+}
+
+.hero-light{
     position:absolute;
-    inset:0;
     pointer-events:none;
-    z-index:5;
-    transform-style:preserve-3d;
-}
-
-.orbit{
-    position:absolute;
-    width:min(76vw,1050px);
-    height:min(76vw,1050px);
-    left:50%;
-    top:50%;
-    transform:
-        translate(-50%,-50%)
-        scale(.55)
-        rotate(-18deg);
-    border:1px solid var(--line);
     border-radius:50%;
-    opacity:0;
-    transition:
-        opacity 1.2s ease,
-        transform 1.8s cubic-bezier(.16,1,.3,1);
+    z-index:1;
 }
 
-.orbit-inner{
-    position:absolute;
-    width:54%;
-    height:54%;
-    left:50%;
-    top:50%;
-    transform:
-        translate(-50%,-50%)
-        scale(.3)
-        rotate(25deg);
-    border:1px solid rgba(242,239,232,.055);
-    border-radius:50%;
-    opacity:0;
-    transition:
-        opacity 1s ease .2s,
-        transform 1.5s cubic-bezier(.16,1,.3,1);
+.hero-light-key{
+    width:70vw;
+    height:70vw;
+    left:12vw;
+    top:-28vw;
+    background:radial-gradient(
+        circle,
+        rgba(242,239,232,.05) 0%,
+        rgba(242,239,232,.018) 30%,
+        transparent 66%
+    );
 }
 
-.cross-horizontal{
+.hero-light-red{
+    width:64vw;
+    height:64vw;
+    right:-22vw;
+    top:12vh;
+    background:radial-gradient(
+        circle,
+        rgba(217,74,67,.13) 0%,
+        rgba(217,74,67,.05) 32%,
+        transparent 64%
+    );
+    filter:blur(10px);
+}
+
+.hero-rule{
     position:absolute;
-    left:0;
-    top:50%;
-    width:100%;
+    left:5vw;
+    right:5vw;
+    top:90px;
     height:1px;
-    background:rgba(242,239,232,.055);
+    background:var(--line);
     transform:scaleX(0);
-    opacity:0;
+    transform-origin:left;
+    animation:heroRuleIn 1.6s cubic-bezier(.16,1,.3,1) .6s forwards;
+    z-index:2;
 }
 
-.cross-vertical{
+.hero-word{
     position:absolute;
-    left:50%;
-    top:0;
-    width:1px;
-    height:100%;
-    background:rgba(242,239,232,.055);
-    transform:scaleY(0);
-    opacity:0;
-}
-
-.geo-square{
-    position:absolute;
-    left:50%;
-    top:50%;
-    width:110px;
-    height:110px;
-    transform:
-        translate(-50%,-50%)
-        rotate(15deg)
-        scale(.2);
-    border:1px solid rgba(242,239,232,.14);
-    opacity:0;
-}
-
-.center-point{
-    position:absolute;
-    left:50%;
-    top:50%;
-    width:5px;
-    height:5px;
-    transform:
-        translate(-50%,-50%)
-        scale(0);
-    border-radius:50%;
-    background:rgba(242,239,232,.8);
-    opacity:0;
-}
-
-.scene.opening-complete .orbit{
-    opacity:.85;
-    transform:
-        translate(-50%,-50%)
-        scale(1)
-        rotate(0deg);
-}
-
-.scene.opening-complete .orbit-inner{
-    opacity:.55;
-    transform:
-        translate(-50%,-50%)
-        scale(1)
-        rotate(0deg);
-}
-
-.scene.opening-complete .cross-horizontal{
-    opacity:.55;
-    transform:scaleX(1);
-}
-
-.scene.opening-complete .cross-vertical{
-    opacity:.55;
-    transform:scaleY(1);
-}
-
-.scene.opening-complete .geo-square{
-    opacity:.65;
-    transform:
-        translate(-50%,-50%)
-        rotate(45deg)
-        scale(1);
-}
-
-.scene.opening-complete .center-point{
-    opacity:.8;
-    transform:
-        translate(-50%,-50%)
-        scale(1);
-}
-
-
-/* =====================================================
-   HERO TYPOGRAPHY
-===================================================== */
-
-.type-stage{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:20;
-    transform-style:preserve-3d;
-    pointer-events:none;
-}
-
-.word,
-.kyoto{
-    position:absolute;
-    left:50%;
-    top:50%;
+    left:4vw;
+    top:44%;
     display:flex;
     white-space:nowrap;
-    font-size:clamp(95px,17vw,280px);
+    font-size:clamp(120px,min(24vw,34vh),380px);
     line-height:.78;
     font-weight:300;
     letter-spacing:-.085em;
-    transform-style:preserve-3d;
-}
-
-.word{
-    will-change:transform,opacity,filter;
-}
-
-.taste{
-    opacity:0;
-    transform:
-        translate(-50%,-68%)
-        translate3d(0,40px,-180px)
-        scale(.94);
-    filter:blur(14px);
-}
-
-.silence{
-    opacity:0;
-    transform:
-        translate(-50%,5%)
-        translate3d(0,25px,-120px)
-        scale(.98);
-    filter:blur(10px);
-    color:transparent;
-    -webkit-text-stroke:
-        1px rgba(242,239,232,.7);
-}
-
-.silence span{
-    display:inline-block;
-}
-
-.kyoto{
     color:var(--white);
-    transform:translate(-50%,-50%);
-    opacity:0;
-    filter:blur(28px);
+    transform:translateY(-50%);
+    z-index:2;
+    pointer-events:none;
+    will-change:transform;
 }
 
-.kyoto span{
+.hero-word span{
     display:inline-block;
-    transform-style:preserve-3d;
+    opacity:0;
+    filter:blur(18px);
+    transform:translateY(.08em);
+    animation:heroLetterIn 1.5s cubic-bezier(.16,1,.3,1) forwards;
 }
 
-.kyoto-subtitle{
+.hero-word span:nth-child(1){ animation-delay:.25s; }
+.hero-word span:nth-child(2){ animation-delay:.32s; }
+.hero-word span:nth-child(3){ animation-delay:.39s; }
+.hero-word span:nth-child(4){ animation-delay:.46s; }
+.hero-word span:nth-child(5){ animation-delay:.53s; }
+
+.hero-product{
     position:absolute;
-    left:50%;
-    top:66%;
-    transform:
-        translateX(-50%)
-        translateY(20px);
+    margin:0;
+    right:-6vw;
+    bottom:-7vh;
+    height:min(108vh,1180px);
+    aspect-ratio:716/1080;
+    z-index:3;
+    pointer-events:none;
     opacity:0;
+    transform:scale(.94) translateY(24px);
+    animation:heroProductIn 2s cubic-bezier(.16,1,.3,1) .45s forwards;
+    -webkit-mask-image:radial-gradient(
+        ellipse 58% 52% at 53% 55%,
+        #000 42%,
+        rgba(0,0,0,.55) 66%,
+        transparent 100%
+    );
+    mask-image:radial-gradient(
+        ellipse 58% 52% at 53% 55%,
+        #000 42%,
+        rgba(0,0,0,.55) 66%,
+        transparent 100%
+    );
+}
+
+.hero-product-inner{
+    width:100%;
+    height:100%;
+    will-change:transform;
+}
+
+.hero-product img{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    animation:heroProductFloat 11s ease-in-out infinite alternate;
+}
+
+.hero-copy{
+    position:absolute;
+    left:5vw;
+    bottom:9vh;
+    max-width:420px;
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+    z-index:4;
+}
+
+.hero-copy > *{
+    opacity:0;
+    transform:translateY(14px);
+    animation:heroFadeUp 1.2s cubic-bezier(.16,1,.3,1) forwards;
+}
+
+.hero-copy > *:nth-child(1){ animation-delay:.9s; }
+.hero-copy > *:nth-child(2){ animation-delay:1s; }
+.hero-copy > *:nth-child(3){ animation-delay:1.1s; }
+.hero-copy > *:nth-child(4){ animation-delay:1.2s; }
+
+.hero-eyebrow{
+    display:flex;
+    align-items:center;
+    gap:10px;
     font-size:8px;
-    letter-spacing:.35em;
+    letter-spacing:.3em;
     text-transform:uppercase;
     color:var(--muted);
-    white-space:nowrap;
-    z-index:30;
+}
+
+.hero-eyebrow-dot{
+    width:5px;
+    height:5px;
+    border-radius:50%;
+    background:var(--red);
+    box-shadow:0 0 14px rgba(217,74,67,.45);
+}
+
+.hero-title{
+    margin:0;
+    font-size:clamp(34px,3.4vw,50px);
+    line-height:.98;
+    font-weight:300;
+    letter-spacing:-.045em;
+    color:var(--white);
+}
+
+.hero-text{
+    margin:0;
+    max-width:330px;
+    font-size:11px;
+    line-height:1.9;
+    color:var(--muted);
+}
+
+.hero-actions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-top:6px;
+}
+
+.hero-btn{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    height:46px;
+    padding:0 30px;
+    font-size:9px;
+    letter-spacing:.28em;
+    text-transform:uppercase;
+    color:var(--white);
+    border:1px solid rgba(242,239,232,.55);
+    overflow:hidden;
+    cursor:pointer;
     transition:
-        opacity 1.2s ease,
-        transform 1.2s cubic-bezier(.16,1,.3,1);
+        color .5s ease,
+        border-color .5s ease;
 }
 
-.kyoto-subtitle.visible{
-    opacity:1;
-    transform:
-        translateX(-50%)
-        translateY(0);
+.hero-btn span{
+    position:relative;
+    z-index:1;
 }
 
-.hero-cta{
+.hero-btn-primary::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:var(--white);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .6s cubic-bezier(.16,1,.3,1);
+}
+
+.hero-btn-primary:hover{
+    color:#050505;
+    border-color:var(--white);
+}
+
+.hero-btn-primary:hover::before{
+    transform:scaleX(1);
+}
+
+.hero-btn-secondary{
+    border-color:transparent;
+    padding:0 14px;
+    color:var(--muted);
+}
+
+.hero-btn-secondary::after{
+    content:"";
+    position:absolute;
+    left:14px;
+    right:14px;
+    bottom:14px;
+    height:1px;
+    background:var(--red);
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:transform .5s cubic-bezier(.16,1,.3,1);
+}
+
+.hero-btn-secondary:hover{
+    color:var(--white);
+}
+
+.hero-btn-secondary:hover::after{
+    transform:scaleX(1);
+}
+
+.hero-meta{
+    position:absolute;
+    right:5vw;
+    bottom:9vh;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:12px;
+    text-align:right;
+    z-index:4;
+    opacity:0;
+    animation:heroFadeUp 1.2s cubic-bezier(.16,1,.3,1) 1.35s forwards;
+}
+
+.hero-meta-item{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    font-size:9px;
+    letter-spacing:.16em;
+    color:rgba(242,239,232,.7);
+}
+
+.hero-meta-label{
+    font-size:8px;
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    color:var(--muted);
+}
+
+.hero-meta a{
+    transition:color .4s ease;
+}
+
+.hero-meta a:hover{
+    color:var(--white);
+}
+
+.hero-jp{
+    position:absolute;
+    right:5vw;
+    top:112px;
+    font-size:8px;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    color:var(--muted);
+    z-index:4;
+    opacity:0;
+    animation:heroFadeUp 1.2s cubic-bezier(.16,1,.3,1) 1.25s forwards;
+}
+
+.hero-scroll{
     position:absolute;
     left:50%;
-    bottom:7vh;
-    transform:
-        translateX(-50%)
-        translateY(20px);
-    opacity:0;
-    z-index:50;
+    bottom:9vh;
+    transform:translateX(-50%);
     display:flex;
+    flex-direction:column;
     align-items:center;
     gap:12px;
     font-size:8px;
-    letter-spacing:.25em;
+    letter-spacing:.3em;
     text-transform:uppercase;
-    color:var(--white);
-    white-space:nowrap;
-    cursor:pointer;
-    transition:
-        opacity 1.2s ease,
-        transform 1.2s cubic-bezier(.16,1,.3,1);
+    color:var(--muted);
+    z-index:4;
+    opacity:0;
+    animation:heroFadeUp 1.2s cubic-bezier(.16,1,.3,1) 1.5s forwards;
+    transition:color .4s ease;
 }
 
-.hero-cta.visible{
-    opacity:.75;
-    transform:
-        translateX(-50%)
-        translateY(0);
+.hero-scroll:hover{
+    color:var(--white);
+}
+
+.hero-scroll i{
+    display:block;
+    width:1px;
+    height:34px;
+    background:rgba(242,239,232,.35);
+    transform-origin:top;
+    animation:heroScrollLine 2.6s cubic-bezier(.16,1,.3,1) infinite;
 }
 
 .grain{
@@ -451,6 +527,244 @@ a{
     background-image:url(
         "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"
     );
+}
+
+@keyframes heroStageIn{
+    to{ opacity:1; }
+}
+
+@keyframes heroRuleIn{
+    to{ transform:scaleX(1); }
+}
+
+@keyframes heroLetterIn{
+    to{
+        opacity:1;
+        filter:blur(0);
+        transform:translateY(0);
+    }
+}
+
+@keyframes heroProductIn{
+    to{
+        opacity:1;
+        transform:scale(1) translateY(0);
+    }
+}
+
+@keyframes heroProductFloat{
+    from{ transform:translateY(0); }
+    to{ transform:translateY(-8px); }
+}
+
+@keyframes heroFadeUp{
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+@keyframes heroScrollLine{
+    0%{ transform:scaleY(0); transform-origin:top; }
+    45%{ transform:scaleY(1); transform-origin:top; }
+    55%{ transform:scaleY(1); transform-origin:bottom; }
+    100%{ transform:scaleY(0); transform-origin:bottom; }
+}
+
+@media(max-height:760px){
+
+    .hero-word{
+        font-size:clamp(110px,min(24vw,32vh),380px);
+    }
+
+    .hero-copy{
+        bottom:7vh;
+        gap:16px;
+    }
+
+    .hero-title{
+        font-size:clamp(30px,3vw,38px);
+    }
+
+    .hero-meta,
+    .hero-scroll{
+        bottom:7vh;
+    }
+
+}
+
+@media(max-width:1100px){
+
+    .hero-word{
+        font-size:clamp(110px,min(24vw,34vh),300px);
+    }
+
+    .hero-product{
+        right:-10vw;
+        bottom:-5vh;
+        height:min(88vh,980px);
+    }
+
+    .hero-copy{
+        max-width:360px;
+    }
+
+}
+
+@media(max-width:1100px) and (orientation:portrait){
+
+    .hero-word{
+        top:18vh;
+        transform:none;
+        font-size:clamp(100px,23vw,240px);
+    }
+
+    .hero-product{
+        right:-8vw;
+        bottom:auto;
+        top:26vh;
+        height:56vh;
+    }
+
+    .hero-copy{
+        bottom:8vh;
+        max-width:420px;
+    }
+
+    .hero-meta{
+        bottom:8vh;
+    }
+
+    .hero-scroll{
+        display:none;
+    }
+
+}
+
+@media(max-width:700px){
+
+    .hero-stage{
+        min-height:620px;
+    }
+
+    .hero-rule{
+        top:70px;
+        left:6vw;
+        right:6vw;
+    }
+
+    .hero-light-key{
+        width:120vw;
+        height:120vw;
+        left:-30vw;
+        top:-50vw;
+    }
+
+    .hero-light-red{
+        width:120vw;
+        height:120vw;
+        right:-50vw;
+        top:8vh;
+    }
+
+    .hero-word{
+        left:5vw;
+        top:96px;
+        transform:none;
+        font-size:clamp(80px,25vw,140px);
+    }
+
+    .hero-product{
+        right:-8vw;
+        bottom:auto;
+        top:15vh;
+        height:52vh;
+        -webkit-mask-image:radial-gradient(
+            ellipse 60% 54% at 53% 55%,
+            #000 40%,
+            rgba(0,0,0,.5) 66%,
+            transparent 100%
+        );
+        mask-image:radial-gradient(
+            ellipse 60% 54% at 53% 55%,
+            #000 40%,
+            rgba(0,0,0,.5) 66%,
+            transparent 100%
+        );
+    }
+
+    .hero-copy{
+        left:6vw;
+        right:6vw;
+        bottom:8vh;
+        max-width:none;
+        gap:16px;
+    }
+
+    .hero-title{
+        font-size:clamp(30px,9vw,38px);
+    }
+
+    .hero-text{
+        max-width:300px;
+        font-size:10px;
+    }
+
+    .hero-actions{
+        gap:8px;
+    }
+
+    .hero-btn{
+        flex:1;
+        padding:0 18px;
+    }
+
+    .hero-btn-secondary{
+        flex:0 0 auto;
+    }
+
+    .hero-meta{
+        left:6vw;
+        right:6vw;
+        bottom:2.4vh;
+        flex-direction:row;
+        justify-content:space-between;
+        align-items:flex-end;
+        text-align:left;
+    }
+
+    .hero-meta-item:last-child{
+        text-align:right;
+    }
+
+    .hero-jp,
+    .hero-scroll{
+        display:none;
+    }
+
+}
+
+@media(prefers-reduced-motion:reduce){
+
+    .hero-stage,
+    .hero-rule,
+    .hero-word span,
+    .hero-product,
+    .hero-copy > *,
+    .hero-meta,
+    .hero-jp,
+    .hero-scroll{
+        animation:none;
+        opacity:1;
+        transform:none;
+        filter:none;
+    }
+
+    .hero-product img,
+    .hero-scroll i{
+        animation:none;
+    }
+
 }
 
 
@@ -1761,15 +2075,7 @@ a{
         font-size:15px;
     }
 
-    .word,
-    .kyoto{
-        font-size:clamp(58px,17vw,130px);
-    }
 
-    .orbit{
-        width:120vw;
-        height:120vw;
-    }
 
     .ritual,
     .menu-section,
@@ -2069,9 +2375,9 @@ a{
 <div class="cursor-dot" id="cursorDot"></div>
 
 
-<section class="hero">
+<section class="hero" id="hero">
 
-<div class="scene" id="scene">
+<div class="hero-stage" id="heroStage">
 
 <nav class="nav">
 
@@ -2096,65 +2402,92 @@ CART
 </nav>
 
 
-<div class="geometry">
-
-<div class="orbit"></div>
-<div class="orbit-inner"></div>
-<div class="cross-horizontal"></div>
-<div class="cross-vertical"></div>
-<div class="geo-square"></div>
-<div class="center-point"></div>
-
-</div>
+<div class="hero-light hero-light-key"></div>
+<div class="hero-light hero-light-red"></div>
+<div class="hero-rule"></div>
 
 
-<div class="type-stage">
-
-<div class="word taste" id="taste">
-<span>T</span>
-<span>A</span>
-<span>S</span>
-<span>T</span>
-<span>E</span>
-</div>
-
-<div class="word silence" id="silence">
-
-<span>S</span>
-<span>I</span>
-<span>L</span>
-<span>E</span>
-<span>N</span>
-<span>C</span>
-<span>E</span>
-
-</div>
-
-
-<div class="kyoto" id="kyoto">
-
+<div class="hero-word" id="heroWord" aria-hidden="true">
 <span>K</span>
 <span>Y</span>
 <span>O</span>
 <span>T</span>
 <span>O</span>
+</div>
+
+
+<figure class="hero-product" id="heroProduct">
+<div class="hero-product-inner" id="heroProductInner">
+<picture>
+<source srcset="assets/hero-roll.webp" type="image/webp">
+<img
+src="assets/hero-roll.jpg"
+alt="Фирменный ролл KYOTO: обожжённый лосось, тунец, авокадо и тобико"
+width="716"
+height="1080"
+decoding="async"
+fetchpriority="high"
+>
+</picture>
+</div>
+</figure>
+
+
+<div class="hero-copy">
+
+<div class="hero-eyebrow">
+<span class="hero-eyebrow-dot"></span>
+New signature roll
+</div>
+
+<h1 class="hero-title">
+Taste<br>the silence.
+</h1>
+
+<p class="hero-text">
+Обожжённый лосось, тунец, авокадо и тобико.
+Подаётся тёплым. Без лишних слов.
+</p>
+
+<div class="hero-actions">
+
+<a href="#menu" class="hero-btn hero-btn-primary" id="heroOrder">
+<span>Заказать</span>
+</a>
+
+<a href="#menu" class="hero-btn hero-btn-secondary" id="heroMenu">
+<span>Меню</span>
+</a>
 
 </div>
 
 </div>
 
 
-<div class="kyoto-subtitle" id="kyotoSubtitle">
-Japanese dining experience
+<div class="hero-jp" aria-hidden="true">
+静けさを味わう
 </div>
 
 
-<div class="hero-cta" id="heroCta">
+<div class="hero-meta">
 
-<span>Discover the ritual</span>
-<span>↓</span>
+<div class="hero-meta-item">
+<span class="hero-meta-label">Доставка</span>
+<span>По городу · заказ онлайн</span>
+</div>
+
+<div class="hero-meta-item">
+<span class="hero-meta-label">Стол</span>
+<a href="#reservation">Бронирование</a>
+</div>
 
 </div>
+
+
+<a href="#ritual" class="hero-scroll" id="heroScroll">
+<span>The ritual</span>
+<i></i>
+</a>
 
 
 <div class="grain"></div>
@@ -2162,6 +2495,7 @@ Japanese dining experience
 </div>
 
 </section>
+
 
 
 <section class="ritual" id="ritual">
@@ -3103,459 +3437,205 @@ if(hasFinePointer){
    HERO
 ===================================================== */
 
-const scene =
-    document.getElementById("scene");
+const heroWord =
+    document.getElementById("heroWord");
 
-const hero =
-    document.querySelector(".hero");
+const heroProductInner =
+    document.getElementById("heroProductInner");
 
-const geometry =
-    document.querySelector(".geometry");
+const heroOrder =
+    document.getElementById("heroOrder");
 
-const taste =
-    document.getElementById("taste");
+const heroMenu =
+    document.getElementById("heroMenu");
 
-const silence =
-    document.getElementById("silence");
+const heroScroll =
+    document.getElementById("heroScroll");
 
-const kyoto =
-    document.getElementById("kyoto");
+const heroFinePointer =
+    window.matchMedia("(pointer:fine)").matches;
 
-const kyotoSubtitle =
-    document.getElementById("kyotoSubtitle");
+const heroReducedMotion =
+    window.matchMedia(
+        "(prefers-reduced-motion:reduce)"
+    ).matches;
 
-const heroCta =
-    document.getElementById("heroCta");
+let heroMouseX=0;
+let heroMouseY=0;
 
-const silenceLetters =
-    document.querySelectorAll(
-        "#silence span"
+let heroSmoothX=0;
+let heroSmoothY=0;
+
+let heroDriftActive=false;
+
+
+if(
+    heroFinePointer &&
+    !heroReducedMotion &&
+    heroWord &&
+    heroProductInner
+){
+
+    window.addEventListener(
+        "mousemove",
+        event=>{
+
+            heroMouseX =
+                event.clientX /
+                window.innerWidth -
+                .5;
+
+            heroMouseY =
+                event.clientY /
+                window.innerHeight -
+                .5;
+
+        },
+        {passive:true}
     );
 
-const kyotoLetters =
-    document.querySelectorAll(
-        "#kyoto span"
-    );
 
-let target=0;
-let current=0;
+    function animateHero(){
 
-let mouseX=0;
-let mouseY=0;
+        const heroVisible =
+            window.scrollY <
+            window.innerHeight;
 
-let smoothMouseX=0;
-let smoothMouseY=0;
+        if(heroVisible){
 
-window.addEventListener(
-    "mousemove",
-    event=>{
-
-        mouseX =
-            event.clientX /
-            window.innerWidth -
-            .5;
-
-        mouseY =
-            event.clientY /
-            window.innerHeight -
-            .5;
-
-    }
-);
-
-window.addEventListener(
-    "load",
-    ()=>{
-
-        setTimeout(
-            ()=>{
-
-                scene.classList.add(
-                    "opening-complete"
+            heroSmoothX =
+                lerp(
+                    heroSmoothX,
+                    heroMouseX,
+                    .035
                 );
 
-            },
-            150
-        );
+            heroSmoothY =
+                lerp(
+                    heroSmoothY,
+                    heroMouseY,
+                    .035
+                );
 
-    }
-);
-
-function updateScroll(){
-
-    const rect =
-        hero.getBoundingClientRect();
-
-    const total =
-        hero.offsetHeight -
-        window.innerHeight;
-
-    target =
-        clamp(
-            -rect.top / total,
-            0,
-            1
-        );
-}
-
-window.addEventListener(
-    "scroll",
-    updateScroll,
-    {passive:true}
-);
-
-updateScroll();
-
-
-const trajectories=[
-
-    {
-        x:-600,
-        y:-300,
-        z:-700,
-        rx:-25,
-        ry:35,
-        rz:-20
-    },
-
-    {
-        x:500,
-        y:-250,
-        z:-500,
-        rx:20,
-        ry:-35,
-        rz:25
-    },
-
-    {
-        x:0,
-        y:500,
-        z:-800,
-        rx:-30,
-        ry:20,
-        rz:-15
-    },
-
-    {
-        x:480,
-        y:280,
-        z:-600,
-        rx:30,
-        ry:-25,
-        rz:18
-    },
-
-    {
-        x:-520,
-        y:330,
-        z:-650,
-        rx:-20,
-        ry:30,
-        rz:-25
-    }
-
-];
-
-
-function animate(){
-
-    current =
-        lerp(
-            current,
-            target,
-            .045
-        );
-
-    smoothMouseX =
-        lerp(
-            smoothMouseX,
-            mouseX,
-            .035
-        );
-
-    smoothMouseY =
-        lerp(
-            smoothMouseY,
-            mouseY,
-            .035
-        );
-
-    const p=current;
-
-
-    const geoExit =
-        clamp(
-            (p-.08)/.18,
-            0,
-            1
-        );
-
-    const geoEase =
-        smoothEase(geoExit);
-
-    geometry.style.opacity =
-        1-geoEase;
-
-    geometry.style.transform=`
-        translate3d(
-            ${smoothMouseX*20}px,
-            ${smoothMouseY*18}px,
-            ${-geoEase*120}px
-        )
-        scale(
-            ${1+geoEase*.25}
-        )
-    `;
-
-
-    const tasteIn =
-        clamp(
-            (p-.13)/.10,
-            0,
-            1
-        );
-
-    const tasteOut =
-        clamp(
-            (p-.36)/.11,
-            0,
-            1
-        );
-
-    const tasteAppear =
-        cinematicEase(tasteIn);
-
-    const tasteDisappear =
-        smoothEase(tasteOut);
-
-    taste.style.opacity =
-        tasteAppear *
-        (1-tasteDisappear);
-
-    taste.style.transform=`
-        translate(-50%,-68%)
-        translate3d(
-            ${-tasteDisappear*300}px,
-            ${-tasteDisappear*35}px,
-            ${-180-tasteDisappear*220}px
-        )
-        scale(
-            ${.94+tasteAppear*.06}
-        )
-    `;
-
-    taste.style.filter=`
-        blur(
-            ${
-                (1-tasteAppear)*14+
-                tasteDisappear*12
-            }px
-        )
-    `;
-
-
-    const silenceIn =
-        clamp(
-            (p-.46)/.15,
-            0,
-            1
-        );
-
-    const silenceOut =
-        clamp(
-            (p-.65)/.13,
-            0,
-            1
-        );
-
-    const silenceAppear =
-        cinematicEase(silenceIn);
-
-    const silenceDisappear =
-        smoothEase(silenceOut);
-
-    silence.style.opacity =
-        silenceAppear *
-        (1-silenceDisappear);
-
-    silence.style.transform=`
-        translate(-50%,5%)
-        translate3d(
-            ${
-                (1-silenceAppear)*45+
-                silenceDisappear*100
-            }px,
-            ${
-                (1-silenceAppear)*22-
-                silenceDisappear*15
-            }px,
-            ${
-                -120+
-                silenceAppear*120-
-                silenceDisappear*180
-            }px
-        )
-        scale(.98)
-    `;
-
-    silence.style.filter=`
-        blur(
-            ${
-                (1-silenceAppear)*10+
-                silenceDisappear*14
-            }px
-        )
-    `;
-
-
-    silenceLetters.forEach(
-        (letter,index)=>{
-
-            const center =
-                index-
-                (silenceLetters.length-1)/2;
-
-            const spread =
-                (1-silenceAppear)*
-                center*5;
-
-            const exitSpread =
-                silenceDisappear*
-                center*9;
-
-            letter.style.transform=`
+            heroWord.style.transform=`
+                translateY(-62%)
                 translate3d(
-                    ${spread+exitSpread}px,
-                    0,
+                    ${heroSmoothX*-10}px,
+                    ${heroSmoothY*-6}px,
+                    0
+                )
+            `;
+
+            heroProductInner.style.transform=`
+                translate3d(
+                    ${heroSmoothX*7}px,
+                    ${heroSmoothY*5}px,
                     0
                 )
             `;
 
         }
-    );
 
-
-    const kyotoProgress =
-        clamp(
-            (p-.79)/.21,
-            0,
-            1
+        requestAnimationFrame(
+            animateHero
         );
-
-    const kyotoEase =
-        cinematicEase(
-            kyotoProgress
-        );
-
-    kyoto.style.opacity =
-        kyotoProgress;
-
-    kyoto.style.transform=`
-        translate(-50%,-50%)
-        translate3d(
-            ${smoothMouseX*12}px,
-            ${smoothMouseY*10}px,
-            ${-80+kyotoEase*80}px
-        )
-        scale(
-            ${.96+kyotoEase*.04}
-        )
-    `;
-
-    kyoto.style.filter=`
-        blur(
-            ${28-kyotoEase*28}px
-        )
-    `;
+    }
 
 
-    kyotoLetters.forEach(
-        (letter,index)=>{
+    window.addEventListener(
+        "load",
+        ()=>{
 
-            const t =
-                trajectories[index];
+            if(heroDriftActive){
+                return;
+            }
 
-            const delay =
-                index*.055;
+            heroDriftActive=true;
 
-            const local =
-                clamp(
-                    (
-                        kyotoProgress-delay
-                    )/
-                    (1-delay),
-                    0,
-                    1
-                );
-
-            const e =
-                cinematicEase(local);
-
-            letter.style.transform=`
-                translate3d(
-                    ${t.x*(1-e)}px,
-                    ${t.y*(1-e)}px,
-                    ${t.z*(1-e)}px
-                )
-                rotateX(
-                    ${t.rx*(1-e)}deg
-                )
-                rotateY(
-                    ${t.ry*(1-e)}deg
-                )
-                rotateZ(
-                    ${t.rz*(1-e)}deg
-                )
-                scale(
-                    ${.65+e*.35}
-                )
-            `;
-
-            letter.style.filter=`
-                blur(
-                    ${14*(1-e)}px
-                )
-            `;
+            setTimeout(
+                animateHero,
+                1600
+            );
 
         }
     );
 
-
-    if(kyotoProgress>.82){
-        kyotoSubtitle.classList.add("visible");
-    }else{
-        kyotoSubtitle.classList.remove("visible");
-    }
-
-
-    if(kyotoProgress>.92){
-        heroCta.classList.add("visible");
-    }else{
-        heroCta.classList.remove("visible");
-    }
-
-
-    requestAnimationFrame(
-        animate
-    );
 }
 
-animate();
 
+function heroScrollTo(id){
 
-heroCta.addEventListener(
-    "click",
-    ()=>{
+    const target =
+        document.getElementById(id);
 
-        document
-            .getElementById("ritual")
-            .scrollIntoView({
-                behavior:"smooth"
-            });
-
+    if(!target){
+        return;
     }
-);
 
+    target.scrollIntoView({
+        behavior:"smooth"
+    });
+}
+
+
+if(heroOrder){
+
+    heroOrder.addEventListener(
+        "click",
+        event=>{
+
+            event.preventDefault();
+
+            const rollsTab =
+                document.querySelector(
+                    '.menu-tab[data-category="rolls"]'
+                );
+
+            if(
+                rollsTab &&
+                !rollsTab.classList.contains("active")
+            ){
+                rollsTab.click();
+            }
+
+            heroScrollTo("menu");
+
+        }
+    );
+
+}
+
+
+if(heroMenu){
+
+    heroMenu.addEventListener(
+        "click",
+        event=>{
+
+            event.preventDefault();
+
+            heroScrollTo("menu");
+
+        }
+    );
+
+}
+
+
+if(heroScroll){
+
+    heroScroll.addEventListener(
+        "click",
+        event=>{
+
+            event.preventDefault();
+
+            heroScrollTo("ritual");
+
+        }
+    );
+
+}
 
 /* =====================================================
    PRODUCTS
