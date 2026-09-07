@@ -1,0 +1,94 @@
+# Кто вы и что продаёте. Отсюда собираются скоринг и отклики.
+# Всё, что помечено «предположение», замените своими цифрами.
+
+name: ""                         # как подписывать отклики
+languages: [ru, en]              # на каких языках берёте заказы
+
+# Ниже этой цифры заказ вам неинтересен. Предположение — замените.
+target_hourly_usd: 40
+
+# money   — очередь строится по ожидаемым $/час
+# reviews — первый месяц: важнее быстро набрать отзывы, конкуренция весит меньше
+mode: money
+
+max_hours_per_order: 10
+min_budget_usd: 100
+sweet_budget_usd: [300, 1000]
+
+# Сколько часов уходит на отклик и переписку до старта — входит в знаменатель $/час
+apply_overhead_hours: 0.5
+
+# Услуги. keywords — по ним фильтр правил решает, «ваша» ли это тема.
+# typical_hours — вилка, по которой модель калибрует оценку.
+# ai_leverage — какую долю такой работы закрывают Claude и ваши шаблоны.
+services:
+  - key: landing
+    name: Лендинг
+    keywords: [landing, лендинг, лендос, one-page, one page, продающая страница, посадочная]
+    typical_hours: [4, 8]
+    ai_leverage: 0.9
+  - key: corporate
+    name: Корпоративный сайт
+    keywords: [corporate site, company website, корпоративный сайт, сайт компании, многостраничный, business website]
+    typical_hours: [10, 24]
+    ai_leverage: 0.75
+  - key: redesign
+    name: Редизайн сайта
+    keywords: [redesign, редизайн, обновить дизайн, переделать сайт, modernize website]
+    typical_hours: [6, 16]
+    ai_leverage: 0.8
+  - key: frontend
+    name: HTML/CSS/JS
+    keywords: [html, css, javascript, вёрстка, верстка, верстальщик, frontend, front-end]
+    typical_hours: [3, 10]
+    ai_leverage: 0.85
+  - key: mobile
+    name: Адаптация под мобильные
+    keywords: [responsive, mobile version, адаптив, мобильная версия, под мобильные, mobile friendly]
+    typical_hours: [2, 6]
+    ai_leverage: 0.9
+  - key: from-reference
+    name: Сайт по референсу
+    keywords: [по референсу, по образцу, как этот сайт, clone website, similar to, по примеру]
+    typical_hours: [4, 10]
+    ai_leverage: 0.9
+  - key: ai-bot
+    name: AI-бот
+    keywords: [ai bot, chatbot, чат-бот, чатбот, gpt bot, бот с ии, llm bot, ai assistant]
+    typical_hours: [6, 16]
+    ai_leverage: 0.8
+  - key: messenger-automation
+    name: Telegram/WhatsApp-автоматизация
+    keywords: [telegram bot, телеграм бот, telegram-бот, whatsapp bot, whatsapp automation, бот для telegram]
+    typical_hours: [4, 12]
+    ai_leverage: 0.85
+  - key: n8n
+    name: n8n-автоматизация
+    keywords: [n8n, make.com, zapier, automation workflow, автоматизация процессов, интеграция сервисов]
+    typical_hours: [3, 10]
+    ai_leverage: 0.8
+  - key: api
+    name: Интеграция API
+    keywords: [api integration, интеграция api, подключить api, webhook, rest api, интеграция с]
+    typical_hours: [3, 12]
+    ai_leverage: 0.8
+  - key: crm
+    name: Простая CRM
+    keywords: [crm, простая crm, учёт клиентов, учет клиентов, mini crm, lead management]
+    typical_hours: [10, 30]
+    ai_leverage: 0.7
+  - key: ai-tool
+    name: AI-инструмент
+    keywords: [ai tool, ai app, инструмент на ии, gpt app, openai app, claude app, генерация текста]
+    typical_hours: [6, 20]
+    ai_leverage: 0.8
+  - key: mvp
+    name: Небольшой SaaS / MVP
+    keywords: [mvp, saas, прототип, prototype, web app, веб-приложение, стартап]
+    typical_hours: [16, 40]
+    ai_leverage: 0.7
+  - key: fixes
+    name: Правки и доработки сайта
+    keywords: [fix, bug, исправить, доработать, правки, не работает, поправить, improve website, website fix]
+    typical_hours: [1, 4]
+    ai_leverage: 0.85

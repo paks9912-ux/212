@@ -1,0 +1,24 @@
+# Источники. Выключенные пропускаются молча.
+poll_interval_minutes: 5
+
+hn:
+  enabled: true
+  # ищем свежий тред «Ask HN: Freelancer? Seeking freelancer?»
+  thread_query: "Freelancer? Seeking freelancer?"
+
+reddit:
+  enabled: true
+  subreddits: [forhire, freelance_forhire, hireawriter]
+  # берём только посты нанимателей
+  title_must_match: "\\[hiring\\]|\\[task\\]"
+
+telegram:
+  enabled: false                # включите после npm run tg:login
+  # публичные каналы с заказами, без @. Пять-десять хороших лучше ста случайных.
+  channels: []
+  messages_per_channel: 40
+
+freelancer:
+  enabled: false                # включите, когда будет FREELANCER_TOKEN
+  queries: ["landing page", "website redesign", "telegram bot", "n8n", "html css"]
+  limit_per_query: 30

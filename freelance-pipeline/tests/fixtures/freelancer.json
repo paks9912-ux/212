@@ -1,0 +1,7 @@
+{"status":"success","result":{"projects":[
+ {"id":39001234,"title":"Redesign of a corporate website (12 pages)","seo_url":"website-design/redesign-corporate-website-39001234",
+  "description":"We have an outdated corporate site on WordPress. Need a modern redesign, responsive, keep the content. References will be provided.",
+  "time_submitted":1757167200,"type":"fixed","budget":{"minimum":750,"maximum":1500},"currency":{"code":"USD"},
+  "bid_stats":{"bid_count":12,"bid_avg":980},"jobs":[{"name":"Website Design"},{"name":"HTML"},{"name":"CSS"}],"owner_id":555}
+],"users":{"555":{"username":"acme_gmbh","display_name":"ACME GmbH","location":{"country":{"name":"Germany"}},
+ "status":{"payment_verified":true,"email_verified":true},"employer_reputation":{"entire_history":{"overall":4.8,"reviews":23,"complete":21}},"registration_date":1600000000}}}}

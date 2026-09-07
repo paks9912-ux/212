@@ -1,0 +1,49 @@
+# Веса скоринга. Сумма положительных весов = 1, risk вычитается.
+# Правьте руками. Автоматическая калибровка включается после 50 откликов.
+fit: 0.22
+money: 0.18
+ai_leverage: 0.15
+client: 0.13
+speed: 0.12
+competition: 0.10
+repeat: 0.10
+risk_penalty: 0.25
+
+# В режиме reviews конкуренция и деньги весят меньше, скорость и клиент — больше
+reviews_mode_overrides:
+  money: 0.10
+  competition: 0.05
+  speed: 0.18
+  client: 0.20
+
+# Вероятность победы: априорные оценки по источникам, пока нет ваших исходов
+p_win_prior:
+  freelancer: 0.25
+  telegram: 0.30
+  hn: 0.20
+  reddit: 0.20
+  manual: 0.15
+
+# Комиссии площадок (доля от бюджета)
+fees:
+  freelancer: 0.10
+  upwork: 0.10
+  kwork: 0.20
+  fl: 0.10
+  telegram: 0.0
+  hn: 0.0
+  reddit: 0.0
+  manual: 0.10
+  other: 0.10
+
+# Категории
+categories:
+  hot_hourly_multiplier: 2.0    # если выиграть — $/час не меньше цели × 2
+  hot_min_p_win: 0.15           # и шанс победы не иллюзорный
+  hot_max_age_minutes: 30       # и заказ ещё свежий — окно на отклик открыто
+  high_profit_min_budget: 500
+  quick_win_max_hours: 3
+  high_ai_min: 0.8
+  good_client_min: 0.8
+  show_min_score: 75            # ниже — не показываем, но храним
+  maybe_min_score: 55

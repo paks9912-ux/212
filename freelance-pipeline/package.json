@@ -1,0 +1,34 @@
+{
+  "name": "freelance-pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Находит фриланс-заказы в легальных источниках, оценивает и ранжирует по прибыли за час, готовит отклики.",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "run": "node --experimental-sqlite --import tsx src/index.ts run",
+    "daemon": "node --experimental-sqlite --import tsx src/index.ts daemon",
+    "bot": "node --experimental-sqlite --import tsx src/index.ts bot",
+    "web": "node --experimental-sqlite --import tsx src/index.ts web",
+    "add": "node --experimental-sqlite --import tsx src/index.ts add",
+    "report": "node --experimental-sqlite --import tsx src/index.ts report",
+    "tg:login": "node --import tsx src/sources/telegram-login.ts",
+    "test": "node --experimental-sqlite --import tsx --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "latest",
+    "fast-xml-parser": "^4.5.0",
+    "grammy": "^1.30.0",
+    "teleproto": "^1.229.0",
+    "yaml": "^2.5.0",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
