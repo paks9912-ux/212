@@ -503,6 +503,11 @@ window.addEventListener('scroll', function () {
 }, { passive: true });
 
 /* ---------------- boot ---------------- */
+/* Подстраховка: без id блюда нельзя положить в корзину. Если в данных
+   заведения id не проставлены — назначаем их здесь, а не теряем заказ. */
+(S.categories || []).forEach(function (c, ci) {
+  (c.items || []).forEach(function (it, ii) { if (!it.id) it.id = 'i' + ci + '_' + ii; });
+});
 loadCart();
 for (var k in CART) if (!findItem(k)) delete CART[k];
 renderHead(); renderTabs(); renderMenu(); renderBar();
