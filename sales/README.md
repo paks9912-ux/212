@@ -8,6 +8,7 @@
 | [dashboard.md](dashboard.md) | Деньги и воронка |
 | [outreach/](outreach/) | 24 персональных сообщения, по одному на заведение |
 | [tools/pitch.js](tools/pitch.js) | `node sales/tools/pitch.js` — пересобрать сообщения из CRM |
+| [freelance/](freelance/) | Биржи: готовые кворки, профиль Upwork, шаблоны откликов, кейс |
 
 ## Порядок работы
 
