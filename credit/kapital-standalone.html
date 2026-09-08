@@ -438,6 +438,10 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
   var U = {};
 
+  /* Номер сборки. При выпуске обновляется здесь, в index.html (?v=) и в sw.js */
+  U.BUILD = '1.3';
+  U.BUILD_DATE = '8 сентября 2026';
+
   /* ---------- id ---------- */
   U.uid = function () {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -1925,6 +1929,12 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       rowBtn('import', 'Загрузить базу', 'копия приложения или таблица CSV') +
       '<button class="row tap" data-act="wipe"><span class="grow"><span class="ttl" style="color:var(--red)">Стереть все данные</span></span></button>' +
       '</div>';
+
+    h += '<h2 class="sec">Приложение</h2><div class="list">' +
+      rowBtn('app-update', 'Обновить приложение', 'загрузить свежую версию с сервера') +
+      '</div><div class="hint">Телефон хранит копию приложения, чтобы оно открывалось без интернета. ' +
+      'Если я говорю, что что-то добавил, а на экране этого нет — нажмите «Обновить приложение». ' +
+      '<b>Ваши клиенты и займы при этом не трогаются.</b></div>';
     h += '<div class="hint">Всё хранится <b>только на этом устройстве</b>, без сервера и интернета: ваши клиенты и суммы не видит никто, включая меня. ' +
       'Обратная сторона — база <b>не появляется сама</b> на другом телефоне, компьютере или по другому адресу. Чтобы перенести, сделайте копию и загрузите её там.</div>';
 
@@ -1932,7 +1942,8 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       '1. Откройте эту страницу в Safari.<br>2. Нажмите кнопку «Поделиться» (квадрат со стрелкой).<br>' +
       '3. Выберите «На экран «Домой»».<br>4. Запускайте с иконки — приложение работает без интернета.</div>';
 
-    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">Капитал · версия 1.1</div>';
+    h += '<div style="text-align:center;color:var(--text-3);font-size:13px;margin:26px 0 10px">' +
+      'Капитал · версия ' + U.BUILD + ' от ' + U.BUILD_DATE + '</div>';
     return h + '</div>';
 
     function rowBtn(act, t, sub) {
@@ -2831,6 +2842,28 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
           'отправьте текст себе — в заметки, Telegram или почту. На другом устройстве откройте ' +
           '«Ещё → Загрузить базу», вставьте текст в поле и нажмите «Загрузить».'
       });
+    },
+    'app-update': function () {
+      U.toast('Загружаю свежую версию…');
+      var jobs = [];
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+        jobs.push(navigator.serviceWorker.getRegistrations()
+          .then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); })
+          .catch(function () { }));
+      }
+      if (w.caches && caches.keys) {
+        jobs.push(caches.keys()
+          .then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); })
+          .catch(function () { }));
+      }
+      var go = function () {
+        /* метка времени в адресе заставляет браузер взять файлы заново;
+           база лежит в хранилище сайта и от этого не меняется */
+        var base = location.href.split('#')[0].split('?')[0];
+        location.replace(base + '?u=' + Date.now() + '#/more');
+      };
+      Promise.all(jobs).then(function () { setTimeout(go, 250); }, go);
+      setTimeout(go, 3000);
     },
     'go-rates': function () {
       App.go('#/more');

@@ -232,6 +232,28 @@
           '«Ещё → Загрузить базу», вставьте текст в поле и нажмите «Загрузить».'
       });
     },
+    'app-update': function () {
+      U.toast('Загружаю свежую версию…');
+      var jobs = [];
+      if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+        jobs.push(navigator.serviceWorker.getRegistrations()
+          .then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister(); })); })
+          .catch(function () { }));
+      }
+      if (w.caches && caches.keys) {
+        jobs.push(caches.keys()
+          .then(function (ks) { return Promise.all(ks.map(function (k) { return caches.delete(k); })); })
+          .catch(function () { }));
+      }
+      var go = function () {
+        /* метка времени в адресе заставляет браузер взять файлы заново;
+           база лежит в хранилище сайта и от этого не меняется */
+        var base = location.href.split('#')[0].split('?')[0];
+        location.replace(base + '?u=' + Date.now() + '#/more');
+      };
+      Promise.all(jobs).then(function () { setTimeout(go, 250); }, go);
+      setTimeout(go, 3000);
+    },
     'go-rates': function () {
       App.go('#/more');
       setTimeout(function () {

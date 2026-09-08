@@ -4,6 +4,10 @@
 
   var U = {};
 
+  /* Номер сборки. При выпуске обновляется здесь, в index.html (?v=) и в sw.js */
+  U.BUILD = '1.3';
+  U.BUILD_DATE = '8 сентября 2026';
+
   /* ---------- id ---------- */
   U.uid = function () {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
