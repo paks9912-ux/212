@@ -515,6 +515,11 @@
       (faceOn ? 'var(--red)' : faceReady ? 'var(--accent)' : 'var(--text-3)') + '">' +
       (faceOn ? 'Отключить' : 'Включить') + '</span></span></button>' +
 
+      '<button class="row tap" data-act="face-check">' +
+      '<span class="grow"><span class="ttl">Проверить Face ID</span>' +
+      '<span class="sub">покажет, что мешает, если вход не работает</span></span>' +
+      '<span class="chev">' + V.ICON.chev + '</span></button>' +
+
       '<button class="row tap" data-act="pin">' +
       '<span class="grow"><span class="ttl">Код-пароль</span><span class="sub">' +
       (st.pin ? 'включён — спрашивается при запуске' : 'выключен') + '</span></span>' +

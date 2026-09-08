@@ -380,14 +380,24 @@
         setTimeout(function () { F.pinSheet(); }, 600);
         return;
       }
-      if (!App.faceOk) { U.toast('Это устройство не поддерживает такой вход'); return; }
+      /* пробуем в любом случае: проверка доступности бывает пессимистичной,
+         а настоящая ошибка браузера полезнее общей фразы */
       U.toast('Подтвердите личность');
       Auth.register(function (err) {
-        if (err) { U.toast(err.message); return; }
+        if (err) {
+          App.ask({
+            title: 'Не получилось включить',
+            text: err.message + '. Нажмите «Проверить», чтобы посмотреть, что мешает.',
+            ok: 'Проверить', cancel: 'Закрыть',
+            onOk: function () { F.faceCheck(); }
+          });
+          return;
+        }
         U.toast('Вход по Face ID включён');
         App.render();
       });
     },
+    'face-check': function () { F.faceCheck(); },
     'face-off': function () {
       App.ask({
         title: 'Отключить вход по Face ID?',
@@ -428,19 +438,19 @@
       '<div style="font-size:19px;font-weight:600" id="lk-title">' +
       (face ? 'Капитал' : 'Введите код') + '</div>' +
 
-      '<div id="lk-face"' + (face ? '' : ' hidden') + ' style="width:100%;max-width:280px;padding:0 8px">' +
+      '<div id="lk-face" class="lock-pane"' + (face ? '' : ' hidden') + ' style="max-width:280px;padding:0 8px">' +
       '<button class="btn" id="lk-go" style="margin-top:6px">Войти по Face ID</button>' +
       '<button class="btn ghost" id="lk-pin" style="margin-top:8px">Ввести код</button>' +
       '<div id="lk-err" style="font-size:13px;color:var(--red);text-align:center;margin-top:10px;min-height:18px"></div>' +
       '</div>' +
 
-      '<div id="lk-keys"' + (face ? ' hidden' : '') + '>' +
+      '<div id="lk-keys" class="lock-pane"' + (face ? ' hidden' : '') + '>' +
       '<div class="pin-dots" id="dots"><i></i><i></i><i></i><i></i></div>' +
-      '<div class="keypad" style="margin-top:18px">' +
+      '<div class="keypad">' +
       [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return '<button data-n="' + n + '">' + n + '</button>'; }).join('') +
       '<button class="blank"></button><button data-n="0">0</button>' +
       '<button data-n="del" style="font-size:20px">⌫</button></div>' +
-      (face ? '<button class="btn ghost" id="lk-face-back" style="margin-top:16px">Войти по Face ID</button>' : '') +
+      (face ? '<button class="btn ghost" id="lk-face-back" style="max-width:280px">Войти по Face ID</button>' : '') +
       '</div>';
     document.body.appendChild(el);
 

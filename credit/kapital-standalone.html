@@ -103,6 +103,8 @@ html[data-theme="dark"]{
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* скрытое остаётся скрытым, даже если у элемента есть свой display */
+[hidden]{display:none!important}
 html,body{margin:0;padding:0;height:100%}
 body{
   background:var(--bg);
@@ -387,8 +389,13 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 .lock{
   position:fixed;inset:0;z-index:100;background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  padding:24px 0 calc(24px + env(safe-area-inset-bottom));
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
 }
-.pin-dots{display:flex;gap:16px}
+/* обе половины экрана входа — колонкой по центру,
+   иначе точки кода прижимаются к левому краю */
+.lock-pane{display:flex;flex-direction:column;align-items:center;gap:18px;width:100%}
+.pin-dots{display:flex;gap:16px;justify-content:center}
 .pin-dots i{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--text-2)}
 .pin-dots i.on{background:var(--text);border-color:var(--text)}
 .keypad{display:grid;grid-template-columns:repeat(3,72px);gap:18px;justify-content:center}
@@ -443,7 +450,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   var U = {};
 
   /* Номер сборки. При выпуске обновляется здесь, в index.html (?v=) и в sw.js */
-  U.BUILD = '1.8';
+  U.BUILD = '1.9';
   U.BUILD_DATE = '8 сентября 2026';
 
   /* ---------- id ---------- */
@@ -846,6 +853,35 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       .then(function (v) { cb(!!v); })
       .catch(function () { cb(false); });
   };
+  /* Что именно мешает включить вход по лицу — человеческим языком */
+  A.diagnose = function (cb) {
+    var out = [];
+    var framed = false;
+    try { framed = w.self !== w.top; } catch (e) { framed = true; }
+
+    out.push({ k: 'Защищённое соединение', ok: !!w.isSecureContext,
+      no: 'нужен адрес на https' });
+    out.push({ k: 'Браузер умеет такой вход', ok: !!(w.PublicKeyCredential && navigator.credentials),
+      no: 'обновите iOS или откройте в Safari' });
+    out.push({ k: 'Открыто напрямую, не в окне другого сайта', ok: !framed,
+      no: 'откройте по своей ссылке, а не внутри просмотра' });
+
+    if (!w.PublicKeyCredential || !w.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+      out.push({ k: 'Face ID или Touch ID доступен', ok: false, no: 'браузер не сообщает о датчике' });
+      return cb(out);
+    }
+    w.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+      .then(function (v) {
+        out.push({ k: 'Face ID или Touch ID доступен', ok: !!v,
+          no: 'телефон не отдаёт датчик браузеру' });
+        cb(out);
+      })
+      .catch(function () {
+        out.push({ k: 'Face ID или Touch ID доступен', ok: false, no: 'проверка не прошла' });
+        cb(out);
+      });
+  };
+
   A.enabled = function () {
     var f = DB.data.settings.faceId;
     return !!(f && f.id);
@@ -2251,6 +2287,11 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       (faceOn ? 'var(--red)' : faceReady ? 'var(--accent)' : 'var(--text-3)') + '">' +
       (faceOn ? 'Отключить' : 'Включить') + '</span></span></button>' +
 
+      '<button class="row tap" data-act="face-check">' +
+      '<span class="grow"><span class="ttl">Проверить Face ID</span>' +
+      '<span class="sub">покажет, что мешает, если вход не работает</span></span>' +
+      '<span class="chev">' + V.ICON.chev + '</span></button>' +
+
       '<button class="row tap" data-act="pin">' +
       '<span class="grow"><span class="ttl">Код-пароль</span><span class="sub">' +
       (st.pin ? 'включён — спрашивается при запуске' : 'выключен') + '</span></span>' +
@@ -2927,6 +2968,61 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     });
   };
 
+  /* ============ ПРОВЕРКА FACE ID ============ */
+  F.faceCheck = function () {
+    App.sheet({
+      title: 'Проверка Face ID', save: null,
+      html: '<div class="list" id="fc-list"><div class="row"><span class="grow">Проверяю…</span></div></div>' +
+        '<div id="fc-act" style="margin-top:14px"></div>' +
+        '<div class="hint">Если всё зелёное, а вход всё равно не работает — напишите мне, что показала кнопка «Попробовать вход».</div>',
+      onOpen: function (bd) {
+        if (!w.Auth) {
+          bd.querySelector('#fc-list').innerHTML =
+            '<div class="row"><span class="grow"><span class="ttl">Модуль входа не загрузился</span>' +
+            '<span class="sub">обновите приложение в разделе «Ещё»</span></span></div>';
+          return;
+        }
+        Auth.diagnose(function (rows) {
+          var allOk = true;
+          bd.querySelector('#fc-list').innerHTML = rows.map(function (r) {
+            if (!r.ok) allOk = false;
+            return '<div class="row"><span class="grow"><span class="ttl">' + esc(r.k) + '</span>' +
+              (r.ok ? '' : '<span class="sub">' + esc(r.no) + '</span>') + '</span>' +
+              '<span class="val"><span class="v1" style="font-size:19px;color:' +
+              (r.ok ? 'var(--accent)' : 'var(--red)') + '">' + (r.ok ? '✓' : '✕') + '</span></span></div>';
+          }).join('');
+
+          var act = bd.querySelector('#fc-act');
+          if (!allOk) {
+            act.innerHTML = '<div class="hint" style="padding:0 4px">Красные строки и мешают включить вход. ' +
+              'Чаще всего помогает открыть приложение прямо по своей ссылке в Safari.</div>';
+            return;
+          }
+          act.innerHTML = '<button class="btn" id="fc-try">' +
+            (Auth.enabled() ? 'Попробовать вход' : 'Включить вход по Face ID') + '</button>' +
+            '<div id="fc-res" style="font-size:14px;text-align:center;margin-top:10px;color:var(--text-2)"></div>';
+          bd.querySelector('#fc-try').addEventListener('click', function () {
+            var res = bd.querySelector('#fc-res');
+            res.style.color = 'var(--text-2)';
+            res.textContent = 'Подтвердите личность…';
+            var done = function (err, okText) {
+              if (err) {
+                res.style.color = 'var(--red)';
+                res.textContent = 'Ошибка: ' + err.message;
+              } else {
+                res.style.color = 'var(--accent)';
+                res.textContent = okText;
+                App.render();
+              }
+            };
+            if (Auth.enabled()) Auth.verify(function (e) { done(e, 'Всё работает — вход подтверждён'); });
+            else Auth.register(function (e) { done(e, 'Готово, вход по Face ID включён'); });
+          });
+        });
+      }
+    });
+  };
+
   /* ============ КОД-ПАРОЛЬ ============ */
   F.pinSheet = function () {
     var h = '<div class="hint" style="padding:0 4px 14px">Код из 4 цифр будет спрашиваться при каждом запуске приложения.</div>' +
@@ -3334,14 +3430,24 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         setTimeout(function () { F.pinSheet(); }, 600);
         return;
       }
-      if (!App.faceOk) { U.toast('Это устройство не поддерживает такой вход'); return; }
+      /* пробуем в любом случае: проверка доступности бывает пессимистичной,
+         а настоящая ошибка браузера полезнее общей фразы */
       U.toast('Подтвердите личность');
       Auth.register(function (err) {
-        if (err) { U.toast(err.message); return; }
+        if (err) {
+          App.ask({
+            title: 'Не получилось включить',
+            text: err.message + '. Нажмите «Проверить», чтобы посмотреть, что мешает.',
+            ok: 'Проверить', cancel: 'Закрыть',
+            onOk: function () { F.faceCheck(); }
+          });
+          return;
+        }
         U.toast('Вход по Face ID включён');
         App.render();
       });
     },
+    'face-check': function () { F.faceCheck(); },
     'face-off': function () {
       App.ask({
         title: 'Отключить вход по Face ID?',
@@ -3382,19 +3488,19 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       '<div style="font-size:19px;font-weight:600" id="lk-title">' +
       (face ? 'Капитал' : 'Введите код') + '</div>' +
 
-      '<div id="lk-face"' + (face ? '' : ' hidden') + ' style="width:100%;max-width:280px;padding:0 8px">' +
+      '<div id="lk-face" class="lock-pane"' + (face ? '' : ' hidden') + ' style="max-width:280px;padding:0 8px">' +
       '<button class="btn" id="lk-go" style="margin-top:6px">Войти по Face ID</button>' +
       '<button class="btn ghost" id="lk-pin" style="margin-top:8px">Ввести код</button>' +
       '<div id="lk-err" style="font-size:13px;color:var(--red);text-align:center;margin-top:10px;min-height:18px"></div>' +
       '</div>' +
 
-      '<div id="lk-keys"' + (face ? ' hidden' : '') + '>' +
+      '<div id="lk-keys" class="lock-pane"' + (face ? ' hidden' : '') + '>' +
       '<div class="pin-dots" id="dots"><i></i><i></i><i></i><i></i></div>' +
-      '<div class="keypad" style="margin-top:18px">' +
+      '<div class="keypad">' +
       [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return '<button data-n="' + n + '">' + n + '</button>'; }).join('') +
       '<button class="blank"></button><button data-n="0">0</button>' +
       '<button data-n="del" style="font-size:20px">⌫</button></div>' +
-      (face ? '<button class="btn ghost" id="lk-face-back" style="margin-top:16px">Войти по Face ID</button>' : '') +
+      (face ? '<button class="btn ghost" id="lk-face-back" style="max-width:280px">Войти по Face ID</button>' : '') +
       '</div>';
     document.body.appendChild(el);
 

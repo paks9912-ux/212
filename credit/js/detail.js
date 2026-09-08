@@ -630,6 +630,61 @@
     });
   };
 
+  /* ============ ПРОВЕРКА FACE ID ============ */
+  F.faceCheck = function () {
+    App.sheet({
+      title: 'Проверка Face ID', save: null,
+      html: '<div class="list" id="fc-list"><div class="row"><span class="grow">Проверяю…</span></div></div>' +
+        '<div id="fc-act" style="margin-top:14px"></div>' +
+        '<div class="hint">Если всё зелёное, а вход всё равно не работает — напишите мне, что показала кнопка «Попробовать вход».</div>',
+      onOpen: function (bd) {
+        if (!w.Auth) {
+          bd.querySelector('#fc-list').innerHTML =
+            '<div class="row"><span class="grow"><span class="ttl">Модуль входа не загрузился</span>' +
+            '<span class="sub">обновите приложение в разделе «Ещё»</span></span></div>';
+          return;
+        }
+        Auth.diagnose(function (rows) {
+          var allOk = true;
+          bd.querySelector('#fc-list').innerHTML = rows.map(function (r) {
+            if (!r.ok) allOk = false;
+            return '<div class="row"><span class="grow"><span class="ttl">' + esc(r.k) + '</span>' +
+              (r.ok ? '' : '<span class="sub">' + esc(r.no) + '</span>') + '</span>' +
+              '<span class="val"><span class="v1" style="font-size:19px;color:' +
+              (r.ok ? 'var(--accent)' : 'var(--red)') + '">' + (r.ok ? '✓' : '✕') + '</span></span></div>';
+          }).join('');
+
+          var act = bd.querySelector('#fc-act');
+          if (!allOk) {
+            act.innerHTML = '<div class="hint" style="padding:0 4px">Красные строки и мешают включить вход. ' +
+              'Чаще всего помогает открыть приложение прямо по своей ссылке в Safari.</div>';
+            return;
+          }
+          act.innerHTML = '<button class="btn" id="fc-try">' +
+            (Auth.enabled() ? 'Попробовать вход' : 'Включить вход по Face ID') + '</button>' +
+            '<div id="fc-res" style="font-size:14px;text-align:center;margin-top:10px;color:var(--text-2)"></div>';
+          bd.querySelector('#fc-try').addEventListener('click', function () {
+            var res = bd.querySelector('#fc-res');
+            res.style.color = 'var(--text-2)';
+            res.textContent = 'Подтвердите личность…';
+            var done = function (err, okText) {
+              if (err) {
+                res.style.color = 'var(--red)';
+                res.textContent = 'Ошибка: ' + err.message;
+              } else {
+                res.style.color = 'var(--accent)';
+                res.textContent = okText;
+                App.render();
+              }
+            };
+            if (Auth.enabled()) Auth.verify(function (e) { done(e, 'Всё работает — вход подтверждён'); });
+            else Auth.register(function (e) { done(e, 'Готово, вход по Face ID включён'); });
+          });
+        });
+      }
+    });
+  };
+
   /* ============ КОД-ПАРОЛЬ ============ */
   F.pinSheet = function () {
     var h = '<div class="hint" style="padding:0 4px 14px">Код из 4 цифр будет спрашиваться при каждом запуске приложения.</div>' +

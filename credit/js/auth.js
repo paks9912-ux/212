@@ -65,6 +65,35 @@
       .then(function (v) { cb(!!v); })
       .catch(function () { cb(false); });
   };
+  /* Что именно мешает включить вход по лицу — человеческим языком */
+  A.diagnose = function (cb) {
+    var out = [];
+    var framed = false;
+    try { framed = w.self !== w.top; } catch (e) { framed = true; }
+
+    out.push({ k: 'Защищённое соединение', ok: !!w.isSecureContext,
+      no: 'нужен адрес на https' });
+    out.push({ k: 'Браузер умеет такой вход', ok: !!(w.PublicKeyCredential && navigator.credentials),
+      no: 'обновите iOS или откройте в Safari' });
+    out.push({ k: 'Открыто напрямую, не в окне другого сайта', ok: !framed,
+      no: 'откройте по своей ссылке, а не внутри просмотра' });
+
+    if (!w.PublicKeyCredential || !w.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) {
+      out.push({ k: 'Face ID или Touch ID доступен', ok: false, no: 'браузер не сообщает о датчике' });
+      return cb(out);
+    }
+    w.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+      .then(function (v) {
+        out.push({ k: 'Face ID или Touch ID доступен', ok: !!v,
+          no: 'телефон не отдаёт датчик браузеру' });
+        cb(out);
+      })
+      .catch(function () {
+        out.push({ k: 'Face ID или Touch ID доступен', ok: false, no: 'проверка не прошла' });
+        cb(out);
+      });
+  };
+
   A.enabled = function () {
     var f = DB.data.settings.faceId;
     return !!(f && f.id);
