@@ -26,6 +26,8 @@
           ratesSource: null,
           ratesPref: 'auto',
           pin: null,
+          faceId: null,          // ключ Face ID / Touch ID, если вход включён
+          faceUser: null,
           lastExport: null
         },
         clients: [],

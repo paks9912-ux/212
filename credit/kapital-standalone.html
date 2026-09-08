@@ -443,7 +443,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   var U = {};
 
   /* Номер сборки. При выпуске обновляется здесь, в index.html (?v=) и в sw.js */
-  U.BUILD = '1.5';
+  U.BUILD = '1.6';
   U.BUILD_DATE = '8 сентября 2026';
 
   /* ---------- id ---------- */
@@ -779,6 +779,173 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   w.FX = FX;
 })(window);
 
+/* Вход по Face ID / Touch ID.
+   Используется WebAuthn: телефон создаёт ключ в защищённом хранилище и
+   подписывает им случайную строку, а приложение проверяет подпись сохранённым
+   открытым ключом. Ни отпечаток, ни лицо приложению не передаются и никуда
+   не уходят. Код-пароль остаётся запасным входом.                        */
+(function (w) {
+  'use strict';
+
+  var A = {};
+
+  /* ---------- преобразования ---------- */
+  function b64u(buf) {
+    var b = new Uint8Array(buf), s = '';
+    for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]);
+    return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  function unb64u(str) {
+    var s = String(str).replace(/-/g, '+').replace(/_/g, '/');
+    while (s.length % 4) s += '=';
+    var bin = atob(s), out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+  function rnd(n) { return crypto.getRandomValues(new Uint8Array(n)); }
+  function same(a, b) {
+    if (a.length !== b.length) return false;
+    var d = 0;
+    for (var i = 0; i < a.length; i++) d |= a[i] ^ b[i];
+    return d === 0;
+  }
+
+  /* Подпись ECDSA приходит в формате DER, а WebCrypto ждёт r||s по 32 байта */
+  function derToRaw(der) {
+    var d = new Uint8Array(der);
+    if (d[0] !== 0x30) return d;
+    var i = 2;
+    if (d[1] & 0x80) i = 2 + (d[1] & 0x7f);
+    function int() {
+      if (d[i] !== 0x02) return null;
+      var len = d[i + 1], start = i + 2;
+      i = start + len;
+      var v = d.subarray(start, start + len);
+      while (v.length > 32 && v[0] === 0) v = v.subarray(1);
+      var out = new Uint8Array(32);
+      out.set(v, 32 - v.length);
+      return out;
+    }
+    var r = int(), s = int();
+    if (!r || !s) return d;
+    var raw = new Uint8Array(64);
+    raw.set(r, 0); raw.set(s, 32);
+    return raw;
+  }
+
+  /* ---------- доступность ---------- */
+  A.supported = function () {
+    /* isSecureContext охватывает https, localhost и 127.0.0.1 */
+    return !!(w.isSecureContext && w.PublicKeyCredential &&
+      navigator.credentials && navigator.credentials.create);
+  };
+  A.available = function (cb) {
+    if (!A.supported()) return cb(false);
+    if (!w.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable) return cb(false);
+    w.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+      .then(function (v) { cb(!!v); })
+      .catch(function () { cb(false); });
+  };
+  A.enabled = function () {
+    var f = DB.data.settings.faceId;
+    return !!(f && f.id);
+  };
+
+  /* ---------- включение ---------- */
+  A.register = function (cb) {
+    if (!A.supported()) return cb(new Error('Устройство не поддерживает такой вход'));
+    var uid = DB.data.settings.faceUser || b64u(rnd(16));
+    navigator.credentials.create({
+      publicKey: {
+        challenge: rnd(32),
+        rp: { name: 'Капитал' },
+        user: { id: unb64u(uid), name: 'Капитал', displayName: 'Учёт займов' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+        authenticatorSelection: {
+          authenticatorAttachment: 'platform',
+          userVerification: 'required',
+          residentKey: 'preferred'
+        },
+        timeout: 60000,
+        attestation: 'none'
+      }
+    }).then(function (cred) {
+      if (!cred) throw new Error('Не удалось создать ключ');
+      var pub = null, alg = -7;
+      try {
+        if (cred.response.getPublicKey) pub = b64u(cred.response.getPublicKey());
+        if (cred.response.getPublicKeyAlgorithm) alg = cred.response.getPublicKeyAlgorithm();
+      } catch (e) { }
+      DB.data.settings.faceUser = uid;
+      DB.data.settings.faceId = { id: b64u(cred.rawId), pub: pub, alg: alg, addedAt: U.today() };
+      DB.save();
+      cb(null);
+    }).catch(function (e) {
+      cb(e && e.name === 'NotAllowedError' ? new Error('Вход отменён') : (e || new Error('Не получилось')));
+    });
+  };
+
+  A.disable = function () {
+    DB.data.settings.faceId = null;
+    DB.save();
+  };
+
+  /* ---------- проверка при входе ---------- */
+  A.verify = function (cb) {
+    var f = DB.data.settings.faceId;
+    if (!f || !f.id) return cb(new Error('Вход по Face ID не настроен'));
+    var challenge = rnd(32);
+
+    navigator.credentials.get({
+      publicKey: {
+        challenge: challenge,
+        allowCredentials: [{ type: 'public-key', id: unb64u(f.id), transports: ['internal'] }],
+        userVerification: 'required',
+        timeout: 60000
+      }
+    }).then(function (as) {
+      if (!as) throw new Error('Нет ответа');
+      var cd = JSON.parse(new TextDecoder().decode(as.response.clientDataJSON));
+      if (cd.type !== 'webauthn.get') throw new Error('Неверный ответ');
+      if (cd.origin !== location.origin) throw new Error('Чужой адрес');
+      if (!same(unb64u(cd.challenge), challenge)) throw new Error('Ответ не совпал с запросом');
+
+      var authData = new Uint8Array(as.response.authenticatorData);
+      var flags = authData[32];
+      if (!(flags & 0x01)) throw new Error('Нет подтверждения присутствия');
+      if (!(flags & 0x04)) throw new Error('Лицо или отпечаток не подтверждены');
+
+      /* если открытый ключ сохранён — проверяем подпись по-настоящему */
+      if (!f.pub) return true;
+      return crypto.subtle.digest('SHA-256', as.response.clientDataJSON).then(function (hash) {
+        var signed = new Uint8Array(authData.length + 32);
+        signed.set(authData, 0);
+        signed.set(new Uint8Array(hash), authData.length);
+        var isRsa = f.alg === -257;
+        var imp = isRsa
+          ? { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }
+          : { name: 'ECDSA', namedCurve: 'P-256' };
+        return crypto.subtle.importKey('spki', unb64u(f.pub), imp, false, ['verify'])
+          .then(function (key) {
+            var sig = isRsa ? new Uint8Array(as.response.signature) : derToRaw(as.response.signature);
+            return crypto.subtle.verify(
+              isRsa ? { name: 'RSASSA-PKCS1-v1_5' } : { name: 'ECDSA', hash: 'SHA-256' },
+              key, sig, signed);
+          })
+          .then(function (okSig) {
+            if (!okSig) throw new Error('Подпись не сошлась');
+            return true;
+          });
+      });
+    }).then(function () { cb(null); })
+      .catch(function (e) {
+        cb(e && e.name === 'NotAllowedError' ? new Error('Вход отменён') : (e || new Error('Не получилось')));
+      });
+  };
+
+  w.Auth = A;
+})(window);
+
 /* Хранилище: всё лежит на телефоне (localStorage), ничего не уходит в сеть */
 (function (w) {
   'use strict';
@@ -807,6 +974,8 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
           ratesSource: null,
           ratesPref: 'auto',
           pin: null,
+          faceId: null,          // ключ Face ID / Touch ID, если вход включён
+          faceUser: null,
           lastExport: null
         },
         clients: [],
@@ -2069,13 +2238,27 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     h += '</div><div class="hint">Курс нужен, только если вы даёте деньги <b>в разных валютах</b> — чтобы свести всё в один итог. ' +
       'Можно вписать вручную: так надёжнее всего, и интернет не нужен.</div>';
 
+    var faceOn = Auth.enabled();
     h += '<h2 class="sec">Защита</h2><div class="list">' +
+      '<button class="row tap" data-act="' + (faceOn ? 'face-off' : 'face-on') + '">' +
+      '<span class="grow"><span class="ttl">Face ID / Touch ID</span><span class="sub">' +
+      (faceOn ? 'вход по лицу или отпечатку'
+        : (App.faceOk ? 'быстрый вход вместо кода' : 'на этом устройстве недоступен')) +
+      '</span></span>' +
+      '<span class="val"><span class="v1" style="font-size:15px;color:' +
+      (faceOn ? 'var(--red)' : App.faceOk ? 'var(--accent)' : 'var(--text-3)') + '">' +
+      (faceOn ? 'Отключить' : 'Включить') + '</span></span></button>' +
+
       '<button class="row tap" data-act="pin">' +
       '<span class="grow"><span class="ttl">Код-пароль</span><span class="sub">' +
       (st.pin ? 'включён — спрашивается при запуске' : 'выключен') + '</span></span>' +
       '<span class="val"><span class="v1" style="color:var(--accent);font-size:15px">' + (st.pin ? 'Изменить' : 'Включить') + '</span></span></button>' +
-      (st.pin ? '<button class="row tap" data-act="pin-off"><span class="grow"><span class="ttl" style="color:var(--red)">Отключить код</span></span></button>' : '') +
-      '</div>';
+      (st.pin && !faceOn ? '<button class="row tap" data-act="pin-off"><span class="grow"><span class="ttl" style="color:var(--red)">Отключить код</span></span></button>' : '') +
+      '</div>' +
+      '<div class="hint">Face ID работает через тот же механизм, что Safari использует для паролей: телефон хранит ключ у себя и просто подтверждает, что это вы. ' +
+      'Ни лицо, ни отпечаток приложению не передаются.<br><br>' +
+      'Код-пароль остаётся <b>запасным входом</b> — на случай, если Face ID не сработает. ' +
+      'И то и другое закрывает вход от чужих глаз, но не шифрует базу: с доступом к телефону данные можно достать в обход приложения.</div>';
 
     h += '<h2 class="sec">Данные</h2><div class="list">' +
       rowBtn('export-json', 'Сохранить резервную копию', st.lastExport ? 'последняя: ' + U.fmtDate(st.lastExport) : 'ещё ни разу') +
@@ -3134,6 +3317,28 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       });
     },
     pin: function () { F.pinSheet(); },
+    'face-on': function () {
+      if (!DB.data.settings.pin) {
+        U.toast('Сначала задайте код-пароль — он нужен как запасной вход');
+        setTimeout(function () { F.pinSheet(); }, 600);
+        return;
+      }
+      if (!App.faceOk) { U.toast('Это устройство не поддерживает такой вход'); return; }
+      U.toast('Подтвердите личность');
+      Auth.register(function (err) {
+        if (err) { U.toast(err.message); return; }
+        U.toast('Вход по Face ID включён');
+        App.render();
+      });
+    },
+    'face-off': function () {
+      App.ask({
+        title: 'Отключить вход по Face ID?',
+        text: 'Приложение будет спрашивать код-пароль.',
+        ok: 'Отключить',
+        onOk: function () { Auth.disable(); U.toast('Отключено'); App.render(); }
+      });
+    },
     'pin-off': function () {
       App.ask({
         title: 'Отключить код-пароль?',
@@ -3158,21 +3363,75 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
   /* ---------- экран блокировки ---------- */
   App.lock = function (done) {
-    var buf = '';
+    var buf = '', face = Auth.enabled();
     var el = document.createElement('div');
     el.className = 'lock';
-    el.innerHTML = '<div style="font-size:44px">🔐</div>' +
-      '<div style="font-size:19px;font-weight:600">Введите код</div>' +
+    el.innerHTML =
+      '<div style="font-size:44px">🔐</div>' +
+      '<div style="font-size:19px;font-weight:600" id="lk-title">' +
+      (face ? 'Капитал' : 'Введите код') + '</div>' +
+
+      '<div id="lk-face"' + (face ? '' : ' hidden') + ' style="width:100%;max-width:280px;padding:0 8px">' +
+      '<button class="btn" id="lk-go" style="margin-top:6px">Войти по Face ID</button>' +
+      '<button class="btn ghost" id="lk-pin" style="margin-top:8px">Ввести код</button>' +
+      '<div id="lk-err" style="font-size:13px;color:var(--red);text-align:center;margin-top:10px;min-height:18px"></div>' +
+      '</div>' +
+
+      '<div id="lk-keys"' + (face ? ' hidden' : '') + '>' +
       '<div class="pin-dots" id="dots"><i></i><i></i><i></i><i></i></div>' +
-      '<div class="keypad" style="margin-top:8px">' +
+      '<div class="keypad" style="margin-top:18px">' +
       [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return '<button data-n="' + n + '">' + n + '</button>'; }).join('') +
       '<button class="blank"></button><button data-n="0">0</button>' +
-      '<button data-n="del" style="font-size:20px">⌫</button></div>';
+      '<button data-n="del" style="font-size:20px">⌫</button></div>' +
+      (face ? '<button class="btn ghost" id="lk-face-back" style="margin-top:16px">Войти по Face ID</button>' : '') +
+      '</div>';
     document.body.appendChild(el);
 
+    var $ = function (x) { return el.querySelector(x); };
     function draw() {
       U.$$('#dots i', el).forEach(function (d, i) { d.classList.toggle('on', i < buf.length); });
     }
+    function open() {
+      el.style.opacity = '0';
+      el.style.transition = 'opacity .25s';
+      setTimeout(function () { el.remove(); }, 260);
+      done();
+    }
+    function showKeys() {
+      $('#lk-face').hidden = true;
+      $('#lk-keys').hidden = false;
+      $('#lk-title').textContent = 'Введите код';
+    }
+    function showFace() {
+      $('#lk-keys').hidden = true;
+      $('#lk-face').hidden = false;
+      $('#lk-title').textContent = 'Капитал';
+    }
+    function tryFace() {
+      var btn = $('#lk-go');
+      btn.disabled = true;
+      btn.textContent = 'Подтвердите личность…';
+      $('#lk-err').textContent = '';
+      Auth.verify(function (err) {
+        btn.disabled = false;
+        btn.textContent = 'Войти по Face ID';
+        if (err) {
+          $('#lk-err').textContent = err.message;
+          el.classList.add('shake');
+          setTimeout(function () { el.classList.remove('shake'); }, 420);
+          return;
+        }
+        open();
+      });
+    }
+
+    if (face) {
+      $('#lk-go').addEventListener('click', tryFace);
+      $('#lk-pin').addEventListener('click', showKeys);
+      var back = $('#lk-face-back');
+      if (back) back.addEventListener('click', showFace);
+    }
+
     el.addEventListener('click', function (e) {
       var b = e.target.closest('[data-n]');
       if (!b) return;
@@ -3181,12 +3440,8 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       buf += b.dataset.n;
       draw();
       if (buf.length === 4) {
-        if (App.hash(buf) === DB.data.settings.pin) {
-          el.style.opacity = '0';
-          el.style.transition = 'opacity .25s';
-          setTimeout(function () { el.remove(); }, 260);
-          done();
-        } else {
+        if (App.hash(buf) === DB.data.settings.pin) open();
+        else {
           el.classList.add('shake');
           setTimeout(function () { el.classList.remove('shake'); buf = ''; draw(); }, 420);
         }
@@ -3198,13 +3453,18 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   App.start = function () {
     DB.load();
     App.applyTheme();
+    App.faceOk = false;
+    Auth.available(function (v) {
+      App.faceOk = v;
+      if (v && App.route === '#/more') App.render();
+    });
 
     var run = function () {
       App.render();
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () { });
     };
 
-    if (DB.data.settings.pin) App.lock(run);
+    if (DB.data.settings.pin || Auth.enabled()) App.lock(run);
     else run();
 
     w.addEventListener('hashchange', App.render);

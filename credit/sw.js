@@ -1,10 +1,10 @@
 /* Офлайн-кэш. Меняйте VER при обновлении файлов. */
-const VER = 'kapital-v15';
+const VER = 'kapital-v16';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
-  './css/app.css?v=15',
-  './js/util.js?v=15', './js/fx.js?v=15', './js/store.js?v=15', './js/calc.js?v=15',
-  './js/views.js?v=15', './js/detail.js?v=15', './js/app.js?v=15',
+  './css/app.css?v=16',
+  './js/util.js?v=16', './js/fx.js?v=16', './js/auth.js?v=16', './js/store.js?v=16', './js/calc.js?v=16',
+  './js/views.js?v=16', './js/detail.js?v=16', './js/app.js?v=16',
   './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png', './icons/favicon-64.png'
 ];
 

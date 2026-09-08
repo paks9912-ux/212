@@ -503,13 +503,27 @@
     h += '</div><div class="hint">Курс нужен, только если вы даёте деньги <b>в разных валютах</b> — чтобы свести всё в один итог. ' +
       'Можно вписать вручную: так надёжнее всего, и интернет не нужен.</div>';
 
+    var faceOn = Auth.enabled();
     h += '<h2 class="sec">Защита</h2><div class="list">' +
+      '<button class="row tap" data-act="' + (faceOn ? 'face-off' : 'face-on') + '">' +
+      '<span class="grow"><span class="ttl">Face ID / Touch ID</span><span class="sub">' +
+      (faceOn ? 'вход по лицу или отпечатку'
+        : (App.faceOk ? 'быстрый вход вместо кода' : 'на этом устройстве недоступен')) +
+      '</span></span>' +
+      '<span class="val"><span class="v1" style="font-size:15px;color:' +
+      (faceOn ? 'var(--red)' : App.faceOk ? 'var(--accent)' : 'var(--text-3)') + '">' +
+      (faceOn ? 'Отключить' : 'Включить') + '</span></span></button>' +
+
       '<button class="row tap" data-act="pin">' +
       '<span class="grow"><span class="ttl">Код-пароль</span><span class="sub">' +
       (st.pin ? 'включён — спрашивается при запуске' : 'выключен') + '</span></span>' +
       '<span class="val"><span class="v1" style="color:var(--accent);font-size:15px">' + (st.pin ? 'Изменить' : 'Включить') + '</span></span></button>' +
-      (st.pin ? '<button class="row tap" data-act="pin-off"><span class="grow"><span class="ttl" style="color:var(--red)">Отключить код</span></span></button>' : '') +
-      '</div>';
+      (st.pin && !faceOn ? '<button class="row tap" data-act="pin-off"><span class="grow"><span class="ttl" style="color:var(--red)">Отключить код</span></span></button>' : '') +
+      '</div>' +
+      '<div class="hint">Face ID работает через тот же механизм, что Safari использует для паролей: телефон хранит ключ у себя и просто подтверждает, что это вы. ' +
+      'Ни лицо, ни отпечаток приложению не передаются.<br><br>' +
+      'Код-пароль остаётся <b>запасным входом</b> — на случай, если Face ID не сработает. ' +
+      'И то и другое закрывает вход от чужих глаз, но не шифрует базу: с доступом к телефону данные можно достать в обход приложения.</div>';
 
     h += '<h2 class="sec">Данные</h2><div class="list">' +
       rowBtn('export-json', 'Сохранить резервную копию', st.lastExport ? 'последняя: ' + U.fmtDate(st.lastExport) : 'ещё ни разу') +

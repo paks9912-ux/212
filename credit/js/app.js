@@ -365,6 +365,28 @@
       });
     },
     pin: function () { F.pinSheet(); },
+    'face-on': function () {
+      if (!DB.data.settings.pin) {
+        U.toast('Сначала задайте код-пароль — он нужен как запасной вход');
+        setTimeout(function () { F.pinSheet(); }, 600);
+        return;
+      }
+      if (!App.faceOk) { U.toast('Это устройство не поддерживает такой вход'); return; }
+      U.toast('Подтвердите личность');
+      Auth.register(function (err) {
+        if (err) { U.toast(err.message); return; }
+        U.toast('Вход по Face ID включён');
+        App.render();
+      });
+    },
+    'face-off': function () {
+      App.ask({
+        title: 'Отключить вход по Face ID?',
+        text: 'Приложение будет спрашивать код-пароль.',
+        ok: 'Отключить',
+        onOk: function () { Auth.disable(); U.toast('Отключено'); App.render(); }
+      });
+    },
     'pin-off': function () {
       App.ask({
         title: 'Отключить код-пароль?',
@@ -389,21 +411,75 @@
 
   /* ---------- экран блокировки ---------- */
   App.lock = function (done) {
-    var buf = '';
+    var buf = '', face = Auth.enabled();
     var el = document.createElement('div');
     el.className = 'lock';
-    el.innerHTML = '<div style="font-size:44px">🔐</div>' +
-      '<div style="font-size:19px;font-weight:600">Введите код</div>' +
+    el.innerHTML =
+      '<div style="font-size:44px">🔐</div>' +
+      '<div style="font-size:19px;font-weight:600" id="lk-title">' +
+      (face ? 'Капитал' : 'Введите код') + '</div>' +
+
+      '<div id="lk-face"' + (face ? '' : ' hidden') + ' style="width:100%;max-width:280px;padding:0 8px">' +
+      '<button class="btn" id="lk-go" style="margin-top:6px">Войти по Face ID</button>' +
+      '<button class="btn ghost" id="lk-pin" style="margin-top:8px">Ввести код</button>' +
+      '<div id="lk-err" style="font-size:13px;color:var(--red);text-align:center;margin-top:10px;min-height:18px"></div>' +
+      '</div>' +
+
+      '<div id="lk-keys"' + (face ? ' hidden' : '') + '>' +
       '<div class="pin-dots" id="dots"><i></i><i></i><i></i><i></i></div>' +
-      '<div class="keypad" style="margin-top:8px">' +
+      '<div class="keypad" style="margin-top:18px">' +
       [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function (n) { return '<button data-n="' + n + '">' + n + '</button>'; }).join('') +
       '<button class="blank"></button><button data-n="0">0</button>' +
-      '<button data-n="del" style="font-size:20px">⌫</button></div>';
+      '<button data-n="del" style="font-size:20px">⌫</button></div>' +
+      (face ? '<button class="btn ghost" id="lk-face-back" style="margin-top:16px">Войти по Face ID</button>' : '') +
+      '</div>';
     document.body.appendChild(el);
 
+    var $ = function (x) { return el.querySelector(x); };
     function draw() {
       U.$$('#dots i', el).forEach(function (d, i) { d.classList.toggle('on', i < buf.length); });
     }
+    function open() {
+      el.style.opacity = '0';
+      el.style.transition = 'opacity .25s';
+      setTimeout(function () { el.remove(); }, 260);
+      done();
+    }
+    function showKeys() {
+      $('#lk-face').hidden = true;
+      $('#lk-keys').hidden = false;
+      $('#lk-title').textContent = 'Введите код';
+    }
+    function showFace() {
+      $('#lk-keys').hidden = true;
+      $('#lk-face').hidden = false;
+      $('#lk-title').textContent = 'Капитал';
+    }
+    function tryFace() {
+      var btn = $('#lk-go');
+      btn.disabled = true;
+      btn.textContent = 'Подтвердите личность…';
+      $('#lk-err').textContent = '';
+      Auth.verify(function (err) {
+        btn.disabled = false;
+        btn.textContent = 'Войти по Face ID';
+        if (err) {
+          $('#lk-err').textContent = err.message;
+          el.classList.add('shake');
+          setTimeout(function () { el.classList.remove('shake'); }, 420);
+          return;
+        }
+        open();
+      });
+    }
+
+    if (face) {
+      $('#lk-go').addEventListener('click', tryFace);
+      $('#lk-pin').addEventListener('click', showKeys);
+      var back = $('#lk-face-back');
+      if (back) back.addEventListener('click', showFace);
+    }
+
     el.addEventListener('click', function (e) {
       var b = e.target.closest('[data-n]');
       if (!b) return;
@@ -412,12 +488,8 @@
       buf += b.dataset.n;
       draw();
       if (buf.length === 4) {
-        if (App.hash(buf) === DB.data.settings.pin) {
-          el.style.opacity = '0';
-          el.style.transition = 'opacity .25s';
-          setTimeout(function () { el.remove(); }, 260);
-          done();
-        } else {
+        if (App.hash(buf) === DB.data.settings.pin) open();
+        else {
           el.classList.add('shake');
           setTimeout(function () { el.classList.remove('shake'); buf = ''; draw(); }, 420);
         }
@@ -429,13 +501,18 @@
   App.start = function () {
     DB.load();
     App.applyTheme();
+    App.faceOk = false;
+    Auth.available(function (v) {
+      App.faceOk = v;
+      if (v && App.route === '#/more') App.render();
+    });
 
     var run = function () {
       App.render();
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () { });
     };
 
-    if (DB.data.settings.pin) App.lock(run);
+    if (DB.data.settings.pin || Auth.enabled()) App.lock(run);
     else run();
 
     w.addEventListener('hashchange', App.render);
