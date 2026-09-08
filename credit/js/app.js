@@ -469,6 +469,9 @@
     function open() {
       if (!App._lockEl) return;
       App._lockEl = null;
+      App._lockIsCover = false;
+      App.hiddenAt = 0;
+      App.lastSeen = Date.now();
       App._unlock = null;
       App._lockRetry = null;
       el.style.opacity = '0';
@@ -590,27 +593,61 @@
     w.addEventListener('scroll', App.onScroll, { passive: true });
     w.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', App.applyTheme);
 
-    /* Уход в фон закрывает приложение замком: и чтобы данные не попали
-       в снимок для переключателя приложений, и чтобы при возврате
-       спрашивало заново. Короткая отлучка прощается — срок задаётся
-       в настройках.                                                     */
+    /* ---------- замок при сворачивании ----------
+       На события сворачивания полагаться нельзя: часть телефонов их не
+       присылает. Поэтому раз в секунду отмечаем, что приложение живо. Пока
+       оно свёрнуто, таймер стоит — по разрыву во времени и видно, что нас
+       останавливали. События визуального скрытия используем дополнительно,
+       чтобы закрыть экран ещё до снимка для переключателя приложений.   */
     var day = U.today();
+    App.lastSeen = Date.now();
     App.hiddenAt = 0;
-    document.addEventListener('visibilitychange', function () {
-      if (document.hidden) {
-        if (App.lockConfigured()) { App.hiddenAt = Date.now(); App.lock(App.render); }
+
+    function grace() { return U.num(DB.data.settings.lockAfter) * 1000; }
+
+    function cover() {                       // закрыть экран, пока нас не видно
+      if (!App.lockConfigured()) return;
+      App.hiddenAt = Date.now();
+      App._lockIsCover = true;
+      App.lock(App.render);
+    }
+
+    function resume(gap) {                   // вернулись: пускать или спрашивать
+      if (U.today() !== day) { day = U.today(); App.render(); }
+      if (!App.lockConfigured()) return;
+
+      if (gap <= grace()) {                  // отлучка уложилась в разрешённый срок
+        if (App._lockEl && App._lockIsCover && App._unlock) App._unlock();
         return;
       }
-      var grace = U.num(DB.data.settings.lockAfter) * 1000;
-      if (App._lockEl && App.hiddenAt && (Date.now() - App.hiddenAt) < grace) {
-        if (App._unlock) App._unlock();          // отлучились ненадолго
-      } else if (App._lockEl && App._lockRetry) {
-        setTimeout(App._lockRetry, 150);         // сразу пробуем Face ID
-      }
-      if (U.today() !== day) { day = U.today(); App.render(); }
+      App._lockIsCover = false;
+      if (!App._lockEl) App.lock(App.render);
+      else if (App._lockRetry) setTimeout(App._lockRetry, 150);
+    }
+
+    setInterval(function () {
+      var now = Date.now(), gap = now - App.lastSeen;
+      App.lastSeen = now;
+      if (gap > 3000) resume(gap);           // таймер стоял — приложение было свёрнуто
+    }, 1000);
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { cover(); return; }
+      var gap = App.hiddenAt ? Date.now() - App.hiddenAt : 0;
+      App.lastSeen = Date.now();
+      resume(gap);
     });
-    window.addEventListener('pagehide', function () {
-      if (App.lockConfigured()) { App.hiddenAt = Date.now(); App.lock(App.render); }
+    window.addEventListener('pagehide', cover);
+    window.addEventListener('blur', function () { App.hiddenAt = App.hiddenAt || Date.now(); });
+    window.addEventListener('pageshow', function () {
+      var gap = App.hiddenAt ? Date.now() - App.hiddenAt : 0;
+      App.lastSeen = Date.now();
+      resume(gap);
+    });
+    window.addEventListener('focus', function () {
+      var gap = App.hiddenAt ? Date.now() - App.hiddenAt : 0;
+      App.lastSeen = Date.now();
+      resume(gap);
     });
 
     /* делегирование кликов */
