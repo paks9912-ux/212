@@ -515,6 +515,12 @@
       (faceOn ? 'var(--red)' : faceReady ? 'var(--accent)' : 'var(--text-3)') + '">' +
       (faceOn ? 'Отключить' : 'Включить') + '</span></span></button>' +
 
+      '<div class="field"><label>Спрашивать вход</label><select data-act="set" data-k="lockAfter">' +
+      [[0, 'каждый раз'], [60, 'если не было минуту'], [300, 'если не было 5 минут'], [900, 'если не было 15 минут']]
+        .map(function (o) {
+          return '<option value="' + o[0] + '"' + (U.num(st.lockAfter) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+        }).join('') + '</select></div>' +
+
       '<button class="row tap" data-act="face-check">' +
       '<span class="grow"><span class="ttl">Проверить Face ID</span>' +
       '<span class="sub">покажет, что мешает, если вход не работает</span></span>' +
@@ -526,7 +532,8 @@
       '<span class="val"><span class="v1" style="color:var(--accent);font-size:15px">' + (st.pin ? 'Изменить' : 'Включить') + '</span></span></button>' +
       (st.pin && !faceOn ? '<button class="row tap" data-act="pin-off"><span class="grow"><span class="ttl" style="color:var(--red)">Отключить код</span></span></button>' : '') +
       '</div>' +
-      '<div class="hint">Face ID работает через тот же механизм, что Safari использует для паролей: телефон хранит ключ у себя и просто подтверждает, что это вы. ' +
+      '<div class="hint">Приложение закрывается замком, как только вы переключаетесь на другое, — заодно ваши суммы не попадают в снимок для переключателя приложений.<br><br>' +
+      'Face ID работает через тот же механизм, что Safari использует для паролей: телефон хранит ключ у себя и просто подтверждает, что это вы. ' +
       'Ни лицо, ни отпечаток приложению не передаются.<br><br>' +
       'Код-пароль остаётся <b>запасным входом</b> — на случай, если Face ID не сработает. ' +
       'И то и другое закрывает вход от чужих глаз, но не шифрует базу: с доступом к телефону данные можно достать в обход приложения.</div>';

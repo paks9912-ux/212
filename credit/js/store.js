@@ -26,6 +26,7 @@
           ratesSource: null,
           ratesPref: 'auto',
           pin: null,
+          lockAfter: 0,          // сколько секунд в фоне прощается без входа
           faceId: null,          // ключ Face ID / Touch ID, если вход включён
           faceUser: null,
           lastExport: null

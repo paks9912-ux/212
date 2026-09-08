@@ -429,7 +429,14 @@
   };
 
   /* ---------- экран блокировки ---------- */
+  /* Настроен ли вообще вход */
+  App.lockConfigured = function () {
+    return !!(DB.data && DB.data.settings &&
+      (DB.data.settings.pin || (w.Auth && Auth.enabled())));
+  };
+
   App.lock = function (done) {
+    if (App._lockEl) return;                 // уже закрыто
     var buf = '', face = !!(w.Auth && Auth.enabled());
     var el = document.createElement('div');
     el.className = 'lock';
@@ -453,17 +460,23 @@
       (face ? '<button class="btn ghost" id="lk-face-back" style="max-width:280px">Войти по Face ID</button>' : '') +
       '</div>';
     document.body.appendChild(el);
+    App._lockEl = el;
 
     var $ = function (x) { return el.querySelector(x); };
     function draw() {
       U.$$('#dots i', el).forEach(function (d, i) { d.classList.toggle('on', i < buf.length); });
     }
     function open() {
+      if (!App._lockEl) return;
+      App._lockEl = null;
+      App._unlock = null;
+      App._lockRetry = null;
       el.style.opacity = '0';
       el.style.transition = 'opacity .25s';
       setTimeout(function () { el.remove(); }, 260);
-      done();
+      if (done) done();
     }
+    App._unlock = open;
     function showKeys() {
       $('#lk-face').hidden = true;
       $('#lk-keys').hidden = false;
@@ -526,7 +539,8 @@
       $('#lk-pin').addEventListener('click', function (e) { e.stopPropagation(); showKeys(); });
       var back = $('#lk-face-back');
       if (back) back.addEventListener('click', function (e) { e.stopPropagation(); showFace(); });
-      setTimeout(function () { tryFace(true); }, 120);
+      App._lockRetry = function () { if (!busy) tryFace(true); };
+      setTimeout(function () { if (!document.hidden) tryFace(true); }, 120);
     }
 
     el.addEventListener('click', function (e) {
@@ -576,10 +590,27 @@
     w.addEventListener('scroll', App.onScroll, { passive: true });
     w.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', App.applyTheme);
 
-    /* сутки могли смениться, пока приложение висело в фоне */
+    /* Уход в фон закрывает приложение замком: и чтобы данные не попали
+       в снимок для переключателя приложений, и чтобы при возврате
+       спрашивало заново. Короткая отлучка прощается — срок задаётся
+       в настройках.                                                     */
     var day = U.today();
+    App.hiddenAt = 0;
     document.addEventListener('visibilitychange', function () {
-      if (!document.hidden && U.today() !== day) { day = U.today(); App.render(); }
+      if (document.hidden) {
+        if (App.lockConfigured()) { App.hiddenAt = Date.now(); App.lock(App.render); }
+        return;
+      }
+      var grace = U.num(DB.data.settings.lockAfter) * 1000;
+      if (App._lockEl && App.hiddenAt && (Date.now() - App.hiddenAt) < grace) {
+        if (App._unlock) App._unlock();          // отлучились ненадолго
+      } else if (App._lockEl && App._lockRetry) {
+        setTimeout(App._lockRetry, 150);         // сразу пробуем Face ID
+      }
+      if (U.today() !== day) { day = U.today(); App.render(); }
+    });
+    window.addEventListener('pagehide', function () {
+      if (App.lockConfigured()) { App.hiddenAt = Date.now(); App.lock(App.render); }
     });
 
     /* делегирование кликов */
@@ -622,7 +653,7 @@
       }
       if (t.dataset && t.dataset.act === 'set') {
         var k = t.dataset.k;
-        var v = ['defaultRate', 'defaultTerm', 'penaltyRate'].indexOf(k) >= 0 ? U.num(t.value) : t.value;
+        var v = ['defaultRate', 'defaultTerm', 'penaltyRate', 'lockAfter'].indexOf(k) >= 0 ? U.num(t.value) : t.value;
         DB.data.settings[k] = v;
         DB.save();
         if (k === 'theme') App.applyTheme();

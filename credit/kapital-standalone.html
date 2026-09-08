@@ -450,7 +450,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   var U = {};
 
   /* Номер сборки. При выпуске обновляется здесь, в index.html (?v=) и в sw.js */
-  U.BUILD = '1.9';
+  U.BUILD = '2.0';
   U.BUILD_DATE = '8 сентября 2026';
 
   /* ---------- id ---------- */
@@ -1011,6 +1011,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
           ratesSource: null,
           ratesPref: 'auto',
           pin: null,
+          lockAfter: 0,          // сколько секунд в фоне прощается без входа
           faceId: null,          // ключ Face ID / Touch ID, если вход включён
           faceUser: null,
           lastExport: null
@@ -2287,6 +2288,12 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       (faceOn ? 'var(--red)' : faceReady ? 'var(--accent)' : 'var(--text-3)') + '">' +
       (faceOn ? 'Отключить' : 'Включить') + '</span></span></button>' +
 
+      '<div class="field"><label>Спрашивать вход</label><select data-act="set" data-k="lockAfter">' +
+      [[0, 'каждый раз'], [60, 'если не было минуту'], [300, 'если не было 5 минут'], [900, 'если не было 15 минут']]
+        .map(function (o) {
+          return '<option value="' + o[0] + '"' + (U.num(st.lockAfter) === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+        }).join('') + '</select></div>' +
+
       '<button class="row tap" data-act="face-check">' +
       '<span class="grow"><span class="ttl">Проверить Face ID</span>' +
       '<span class="sub">покажет, что мешает, если вход не работает</span></span>' +
@@ -2298,7 +2305,8 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       '<span class="val"><span class="v1" style="color:var(--accent);font-size:15px">' + (st.pin ? 'Изменить' : 'Включить') + '</span></span></button>' +
       (st.pin && !faceOn ? '<button class="row tap" data-act="pin-off"><span class="grow"><span class="ttl" style="color:var(--red)">Отключить код</span></span></button>' : '') +
       '</div>' +
-      '<div class="hint">Face ID работает через тот же механизм, что Safari использует для паролей: телефон хранит ключ у себя и просто подтверждает, что это вы. ' +
+      '<div class="hint">Приложение закрывается замком, как только вы переключаетесь на другое, — заодно ваши суммы не попадают в снимок для переключателя приложений.<br><br>' +
+      'Face ID работает через тот же механизм, что Safari использует для паролей: телефон хранит ключ у себя и просто подтверждает, что это вы. ' +
       'Ни лицо, ни отпечаток приложению не передаются.<br><br>' +
       'Код-пароль остаётся <b>запасным входом</b> — на случай, если Face ID не сработает. ' +
       'И то и другое закрывает вход от чужих глаз, но не шифрует базу: с доступом к телефону данные можно достать в обход приложения.</div>';
@@ -3479,7 +3487,14 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   };
 
   /* ---------- экран блокировки ---------- */
+  /* Настроен ли вообще вход */
+  App.lockConfigured = function () {
+    return !!(DB.data && DB.data.settings &&
+      (DB.data.settings.pin || (w.Auth && Auth.enabled())));
+  };
+
   App.lock = function (done) {
+    if (App._lockEl) return;                 // уже закрыто
     var buf = '', face = !!(w.Auth && Auth.enabled());
     var el = document.createElement('div');
     el.className = 'lock';
@@ -3503,17 +3518,23 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       (face ? '<button class="btn ghost" id="lk-face-back" style="max-width:280px">Войти по Face ID</button>' : '') +
       '</div>';
     document.body.appendChild(el);
+    App._lockEl = el;
 
     var $ = function (x) { return el.querySelector(x); };
     function draw() {
       U.$$('#dots i', el).forEach(function (d, i) { d.classList.toggle('on', i < buf.length); });
     }
     function open() {
+      if (!App._lockEl) return;
+      App._lockEl = null;
+      App._unlock = null;
+      App._lockRetry = null;
       el.style.opacity = '0';
       el.style.transition = 'opacity .25s';
       setTimeout(function () { el.remove(); }, 260);
-      done();
+      if (done) done();
     }
+    App._unlock = open;
     function showKeys() {
       $('#lk-face').hidden = true;
       $('#lk-keys').hidden = false;
@@ -3576,7 +3597,8 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       $('#lk-pin').addEventListener('click', function (e) { e.stopPropagation(); showKeys(); });
       var back = $('#lk-face-back');
       if (back) back.addEventListener('click', function (e) { e.stopPropagation(); showFace(); });
-      setTimeout(function () { tryFace(true); }, 120);
+      App._lockRetry = function () { if (!busy) tryFace(true); };
+      setTimeout(function () { if (!document.hidden) tryFace(true); }, 120);
     }
 
     el.addEventListener('click', function (e) {
@@ -3626,10 +3648,27 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     w.addEventListener('scroll', App.onScroll, { passive: true });
     w.matchMedia('(prefers-color-scheme:dark)').addEventListener('change', App.applyTheme);
 
-    /* сутки могли смениться, пока приложение висело в фоне */
+    /* Уход в фон закрывает приложение замком: и чтобы данные не попали
+       в снимок для переключателя приложений, и чтобы при возврате
+       спрашивало заново. Короткая отлучка прощается — срок задаётся
+       в настройках.                                                     */
     var day = U.today();
+    App.hiddenAt = 0;
     document.addEventListener('visibilitychange', function () {
-      if (!document.hidden && U.today() !== day) { day = U.today(); App.render(); }
+      if (document.hidden) {
+        if (App.lockConfigured()) { App.hiddenAt = Date.now(); App.lock(App.render); }
+        return;
+      }
+      var grace = U.num(DB.data.settings.lockAfter) * 1000;
+      if (App._lockEl && App.hiddenAt && (Date.now() - App.hiddenAt) < grace) {
+        if (App._unlock) App._unlock();          // отлучились ненадолго
+      } else if (App._lockEl && App._lockRetry) {
+        setTimeout(App._lockRetry, 150);         // сразу пробуем Face ID
+      }
+      if (U.today() !== day) { day = U.today(); App.render(); }
+    });
+    window.addEventListener('pagehide', function () {
+      if (App.lockConfigured()) { App.hiddenAt = Date.now(); App.lock(App.render); }
     });
 
     /* делегирование кликов */
@@ -3672,7 +3711,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       }
       if (t.dataset && t.dataset.act === 'set') {
         var k = t.dataset.k;
-        var v = ['defaultRate', 'defaultTerm', 'penaltyRate'].indexOf(k) >= 0 ? U.num(t.value) : t.value;
+        var v = ['defaultRate', 'defaultTerm', 'penaltyRate', 'lockAfter'].indexOf(k) >= 0 ? U.num(t.value) : t.value;
         DB.data.settings[k] = v;
         DB.save();
         if (k === 'theme') App.applyTheme();
