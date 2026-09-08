@@ -341,10 +341,21 @@
         if (l.issuedAt > t) { if (!startsAt || l.issuedAt < startsAt) startsAt = l.issuedAt; }
         else running = true;
       });
+      /* ближайший платёж среди активных займов клиента */
+      var next = null, missed = 0;
+      loans.forEach(function (l) {
+        if (l.status === 'closed') return;
+        var r = CALC.loan(l);
+        missed += r.missed || 0;
+        if (r.nextPay && (!next || r.nextPay.date < next.date)) next = r.nextPay;
+      });
       out.push({
         client: c, p: p,
         month: p.perMonth, day: p.dailyAccrual,
         curMonth: p.cur.perMonth, curDay: p.cur.daily,
+        /* накоплено процентов и пени, ещё не выплачено — на сегодня */
+        owed: p.interestDue, curOwed: p.cur.interestDue,
+        missed: missed, overdueCount: p.overdueCount, next: next,
         startsAt: running ? null : startsAt
       });
     });
@@ -353,6 +364,21 @@
       return b.p.activeCount - a.p.activeCount;
     });
     return out;
+  };
+
+  /* Те же клиенты, но по размеру накопленного процента на сегодня */
+  CALC.owedNow = function (clients, loansOf) {
+    var list = CALC.byClient(clients, loansOf).filter(function (x) {
+      if (x.owed != null) return x.owed > 0.5;
+      for (var c in x.curOwed) if (x.curOwed[c] > 0.5) return true;
+      return false;
+    });
+    list.sort(function (a, b) {
+      if (a.overdueCount !== b.overdueCount) return b.overdueCount - a.overdueCount;
+      if (a.owed != null && b.owed != null) return b.owed - a.owed;
+      return 0;
+    });
+    return list;
   };
 
   /* Приход денег по месяцам: {'2026-09': {total, interest, principal}} */

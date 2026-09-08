@@ -183,7 +183,32 @@
         '<button class="btn sec sm" style="margin-top:12px;width:100%" data-act="go-rates">Задать курс</button></div>';
     }
 
-    /* ---------- 2. кто должен проценты — главный вопрос дня ---------- */
+    /* ---------- 2. сколько процентов набежало на сегодня ---------- */
+    var owed = CALC.owedNow(DB.clients(), function (id) { return DB.loansOf(id); });
+    if (owed.length) {
+      h += '<h2 class="sec">Должны процентов на сегодня' +
+        '<span class="act num">' + V.sum(s.interestDue, s.cur.interestDue) + '</span></h2><div class="list" id="owed-list">';
+      owed.forEach(function (x) {
+        var c = x.client, p = x.p;
+        var sub = x.missed
+          ? '<span class="badge bad">просрочка</span> ' + x.missed + ' ' +
+            U.plural(x.missed, 'месяц', 'месяца', 'месяцев')
+          : (p.activeCount + ' ' + U.plural(p.activeCount, 'заём', 'займа', 'займов') +
+            ' · ' + V.sum(p.outstanding, p.cur.outstanding));
+        var v2 = x.next ? (x.missed ? 'не платит с ' : 'платёж ') + U.fmtDate(x.next.date) : '';
+        h += '<button class="row tap" data-act="client" data-id="' + c.id + '">' + V.avatar(c.name) +
+          '<span class="grow"><span class="ttl">' + esc(c.name) + '</span>' +
+          '<span class="sub">' + sub + '</span></span>' +
+          '<span class="val"><span class="v1 num" style="color:' + (x.missed ? 'var(--red)' : 'var(--accent)') + '">' +
+          V.sum(x.owed, x.curOwed) + '</span>' +
+          (v2 ? '<span class="v2">' + esc(v2) + '</span>' : '') + '</span>' +
+          '<span class="chev">' + V.ICON.chev + '</span></button>';
+      });
+      h += '</div><div class="hint">Это проценты, которые <b>уже набежали и ещё не выплачены</b> — ' +
+        'на сегодняшний день, а не будущий платёж. Каждый день сумма растёт.</div>';
+    }
+
+    /* ---------- 3. график ближайших платежей ---------- */
     var due = CALC.duePayments(loans, 31);
     if (due.length) {
       var today = due.filter(function (x) { return x.kind === 'today'; });
@@ -206,12 +231,12 @@
           (late.length ? 'просрочено и к оплате сегодня' : 'проценты за месяц') + '</div></div>';
       }
 
-      h += '<h2 class="sec">Кто должен проценты<span class="act">' + due.length + ' из ' + s.activeCount + '</span></h2>' +
-        '<div class="list">';
+      h += '<h2 class="sec">Ближайшие платежи<span class="act">' + due.length + ' из ' + s.activeCount + '</span></h2>' +
+        '<div class="list" id="due-list">';
       due.forEach(function (x) { h += V.dueRow(x); });
       h += '</div>';
       var later = s.activeCount - due.length;
-      h += '<div class="hint">Платежи на ближайший месяц' +
+      h += '<div class="hint">Даты, когда платёж по графику' +
         (later > 0 ? '; ещё ' + later + ' ' + U.plural(later, 'заём платит', 'займа платят', 'займов платят') + ' позже' : '') +
         '. Нажмите строку, чтобы открыть заём и принять платёж.</div>';
     } else {
@@ -238,7 +263,7 @@
     /* ---------- 4. доход по клиентам ---------- */
     var perClient = CALC.byClient(DB.clients(), function (id) { return DB.loansOf(id); });
     if (perClient.length) {
-      h += '<h2 class="sec">Сколько приносит каждый<span class="act">в месяц</span></h2><div class="list">';
+      h += '<h2 class="sec">Сколько приносит каждый<span class="act">в месяц</span></h2><div class="list" id="income-list">';
       perClient.forEach(function (x) {
         var c = x.client, p = x.p;
         var bits = p.activeCount + ' ' + U.plural(p.activeCount, 'заём', 'займа', 'займов') +

@@ -177,6 +177,9 @@
     h += '<div class="stats" style="margin-top:12px">' +
       '<div class="stat"><div class="k">Приносит в месяц</div><div class="v num" style="color:var(--accent)">' + V.sum(s.perMonth, s.cur.perMonth) + '</div>' +
       '<div class="k" style="margin-top:2px">' + V.sum(s.dailyAccrual, s.cur.daily) + ' в день</div></div>' +
+      '<div class="stat"><div class="k">Процентов на сегодня</div><div class="v num" style="color:' + (s.overdueCount ? 'var(--red)' : 'var(--accent)') + '">' +
+      V.sum(s.interestDue, s.cur.interestDue) + '</div>' +
+      '<div class="k" style="margin-top:2px">набежало и не выплачено</div></div>' +
       '<div class="stat"><div class="k">Текущий долг</div><div class="v num"' + (s.overdueCount ? ' style="color:var(--red)"' : '') + '>' + V.sum(s.totalDue, s.cur.totalDue) + '</div></div>' +
       '<div class="stat"><div class="k">Заработано всего</div><div class="v num sm" style="color:var(--accent)">' + V.sum(s.profitRealized, s.cur.profit) + '</div></div>' +
       '<div class="stat"><div class="k">Выдано за всё время</div><div class="v num sm">' + V.sum(s.issuedTotal, s.cur.issued) + '</div></div>' +
