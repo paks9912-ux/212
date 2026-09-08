@@ -1019,37 +1019,74 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       return { clients: this.data.clients.length, loans: this.data.loans.length };
     },
 
-    /* CSV: Клиент;Телефон;Сумма;Дата выдачи;Ставка %;Период;Срок дней;Заметка */
+    /* Загрузка CSV. Понимает два вида таблиц:
+       — простая:  Имя;Телефон;Сумма;Дата выдачи;Ставка;Период;Срок в днях;Заметка
+       — свою выгрузку (в ней есть столбцы «Валюта» и «Остаток долга»)          */
     importCSV: function (text) {
       var lines = String(text).split(/\r?\n/).filter(function (s) { return s.trim(); });
       if (!lines.length) throw new Error('Пустой файл');
       var sep = (lines[0].match(/;/g) || []).length >= (lines[0].match(/,/g) || []).length ? ';' : ',';
       var head = lines[0].toLowerCase();
+      var isExport = head.indexOf('валюта') >= 0 && head.indexOf('остаток') >= 0;
       var start = /клиент|имя|name|фио/.test(head) ? 1 : 0;
       var per = { 'день': 'day', 'дн': 'day', 'day': 'day', 'неделя': 'week', 'нед': 'week', 'week': 'week', 'месяц': 'month', 'мес': 'month', 'month': 'month', 'год': 'year', 'year': 'year' };
-      var added = 0, self = this;
+      var self = this, added = 0, skipped = 0;
+
+      function cell(row, i) { return String(row[i] == null ? '' : row[i]).trim().replace(/^"|"$/g, ''); }
+      function period(v) {
+        v = String(v || '').toLowerCase().replace('в ', '').trim();
+        return per[v.slice(0, 6)] || per[v.slice(0, 3)] || self.data.settings.defaultPeriod;
+      }
+
       for (var i = start; i < lines.length; i++) {
-        var c = lines[i].split(sep).map(function (s) { return s.trim().replace(/^"|"$/g, ''); });
+        var c = lines[i].split(sep).map(function (x) { return x.trim().replace(/^"|"$/g, ''); });
         if (!c[0]) continue;
-        var cl = self.clientByName(c[0]) || self.addClient({ name: c[0], phone: c[1] || '' });
-        if (c[1] && !cl.phone) cl.phone = c[1];
-        var principal = U.num(c[2]);
-        if (!principal) continue;
-        var issued = self.parseDate(c[3]) || U.today();
-        var rate = c[4] != null && c[4] !== '' ? U.num(c[4]) : self.data.settings.defaultRate;
-        var pk = per[String(c[5] || '').toLowerCase().slice(0, 6)] || per[String(c[5] || '').toLowerCase().slice(0, 3)] || self.data.settings.defaultPeriod;
-        var term = c[6] ? U.num(c[6]) : self.data.settings.defaultTerm;
-        self.addLoan({
-          clientId: cl.id, principal: principal, issuedAt: issued,
-          currency: self.data.settings.currency,
-          model: 'simple', rate: rate, ratePeriod: pk,
-          payMode: self.data.settings.defaultPayMode || 'monthly',
-          dueAt: term ? U.addDays(issued, term) : null,
-          penaltyRate: self.data.settings.penaltyRate || 0,
-          note: c[7] || ''
-        });
+        var name = c[0], phone = cell(c, 1), principal = U.num(c[2]);
+        if (!principal) { skipped++; continue; }
+        var loan;
+
+        if (isExport) {
+          var issued = self.parseDate(c[4]) || U.today();
+          var paid = U.num(c[9]);
+          loan = {
+            principal: principal,
+            currency: FX.fromSymbol(cell(c, 3) || self.data.settings.currency),
+            issuedAt: issued,
+            model: 'simple',
+            rate: U.num(c[5]),
+            ratePeriod: period(c[6]),
+            payMode: /ежемес/i.test(cell(c, 7)) ? 'monthly' : 'end',
+            dueAt: self.parseDate(c[8]),
+            penaltyRate: self.data.settings.penaltyRate || 0,
+            status: /закрыт/i.test(cell(c, 11)) ? 'closed' : 'active',
+            note: ''
+          };
+          /* в таблице нет дат платежей — переносим одной строкой на сегодня */
+          if (paid > 0) loan.payments = [{ id: U.uid(), date: U.today(), amount: paid, note: 'перенесено из таблицы' }];
+        } else {
+          var iss = self.parseDate(c[3]) || U.today();
+          var term = U.num(cell(c, 6));   // пустой столбец = срок не назначен
+          loan = {
+            principal: principal,
+            currency: self.data.settings.currency,
+            issuedAt: iss,
+            model: 'simple',
+            rate: c[4] != null && c[4] !== '' ? U.num(c[4]) : self.data.settings.defaultRate,
+            ratePeriod: period(c[5]),
+            payMode: self.data.settings.defaultPayMode || 'monthly',
+            dueAt: term ? U.addDays(iss, term) : null,
+            penaltyRate: self.data.settings.penaltyRate || 0,
+            note: cell(c, 7)
+          };
+        }
+
+        var cl = self.clientByName(name) || self.addClient({ name: name, phone: phone });
+        if (phone && !cl.phone) cl.phone = phone;
+        loan.clientId = cl.id;
+        self.addLoan(loan);
         added++;
       }
+      if (!added && skipped) throw new Error('в строках не нашлась сумма займа');
       return added;
     },
 
