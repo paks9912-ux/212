@@ -175,12 +175,14 @@
     App.copyFallback(name, text, done);
   };
 
-  /* Файл сохранить не удалось: показываем текст, чтобы скопировать и сохранить самому */
-  App.copyFallback = function (name, text, done) {
+  /* Показ базы текстом: и когда файл сохранить не вышло, и для переноса вручную */
+  App.copyFallback = function (name, text, done, opt) {
+    opt = opt || {};
     App.sheet({
-      title: 'Скопируйте копию',
+      title: opt.title || 'Скопируйте копию',
       save: null,
-      html: '<div class="hint" style="padding:0 4px 12px">Здесь сохранить файл нельзя. Скопируйте текст и вставьте его в заметку, письмо или мессенджер — из него база восстанавливается целиком через «Загрузить базу».</div>' +
+      html: '<div class="hint" style="padding:0 4px 12px">' + (opt.hint ||
+        'Здесь сохранить файл нельзя. Скопируйте текст и вставьте его в заметку, письмо или мессенджер — из него база восстанавливается целиком через «Загрузить базу».') + '</div>' +
         '<button class="btn" id="cp">Скопировать всё</button>' +
         '<div class="list" style="margin-top:12px"><div class="field col">' +
         '<label>' + U.esc(name) + '</label>' +
@@ -219,6 +221,17 @@
     'quick-pay': function () { F.quickPay(); },
     'go-import': function () { F.importSheet(); },
     import: function () { F.importSheet(); },
+    transfer: function () {
+      var n = DB.clients().length, l = DB.loans().length;
+      if (!n && !l) { U.toast('Переносить пока нечего — база пустая'); return; }
+      App.copyFallback('kapital-' + U.today() + '.json', DB.exportJSON(), function () { }, {
+        title: 'Перенос на другое устройство',
+        hint: 'Здесь вся база: ' + n + ' ' + U.plural(n, 'клиент', 'клиента', 'клиентов') + ' и ' +
+          l + ' ' + U.plural(l, 'заём', 'займа', 'займов') + '. Нажмите «Скопировать всё», ' +
+          'отправьте текст себе — в заметки, Telegram или почту. На другом устройстве откройте ' +
+          '«Ещё → Загрузить базу», вставьте текст в поле и нажмите «Загрузить».'
+      });
+    },
     'go-rates': function () {
       App.go('#/more');
       setTimeout(function () {

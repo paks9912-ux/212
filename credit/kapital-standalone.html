@@ -1830,10 +1830,12 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     h += '<h2 class="sec">Данные</h2><div class="list">' +
       rowBtn('export-json', 'Сохранить резервную копию', st.lastExport ? 'последняя: ' + U.fmtDate(st.lastExport) : 'ещё ни разу') +
       rowBtn('export-csv', 'Выгрузить таблицу CSV', 'для Excel и Numbers') +
+      rowBtn('transfer', 'Перенести на другое устройство', 'скопировать базу текстом') +
       rowBtn('import', 'Загрузить базу', 'копия приложения или таблица CSV') +
       '<button class="row tap" data-act="wipe"><span class="grow"><span class="ttl" style="color:var(--red)">Стереть все данные</span></span></button>' +
       '</div>';
-    h += '<div class="hint">Всё хранится <b>только на этом телефоне</b>, без сервера и интернета. Делайте копию хотя бы раз в месяц.</div>';
+    h += '<div class="hint">Всё хранится <b>только на этом устройстве</b>, без сервера и интернета: ваши клиенты и суммы не видит никто, включая меня. ' +
+      'Обратная сторона — база <b>не появляется сама</b> на другом телефоне, компьютере или по другому адресу. Чтобы перенести, сделайте копию и загрузите её там.</div>';
 
     h += '<h2 class="sec">Установка на iPhone</h2><div class="card pad" style="font-size:15px;line-height:1.5;color:var(--text-2)">' +
       '1. Откройте эту страницу в Safari.<br>2. Нажмите кнопку «Поделиться» (квадрат со стрелкой).<br>' +
@@ -2412,7 +2414,8 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
   /* ============ ИМПОРТ ============ */
   F.importSheet = function () {
-    var h = '<div class="hint" style="padding:0 4px 14px">Выберите файл резервной копии <b>.json</b> или таблицу <b>.csv</b>. Можно также вставить текст ниже.</div>' +
+    var h = '<div class="hint" style="padding:0 4px 14px">Выберите файл резервной копии <b>.json</b> или таблицу <b>.csv</b>. ' +
+      'Можно также вставить текст ниже — например, тот, что скопировали на другом телефоне через «Перенести на другое устройство».</div>' +
       '<div class="list">' +
       '<button class="row tap" id="pick"><span class="grow"><span class="ttl" style="color:var(--accent)">Выбрать файл</span>' +
       '<span class="sub">.json или .csv</span></span></button></div>' +
@@ -2680,12 +2683,14 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     App.copyFallback(name, text, done);
   };
 
-  /* Файл сохранить не удалось: показываем текст, чтобы скопировать и сохранить самому */
-  App.copyFallback = function (name, text, done) {
+  /* Показ базы текстом: и когда файл сохранить не вышло, и для переноса вручную */
+  App.copyFallback = function (name, text, done, opt) {
+    opt = opt || {};
     App.sheet({
-      title: 'Скопируйте копию',
+      title: opt.title || 'Скопируйте копию',
       save: null,
-      html: '<div class="hint" style="padding:0 4px 12px">Здесь сохранить файл нельзя. Скопируйте текст и вставьте его в заметку, письмо или мессенджер — из него база восстанавливается целиком через «Загрузить базу».</div>' +
+      html: '<div class="hint" style="padding:0 4px 12px">' + (opt.hint ||
+        'Здесь сохранить файл нельзя. Скопируйте текст и вставьте его в заметку, письмо или мессенджер — из него база восстанавливается целиком через «Загрузить базу».') + '</div>' +
         '<button class="btn" id="cp">Скопировать всё</button>' +
         '<div class="list" style="margin-top:12px"><div class="field col">' +
         '<label>' + U.esc(name) + '</label>' +
@@ -2724,6 +2729,17 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     'quick-pay': function () { F.quickPay(); },
     'go-import': function () { F.importSheet(); },
     import: function () { F.importSheet(); },
+    transfer: function () {
+      var n = DB.clients().length, l = DB.loans().length;
+      if (!n && !l) { U.toast('Переносить пока нечего — база пустая'); return; }
+      App.copyFallback('kapital-' + U.today() + '.json', DB.exportJSON(), function () { }, {
+        title: 'Перенос на другое устройство',
+        hint: 'Здесь вся база: ' + n + ' ' + U.plural(n, 'клиент', 'клиента', 'клиентов') + ' и ' +
+          l + ' ' + U.plural(l, 'заём', 'займа', 'займов') + '. Нажмите «Скопировать всё», ' +
+          'отправьте текст себе — в заметки, Telegram или почту. На другом устройстве откройте ' +
+          '«Ещё → Загрузить базу», вставьте текст в поле и нажмите «Загрузить».'
+      });
+    },
     'go-rates': function () {
       App.go('#/more');
       setTimeout(function () {

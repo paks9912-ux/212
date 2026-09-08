@@ -559,7 +559,8 @@
 
   /* ============ ИМПОРТ ============ */
   F.importSheet = function () {
-    var h = '<div class="hint" style="padding:0 4px 14px">Выберите файл резервной копии <b>.json</b> или таблицу <b>.csv</b>. Можно также вставить текст ниже.</div>' +
+    var h = '<div class="hint" style="padding:0 4px 14px">Выберите файл резервной копии <b>.json</b> или таблицу <b>.csv</b>. ' +
+      'Можно также вставить текст ниже — например, тот, что скопировали на другом телефоне через «Перенести на другое устройство».</div>' +
       '<div class="list">' +
       '<button class="row tap" id="pick"><span class="grow"><span class="ttl" style="color:var(--accent)">Выбрать файл</span>' +
       '<span class="sub">.json или .csv</span></span></button></div>' +
