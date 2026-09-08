@@ -464,29 +464,59 @@
       $('#lk-face').hidden = false;
       $('#lk-title').textContent = 'Капитал';
     }
-    function tryFace() {
-      var btn = $('#lk-go');
-      btn.disabled = true;
-      btn.textContent = 'Подтвердите личность…';
-      $('#lk-err').textContent = '';
-      Auth.verify(function (err) {
-        btn.disabled = false;
-        btn.textContent = 'Войти по Face ID';
-        if (err) {
-          $('#lk-err').textContent = err.message;
-          el.classList.add('shake');
-          setTimeout(function () { el.classList.remove('shake'); }, 420);
-          return;
-        }
-        open();
+    /* Safari запускает Face ID только после касания экрана — автоматически,
+       как в родном приложении, браузер не разрешает. Поэтому: сначала пробуем
+       сами (вдруг платформа позволит), а если нет — годится касание в любом
+       месте экрана, целиться в кнопку не нужно.                            */
+    var abort = null, busy = false, armed = false;
+
+    function armTap() {
+      if (armed) return;
+      armed = true;
+      el.addEventListener('click', function onTap(ev) {
+        if (ev.target.closest('#lk-pin') || ev.target.closest('#lk-face-back') || ev.target.closest('[data-n]')) return;
+        if ($('#lk-keys').hidden === false) return;
+        el.removeEventListener('click', onTap);
+        armed = false;
+        tryFace(false);
       });
     }
 
+    function tryFace(silent) {
+      if (busy) { try { abort.abort(); } catch (e) { } }
+      busy = true;
+      abort = (w.AbortController ? new AbortController() : null);
+      var btn = $('#lk-go');
+      btn.textContent = 'Подтвердите личность…';
+      if (!silent) $('#lk-err').textContent = '';
+      Auth.verify(function (err) {
+        busy = false;
+        btn.textContent = 'Войти по Face ID';
+        if (err) {
+          if (silent) {
+            /* платформа просто требует касания — это не ошибка */
+            $('#lk-err').textContent = 'Коснитесь экрана, чтобы войти';
+            $('#lk-err').style.color = 'var(--text-2)';
+            armTap();
+            return;
+          }
+          $('#lk-err').style.color = 'var(--red)';
+          $('#lk-err').textContent = err.message;
+          el.classList.add('shake');
+          setTimeout(function () { el.classList.remove('shake'); }, 420);
+          armTap();
+          return;
+        }
+        open();
+      }, abort ? abort.signal : undefined);
+    }
+
     if (face) {
-      $('#lk-go').addEventListener('click', tryFace);
-      $('#lk-pin').addEventListener('click', showKeys);
+      $('#lk-go').addEventListener('click', function (e) { e.stopPropagation(); tryFace(false); });
+      $('#lk-pin').addEventListener('click', function (e) { e.stopPropagation(); showKeys(); });
       var back = $('#lk-face-back');
-      if (back) back.addEventListener('click', showFace);
+      if (back) back.addEventListener('click', function (e) { e.stopPropagation(); showFace(); });
+      setTimeout(function () { tryFace(true); }, 120);
     }
 
     el.addEventListener('click', function (e) {

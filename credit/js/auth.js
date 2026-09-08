@@ -110,12 +110,13 @@
   };
 
   /* ---------- проверка при входе ---------- */
-  A.verify = function (cb) {
+  A.verify = function (cb, signal) {
     var f = DB.data.settings.faceId;
     if (!f || !f.id) return cb(new Error('Вход по Face ID не настроен'));
     var challenge = rnd(32);
 
     navigator.credentials.get({
+      signal: signal,
       publicKey: {
         challenge: challenge,
         allowCredentials: [{ type: 'public-key', id: unb64u(f.id), transports: ['internal'] }],
