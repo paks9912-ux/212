@@ -175,10 +175,11 @@
     }
 
     h += '<div class="stats" style="margin-top:12px">' +
-      '<div class="stat"><div class="k">Текущий долг</div><div class="v num"' + (s.overdueCount ? ' style="color:var(--red)"' : '') + '>' + U.money(s.totalDue) + '</div></div>' +
-      '<div class="stat"><div class="k">Заработано</div><div class="v num" style="color:var(--accent)">' + U.money(s.profitRealized) + '</div></div>' +
-      '<div class="stat"><div class="k">Выдано за всё время</div><div class="v num sm">' + U.money(s.issuedTotal) + '</div></div>' +
-      '<div class="stat"><div class="k">Займов</div><div class="v num sm">' + s.count + (s.overdueCount ? ' · ' + s.overdueCount + ' просроч.' : '') + '</div></div>' +
+      '<div class="stat"><div class="k">Приносит в месяц</div><div class="v num" style="color:var(--accent)">' + V.sum(s.perMonth, s.cur.perMonth) + '</div>' +
+      '<div class="k" style="margin-top:2px">' + V.sum(s.dailyAccrual, s.cur.daily) + ' в день</div></div>' +
+      '<div class="stat"><div class="k">Текущий долг</div><div class="v num"' + (s.overdueCount ? ' style="color:var(--red)"' : '') + '>' + V.sum(s.totalDue, s.cur.totalDue) + '</div></div>' +
+      '<div class="stat"><div class="k">Заработано всего</div><div class="v num sm" style="color:var(--accent)">' + V.sum(s.profitRealized, s.cur.profit) + '</div></div>' +
+      '<div class="stat"><div class="k">Выдано за всё время</div><div class="v num sm">' + V.sum(s.issuedTotal, s.cur.issued) + '</div></div>' +
       '</div>';
 
     h += '<div class="btn-row"><button class="btn" data-act="new-loan" data-client="' + c.id + '">＋ Новый заём</button></div>';

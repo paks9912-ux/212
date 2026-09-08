@@ -228,7 +228,7 @@
   CALC.portfolio = function (loans) {
     var cur = {
       issued: {}, outstanding: {}, interestDue: {}, totalDue: {},
-      overdueSum: {}, profit: {}, expected: {}, daily: {}, monthDue: {}
+      overdueSum: {}, profit: {}, expected: {}, daily: {}, monthDue: {}, perMonth: {}
     };
     function add(bag, c, v) { if (v) bag[c] = (bag[c] || 0) + v; }
 
@@ -250,6 +250,7 @@
       add(cur.interestDue, c, r.interestDue + r.penaltyDue);
       add(cur.totalDue, c, r.totalDue);
       add(cur.daily, c, r.dailyAccrual);
+      add(cur.perMonth, c, CALC.perMonth(l, r.balance));
 
       var p = CALC.plan(l);
       add(cur.expected, c, Math.max(0, p.interestDue + p.penaltyDue));
@@ -277,7 +278,7 @@
     s.dueSoon.sort(function (a, b) { return a.days - b.days; });
 
     /* сведение в базовую валюту */
-    ['issued', 'outstanding', 'interestDue', 'totalDue', 'overdueSum', 'profit', 'expected', 'daily', 'monthDue']
+    ['issued', 'outstanding', 'interestDue', 'totalDue', 'overdueSum', 'profit', 'expected', 'daily', 'monthDue', 'perMonth']
       .forEach(function (k) {
         var t = FX.total(cur[k]);
         s[k === 'issued' ? 'issuedTotal' : k === 'profit' ? 'profitRealized' : k === 'expected' ? 'profitExpected' :
@@ -285,6 +286,35 @@
         if (!t.ok) s.mixed = true;
       });
     return s;
+  };
+
+  /* Доход по каждому клиенту: сколько приносит в месяц и в день */
+  CALC.byClient = function (clients, loansOf) {
+    var out = [];
+    clients.forEach(function (c) {
+      var loans = loansOf(c.id);
+      if (!loans.length) return;
+      var p = CALC.portfolio(loans);
+      if (!p.activeCount) return;
+      /* заём, датированный будущим, ещё не приносит — покажем, с какого числа */
+      var t = U.today(), startsAt = null, running = false;
+      loans.forEach(function (l) {
+        if (l.status === 'closed') return;
+        if (l.issuedAt > t) { if (!startsAt || l.issuedAt < startsAt) startsAt = l.issuedAt; }
+        else running = true;
+      });
+      out.push({
+        client: c, p: p,
+        month: p.perMonth, day: p.dailyAccrual,
+        curMonth: p.cur.perMonth, curDay: p.cur.daily,
+        startsAt: running ? null : startsAt
+      });
+    });
+    out.sort(function (a, b) {
+      if (a.month != null && b.month != null) return b.month - a.month;
+      return b.p.activeCount - a.p.activeCount;
+    });
+    return out;
   };
 
   /* Приход денег по месяцам: {'2026-09': {total, interest, principal}} */

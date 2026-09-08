@@ -35,6 +35,7 @@
 
   V.badge = function (l, r) {
     if (r.isClosed) return '<span class="badge">Закрыт</span>';
+    if (l.issuedAt > U.today()) return '<span class="badge warn">Выдача ' + U.relDate(l.issuedAt) + '</span>';
     if (r.isPaidOff) return '<span class="badge ok">Погашен</span>';
     if (r.missed) return '<span class="badge bad">Не заплатил ' + r.missed + ' ' +
       U.plural(r.missed, 'месяц', 'месяца', 'месяцев') + '</span>';
@@ -83,7 +84,9 @@
       '<span class="grow"><span class="ttl">' + esc(c.name) + '</span><span class="sub">' + sub +
       (p.overdueCount ? ' · <b style="color:var(--red)">просрочка</b>' : '') + '</span></span>' +
       '<span class="val"><span class="v1 num">' + V.sum(p.totalDue, p.cur.totalDue) + '</span>' +
-      (V.hasMoney(p.profitRealized, p.cur.profit) ? '<span class="v2">заработано ' + V.sum(p.profitRealized, p.cur.profit) + '</span>' : '') +
+      (V.hasMoney(p.perMonth, p.cur.perMonth)
+        ? '<span class="v2" style="color:var(--accent)">' + V.sum(p.perMonth, p.cur.perMonth) + ' в месяц</span>'
+        : (V.hasMoney(p.profitRealized, p.cur.profit) ? '<span class="v2">заработано ' + V.sum(p.profitRealized, p.cur.profit) + '</span>' : '')) +
       '</span><span class="chev">' + V.ICON.chev + '</span></button>';
   };
 
@@ -135,8 +138,9 @@
       '<div class="amt num">' + V.sum(s.totalDue, s.cur.totalDue) + '</div>' +
       '<div class="delta">тело ' + V.sum(s.outstanding, s.cur.outstanding) +
       ' · проценты ' + V.sum(s.interestDue, s.cur.interestDue) + '</div>' +
-      (V.hasMoney(s.dailyAccrual, s.cur.daily)
-        ? '<div class="delta" style="color:var(--accent);font-weight:600">+' + V.sum(s.dailyAccrual, s.cur.daily) + ' каждый день</div>' : '') +
+      (V.hasMoney(s.perMonth, s.cur.perMonth)
+        ? '<div class="delta" style="color:var(--accent);font-weight:600">Зарабатываю ' +
+        V.sum(s.perMonth, s.cur.perMonth) + ' в месяц · ' + V.sum(s.dailyAccrual, s.cur.daily) + ' в день</div>' : '') +
       '</div>';
 
     if (s.mixed) {
@@ -156,6 +160,26 @@
         '<div class="kv big"><span class="k">Ещё ждём</span><span class="v num">' +
         (expects ? V.sum(s.monthDue, s.cur.monthDue) : '—') + '</span></div>' +
         '</div>';
+    }
+
+    var perClient = CALC.byClient(DB.clients(), function (id) { return DB.loansOf(id); });
+    if (perClient.length) {
+      h += '<h2 class="sec">Сколько приносит каждый<span class="act">в месяц</span></h2><div class="list">';
+      perClient.forEach(function (x) {
+        var c = x.client, p = x.p;
+        var bits = p.activeCount + ' ' + U.plural(p.activeCount, 'заём', 'займа', 'займов') +
+          ' · ' + V.sum(p.outstanding, p.cur.outstanding);
+        h += '<button class="row tap" data-act="client" data-id="' + c.id + '">' + V.avatar(c.name) +
+          '<span class="grow"><span class="ttl">' + esc(c.name) + '</span>' +
+          '<span class="sub">' + (p.overdueCount ? '<span class="badge bad">просрочка</span> ' : '') + bits + '</span></span>' +
+          '<span class="val"><span class="v1 num" style="color:var(--accent)">' + V.sum(x.month, x.curMonth) + '</span>' +
+          '<span class="v2">' + (x.startsAt ? 'с ' + U.fmtDate(x.startsAt) : V.sum(x.day, x.curDay) + ' в день') + '</span></span>' +
+          '<span class="chev">' + V.ICON.chev + '</span></button>';
+      });
+      h += '</div>';
+      h += '<div style="font-size:13px;color:var(--text-2);margin:8px 4px 0">Итого <b style="color:var(--accent)">' +
+        V.sum(s.perMonth, s.cur.perMonth) + '</b> в месяц, ' + V.sum(s.dailyAccrual, s.cur.daily) + ' в день. ' +
+        'Это проценты, которые набегают при текущих остатках долга.</div>';
     }
 
     h += '<div class="stats">' +
