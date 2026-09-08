@@ -186,6 +186,10 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 .row .chev{color:var(--text-3);font-size:15px;flex:none}
 .row .ttl{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .row .sub{display:block;font-size:13px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row.wrap2 .sub{white-space:normal;overflow:visible;line-height:1.45}
+.row.wrap2 .sub .badge{margin-right:4px}
+.row.wrap2 .val{max-width:36%}
+.row.wrap2 .val .v2{white-space:normal;line-height:1.3}
 .row .val{text-align:right;flex:none;display:block;max-width:42%}
 .row .val .v1{display:block;font-size:17px;font-weight:600;white-space:nowrap}
 .row .val .v2{display:block;font-size:12px;color:var(--text-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -439,7 +443,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   var U = {};
 
   /* Номер сборки. При выпуске обновляется здесь, в index.html (?v=) и в sw.js */
-  U.BUILD = '1.3';
+  U.BUILD = '1.4';
   U.BUILD_DATE = '8 сентября 2026';
 
   /* ---------- id ---------- */
@@ -1422,6 +1426,44 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     return s;
   };
 
+  /* Кто и сколько должен принести процентами: по строке на активный заём.
+     Просроченные впереди, дальше — по дате ближайшего платежа.          */
+  CALC.duePayments = function (loans, horizonDays) {
+    var t = U.today(), horizon = horizonDays == null ? 31 : horizonDays, out = [];
+    loans.forEach(function (l) {
+      var r = CALC.loan(l);
+      if (r.isClosed || r.isPaidOff) return;
+      if (l.issuedAt > t) return;                       // ещё не выдан
+
+      if (r.missed > 0) {                               // пропустил месяцы
+        out.push({
+          loan: l, r: r, kind: 'overdue',
+          amount: r.interestDue + r.penaltyDue,
+          date: r.schedule.filter(function (p) { return p.status === 'overdue'; })[0].date,
+          days: -Math.max(1, r.overdueDays || U.diffDays(r.schedule[0].date, t))
+        });
+        return;
+      }
+      if (r.nextPay) {                                  // ближайший месячный платёж
+        var d = U.diffDays(t, r.nextPay.date);
+        if (d > horizon) return;
+        out.push({ loan: l, r: r, kind: d === 0 ? 'today' : 'soon', amount: r.nextPay.due, date: r.nextPay.date, days: d });
+        return;
+      }
+      if (l.dueAt) {                                    // проценты в конце срока
+        var d2 = U.diffDays(t, l.dueAt);
+        if (d2 > horizon) return;
+        out.push({
+          loan: l, r: r, whole: true,
+          kind: d2 < 0 ? 'overdue' : d2 === 0 ? 'today' : 'soon',
+          amount: r.totalDue, date: l.dueAt, days: d2
+        });
+      }
+    });
+    out.sort(function (a, b) { return a.days - b.days; });
+    return out;
+  };
+
   /* Доход по каждому клиенту: сколько приносит в месяц и в день */
   CALC.byClient = function (clients, loansOf) {
     var out = [];
@@ -1571,6 +1613,38 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       '<span class="chev">' + V.ICON.chev + '</span></button>';
   };
 
+  /* Строка «кто должен проценты»: слева когда, справа сумма платежа */
+  V.dueRow = function (x) {
+    var l = x.loan, r = x.r;
+    var c = DB.client(l.clientId) || { name: 'Без клиента' };
+    var cur = l.currency || FX.base();
+    var when, cls, note;
+
+    if (x.kind === 'overdue') {
+      cls = 'bad';
+      when = r.missed
+        ? 'не платил ' + r.missed + ' ' + U.plural(r.missed, 'месяц', 'месяца', 'месяцев')
+        : 'просрочка ' + U.days(-x.days);
+      note = 'с ' + U.fmtDate(x.date);
+    } else if (x.kind === 'today') {
+      cls = 'warn'; when = 'сегодня'; note = 'проценты за месяц';
+    } else {
+      cls = x.days <= 3 ? 'warn' : '';
+      when = U.relDate(x.date);
+      note = U.fmtDate(x.date, true);
+    }
+    if (x.whole) note = 'весь долг';
+
+    return '<button class="row tap" data-act="loan" data-id="' + l.id + '">' +
+      V.avatar(c.name) +
+      '<span class="grow"><span class="ttl">' + esc(c.name) + '</span>' +
+      '<span class="sub"><span class="badge ' + cls + '">' + esc(when) + '</span></span></span>' +
+      '<span class="val"><span class="v1 num" style="color:' + (x.kind === 'overdue' ? 'var(--red)' : 'var(--accent)') + '">' +
+      U.money(x.amount, cur) + '</span>' +
+      '<span class="v2">' + esc(note) + '</span></span>' +
+      '<span class="chev">' + V.ICON.chev + '</span></button>';
+  };
+
   V.clientRow = function (c) {
     var loans = DB.loansOf(c.id);
     var p = CALC.portfolio(loans);
@@ -1631,6 +1705,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       return h + '</div>';
     }
 
+    /* ---------- 1. общая сумма и заработок ---------- */
     h += '<div class="hero">' +
       '<div class="lbl">Должны вернуть</div>' +
       '<div class="amt num">' + V.sum(s.totalDue, s.cur.totalDue) + '</div>' +
@@ -1648,7 +1723,47 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         '<button class="btn sec sm" style="margin-top:12px;width:100%" data-act="go-rates">Задать курс</button></div>';
     }
 
-    /* главное для ежемесячных процентов */
+    /* ---------- 2. кто должен проценты — главный вопрос дня ---------- */
+    var due = CALC.duePayments(loans, 31);
+    if (due.length) {
+      var today = due.filter(function (x) { return x.kind === 'today'; });
+      var late = due.filter(function (x) { return x.kind === 'overdue'; });
+
+      if (late.length || today.length) {
+        var bagNow = {};
+        late.concat(today).forEach(function (x) {
+          var cc = x.loan.currency || FX.base();
+          bagNow[cc] = (bagNow[cc] || 0) + x.amount;
+        });
+        var tot = FX.total(bagNow), n = late.length + today.length;
+        h += '<div class="card pad" style="margin-top:14px;background:' + (late.length ? 'var(--danger-soft)' : 'var(--warn-soft)') + '">' +
+          '<div style="font-size:13px;font-weight:600;color:' + (late.length ? 'var(--red)' : 'var(--orange)') + '">' +
+          (late.length ? 'Должны прямо сейчас' : 'Платят сегодня') + ' · ' + n + ' ' +
+          U.plural(n, 'заём', 'займа', 'займов') + '</div>' +
+          '<div style="font-size:28px;font-weight:700;letter-spacing:-.5px;margin-top:3px" class="num">' +
+          V.sum(tot.ok ? tot.value : null, bagNow) + '</div>' +
+          '<div style="font-size:13px;color:var(--text-2);margin-top:2px">' +
+          (late.length ? 'просрочено и к оплате сегодня' : 'проценты за месяц') + '</div></div>';
+      }
+
+      h += '<h2 class="sec">Кто должен проценты<span class="act">' + due.length + ' из ' + s.activeCount + '</span></h2>' +
+        '<div class="list">';
+      due.forEach(function (x) { h += V.dueRow(x); });
+      h += '</div>';
+      var later = s.activeCount - due.length;
+      h += '<div class="hint">Платежи на ближайший месяц' +
+        (later > 0 ? '; ещё ' + later + ' ' + U.plural(later, 'заём платит', 'займа платят', 'займов платят') + ' позже' : '') +
+        '. Нажмите строку, чтобы открыть заём и принять платёж.</div>';
+    } else {
+      h += '<div class="card pad" style="margin-top:14px">' +
+        '<div style="font-weight:600;margin-bottom:3px">В ближайший месяц платежей нет</div>' +
+        '<div style="font-size:14px;color:var(--text-2);line-height:1.4">Все проценты за этот период получены.</div></div>';
+    }
+
+    h += '<div class="btn-row"><button class="btn" data-act="quick-pay">Принять платёж</button>' +
+      '<button class="btn sec" data-act="new-loan">＋ Выдать заём</button></div>';
+
+    /* ---------- 3. месяц ---------- */
     var expects = V.hasMoney(s.monthDue, s.cur.monthDue);
     if (expects || mProfit) {
       h += '<h2 class="sec">Проценты за ' + U.monthName(mk).toLowerCase().replace(/ \d+$/, '') + '</h2>' +
@@ -1660,6 +1775,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         '</div>';
     }
 
+    /* ---------- 4. доход по клиентам ---------- */
     var perClient = CALC.byClient(DB.clients(), function (id) { return DB.loansOf(id); });
     if (perClient.length) {
       h += '<h2 class="sec">Сколько приносит каждый<span class="act">в месяц</span></h2><div class="list">';
@@ -1680,6 +1796,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
         'Это проценты, которые набегают при текущих остатках долга.</div>';
     }
 
+    /* ---------- 5. цифры помельче ---------- */
     h += '<div class="stats">' +
       '<div class="stat"><div class="k"><span class="dot" style="background:var(--red)"></span>Просрочено</div>' +
       '<div class="v num" style="color:' + (s.overdueCount ? 'var(--red)' : 'inherit') + '">' +
@@ -1699,20 +1816,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       '<div class="k" style="margin-top:2px">' + s.activeCount + ' ' + U.plural(s.activeCount, 'активный заём', 'активных займа', 'активных займов') + '</div></div>' +
       '</div>';
 
-    h += '<div class="btn-row"><button class="btn" data-act="new-loan">＋ Выдать заём</button>' +
-      '<button class="btn sec" data-act="quick-pay">Принять платёж</button></div>';
-
-    if (s.overdue.length) {
-      h += '<h2 class="sec" style="color:var(--red)">Просрочено · ' + s.overdue.length + '</h2><div class="list">';
-      s.overdue.slice(0, 8).forEach(function (x) { h += V.loanRow(x.loan); });
-      h += '</div>';
-    }
-    if (s.dueSoon.length) {
-      h += '<h2 class="sec">Ближайшие платежи</h2><div class="list">';
-      s.dueSoon.slice(0, 8).forEach(function (x) { h += V.loanRow(x.loan); });
-      h += '</div>';
-    }
-
+    /* ---------- 6. последние платежи ---------- */
     var recent = [];
     loans.forEach(function (l) {
       (l.payments || []).forEach(function (p) { recent.push({ l: l, p: p }); });

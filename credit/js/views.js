@@ -73,6 +73,38 @@
       '<span class="chev">' + V.ICON.chev + '</span></button>';
   };
 
+  /* Строка «кто должен проценты»: слева когда, справа сумма платежа */
+  V.dueRow = function (x) {
+    var l = x.loan, r = x.r;
+    var c = DB.client(l.clientId) || { name: 'Без клиента' };
+    var cur = l.currency || FX.base();
+    var when, cls, note;
+
+    if (x.kind === 'overdue') {
+      cls = 'bad';
+      when = r.missed
+        ? 'не платил ' + r.missed + ' ' + U.plural(r.missed, 'месяц', 'месяца', 'месяцев')
+        : 'просрочка ' + U.days(-x.days);
+      note = 'с ' + U.fmtDate(x.date);
+    } else if (x.kind === 'today') {
+      cls = 'warn'; when = 'сегодня'; note = 'проценты за месяц';
+    } else {
+      cls = x.days <= 3 ? 'warn' : '';
+      when = U.relDate(x.date);
+      note = U.fmtDate(x.date, true);
+    }
+    if (x.whole) note = 'весь долг';
+
+    return '<button class="row tap" data-act="loan" data-id="' + l.id + '">' +
+      V.avatar(c.name) +
+      '<span class="grow"><span class="ttl">' + esc(c.name) + '</span>' +
+      '<span class="sub"><span class="badge ' + cls + '">' + esc(when) + '</span></span></span>' +
+      '<span class="val"><span class="v1 num" style="color:' + (x.kind === 'overdue' ? 'var(--red)' : 'var(--accent)') + '">' +
+      U.money(x.amount, cur) + '</span>' +
+      '<span class="v2">' + esc(note) + '</span></span>' +
+      '<span class="chev">' + V.ICON.chev + '</span></button>';
+  };
+
   V.clientRow = function (c) {
     var loans = DB.loansOf(c.id);
     var p = CALC.portfolio(loans);
@@ -133,6 +165,7 @@
       return h + '</div>';
     }
 
+    /* ---------- 1. общая сумма и заработок ---------- */
     h += '<div class="hero">' +
       '<div class="lbl">Должны вернуть</div>' +
       '<div class="amt num">' + V.sum(s.totalDue, s.cur.totalDue) + '</div>' +
@@ -150,7 +183,47 @@
         '<button class="btn sec sm" style="margin-top:12px;width:100%" data-act="go-rates">Задать курс</button></div>';
     }
 
-    /* главное для ежемесячных процентов */
+    /* ---------- 2. кто должен проценты — главный вопрос дня ---------- */
+    var due = CALC.duePayments(loans, 31);
+    if (due.length) {
+      var today = due.filter(function (x) { return x.kind === 'today'; });
+      var late = due.filter(function (x) { return x.kind === 'overdue'; });
+
+      if (late.length || today.length) {
+        var bagNow = {};
+        late.concat(today).forEach(function (x) {
+          var cc = x.loan.currency || FX.base();
+          bagNow[cc] = (bagNow[cc] || 0) + x.amount;
+        });
+        var tot = FX.total(bagNow), n = late.length + today.length;
+        h += '<div class="card pad" style="margin-top:14px;background:' + (late.length ? 'var(--danger-soft)' : 'var(--warn-soft)') + '">' +
+          '<div style="font-size:13px;font-weight:600;color:' + (late.length ? 'var(--red)' : 'var(--orange)') + '">' +
+          (late.length ? 'Должны прямо сейчас' : 'Платят сегодня') + ' · ' + n + ' ' +
+          U.plural(n, 'заём', 'займа', 'займов') + '</div>' +
+          '<div style="font-size:28px;font-weight:700;letter-spacing:-.5px;margin-top:3px" class="num">' +
+          V.sum(tot.ok ? tot.value : null, bagNow) + '</div>' +
+          '<div style="font-size:13px;color:var(--text-2);margin-top:2px">' +
+          (late.length ? 'просрочено и к оплате сегодня' : 'проценты за месяц') + '</div></div>';
+      }
+
+      h += '<h2 class="sec">Кто должен проценты<span class="act">' + due.length + ' из ' + s.activeCount + '</span></h2>' +
+        '<div class="list">';
+      due.forEach(function (x) { h += V.dueRow(x); });
+      h += '</div>';
+      var later = s.activeCount - due.length;
+      h += '<div class="hint">Платежи на ближайший месяц' +
+        (later > 0 ? '; ещё ' + later + ' ' + U.plural(later, 'заём платит', 'займа платят', 'займов платят') + ' позже' : '') +
+        '. Нажмите строку, чтобы открыть заём и принять платёж.</div>';
+    } else {
+      h += '<div class="card pad" style="margin-top:14px">' +
+        '<div style="font-weight:600;margin-bottom:3px">В ближайший месяц платежей нет</div>' +
+        '<div style="font-size:14px;color:var(--text-2);line-height:1.4">Все проценты за этот период получены.</div></div>';
+    }
+
+    h += '<div class="btn-row"><button class="btn" data-act="quick-pay">Принять платёж</button>' +
+      '<button class="btn sec" data-act="new-loan">＋ Выдать заём</button></div>';
+
+    /* ---------- 3. месяц ---------- */
     var expects = V.hasMoney(s.monthDue, s.cur.monthDue);
     if (expects || mProfit) {
       h += '<h2 class="sec">Проценты за ' + U.monthName(mk).toLowerCase().replace(/ \d+$/, '') + '</h2>' +
@@ -162,6 +235,7 @@
         '</div>';
     }
 
+    /* ---------- 4. доход по клиентам ---------- */
     var perClient = CALC.byClient(DB.clients(), function (id) { return DB.loansOf(id); });
     if (perClient.length) {
       h += '<h2 class="sec">Сколько приносит каждый<span class="act">в месяц</span></h2><div class="list">';
@@ -182,6 +256,7 @@
         'Это проценты, которые набегают при текущих остатках долга.</div>';
     }
 
+    /* ---------- 5. цифры помельче ---------- */
     h += '<div class="stats">' +
       '<div class="stat"><div class="k"><span class="dot" style="background:var(--red)"></span>Просрочено</div>' +
       '<div class="v num" style="color:' + (s.overdueCount ? 'var(--red)' : 'inherit') + '">' +
@@ -201,20 +276,7 @@
       '<div class="k" style="margin-top:2px">' + s.activeCount + ' ' + U.plural(s.activeCount, 'активный заём', 'активных займа', 'активных займов') + '</div></div>' +
       '</div>';
 
-    h += '<div class="btn-row"><button class="btn" data-act="new-loan">＋ Выдать заём</button>' +
-      '<button class="btn sec" data-act="quick-pay">Принять платёж</button></div>';
-
-    if (s.overdue.length) {
-      h += '<h2 class="sec" style="color:var(--red)">Просрочено · ' + s.overdue.length + '</h2><div class="list">';
-      s.overdue.slice(0, 8).forEach(function (x) { h += V.loanRow(x.loan); });
-      h += '</div>';
-    }
-    if (s.dueSoon.length) {
-      h += '<h2 class="sec">Ближайшие платежи</h2><div class="list">';
-      s.dueSoon.slice(0, 8).forEach(function (x) { h += V.loanRow(x.loan); });
-      h += '</div>';
-    }
-
+    /* ---------- 6. последние платежи ---------- */
     var recent = [];
     loans.forEach(function (l) {
       (l.payments || []).forEach(function (p) { recent.push({ l: l, p: p }); });

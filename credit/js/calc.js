@@ -288,6 +288,44 @@
     return s;
   };
 
+  /* Кто и сколько должен принести процентами: по строке на активный заём.
+     Просроченные впереди, дальше — по дате ближайшего платежа.          */
+  CALC.duePayments = function (loans, horizonDays) {
+    var t = U.today(), horizon = horizonDays == null ? 31 : horizonDays, out = [];
+    loans.forEach(function (l) {
+      var r = CALC.loan(l);
+      if (r.isClosed || r.isPaidOff) return;
+      if (l.issuedAt > t) return;                       // ещё не выдан
+
+      if (r.missed > 0) {                               // пропустил месяцы
+        out.push({
+          loan: l, r: r, kind: 'overdue',
+          amount: r.interestDue + r.penaltyDue,
+          date: r.schedule.filter(function (p) { return p.status === 'overdue'; })[0].date,
+          days: -Math.max(1, r.overdueDays || U.diffDays(r.schedule[0].date, t))
+        });
+        return;
+      }
+      if (r.nextPay) {                                  // ближайший месячный платёж
+        var d = U.diffDays(t, r.nextPay.date);
+        if (d > horizon) return;
+        out.push({ loan: l, r: r, kind: d === 0 ? 'today' : 'soon', amount: r.nextPay.due, date: r.nextPay.date, days: d });
+        return;
+      }
+      if (l.dueAt) {                                    // проценты в конце срока
+        var d2 = U.diffDays(t, l.dueAt);
+        if (d2 > horizon) return;
+        out.push({
+          loan: l, r: r, whole: true,
+          kind: d2 < 0 ? 'overdue' : d2 === 0 ? 'today' : 'soon',
+          amount: r.totalDue, date: l.dueAt, days: d2
+        });
+      }
+    });
+    out.sort(function (a, b) { return a.days - b.days; });
+    return out;
+  };
+
   /* Доход по каждому клиенту: сколько приносит в месяц и в день */
   CALC.byClient = function (clients, loansOf) {
     var out = [];
