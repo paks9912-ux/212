@@ -17,7 +17,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="icons/favicon-64.png" type="image/png">
-<link rel="stylesheet" href="css/app.css?v=16">
+<link rel="stylesheet" href="css/app.css?v=17">
 </head>
 <body>
 
@@ -32,14 +32,94 @@
 
 <div id="toast"></div>
 
-<script src="js/util.js?v=16"></script>
-<script src="js/fx.js?v=16"></script>
-<script src="js/auth.js?v=16"></script>
-<script src="js/store.js?v=16"></script>
-<script src="js/calc.js?v=16"></script>
-<script src="js/views.js?v=16"></script>
-<script src="js/detail.js?v=16"></script>
-<script src="js/app.js?v=16"></script>
+<script>
+/* Спасательный экран. Работает без остальных файлов приложения: если что-то
+   не догрузилось, человек видит понятный текст, может обновить приложение и
+   в любом случае забрать свою базу — она лежит в хранилище браузера. */
+(function () {
+  var shown = false;
+  function esc(t) { return String(t).replace(/[<>&]/g, function (c) { return { '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]; }); }
+
+  window.appRecover = function (why) {
+    if (shown) return;
+    var el = document.getElementById('screen');
+    if (!el) return;
+    shown = true;
+    el.innerHTML =
+      '<div style="max-width:420px;margin:0 auto;padding:44px 20px;font:400 17px/1.45 -apple-system,BlinkMacSystemFont,system-ui,sans-serif">' +
+      '<div style="font-size:44px;text-align:center">⚠️</div>' +
+      '<h1 style="font-size:22px;font-weight:700;text-align:center;margin:12px 0 6px">Приложение не запустилось</h1>' +
+      '<p style="color:#6b6b70;text-align:center;margin:0 0 22px">Часть файлов не догрузилась. Ваши данные целы — они хранятся отдельно от программы.</p>' +
+      '<button id="rc-up" style="display:block;width:100%;min-height:50px;border:0;border-radius:14px;background:#12a150;color:#fff;font-size:17px;font-weight:600">Обновить приложение</button>' +
+      '<button id="rc-save" style="display:block;width:100%;min-height:50px;margin-top:10px;border:0;border-radius:14px;background:rgba(120,120,128,.16);color:inherit;font-size:17px;font-weight:600">Сохранить копию базы</button>' +
+      '<textarea id="rc-dump" readonly style="display:none;width:100%;min-height:180px;margin-top:12px;font-size:12px;font-family:ui-monospace,Menlo,monospace;border-radius:12px;border:1px solid rgba(120,120,128,.3);background:transparent;color:inherit;padding:10px"></textarea>' +
+      '<p id="rc-hint" style="display:none;color:#6b6b70;font-size:13px;margin-top:8px">Выделите текст и скопируйте — из него база восстанавливается через «Загрузить базу».</p>' +
+      '<p style="color:#9a9aa0;font-size:12px;margin-top:22px;text-align:center">' + esc(why || '') + '</p></div>';
+
+    document.getElementById('rc-up').onclick = function () {
+      var jobs = [];
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations)
+          jobs.push(navigator.serviceWorker.getRegistrations().then(function (rs) {
+            return Promise.all(rs.map(function (r) { return r.unregister(); }));
+          }).catch(function () { }));
+        if (window.caches && caches.keys)
+          jobs.push(caches.keys().then(function (ks) {
+            return Promise.all(ks.map(function (k) { return caches.delete(k); }));
+          }).catch(function () { }));
+      } catch (e) { }
+      var go = function () {
+        location.replace(location.href.split('#')[0].split('?')[0] + '?u=' + Date.now());
+      };
+      Promise.all(jobs).then(function () { setTimeout(go, 250); }, go);
+      setTimeout(go, 3000);
+    };
+
+    document.getElementById('rc-save').onclick = function () {
+      var raw = '';
+      try { raw = localStorage.getItem('kapital.db.v1') || localStorage.getItem('kapital.autobackup') || ''; } catch (e) { }
+      var ta = document.getElementById('rc-dump');
+      if (!raw) { ta.value = 'База пуста — сохранять нечего.'; }
+      else {
+        ta.value = raw;
+        try {
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(new Blob([raw], { type: 'application/json' }));
+          a.download = 'kapital-backup.json';
+          document.body.appendChild(a); a.click(); a.remove();
+        } catch (e) { }
+      }
+      ta.style.display = 'block';
+      document.getElementById('rc-hint').style.display = 'block';
+      ta.focus(); ta.setSelectionRange(0, ta.value.length);
+    };
+  };
+
+  window.addEventListener('error', function (e) {
+    var src = e && e.target && e.target.src;
+    if (src) {
+      var name = src.split('/').pop().split('?')[0];
+      try { name = decodeURIComponent(name); } catch (err) { }
+      appRecover('Не загрузился файл: ' + name);
+    }
+    else if (e && e.message) appRecover(e.message);
+  }, true);
+
+  setTimeout(function () {
+    var el = document.getElementById('screen');
+    if (el && !el.innerHTML.trim()) appRecover('приложение не ответило за 3 секунды');
+  }, 3000);
+})();
+</script>
+
+<script src="js/util.js?v=17"></script>
+<script src="js/fx.js?v=17"></script>
+<script src="js/auth.js?v=17"></script>
+<script src="js/store.js?v=17"></script>
+<script src="js/calc.js?v=17"></script>
+<script src="js/views.js?v=17"></script>
+<script src="js/detail.js?v=17"></script>
+<script src="js/app.js?v=17"></script>
 <script>
   /* иконки вкладок */
   ['home','loans','clients','more'].forEach(function(k){

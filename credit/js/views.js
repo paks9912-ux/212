@@ -503,15 +503,16 @@
     h += '</div><div class="hint">Курс нужен, только если вы даёте деньги <b>в разных валютах</b> — чтобы свести всё в один итог. ' +
       'Можно вписать вручную: так надёжнее всего, и интернет не нужен.</div>';
 
-    var faceOn = Auth.enabled();
+    var faceOn = !!(w.Auth && Auth.enabled());
+    var faceReady = !!w.Auth && App.faceOk;
     h += '<h2 class="sec">Защита</h2><div class="list">' +
       '<button class="row tap" data-act="' + (faceOn ? 'face-off' : 'face-on') + '">' +
       '<span class="grow"><span class="ttl">Face ID / Touch ID</span><span class="sub">' +
       (faceOn ? 'вход по лицу или отпечатку'
-        : (App.faceOk ? 'быстрый вход вместо кода' : 'на этом устройстве недоступен')) +
+        : (faceReady ? 'быстрый вход вместо кода' : 'на этом устройстве недоступен')) +
       '</span></span>' +
       '<span class="val"><span class="v1" style="font-size:15px;color:' +
-      (faceOn ? 'var(--red)' : App.faceOk ? 'var(--accent)' : 'var(--text-3)') + '">' +
+      (faceOn ? 'var(--red)' : faceReady ? 'var(--accent)' : 'var(--text-3)') + '">' +
       (faceOn ? 'Отключить' : 'Включить') + '</span></span></button>' +
 
       '<button class="row tap" data-act="pin">' +

@@ -443,7 +443,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   var U = {};
 
   /* Номер сборки. При выпуске обновляется здесь, в index.html (?v=) и в sw.js */
-  U.BUILD = '1.6';
+  U.BUILD = '1.7';
   U.BUILD_DATE = '8 сентября 2026';
 
   /* ---------- id ---------- */
@@ -2238,15 +2238,16 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     h += '</div><div class="hint">Курс нужен, только если вы даёте деньги <b>в разных валютах</b> — чтобы свести всё в один итог. ' +
       'Можно вписать вручную: так надёжнее всего, и интернет не нужен.</div>';
 
-    var faceOn = Auth.enabled();
+    var faceOn = !!(w.Auth && Auth.enabled());
+    var faceReady = !!w.Auth && App.faceOk;
     h += '<h2 class="sec">Защита</h2><div class="list">' +
       '<button class="row tap" data-act="' + (faceOn ? 'face-off' : 'face-on') + '">' +
       '<span class="grow"><span class="ttl">Face ID / Touch ID</span><span class="sub">' +
       (faceOn ? 'вход по лицу или отпечатку'
-        : (App.faceOk ? 'быстрый вход вместо кода' : 'на этом устройстве недоступен')) +
+        : (faceReady ? 'быстрый вход вместо кода' : 'на этом устройстве недоступен')) +
       '</span></span>' +
       '<span class="val"><span class="v1" style="font-size:15px;color:' +
-      (faceOn ? 'var(--red)' : App.faceOk ? 'var(--accent)' : 'var(--text-3)') + '">' +
+      (faceOn ? 'var(--red)' : faceReady ? 'var(--accent)' : 'var(--text-3)') + '">' +
       (faceOn ? 'Отключить' : 'Включить') + '</span></span></button>' +
 
       '<button class="row tap" data-act="pin">' +
@@ -2974,6 +2975,14 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
   };
 
   App.render = function () {
+    try { App._render(); }
+    catch (e) {
+      if (w.appRecover) w.appRecover('Ошибка при отрисовке: ' + (e && e.message ? e.message : e));
+      else throw e;
+    }
+  };
+
+  App._render = function () {
     var r = location.hash || '#/';
     App.route = r;
     var scr = U.$('#screen'), html = '';
@@ -3318,6 +3327,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
     },
     pin: function () { F.pinSheet(); },
     'face-on': function () {
+      if (!w.Auth) { U.toast('Модуль входа не загрузился — обновите приложение'); return; }
       if (!DB.data.settings.pin) {
         U.toast('Сначала задайте код-пароль — он нужен как запасной вход');
         setTimeout(function () { F.pinSheet(); }, 600);
@@ -3363,7 +3373,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
   /* ---------- экран блокировки ---------- */
   App.lock = function (done) {
-    var buf = '', face = Auth.enabled();
+    var buf = '', face = !!(w.Auth && Auth.enabled());
     var el = document.createElement('div');
     el.className = 'lock';
     el.innerHTML =
@@ -3451,10 +3461,18 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
 
   /* ---------- старт ---------- */
   App.start = function () {
+    try { App._start(); }
+    catch (e) {
+      if (w.appRecover) w.appRecover('Ошибка при запуске: ' + (e && e.message ? e.message : e));
+      else throw e;
+    }
+  };
+
+  App._start = function () {
     DB.load();
     App.applyTheme();
     App.faceOk = false;
-    Auth.available(function (v) {
+    if (w.Auth) Auth.available(function (v) {
       App.faceOk = v;
       if (v && App.route === '#/more') App.render();
     });
@@ -3464,7 +3482,7 @@ h2.sec .act{float:right;text-transform:none;letter-spacing:0;color:var(--accent)
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () { });
     };
 
-    if (DB.data.settings.pin || Auth.enabled()) App.lock(run);
+    if (DB.data.settings.pin || (w.Auth && Auth.enabled())) App.lock(run);
     else run();
 
     w.addEventListener('hashchange', App.render);

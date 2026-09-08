@@ -1,10 +1,10 @@
 /* Офлайн-кэш. Меняйте VER при обновлении файлов. */
-const VER = 'kapital-v16';
+const VER = 'kapital-v17';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
-  './css/app.css?v=16',
-  './js/util.js?v=16', './js/fx.js?v=16', './js/auth.js?v=16', './js/store.js?v=16', './js/calc.js?v=16',
-  './js/views.js?v=16', './js/detail.js?v=16', './js/app.js?v=16',
+  './css/app.css?v=17',
+  './js/util.js?v=17', './js/fx.js?v=17', './js/auth.js?v=17', './js/store.js?v=17', './js/calc.js?v=17',
+  './js/views.js?v=17', './js/detail.js?v=17', './js/app.js?v=17',
   './icons/icon-180.png', './icons/icon-192.png', './icons/icon-512.png', './icons/favicon-64.png'
 ];
 
@@ -30,6 +30,12 @@ self.addEventListener('fetch', e => {
         caches.open(VER).then(c => c.put(e.request, copy)).catch(() => {});
         return res;
       })
-      .catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
+      .catch(() => caches.match(e.request).then(r => {
+        if (r) return r;
+        /* Страницей подменяем только переход по адресу. Отдать HTML вместо
+           скрипта нельзя: он не выполнится, и приложение не запустится. */
+        if (e.request.mode === 'navigate') return caches.match('./index.html');
+        return Response.error();
+      }))
   );
 });

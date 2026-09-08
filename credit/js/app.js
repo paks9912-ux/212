@@ -22,6 +22,14 @@
   };
 
   App.render = function () {
+    try { App._render(); }
+    catch (e) {
+      if (w.appRecover) w.appRecover('Ошибка при отрисовке: ' + (e && e.message ? e.message : e));
+      else throw e;
+    }
+  };
+
+  App._render = function () {
     var r = location.hash || '#/';
     App.route = r;
     var scr = U.$('#screen'), html = '';
@@ -366,6 +374,7 @@
     },
     pin: function () { F.pinSheet(); },
     'face-on': function () {
+      if (!w.Auth) { U.toast('Модуль входа не загрузился — обновите приложение'); return; }
       if (!DB.data.settings.pin) {
         U.toast('Сначала задайте код-пароль — он нужен как запасной вход');
         setTimeout(function () { F.pinSheet(); }, 600);
@@ -411,7 +420,7 @@
 
   /* ---------- экран блокировки ---------- */
   App.lock = function (done) {
-    var buf = '', face = Auth.enabled();
+    var buf = '', face = !!(w.Auth && Auth.enabled());
     var el = document.createElement('div');
     el.className = 'lock';
     el.innerHTML =
@@ -499,10 +508,18 @@
 
   /* ---------- старт ---------- */
   App.start = function () {
+    try { App._start(); }
+    catch (e) {
+      if (w.appRecover) w.appRecover('Ошибка при запуске: ' + (e && e.message ? e.message : e));
+      else throw e;
+    }
+  };
+
+  App._start = function () {
     DB.load();
     App.applyTheme();
     App.faceOk = false;
-    Auth.available(function (v) {
+    if (w.Auth) Auth.available(function (v) {
       App.faceOk = v;
       if (v && App.route === '#/more') App.render();
     });
@@ -512,7 +529,7 @@
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () { });
     };
 
-    if (DB.data.settings.pin || Auth.enabled()) App.lock(run);
+    if (DB.data.settings.pin || (w.Auth && Auth.enabled())) App.lock(run);
     else run();
 
     w.addEventListener('hashchange', App.render);
