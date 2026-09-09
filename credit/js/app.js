@@ -56,6 +56,8 @@
       a.classList.toggle('on', a.getAttribute('href') === base);
     });
 
+    if (V.mountDeck) V.mountDeck();
+
     if (App.lastRoute !== r) { w.scrollTo(0, 0); App.lastRoute = r; }
     App.onScroll();
   };
