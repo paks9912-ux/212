@@ -469,13 +469,11 @@ h2.sec button.act{min-height:32px;padding:0 4px;font-size:15px;margin-top:-6px}
 .deck{margin-top:6px}
 .deck-tabs{margin-bottom:10px}
 .deck-tabs button{padding:0 6px;white-space:nowrap}
-.deck-track{
-  display:flex;overflow-x:auto;scroll-snap-type:x mandatory;
-  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
-  scrollbar-width:none;transition:height .28s var(--ease);
-}
-.deck-track::-webkit-scrollbar{display:none}
-.deck-page{flex:0 0 100%;min-width:100%;scroll-snap-align:start;align-self:flex-start}
+/* Листаем сами, а не системной прокруткой: иначе палец над списком
+   «залипает» в горизонтальном скроллере и страница не прокручивается. */
+.deck-view{overflow:hidden;transition:height .28s var(--ease)}
+.deck-track{display:flex;will-change:transform;touch-action:pan-y}
+.deck-page{flex:0 0 100%;min-width:100%;align-self:flex-start}
 .deck-sum{font-size:13px;color:var(--text-2);margin:0 4px 8px}
 .deck-sum b{color:var(--text)}
 .deck-dots{display:flex;justify-content:center;gap:7px;margin-top:12px}

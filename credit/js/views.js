@@ -276,11 +276,11 @@
       labels.map(function (t, i) {
         return '<button data-p="' + i + '" class="' + (i === act ? 'on' : '') + '">' + t + '</button>';
       }).join('') + '</div>' +
-      '<div class="deck-track" id="deck-track">' +
+      '<div class="deck-view" id="deck-view"><div class="deck-track" id="deck-track">' +
       '<div class="deck-page">' + p1 + '</div>' +
       '<div class="deck-page">' + p2 + '</div>' +
       '<div class="deck-page">' + p3 + '</div>' +
-      '</div>' +
+      '</div></div>' +
       '<div class="deck-dots" id="deck-dots">' +
       labels.map(function (t, i) { return '<i class="' + (i === act ? 'on' : '') + '"></i>'; }).join('') +
       '</div></div>';
@@ -584,50 +584,88 @@
     }
   };
 
-  /* Перелистывание: снап по страницам, вкладки и точки, высота по странице */
+  /* ---------- перелистывание ----------
+     Направление определяем сами по первым 10 пикселям движения: вертикальное
+     отдаём странице, горизонтальное ведём пальцем. Системная горизонтальная
+     прокрутка так не делает — она перехватывает жест и мешает листать вверх. */
   V.deckPage = 0;
   V.mountDeck = function () {
-    var track = U.$('#deck-track');
-    if (!track) return;
+    var view = U.$('#deck-view'), track = U.$('#deck-track');
+    if (!view || !track) return;
     var pages = U.$$('.deck-page', track);
     var tabs = U.$$('#deck-tabs button');
     var dots = U.$$('#deck-dots i');
+    var last = pages.length - 1;
+    var cur = Math.max(0, Math.min(last, U.num(V.deckPage)));
 
-    function mark(i) {
-      V.deckPage = i;
-      tabs.forEach(function (b, n) { b.classList.toggle('on', n === i); });
-      dots.forEach(function (d, n) { d.classList.toggle('on', n === i); });
-      if (pages[i]) track.style.height = pages[i].offsetHeight + 'px';
+    function width() { return view.clientWidth || w.innerWidth || 1; }
+    function shift(px, animate) {
+      track.style.transition = animate ? 'transform .32s cubic-bezier(.32,.72,0,1)' : 'none';
+      track.style.transform = 'translate3d(' + px + 'px,0,0)';
     }
-    function goto(i, smooth) {
-      track.scrollTo({ left: i * track.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
-      mark(i);
+    function height() {
+      if (pages[cur]) view.style.height = pages[cur].offsetHeight + 'px';
+    }
+    function mark(k) {
+      cur = k; V.deckPage = k;
+      tabs.forEach(function (b, n) { b.classList.toggle('on', n === k); });
+      dots.forEach(function (d, n) { d.classList.toggle('on', n === k); });
+      height();
+    }
+    function go(k, animate) {
+      mark(Math.max(0, Math.min(last, k)));
+      shift(-cur * width(), animate !== false);
     }
 
     tabs.forEach(function (b) {
-      b.addEventListener('click', function () { goto(+b.dataset.p, true); });
+      b.addEventListener('click', function () { go(+b.dataset.p, true); });
     });
 
-    var tmr;
-    track.addEventListener('scroll', function () {
-      clearTimeout(tmr);
-      tmr = setTimeout(function () {
-        var i = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
-        if (i !== V.deckPage) mark(i);
-        else if (pages[i]) track.style.height = pages[i].offsetHeight + 'px';
-      }, 90);
+    var sx = 0, sy = 0, dx = 0, axis = null, base = 0, t0 = 0, live = false;
+
+    view.addEventListener('touchstart', function (e) {
+      if (e.touches.length !== 1) { live = false; return; }
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+      dx = 0; axis = null; live = true; t0 = Date.now();
+      base = -cur * width();
+      shift(base, false);
     }, { passive: true });
 
-    window.addEventListener('resize', function () {
-      if (U.$('#deck-track') === track) goto(V.deckPage, false);
+    view.addEventListener('touchmove', function (e) {
+      if (!live || e.touches.length !== 1) return;
+      dx = e.touches[0].clientX - sx;
+      var dy = e.touches[0].clientY - sy;
+      if (!axis) {
+        if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+        axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      }
+      if (axis === 'y') return;                 /* вертикаль — страница листается сама */
+      if (e.cancelable) e.preventDefault();
+      var d = dx;
+      if ((cur === 0 && d > 0) || (cur === last && d < 0)) d *= 0.32;   /* упор на краях */
+      shift(base + d, false);
+    }, { passive: false });
+
+    function release() {
+      if (!live) return;
+      live = false;
+      if (axis !== 'x') return;
+      var speed = dx / Math.max(1, Date.now() - t0);
+      var k = cur;
+      if (dx < -width() * 0.2 || speed < -0.3) k = cur + 1;
+      else if (dx > width() * 0.2 || speed > 0.3) k = cur - 1;
+      go(k, true);
+    }
+    view.addEventListener('touchend', release);
+    view.addEventListener('touchcancel', release);
+
+    w.addEventListener('resize', function () {
+      if (U.$('#deck-view') === view) go(cur, false);
     });
 
-    goto(V.deckPage, false);
-    /* картинки и шрифты могли ещё дорисовываться — уточняем высоту */
-    setTimeout(function () { if (pages[V.deckPage]) track.style.height = pages[V.deckPage].offsetHeight + 'px'; }, 120);
+    go(cur, false);
+    setTimeout(height, 120);
   };
-
-  V.payEdit = false;
 
   w.V = V;
 })(window);
