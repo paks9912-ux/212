@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="ФС-24 — стропильная ферма пролётом 24 метра. Монтаж металлоконструкций: сталь С345, узлы на высокопрочных болтах М24, каркас за 21 день.">
+<meta name="description" content="ФС-24 — стропильная ферма пролётом 24 метра. Монтаж металлоконструкций: сталь С345, узлы на высокопрочных болтах М24, горячий цинк, каркас за 21 день.">
 <meta name="theme-color" content="#0A0C0E">
 <title>Каркас ФС-24</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -114,13 +114,15 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
   <div class="tip"></div><div class="bar"></div>
   <i class="on"></i><div class="bar"></div><i></i><div class="bar"></div><i></i>
   <div class="bar"></div><i></i><div class="bar"></div><i></i><div class="bar"></div><i></i>
+  <div class="bar"></div><i></i><div class="bar"></div><i></i><div class="bar"></div><i></i>
+  <div class="bar"></div><i></i><div class="bar"></div><i></i>
   <div class="bar"></div><div class="tip"></div>
 </div>
 
 <div class="stamp" aria-hidden="true">
   <div>стадия <b>КМД</b></div>
   <div>масштаб <b id="scale">1:2</b></div>
-  <div>лист <b id="sheet">1/6</b></div>
+  <div>лист <b id="sheet">1/11</b></div>
 </div>
 
 <div class="hint" id="hint"><span>↓</span> &nbsp;прокрутка собирает каркас · <b id="pct">0</b>%</div>
@@ -160,9 +162,25 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     </div>
   </section>
 
-  <section class="beat" id="b2">
+  <section class="beat low" id="b2">
     <div class="col">
-      <p class="eyebrow"><b>02</b> Соединение</p>
+      <p class="eyebrow"><b>02</b> Завод</p>
+      <h2>Сварка — только в цехе</h2>
+      <p>Пояса варим на кондукторе полуавтоматом в среде углекислого газа: геометрия
+      фермы задаётся один раз и больше не меняется. Швы проверяем ультразвуком, а не на глаз.
+      На площадке варить нечего — там только болты, и это принципиально: шов, положенный
+      на высоте в мороз, не гарантирует никто.</p>
+      <ul class="spec">
+        <li><span>Способ</span><b>МП (135) ГОСТ 14771</b></li>
+        <li><span>Катет шва</span><b>6 мм</b></li>
+        <li><span>Контроль</span><b>УЗК · 100 %</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="beat" id="b3">
+    <div class="col">
+      <p class="eyebrow"><b>03</b> Соединение</p>
       <h2>Узел на болтах</h2>
       <p>Фасонка 12 мм и шестнадцать болтов М24 класса прочности 10.9. Момент затяжки
       1 050 Н·м, на каждый болт — протокол. Ни одного сварного шва на высоте: соединение
@@ -175,9 +193,24 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     </div>
   </section>
 
-  <section class="beat low" id="b3">
+  <section class="beat high" id="b4">
     <div class="col">
-      <p class="eyebrow"><b>03</b> Конструкция</p>
+      <p class="eyebrow"><b>04</b> Защита</p>
+      <h2>Цинк на 25 лет</h2>
+      <p>Горячее цинкование, толщина слоя 80 микрон. Ванна 12,5 метра — пояс проходит
+      целиком, без стыков и подкраски кистью. Там, где цинк технически невозможен, идёт
+      грунт-эмаль по системе С4 для промышленной атмосферы.</p>
+      <ul class="spec">
+        <li><span>Покрытие</span><b>горячий цинк · 80 мкм</b></li>
+        <li><span>Ванна</span><b>12 500 мм</b></li>
+        <li><span>До первого ремонта</span><b>25 лет</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="beat low" id="b5">
+    <div class="col">
+      <p class="eyebrow"><b>05</b> Конструкция</p>
       <h2>24 метра без опор</h2>
       <p>Восемь панелей по три метра, высота фермы 2 400 мм. Внутри пролёта не стоит ни одной
       колонны — кран-балка ходит от стены до стены, а планировку цеха можно переделать
@@ -190,9 +223,9 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     </div>
   </section>
 
-  <section class="beat high" id="b4">
+  <section class="beat high" id="b6">
     <div class="col">
-      <p class="eyebrow"><b>04</b> Каркас</p>
+      <p class="eyebrow"><b>06</b> Каркас</p>
       <h2>Шаг ферм — 6 метров</h2>
       <p>Пять ферм, десять колонн, прогоны по верхнему поясу. 1 440 м² под крышей при высоте
       до низа фермы 6 метров — заходит и фура, и мостовой кран.</p>
@@ -204,9 +237,53 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     </div>
   </section>
 
-  <section class="beat" id="b5">
+  <section class="beat low" id="b7">
     <div class="col">
-      <p class="eyebrow"><b>05</b> Сроки</p>
+      <p class="eyebrow"><b>07</b> Жёсткость</p>
+      <h2>Связи держат геометрию</h2>
+      <p>Вертикальные связи по колоннам и горизонтальные по верхним поясам. Именно они
+      не дают каркасу сложиться от ветра вдоль здания: сама по себе ферма работает только
+      в своей плоскости и поперёк неё держать ничего не может.</p>
+      <ul class="spec">
+        <li><span>Ветровой район</span><b>II</b></li>
+        <li><span>Связи</span><b>крестовые · уголок 75×6</b></li>
+        <li><span>Прогоны</span><b>швеллер 16П · шаг 3 000</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="beat high" id="b8">
+    <div class="col">
+      <p class="eyebrow"><b>08</b> Основание</p>
+      <h2>Анкеры с допуском 3 мм</h2>
+      <p>Базы колонн садятся на анкерные болты, залитые в фундамент за две недели до
+      монтажа. Разбежка больше трёх миллиметров — и колонна не встанет по проекту:
+      выводим отметку подливкой и рихтуем траверсой, а не кувалдой.</p>
+      <ul class="spec">
+        <li><span>Анкеры</span><b>М30 · 4 шт на базу</b></li>
+        <li><span>Подливка</span><b>безусадочная · 40 мм</b></li>
+        <li><span>Допуск на отметку</span><b>±3 мм</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="beat" id="b9">
+    <div class="col">
+      <p class="eyebrow"><b>09</b> Объекты</p>
+      <h2>Сделанные объекты</h2>
+      <p>Каждый объект — это КМД, завод, логистика и монтаж под одной ответственностью.
+      Три из портфолио: назначение, площадь, регион и срок.</p>
+      <ul class="spec">
+        <li><span>Объект 01</span><b>— · — м² · —</b></li>
+        <li><span>Объект 02</span><b>— · — м² · —</b></li>
+        <li><span>Объект 03</span><b>— · — м² · —</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="beat" id="b10">
+    <div class="col">
+      <p class="eyebrow"><b>10</b> Сроки</p>
       <h2>21 день от чертежа до каркаса</h2>
       <p>КМД — пять дней, изготовление на заводе — десять, монтаж на площадке — шесть.
       Даты стоят в договоре, за срыв платим мы.</p>
@@ -230,8 +307,8 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
   var elScale = document.getElementById('scale');
   var elPct   = document.getElementById('pct');
   var elHint  = document.getElementById('hint');
-  var SCALES  = ['1:2', '1:5', '1:2', '1:50', '1:200', '1:200'];
-  var LAST = 5;
+  var SCALES = ['1:2', '1:5', '1:5', '1:2', '1:10', '1:50', '1:200', '1:100', '1:20', '1:200', '1:200'];
+  var LAST = 10;
 
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
   function sm(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
@@ -246,7 +323,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
   /* ---------------- текст и приборная панель ---------------- */
   function ui(p) {
     var i = clamp(Math.round(p * LAST), 0, LAST);
-    elSheet.textContent = (i + 1) + '/6';
+    elSheet.textContent = (i + 1) + '/11';
     elScale.textContent = SCALES[i];
     elPct.textContent = Math.round(p * 100);
     for (var d = 0; d < dots.length; d++) dots[d].classList.toggle('on', d === i);
@@ -277,6 +354,8 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 0.94;
     renderer.setClearColor(0x06080a, 1);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     var scene = new THREE.Scene();
     scene.fog = new THREE.Fog(0x0a0e12, 34, 210);
@@ -288,11 +367,11 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     function cnv(s) { var c = document.createElement('canvas'); c.width = c.height = s; return c; }
 
     /* прокатная шероховатость: продольные полосы + питтинг */
-    function roughTex(rx, ry) {
+    function roughTex(rx, ry, flat) {
       var S = 256, c = cnv(S), g = c.getContext('2d');
       var img = g.createImageData(S, S), d = img.data;
       for (var y = 0; y < S; y++) {
-        var band = 0.5 + Math.sin(y * 0.9) * 0.05 + Math.sin(y * 0.17) * 0.07;
+        var band = flat ? 0.5 : (0.5 + Math.sin(y * 0.9) * 0.05 + Math.sin(y * 0.17) * 0.07);
         for (var x = 0; x < S; x++) {
           var v = band + (Math.random() - 0.5) * 0.28;
           var q = clamp(v, 0, 1) * 255;
@@ -340,6 +419,59 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       return t;
     }
 
+    /* бетонное покрытие: пятна пролива, швы плит, редкие трещины */
+    function concreteTex() {
+      var S = 512, c = cnv(S), g = c.getContext('2d');
+      g.fillStyle = '#31373b'; g.fillRect(0, 0, S, S);
+      for (var i = 0; i < 900; i++) {
+        g.globalAlpha = 0.03 + Math.random() * 0.09;
+        g.fillStyle = ['#3d4449', '#262b2e', '#454c51', '#1e2225'][(Math.random() * 4) | 0];
+        g.beginPath();
+        g.ellipse(Math.random() * S, Math.random() * S, 6 + Math.random() * 46, 5 + Math.random() * 34,
+                  Math.random() * 3.14, 0, 6.283);
+        g.fill();
+      }
+      g.globalAlpha = 1;
+      g.strokeStyle = '#191d20'; g.lineWidth = 3;
+      for (var k = 0; k <= 4; k++) {
+        var t = k * S / 4;
+        g.beginPath(); g.moveTo(t, 0); g.lineTo(t, S); g.stroke();
+        g.beginPath(); g.moveTo(0, t); g.lineTo(S, t); g.stroke();
+      }
+      g.strokeStyle = 'rgba(20,24,26,0.5)'; g.lineWidth = 1;
+      for (var cr = 0; cr < 14; cr++) {
+        var x = Math.random() * S, y = Math.random() * S;
+        g.beginPath(); g.moveTo(x, y);
+        for (var seg = 0; seg < 5; seg++) { x += (Math.random() - 0.5) * 50; y += (Math.random() - 0.5) * 50; g.lineTo(x, y); }
+        g.stroke();
+      }
+      var t2 = new THREE.CanvasTexture(c);
+      t2.wrapS = t2.wrapT = THREE.RepeatWrapping; t2.repeat.set(25, 25); t2.anisotropy = MAXA;
+      t2.encoding = THREE.sRGBEncoding;
+      return t2;
+    }
+
+    /* «морозный узор» горячего цинка */
+    function spangleTex() {
+      var S = 256, c = cnv(S), g = c.getContext('2d');
+      g.fillStyle = '#9aa4ab'; g.fillRect(0, 0, S, S);
+      for (var i = 0; i < 520; i++) {
+        g.globalAlpha = 0.06 + Math.random() * 0.16;
+        g.fillStyle = ['#c4ced4', '#79838a', '#dde5e9', '#69737a'][(Math.random() * 4) | 0];
+        g.save();
+        g.translate(Math.random() * S, Math.random() * S);
+        g.rotate(Math.random() * 6.283);
+        var w = 5 + Math.random() * 26;
+        g.fillRect(-w / 2, -w / 2, w, w * (0.35 + Math.random() * 0.8));
+        g.restore();
+      }
+      g.globalAlpha = 1;
+      var t = new THREE.CanvasTexture(c);
+      t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(4, 4); t.anisotropy = MAXA;
+      t.encoding = THREE.sRGBEncoding;
+      return t;
+    }
+
     function glowTex() {
       var S = 128, c = cnv(S), g = c.getContext('2d');
       var grd = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
@@ -353,13 +485,25 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
 
     /* отражения: без карты окружения металл выглядит мёртвым */
     (function () {
-      var c = cnv(1); c.width = 16; c.height = 160;
-      var g = c.getContext('2d'), grd = g.createLinearGradient(0, 0, 0, 160);
+      var c = cnv(1); c.width = 256; c.height = 128;
+      var g = c.getContext('2d'), grd = g.createLinearGradient(0, 0, 0, 128);
       grd.addColorStop(0.00, '#eef5f8'); grd.addColorStop(0.36, '#93a0a8');
       grd.addColorStop(0.50, '#414a50'); grd.addColorStop(0.62, '#20262b');
       grd.addColorStop(1.00, '#0a0c0e');
-      g.fillStyle = grd; g.fillRect(0, 0, 16, 160);
-      g.fillStyle = 'rgba(255,214,160,0.85)'; g.fillRect(0, 74, 16, 6);   /* тёплая полоса заката */
+      g.fillStyle = grd; g.fillRect(0, 0, 256, 128);
+      for (var q = 0; q < 26; q++) {          /* облачная гряда: металлу нужно что-то отражать */
+        g.globalAlpha = 0.05 + Math.random() * 0.1;
+        g.fillStyle = '#ffffff';
+        g.beginPath();
+        g.ellipse(Math.random() * 256, 12 + Math.random() * 34, 14 + Math.random() * 46, 3 + Math.random() * 7, 0, 0, 6.283);
+        g.fill();
+      }
+      g.globalAlpha = 1;
+      var sg = g.createRadialGradient(184, 58, 0, 184, 58, 30);
+      sg.addColorStop(0, '#fffaf0'); sg.addColorStop(0.16, '#ffe3b4');
+      sg.addColorStop(0.45, 'rgba(255,196,132,0.5)'); sg.addColorStop(1, 'rgba(255,180,110,0)');
+      g.fillStyle = sg; g.fillRect(150, 24, 68, 68);
+      g.fillStyle = 'rgba(255,214,160,0.7)'; g.fillRect(0, 60, 256, 4);
       var tex = new THREE.CanvasTexture(c);
       tex.mapping = THREE.EquirectangularReflectionMapping;
       tex.encoding = THREE.sRGBEncoding;
@@ -369,6 +513,8 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     })();
 
     var RGH_L = roughTex(30, 1), RGH_S = roughTex(2, 5);
+    var RGH_P = roughTex(3, 3, true);
+    var PRIMER_MAP = primerTex(), ZINC_MAP = spangleTex();
 
     var M = {
       steel: new THREE.MeshStandardMaterial({
@@ -380,7 +526,8 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         metalness: 0.88, roughness: 0.58
       }),
       primer: new THREE.MeshStandardMaterial({
-        color: 0x9c4630, map: primerTex(), metalness: 0.16, roughness: 0.8
+        color: 0x9c4630, map: PRIMER_MAP, roughnessMap: RGH_P, bumpMap: RGH_P,
+        bumpScale: 0.0012, metalness: 0.16, roughness: 0.8
       }),
       bolt: new THREE.MeshStandardMaterial({ color: 0xc8d1d6, metalness: 1.0, roughness: 0.3 })
     };
@@ -388,7 +535,8 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
 
     function fade(src) { var m = src.clone(); m.name = src.name; m.transparent = true; m.opacity = 0; return m; }
     var F = { steel: fade(M.steel), dark: fade(M.dark), primer: fade(M.primer), bolt: fade(M.bolt) };
-    var fadeMats = [F.steel, F.dark, F.primer, F.bolt];
+    F.base = fade(M.primer);
+    var fadeMats = [F.steel, F.dark, F.primer, F.bolt, F.base];
 
     /* ============ небо и свет ============ */
     var sky = new THREE.Mesh(new THREE.SphereGeometry(400, 32, 20), new THREE.ShaderMaterial({
@@ -416,6 +564,13 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
 
     scene.add(new THREE.HemisphereLight(0xa8bcc6, 0x0e1214, 0.42));
     var key = new THREE.DirectionalLight(0xfff0d8, 1.85); key.position.set(9, 14, 7); scene.add(key);
+    key.castShadow = true;
+    key.shadow.mapSize.set(LOW ? 1024 : 2048, LOW ? 1024 : 2048);
+    key.shadow.bias = -0.0009; key.shadow.normalBias = 0.03;
+    (function (sc) {
+      sc.left = -46; sc.right = 46; sc.top = 46; sc.bottom = -46;
+      sc.near = 1; sc.far = 150; sc.updateProjectionMatrix();
+    })(key.shadow.camera);
     var fill = new THREE.DirectionalLight(0x86b0d4, 0.6); fill.position.set(-11, 5, -9); scene.add(fill);
     var rim = new THREE.DirectionalLight(0xdfeaf2, 0.55); rim.position.set(-3, 2, 12); scene.add(rim);
 
@@ -471,6 +626,9 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
 
     var truss = buildTruss(M);
     scene.add(truss);
+    function castAll(root) {
+      root.traverse(function (o) { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    }
 
     /* узел: две фасонки и шестнадцать болтов М24 */
     var explodables = [];
@@ -489,8 +647,11 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         hp.absarc(b[0], b[1], 0.0145, 0, Math.PI * 2, true);
         sh.holes.push(hp);
       });
-      var g = new THREE.ExtrudeGeometry(sh, { depth: 0.012, bevelEnabled: false, curveSegments: 14 });
-      g.translate(0, 0, -0.006);
+      var g = new THREE.ExtrudeGeometry(sh, {
+        depth: 0.011, bevelEnabled: true, bevelThickness: 0.0007, bevelSize: 0.0009,
+        bevelSegments: 1, curveSegments: 14
+      });
+      g.translate(0, 0, -0.0062);
       return g;
     })();
     [0.081, -0.081].forEach(function (z, idx) {
@@ -507,6 +668,13 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         dir: new THREE.Vector3(bx * 0.5, (r ? 0.42 : -0.18) + by * 0.2, (bx > 0 ? 1 : -1) * (0.5 + Math.abs(bx))),
         spin: (bx > 0 ? 1 : -1) * (2.4 + r)
       });
+    });
+
+    /* рёбра жёсткости в стенке пояса по обе стороны от узла */
+    var GRIB = new THREE.BoxGeometry(0.011, 0.216, 0.14);
+    [-0.34, 0.34].forEach(function (rx) {
+      var rib = new THREE.Mesh(GRIB, M.steel);
+      rib.position.set(rx, 0, 0); truss.add(rib);
     });
 
     /* чертёж поверх металла на первом экране */
@@ -526,6 +694,14 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     scene.add(wire);
 
     /* ============ каркас ============ */
+    function member3(a, b, sz, mat) {
+      var va = new THREE.Vector3(a[0], a[1], a[2]), vb = new THREE.Vector3(b[0], b[1], b[2]);
+      var m = new THREE.Mesh(new THREE.BoxGeometry(sz, va.distanceTo(vb), sz), mat);
+      m.position.copy(va).add(vb).multiplyScalar(0.5);
+      m.quaternion.setFromUnitVectors(UP, vb.clone().sub(va).normalize());
+      return m;
+    }
+
     var frameGroup = new THREE.Group();
     [-12, -6, 6, 12].forEach(function (z) {
       var c = truss.clone(true);
@@ -542,7 +718,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         col.position.set(x, -COL_H / 2 - 0.13, z);
         col.userData.off = new THREE.Vector3(0, -3.6, 0);
         frameGroup.add(col);
-        var bp = new THREE.Mesh(GBASE, F.primer);
+        var bp = new THREE.Mesh(GBASE, F.base);
         bp.position.set(x, -COL_H - 0.1, z);
         bp.userData.off = new THREE.Vector3(0, -3.6, 0);
         frameGroup.add(bp);
@@ -555,23 +731,59 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       pur.userData.off = new THREE.Vector3(0, 6, 0);
       frameGroup.add(pur);
     }
+    /* связи: без них каркас работает только в плоскости ферм */
+    [[-12, -6], [6, 12]].forEach(function (bay) {
+      [-SPAN / 2, SPAN / 2].forEach(function (x) {
+        var br1 = member3([x, -0.2, bay[0]], [x, -COL_H + 0.2, bay[1]], 0.075, F.dark);
+        var br2 = member3([x, -COL_H + 0.2, bay[0]], [x, -0.2, bay[1]], 0.075, F.dark);
+        br1.userData.off = new THREE.Vector3(0, -3.6, 0);
+        br2.userData.off = new THREE.Vector3(0, -3.6, 0);
+        frameGroup.add(br1, br2);
+        var sgn = x < 0 ? 1 : -1;
+        var h1 = member3([x, HGT - 0.17, bay[0]], [x + sgn * 6, HGT - 0.17, bay[1]], 0.07, F.dark);
+        var h2 = member3([x + sgn * 6, HGT - 0.17, bay[0]], [x, HGT - 0.17, bay[1]], 0.07, F.dark);
+        h1.userData.off = new THREE.Vector3(0, 6, 0);
+        h2.userData.off = new THREE.Vector3(0, 6, 0);
+        frameGroup.add(h1, h2);
+      });
+    });
+
+    /* анкерные болты М30 в базах колонн */
+    var GANC = new THREE.CylinderGeometry(0.016, 0.016, 0.13, 10);
+    var GNUT = new THREE.CylinderGeometry(0.026, 0.026, 0.022, 6);
+    [-12, -6, 0, 6, 12].forEach(function (z) {
+      [-SPAN / 2, SPAN / 2].forEach(function (x) {
+        [-0.26, 0.26].forEach(function (dx) {
+          [-0.26, 0.26].forEach(function (dz) {
+            var an = new THREE.Group();
+            an.add(new THREE.Mesh(GANC, F.bolt));
+            var nu = new THREE.Mesh(GNUT, F.bolt); nu.position.y = 0.042; an.add(nu);
+            an.position.set(x + dx, -COL_H - 0.03, z + dz);
+            an.userData.off = new THREE.Vector3(0, -3.6, 0);
+            frameGroup.add(an);
+          });
+        });
+      });
+    });
+
     var groundMat = new THREE.MeshStandardMaterial({
-      color: 0x090c0f, roughness: 0.88, metalness: 0.05, transparent: true, opacity: 0
+      color: 0x5c666c, map: concreteTex(), roughness: 0.92, metalness: 0.02,
+      transparent: true, opacity: 0
     });
     var ground = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), groundMat);
     ground.rotation.x = -Math.PI / 2; ground.position.y = -COL_H - 0.14;
+    ground.receiveShadow = true;
     frameGroup.add(ground);
-    var grid = new THREE.GridHelper(140, 46, 0x4a5a63, 0x232a2f);
-    grid.position.y = -COL_H - 0.10;
-    grid.material.depthWrite = false;
-    grid.material.transparent = true; grid.material.opacity = 0;
-    frameGroup.add(grid);
+    castAll(truss); castAll(frameGroup);
+    ground.castShadow = false;
     scene.add(frameGroup);
     var frameKids = frameGroup.children.slice();
     frameKids.forEach(function (k) { k.userData.base = k.position.clone(); });
 
     /* ============ плазменный раскрой: искры и дуга ============ */
-    var CUTP = new THREE.Vector3(0.62, 0.128, 0.082);
+    var CUTP = new THREE.Vector3(0.62, 0.128, 0.082);      /* плазменный рез по полке */
+    var WELDP = new THREE.Vector3(0.97, 0.118, 0.05);      /* сварочная ванна на поясе */
+    var EMIT = CUTP.clone();
     var SPN = LOW ? 130 : 300;
     var spPos = new Float32Array(SPN * 3), spVel = new Float32Array(SPN * 3), spLife = new Float32Array(SPN);
     for (var s0 = 0; s0 < SPN; s0++) spLife[s0] = Math.random();
@@ -589,17 +801,21 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     }));
     flare.position.copy(CUTP); flare.scale.setScalar(0.2); scene.add(flare);
 
-    function sparkStep(w) {
+    function sparkStep(w, weld) {
       sparks.material.opacity = w;
+      EMIT.copy(weld ? WELDP : CUTP);
+      arc.position.copy(EMIT); flare.position.copy(EMIT);
+      sparks.material.color.setHex(weld ? 0xffd08a : 0xffa845);
+      flare.material.color.setHex(weld ? 0xdcecff : 0xffd0a0);
       if (w < 0.01) return;
       for (var i = 0; i < SPN; i++) {
         var j = i * 3;
         spLife[i] -= 0.016 + Math.random() * 0.01;
         if (spLife[i] <= 0) {
           spLife[i] = 0.35 + Math.random() * 0.75;
-          spPos[j] = CUTP.x + (Math.random() - 0.5) * 0.02;
-          spPos[j + 1] = CUTP.y;
-          spPos[j + 2] = CUTP.z + (Math.random() - 0.5) * 0.02;
+          spPos[j] = EMIT.x + (Math.random() - 0.5) * 0.02;
+          spPos[j + 1] = EMIT.y;
+          spPos[j + 2] = EMIT.z + (Math.random() - 0.5) * 0.02;
           var a = Math.random() * 6.283, sp = 0.5 + Math.random() * 2.6;
           spVel[j] = Math.cos(a) * sp * 0.35;
           spVel[j + 1] = -0.15 + Math.random() * 1.1;
@@ -712,18 +928,24 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
 
     /* ============ траектория камеры ============ */
     var KEYS = [
-      { p: [0.90, 0.60, 1.60], t: [0.02, 0.18, 0] },
-      { p: [1.55, 0.52, 1.30], t: [0.60, 0.14, 0] },
-      { p: [0.50, 0.74, 1.95], t: [0.00, 0.20, 0] },
-      { p: [2.20, 3.60, 22.5], t: [0.00, 1.20, 0] },
-      { p: [27.0, 12.5, 35.0], t: [0.00, -1.2, 0] },
-      { p: [31.0, 3.20, 23.0], t: [0.00, -1.4, 0] }
+      { p: [0.90, 0.60, 1.60], t: [0.02, 0.18, 0.00] },   /* 00 узел крупно      */
+      { p: [1.55, 0.52, 1.30], t: [0.60, 0.14, 0.00] },   /* 01 плазменный рез   */
+      { p: [1.48, 0.30, 0.86], t: [1.00, 0.11, 0.00] },   /* 02 сварка пояса     */
+      { p: [0.50, 0.74, 1.95], t: [0.00, 0.20, 0.00] },   /* 03 разлёт узла      */
+      { p: [1.30, 0.72, 1.72], t: [0.30, 0.18, 0.00] },   /* 04 цинк по поясу    */
+      { p: [2.60, 3.80, 26.5], t: [0.00, 1.20, 0.00] },   /* 05 ферма целиком    */
+      { p: [27.0, 12.5, 35.0], t: [0.00, -1.2, 0.00] },   /* 06 каркас           */
+      { p: [6.00, -1.6, 10.5], t: [0.00, 0.90, 0.00] },   /* 07 связи изнутри    */
+      { p: [10.6, -4.7, 4.20], t: [12.0, -5.85, 0.00] },  /* 08 анкеры           */
+      { p: [-26.0, 9.0, 31.0], t: [0.00, -1.0, 0.00] },   /* 09 объекты          */
+      { p: [31.0, 3.20, 23.0], t: [0.00, -1.4, 0.00] }    /* 10 финал            */
     ];
     var cp = new THREE.Vector3(), ct = new THREE.Vector3(), off = new THREE.Vector3();
     var C_VOID_T = new THREE.Color(0x05070a), C_VOID_H = new THREE.Color(0x0a0e12), C_VOID_S = new THREE.Color(0x140d09);
     var C_DUSK_T = new THREE.Color(0x0a1728), C_DUSK_H = new THREE.Color(0x4a2e1a), C_DUSK_S = new THREE.Color(0xff8a34);
     var COLD = new THREE.Color(0xfff0d8), WARM = new THREE.Color(0xffb066);
     var tmpC = new THREE.Color();
+    var C_PRIMER = new THREE.Color(0x9c4630), C_ZINC = new THREE.Color(0xdae2e7);
 
     function resize() {
       W = window.innerWidth; H = window.innerHeight;
@@ -756,56 +978,71 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       );
       camera.lookAt(ct);
       /* макро уводим правее текста, общий план возвращаем к центру, иначе каркас режется краем */
-      if (camera.aspect > 1.1) camera.rotateY(0.19 - sm(0.55, 0.82, p) * 0.12);
-      camera.rotateZ(sm(0.78, 1, p) * 0.035);
+      if (camera.aspect > 1.1) camera.rotateY(0.19 - sm(0.44, 0.60, p) * 0.11);
+      camera.rotateZ(sm(0.88, 1, p) * 0.035);
 
       /* чертёж → металл */
       wireMat.opacity = 0;
       wire.visible = false;
 
-      /* плазменный раскрой на 01 */
-      var cut = bump(p, 0.20, 0.085);
-      sparkStep(cut);
+      /* 01 — плазменный рез, 02 — сварка на кондукторе */
+      var wPlasma = bump(p, 0.10, 0.052), wWeld = bump(p, 0.20, 0.052);
+      var cut = Math.max(wPlasma, wWeld);
+      sparkStep(cut, wWeld > wPlasma);
       var flick = 0.55 + Math.random() * 0.45;
       arc.intensity = cut * 7.0 * flick;
       flare.material.opacity = cut * flick;
       flare.scale.setScalar(0.07 + cut * 0.08 * flick);
 
       /* узел разлетается на 02 и собирается обратно к 03 */
-      var ex = bump(p, 0.40, 0.135);
+      var ex = bump(p, 0.30, 0.072);
       for (var e = 0; e < explodables.length; e++) {
         var it = explodables[e];
         it.o.position.copy(it.base).addScaledVector(it.dir, ex);
         if (it.spin) it.o.rotation.z = ex * it.spin;
       }
 
+      /* горячее цинкование на листе 04: сурик уходит в цинк */
+      var zinc = sm(0.34, 0.45, p);
+      var wantMap = zinc < 0.5 ? PRIMER_MAP : ZINC_MAP;
+      if (M.primer.map !== wantMap) {
+        M.primer.map = wantMap; M.primer.needsUpdate = true;
+        F.primer.map = wantMap; F.primer.needsUpdate = true;
+      }
+      var dip = 1 - Math.abs(zinc - 0.5) * 2;          /* ныряет в ванну и выходит цинком */
+      M.primer.color.copy(zinc < 0.5 ? C_PRIMER : C_ZINC).multiplyScalar(1 - dip * 0.82);
+      M.primer.metalness = 0.16 + zinc * 0.74;
+      M.primer.roughness = 0.8 - zinc * 0.34;
+      F.primer.color.copy(M.primer.color);
+      F.primer.metalness = M.primer.metalness;
+      F.primer.roughness = M.primer.roughness;
+
       /* каркас: сборка со сдвигом по времени */
-      var rev = sm(0.56, 0.74, p);
+      var rev = sm(0.52, 0.60, p);
       for (var m = 0; m < fadeMats.length; m++) fadeMats[m].opacity = rev;
       groundMat.opacity = rev * 0.96;
-      grid.material.opacity = rev * 0.4;
       frameGroup.visible = rev > 0.002;
       if (frameGroup.visible) {
         for (var c2 = 0; c2 < frameKids.length; c2++) {
           var kid = frameKids[c2];
           if (!kid.userData.off) continue;
-          var st = sm(0.55 + (c2 % 7) * 0.008, 0.75 + (c2 % 7) * 0.008, p);
+          var st = sm(0.51 + (c2 % 7) * 0.006, 0.61 + (c2 % 7) * 0.006, p);
           kid.position.copy(kid.userData.base).addScaledVector(kid.userData.off, 1 - st);
         }
       }
 
       /* пустота → закат */
-      var sun = sm(0.55, 0.98, p);
+      var sun = sm(0.42, 0.92, p);
       var u = sky.material.uniforms;
       u.cTop.value.copy(C_VOID_T).lerp(C_DUSK_T, sun);
       u.cHor.value.copy(C_VOID_H).lerp(C_DUSK_H, sun);
       u.cSun.value.copy(C_VOID_S).lerp(C_DUSK_S, sun);
       scene.fog.color.copy(u.cHor.value);
       key.color.copy(COLD).lerp(WARM, sun);
-      key.intensity = 1.85 + sun * 1.1;
+      key.intensity = 1.85 + sun * 0.7;
       key.position.set(9 - sun * 20, 14 - sun * 11, 7 + sun * 16);
       renderer.toneMappingExposure = 0.94 + sun * 0.1;
-      mComp.uniforms.amt.value = 0.32 + sun * 0.3 + cut * 0.45;
+      mComp.uniforms.amt.value = 0.27 + sun * 0.2 + cut * 0.45;
 
       dust.rotation.y = time * 0.000015;
       dust.material.opacity = 0.42 - sun * 0.18;
