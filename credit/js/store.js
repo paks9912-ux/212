@@ -26,6 +26,8 @@
           ratesSource: null,
           ratesPref: 'auto',
           pin: null,
+          remindHour: 10,        // во сколько напоминать о платеже
+          remindMade: null,
           lockAfter: 0,          // сколько секунд в фоне прощается без входа
           faceId: null,          // ключ Face ID / Touch ID, если вход включён
           faceUser: null,

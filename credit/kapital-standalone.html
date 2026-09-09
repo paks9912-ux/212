@@ -512,7 +512,7 @@ h2.sec button.act{min-height:32px;padding:0 4px;font-size:15px;margin-top:-6px}
   var U = {};
 
   /* Номер сборки. При выпуске обновляется здесь, в index.html (?v=) и в sw.js */
-  U.BUILD = '2.4';
+  U.BUILD = '2.5';
   U.BUILD_DATE = '9 сентября 2026';
 
   /* ---------- id ---------- */
@@ -1046,6 +1046,121 @@ h2.sec button.act{min-height:32px;padding:0 4px;font-size:15px;margin-top:-6px}
   w.Auth = A;
 })(window);
 
+/* Напоминания через Календарь iPhone.
+   Веб-приложение не может само разбудить телефон по расписанию — для этого
+   нужен сервер, который шлёт push. Зато оно может отдать все будущие платежи
+   календарным файлом: дальше напоминания показывает сам iOS, без интернета
+   и без передачи данных куда-либо.                                        */
+(function (w) {
+  'use strict';
+
+  var ICS = {};
+
+  function esc(t) {
+    return String(t == null ? '' : t)
+      .replace(/\\/g, '\\\\').replace(/;/g, '\;').replace(/,/g, '\\,')
+      .replace(/\r?\n/g, '\\n');
+  }
+  /* строки календаря складываются по 60 символов — так требует формат */
+  function fold(line) {
+    if (line.length <= 60) return line;
+    var out = line.slice(0, 60), rest = line.slice(60);
+    while (rest.length) { out += '\r\n ' + rest.slice(0, 59); rest = rest.slice(59); }
+    return out;
+  }
+  function stamp(d) {
+    return d.getUTCFullYear() +
+      String(d.getUTCMonth() + 1).padStart(2, '0') +
+      String(d.getUTCDate()).padStart(2, '0') + 'T' +
+      String(d.getUTCHours()).padStart(2, '0') +
+      String(d.getUTCMinutes()).padStart(2, '0') + '00Z';
+  }
+  /* местное время без часового пояса — телефон подставит своё */
+  function local(day, hour) {
+    return String(day).replace(/-/g, '') + 'T' + String(hour).padStart(2, '0') + '0000';
+  }
+
+  /* Что напомнить: невыплаченные платежи по графику и возвраты тела */
+  ICS.events = function (days) {
+    days = days || 365;
+    var t = U.today(), limit = U.addDays(t, days), out = [];
+
+    DB.loans().forEach(function (l) {
+      var r = CALC.loan(l);
+      if (r.isClosed || r.isPaidOff) return;
+      var c = DB.client(l.clientId) || { name: 'Без клиента', phone: '' };
+      var cur = l.currency || FX.base();
+
+      (r.schedule || []).forEach(function (p) {
+        if (p.paid || p.date < t || p.date > limit) return;
+        out.push({
+          uid: 'p-' + l.id + '-' + p.date,
+          date: p.date,
+          title: 'Проценты: ' + c.name + ' — ' + U.money(p.due, cur),
+          body: 'Платёж процентов за месяц ' + p.n + '.\n' +
+            'Заём ' + U.money(l.principal, cur) + ' от ' + U.fmtDateFull(l.issuedAt) +
+            ', ставка ' + U.pct(l.rate) + ' ' + CALC.PERIOD_NAME[l.ratePeriod] + '.' +
+            (c.phone ? '\nТелефон: ' + c.phone : ''),
+          loanId: l.id
+        });
+      });
+
+      if (l.dueAt && l.dueAt >= t && l.dueAt <= limit) {
+        out.push({
+          uid: 'd-' + l.id,
+          date: l.dueAt,
+          title: 'Возврат тела: ' + c.name + ' — ' + U.money(r.balance, cur),
+          body: 'Срок возврата основного долга.' + (c.phone ? '\nТелефон: ' + c.phone : ''),
+          loanId: l.id
+        });
+      }
+    });
+
+    out.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+    return out;
+  };
+
+  ICS.build = function (opt) {
+    opt = opt || {};
+    var hour = opt.hour == null ? 10 : opt.hour;
+    var events = ICS.events(opt.days);
+    var now = stamp(new Date());
+    var base = '';
+    try { base = location.origin + location.pathname; } catch (e) { }
+
+    var L = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Kapital//Loan reminders//RU',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'X-WR-CALNAME:Капитал — платежи',
+      'X-WR-TIMEZONE:' + (Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC')
+    ];
+
+    events.forEach(function (e) {
+      L.push('BEGIN:VEVENT');
+      L.push('UID:kapital-' + e.uid + '@kapital.app');
+      L.push('DTSTAMP:' + now);
+      L.push('DTSTART:' + local(e.date, hour));
+      L.push('DTEND:' + local(e.date, hour + 1));
+      L.push('SUMMARY:' + esc(e.title));
+      L.push('DESCRIPTION:' + esc(e.body));
+      if (base) L.push('URL:' + esc(base + '#/loan/' + e.loanId));
+      L.push('TRANSP:TRANSPARENT');
+      /* два напоминания: накануне и в сам день */
+      L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(e.title), 'TRIGGER:-P1D', 'END:VALARM');
+      L.push('BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(e.title), 'TRIGGER:PT0S', 'END:VALARM');
+      L.push('END:VEVENT');
+    });
+
+    L.push('END:VCALENDAR');
+    return L.map(fold).join('\r\n') + '\r\n';
+  };
+
+  w.ICS = ICS;
+})(window);
+
 /* Хранилище: всё лежит на телефоне (localStorage), ничего не уходит в сеть */
 (function (w) {
   'use strict';
@@ -1074,6 +1189,8 @@ h2.sec button.act{min-height:32px;padding:0 4px;font-size:15px;margin-top:-6px}
           ratesSource: null,
           ratesPref: 'auto',
           pin: null,
+          remindHour: 10,        // во сколько напоминать о платеже
+          remindMade: null,
           lockAfter: 0,          // сколько секунд в фоне прощается без входа
           faceId: null,          // ключ Face ID / Touch ID, если вход включён
           faceUser: null,
@@ -2424,6 +2541,22 @@ h2.sec button.act{min-height:32px;padding:0 4px;font-size:15px;margin-top:-6px}
       'Код-пароль остаётся <b>запасным входом</b> — на случай, если Face ID не сработает. ' +
       'И то и другое закрывает вход от чужих глаз, но не шифрует базу: с доступом к телефону данные можно достать в обход приложения.</div>';
 
+    var evN = w.ICS ? ICS.events(365).length : 0;
+    h += '<h2 class="sec">Напоминания</h2><div class="list">' +
+      '<div class="field"><label>Напоминать в</label><select data-act="set" data-k="remindHour">' +
+      [7, 8, 9, 10, 11, 12, 14, 16, 18, 20].map(function (x) {
+        return '<option value="' + x + '"' + ((U.num(st.remindHour) || 10) === x ? ' selected' : '') +
+          '>' + x + ':00</option>';
+      }).join('') + '</select></div>' +
+      rowBtn('export-ics', 'Отправить платежи в Календарь',
+        evN ? evN + ' ' + U.plural(evN, 'платёж', 'платежа', 'платежей') + ' на год вперёд' +
+          (st.remindMade ? ' · последний раз ' + U.fmtDate(st.remindMade) : '')
+          : 'впереди платежей нет') +
+      '</div>' +
+      '<div class="hint">iPhone сам напомнит <b>накануне и в день платежа</b> — уведомлением Календаря, ' +
+      'без интернета. Приложение отдаёт файл с датами; всё остальное остаётся на телефоне.<br><br>' +
+      'После приёма платежа или нового займа отправьте файл заново — календарь обновится по тем же событиям.</div>';
+
     h += '<h2 class="sec">Данные</h2><div class="list">' +
       rowBtn('export-json', 'Сохранить резервную копию', st.lastExport ? 'последняя: ' + U.fmtDate(st.lastExport) : 'ещё ни разу') +
       rowBtn('export-csv', 'Выгрузить таблицу CSV', 'для Excel и Numbers') +
@@ -3705,6 +3838,20 @@ h2.sec button.act{min-height:32px;padding:0 4px;font-size:15px;margin-top:-6px}
         if (App.route === '#/more' || App.route === '#/') App.render();
       });
     },
+    'export-ics': function () {
+      if (!w.ICS) { U.toast('Модуль напоминаний не загрузился'); return; }
+      var n = ICS.events(365).length;
+      if (!n) { U.toast('Впереди нет платежей — напоминать не о чем'); return; }
+      var hour = U.num(DB.data.settings.remindHour) || 10;
+      App.saveFile('kapital-platezhi.ics', ICS.build({ hour: hour }), 'text/calendar;charset=utf-8',
+        function (ok) {
+          if (!ok) return;
+          DB.data.settings.remindMade = U.today();
+          DB.save();
+          U.toast('Готово: ' + n + ' ' + U.plural(n, 'напоминание', 'напоминания', 'напоминаний'));
+          App.render();
+        });
+    },
     'export-csv': function () {
       App.saveFile('kapital-' + U.today() + '.csv', DB.exportCSV(), 'text/csv;charset=utf-8',
         function (ok) { if (ok) U.toast('Таблица сохранена'); });
@@ -4041,7 +4188,7 @@ h2.sec button.act{min-height:32px;padding:0 4px;font-size:15px;margin-top:-6px}
       }
       if (t.dataset && t.dataset.act === 'set') {
         var k = t.dataset.k;
-        var v = ['defaultRate', 'defaultTerm', 'penaltyRate', 'lockAfter'].indexOf(k) >= 0 ? U.num(t.value) : t.value;
+        var v = ['defaultRate', 'defaultTerm', 'penaltyRate', 'lockAfter', 'remindHour'].indexOf(k) >= 0 ? U.num(t.value) : t.value;
         DB.data.settings[k] = v;
         DB.save();
         if (k === 'theme') App.applyTheme();

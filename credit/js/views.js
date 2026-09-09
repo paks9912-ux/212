@@ -554,6 +554,22 @@
       'Код-пароль остаётся <b>запасным входом</b> — на случай, если Face ID не сработает. ' +
       'И то и другое закрывает вход от чужих глаз, но не шифрует базу: с доступом к телефону данные можно достать в обход приложения.</div>';
 
+    var evN = w.ICS ? ICS.events(365).length : 0;
+    h += '<h2 class="sec">Напоминания</h2><div class="list">' +
+      '<div class="field"><label>Напоминать в</label><select data-act="set" data-k="remindHour">' +
+      [7, 8, 9, 10, 11, 12, 14, 16, 18, 20].map(function (x) {
+        return '<option value="' + x + '"' + ((U.num(st.remindHour) || 10) === x ? ' selected' : '') +
+          '>' + x + ':00</option>';
+      }).join('') + '</select></div>' +
+      rowBtn('export-ics', 'Отправить платежи в Календарь',
+        evN ? evN + ' ' + U.plural(evN, 'платёж', 'платежа', 'платежей') + ' на год вперёд' +
+          (st.remindMade ? ' · последний раз ' + U.fmtDate(st.remindMade) : '')
+          : 'впереди платежей нет') +
+      '</div>' +
+      '<div class="hint">iPhone сам напомнит <b>накануне и в день платежа</b> — уведомлением Календаря, ' +
+      'без интернета. Приложение отдаёт файл с датами; всё остальное остаётся на телефоне.<br><br>' +
+      'После приёма платежа или нового займа отправьте файл заново — календарь обновится по тем же событиям.</div>';
+
     h += '<h2 class="sec">Данные</h2><div class="list">' +
       rowBtn('export-json', 'Сохранить резервную копию', st.lastExport ? 'последняя: ' + U.fmtDate(st.lastExport) : 'ещё ни разу') +
       rowBtn('export-csv', 'Выгрузить таблицу CSV', 'для Excel и Numbers') +

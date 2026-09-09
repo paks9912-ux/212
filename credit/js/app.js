@@ -392,6 +392,20 @@
         if (App.route === '#/more' || App.route === '#/') App.render();
       });
     },
+    'export-ics': function () {
+      if (!w.ICS) { U.toast('Модуль напоминаний не загрузился'); return; }
+      var n = ICS.events(365).length;
+      if (!n) { U.toast('Впереди нет платежей — напоминать не о чем'); return; }
+      var hour = U.num(DB.data.settings.remindHour) || 10;
+      App.saveFile('kapital-platezhi.ics', ICS.build({ hour: hour }), 'text/calendar;charset=utf-8',
+        function (ok) {
+          if (!ok) return;
+          DB.data.settings.remindMade = U.today();
+          DB.save();
+          U.toast('Готово: ' + n + ' ' + U.plural(n, 'напоминание', 'напоминания', 'напоминаний'));
+          App.render();
+        });
+    },
     'export-csv': function () {
       App.saveFile('kapital-' + U.today() + '.csv', DB.exportCSV(), 'text/csv;charset=utf-8',
         function (ok) { if (ok) U.toast('Таблица сохранена'); });
@@ -728,7 +742,7 @@
       }
       if (t.dataset && t.dataset.act === 'set') {
         var k = t.dataset.k;
-        var v = ['defaultRate', 'defaultTerm', 'penaltyRate', 'lockAfter'].indexOf(k) >= 0 ? U.num(t.value) : t.value;
+        var v = ['defaultRate', 'defaultTerm', 'penaltyRate', 'lockAfter', 'remindHour'].indexOf(k) >= 0 ? U.num(t.value) : t.value;
         DB.data.settings[k] = v;
         DB.save();
         if (k === 'theme') App.applyTheme();
