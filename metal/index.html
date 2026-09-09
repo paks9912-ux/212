@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="ФС-24 — стропильная ферма пролётом 24 метра. Монтаж металлоконструкций: сталь С345, узлы на высокопрочных болтах М24, каркас за 21 день.">
+<meta name="theme-color" content="#0A0C0E">
+<title>Каркас ФС-24</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;500;600&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+:root{
+  --ink:#0A0C0E; --ink-2:#12161A; --steel:#7E888E; --zinc:#C3CDD2;
+  --chalk:#EEF2F3; --primer:#C25236; --line:rgba(195,205,210,.16);
+  --disp:"Oswald","Arial Narrow",system-ui,sans-serif;
+  --body:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"Courier New",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ink);color:var(--zinc);font-family:var(--body);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ---------- сцена ---------- */
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+.scrim{position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(100deg,rgba(10,12,14,.94) 0%,rgba(10,12,14,.78) 26%,rgba(10,12,14,0) 62%)}
+@media (max-width:820px){
+  .scrim{background:linear-gradient(180deg,rgba(10,12,14,.86) 0%,rgba(10,12,14,.25) 34%,rgba(10,12,14,.92) 82%)}
+}
+
+/* ---------- каркас страницы ---------- */
+.deck{position:relative;z-index:2}
+.beat{min-height:100vh;min-height:100svh;display:flex;align-items:center;
+  padding:0 clamp(20px,6vw,96px) 0 clamp(20px,7vw,120px)}
+.beat.low{align-items:flex-end;padding-bottom:14vh}
+.beat.high{align-items:flex-start;padding-top:16vh}
+.col{max-width:34rem;opacity:var(--o,1);transform:translateY(calc((1 - var(--o,1)) * 26px));
+  will-change:transform,opacity}
+@media (max-width:820px){
+  .beat,.beat.low,.beat.high{align-items:flex-end;padding:0 20px 12vh}
+  .col{max-width:none}
+}
+
+/* ---------- типографика ---------- */
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--steel);display:flex;gap:14px;align-items:center;margin:0 0 22px}
+.eyebrow b{color:var(--primer);font-weight:500}
+h1{font-family:var(--disp);font-weight:600;color:var(--chalk);margin:0;
+  font-size:clamp(78px,15vw,208px);line-height:.86;letter-spacing:.005em}
+h2{font-family:var(--disp);font-weight:500;color:var(--chalk);margin:0 0 18px;
+  font-size:clamp(34px,5.2vw,62px);line-height:1.02;text-wrap:balance;text-transform:uppercase;
+  letter-spacing:.012em}
+p{font-size:clamp(15px,1.12vw,17px);line-height:1.62;color:var(--zinc);margin:0;max-width:38ch}
+.lead{font-size:clamp(16px,1.3vw,19px);max-width:42ch;color:#D5DEE2}
+.dim{display:block;width:min(340px,72vw);height:auto;margin:26px 0 30px;color:var(--primer)}
+.dim text{font-family:var(--mono);font-size:9px;letter-spacing:.14em;fill:var(--zinc)}
+
+/* ---------- спецификация ---------- */
+.spec{list-style:none;display:grid;gap:0;margin:28px 0 0;padding:0;
+  border-top:1px solid var(--line);max-width:34rem}
+.spec li{display:flex;justify-content:space-between;gap:24px;align-items:baseline;
+  padding:11px 0;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;
+  letter-spacing:.04em}
+.spec dt,.spec span:first-child{color:var(--steel);text-transform:uppercase;letter-spacing:.14em;font-size:10.5px}
+.spec b{color:var(--chalk);font-weight:500;font-variant-numeric:tabular-nums}
+
+/* ---------- CTA ---------- */
+.act{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:30px}
+.btn{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  padding:15px 26px;border:1px solid var(--primer);color:var(--chalk);background:rgba(194,82,54,.14);
+  text-decoration:none;transition:background .25s ease,transform .25s ease}
+.btn:hover,.btn:focus-visible{background:rgba(194,82,54,.3);transform:translateY(-2px)}
+.tel{font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:var(--zinc);text-decoration:none;
+  border-bottom:1px solid var(--line);padding-bottom:3px}
+.tel:hover{color:var(--chalk)}
+a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offset:3px}
+
+/* ---------- HUD ---------- */
+.mark{position:fixed;top:26px;left:clamp(20px,7vw,120px);z-index:3;font-family:var(--mono);
+  font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--steel)}
+.mark b{color:var(--chalk);font-weight:500}
+.rail{position:fixed;left:clamp(9px,2.6vw,44px);top:50%;transform:translateY(-50%);z-index:3;
+  display:flex;flex-direction:column;align-items:center;gap:0}
+.rail .tip{width:9px;height:1px;background:var(--line)}
+.rail .bar{width:1px;flex:0 0 auto;height:16px;background:var(--line)}
+.rail i{width:5px;height:5px;border:1px solid var(--steel);transform:rotate(45deg);
+  transition:background .3s ease,border-color .3s ease}
+.rail i.on{background:var(--primer);border-color:var(--primer)}
+.stamp{position:fixed;right:0;bottom:0;z-index:3;border-top:1px solid var(--line);
+  border-left:1px solid var(--line);background:rgba(10,12,14,.72);backdrop-filter:blur(6px);
+  display:grid;grid-template-columns:auto auto auto;font-family:var(--mono);font-size:10px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--steel)}
+.stamp div{padding:9px 16px;border-left:1px solid var(--line)}
+.stamp div:first-child{border-left:0}
+.stamp b{color:var(--chalk);font-weight:500;font-variant-numeric:tabular-nums}
+.hint{position:fixed;bottom:22px;left:clamp(20px,7vw,120px);z-index:3;font-family:var(--mono);
+  font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--steel);
+  opacity:var(--hint,1);transition:opacity .4s ease;pointer-events:none}
+.hint span{display:inline-block;animation:nudge 2.6s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
+@media (max-width:820px){.rail,.hint{display:none}.mark{left:20px;top:18px}}
+@media (prefers-reduced-motion:reduce){.hint span{animation:none}.col{transform:none}}
+</style>
+
+</head>
+<body>
+<canvas id="gl" aria-hidden="true"></canvas>
+<div class="scrim" aria-hidden="true"></div>
+
+<div class="mark"><b>ФС-24</b> · монтаж металлоконструкций</div>
+
+<div class="rail" aria-hidden="true">
+  <div class="tip"></div><div class="bar"></div>
+  <i class="on"></i><div class="bar"></div><i></i><div class="bar"></div><i></i>
+  <div class="bar"></div><i></i><div class="bar"></div><i></i><div class="bar"></div><i></i>
+  <div class="bar"></div><div class="tip"></div>
+</div>
+
+<div class="stamp" aria-hidden="true">
+  <div>стадия <b>КМД</b></div>
+  <div>масштаб <b id="scale">1:2</b></div>
+  <div>лист <b id="sheet">1/6</b></div>
+</div>
+
+<div class="hint" id="hint"><span>↓</span> &nbsp;прокрутка собирает каркас · <b id="pct">0</b>%</div>
+
+<main class="deck">
+
+  <section class="beat" id="b0">
+    <div class="col">
+      <p class="eyebrow"><b>00</b> Стропильная ферма</p>
+      <h1>ФС-24</h1>
+      <svg class="dim" viewBox="0 0 340 24" role="img" aria-label="Пролёт 24 000 миллиметров">
+        <line x1="8" y1="16" x2="332" y2="16" stroke="currentColor" stroke-width="1"/>
+        <path d="M8 10 L8 22 M332 10 L332 22" stroke="currentColor" stroke-width="1"/>
+        <polyline points="18,12.5 8,16 18,19.5" fill="none" stroke="currentColor" stroke-width="1"/>
+        <polyline points="322,12.5 332,16 322,19.5" fill="none" stroke="currentColor" stroke-width="1"/>
+        <text x="170" y="9" text-anchor="middle">24 000</text>
+      </svg>
+      <p class="lead">Пролёт 24 метра без единой опоры внутри. Сталь С345, узлы на высокопрочных
+      болтах М24. Собираем на земле, ставим на колонны за 40 минут.</p>
+    </div>
+  </section>
+
+  <section class="beat high" id="b1">
+    <div class="col">
+      <p class="eyebrow"><b>01</b> Материал</p>
+      <h2>Сталь С345</h2>
+      <p>Предел текучести 345 МПа против 245 у обычной Ст3. На том же пролёте это профиль
+      на 18 % легче: меньше металла в смете и меньше нагрузка на фундамент — экономия уходит
+      вниз, в бетон, где её обычно и не ждут.</p>
+      <ul class="spec">
+        <li><span>Пояса</span><b>двутавр 25Ш1</b></li>
+        <li><span>Масса фермы</span><b>1 180 кг</b></li>
+        <li><span>Снеговая нагрузка</span><b>240 кг/м²</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="beat" id="b2">
+    <div class="col">
+      <p class="eyebrow"><b>02</b> Соединение</p>
+      <h2>Узел на болтах</h2>
+      <p>Фасонка 12 мм и шестнадцать болтов М24 класса прочности 10.9. Момент затяжки
+      1 050 Н·м, на каждый болт — протокол. Ни одного сварного шва на высоте: соединение
+      работает на трение, а не на веру в хорошую погоду в день монтажа.</p>
+      <ul class="spec">
+        <li><span>Болты</span><b>М24 · 10.9</b></li>
+        <li><span>Фасонка</span><b>12 мм · С345</b></li>
+        <li><span>Контроль</span><b>динамометрический</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="beat low" id="b3">
+    <div class="col">
+      <p class="eyebrow"><b>03</b> Конструкция</p>
+      <h2>24 метра без опор</h2>
+      <p>Восемь панелей по три метра, высота фермы 2 400 мм. Внутри пролёта не стоит ни одной
+      колонны — кран-балка ходит от стены до стены, а планировку цеха можно переделать
+      хоть через год.</p>
+      <ul class="spec">
+        <li><span>Пролёт</span><b>24 000 мм</b></li>
+        <li><span>Высота фермы</span><b>2 400 мм</b></li>
+        <li><span>Предельный прогиб</span><b>1/250</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="beat high" id="b4">
+    <div class="col">
+      <p class="eyebrow"><b>04</b> Каркас</p>
+      <h2>Шаг ферм — 6 метров</h2>
+      <p>Пять ферм, десять колонн, прогоны по верхнему поясу. 1 440 м² под крышей при высоте
+      до низа фермы 6 метров — заходит и фура, и мостовой кран.</p>
+      <ul class="spec">
+        <li><span>Площадь</span><b>1 440 м²</b></li>
+        <li><span>Высота колонн</span><b>6 000 мм</b></li>
+        <li><span>Масса каркаса</span><b>34 т</b></li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="beat" id="b5">
+    <div class="col">
+      <p class="eyebrow"><b>05</b> Сроки</p>
+      <h2>21 день от чертежа до каркаса</h2>
+      <p>КМД — пять дней, изготовление на заводе — десять, монтаж на площадке — шесть.
+      Даты стоят в договоре, за срыв платим мы.</p>
+      <div class="act">
+        <a class="btn" href="#b0">Рассчитать каркас</a>
+        <a class="tel" href="tel:+70000000000">+7 000 000-00-00</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var beats  = [].slice.call(document.querySelectorAll('.beat'));
+  var dots   = [].slice.call(document.querySelectorAll('.rail i'));
+  var elSheet = document.getElementById('sheet');
+  var elScale = document.getElementById('scale');
+  var elPct   = document.getElementById('pct');
+  var elHint  = document.getElementById('hint');
+  var SCALES  = ['1:2', '1:5', '1:2', '1:50', '1:200', '1:200'];
+  var LAST = 5;
+
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  function sm(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  function progress() {
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    return max > 0 ? clamp(window.pageYOffset / max, 0, 1) : 0;
+  }
+
+  /* ---------------- текст и приборная панель ---------------- */
+  function ui(p) {
+    var i = clamp(Math.round(p * LAST), 0, LAST);
+    elSheet.textContent = (i + 1) + '/6';
+    elScale.textContent = SCALES[i];
+    elPct.textContent = Math.round(p * 100);
+    for (var d = 0; d < dots.length; d++) dots[d].classList.toggle('on', d === i);
+    elHint.style.setProperty('--hint', (1 - sm(0, 0.06, p)).toFixed(2));
+    for (var b = 0; b < beats.length; b++) {
+      var r = beats[b].getBoundingClientRect();
+      var c = (r.top + r.height / 2) / window.innerHeight;
+      var k = clamp(Math.abs(c - 0.5) / 0.58, 0, 1);
+      beats[b].firstElementChild.style.setProperty('--o', (1 - k * k).toFixed(3));
+    }
+  }
+
+  /* ---------------- сцена ---------------- */
+  var renderer, scene, camera, explodables = [], frameGroup = null, dust = null;
+  var HAS_GL = false;
+  var SPAN = 24, HGT = 2.4, PANEL = 3, COL_H = 6;
+
+  try {
+    if (window.THREE) {
+      renderer = new THREE.WebGLRenderer({
+        canvas: document.getElementById('gl'), antialias: true, powerPreference: 'high-performance'
+      });
+      HAS_GL = true;
+    }
+  } catch (e) { HAS_GL = false; }
+
+  if (HAS_GL) {
+    var mobile = window.innerWidth < 820;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, mobile ? 1.6 : 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.outputEncoding = THREE.sRGBEncoding;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.06;
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0c0e);
+    scene.fog = new THREE.Fog(0x0a0c0e, 26, 150);
+    camera = new THREE.PerspectiveCamera(38, window.innerWidth / window.innerHeight, 0.04, 500);
+
+    /* небо-градиент как источник отражений: металл без окружения выглядит мёртвым */
+    (function () {
+      var c = document.createElement('canvas'); c.width = 16; c.height = 160;
+      var g = c.getContext('2d'), grd = g.createLinearGradient(0, 0, 0, 160);
+      grd.addColorStop(0.00, '#e6eef2'); grd.addColorStop(0.42, '#8b979e');
+      grd.addColorStop(0.52, '#3d454a'); grd.addColorStop(1.00, '#0c0e10');
+      g.fillStyle = grd; g.fillRect(0, 0, 16, 160);
+      var tex = new THREE.CanvasTexture(c);
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      tex.encoding = THREE.sRGBEncoding;
+      var pmrem = new THREE.PMREMGenerator(renderer);
+      scene.environment = pmrem.fromEquirectangular(tex).texture;
+      tex.dispose(); pmrem.dispose();
+    })();
+
+    var hemi = new THREE.HemisphereLight(0xa8bcc6, 0x0e1214, 0.55); scene.add(hemi);
+    var key = new THREE.DirectionalLight(0xfff0d8, 2.3); key.position.set(9, 14, 7); scene.add(key);
+    var fill = new THREE.DirectionalLight(0x86b0d4, 0.75); fill.position.set(-11, 5, -9); scene.add(fill);
+    var rim = new THREE.DirectionalLight(0xffffff, 0.9); rim.position.set(-3, 2, 12); scene.add(rim);
+
+    var M = {
+      steel:  new THREE.MeshStandardMaterial({ color: 0x9aa3a9, metalness: 0.92, roughness: 0.34 }),
+      dark:   new THREE.MeshStandardMaterial({ color: 0x6b757b, metalness: 0.88, roughness: 0.46 }),
+      primer: new THREE.MeshStandardMaterial({ color: 0xb04a2e, metalness: 0.32, roughness: 0.64 }),
+      bolt:   new THREE.MeshStandardMaterial({ color: 0xccd6da, metalness: 1.0,  roughness: 0.2 })
+    };
+    M.steel.name = 'steel'; M.dark.name = 'dark'; M.primer.name = 'primer'; M.bolt.name = 'bolt';
+
+    function fade(src) {
+      var m = src.clone(); m.name = src.name; m.transparent = true; m.opacity = 0; return m;
+    }
+    var F = { steel: fade(M.steel), dark: fade(M.dark), primer: fade(M.primer), bolt: fade(M.bolt) };
+    var fadeMats = [F.steel, F.dark, F.primer, F.bolt];
+
+    /* --- двутавр вдоль X --- */
+    var GEO = {};
+    function ibeam(len, h, w, tf, tw, mat) {
+      var g = new THREE.Group();
+      var kf = 'f' + len + h + w, kw = 'w' + len + h + w;
+      GEO[kf] = GEO[kf] || new THREE.BoxGeometry(len, tf, w);
+      GEO[kw] = GEO[kw] || new THREE.BoxGeometry(len, h - 2 * tf, tw);
+      var top = new THREE.Mesh(GEO[kf], mat); top.position.y = h / 2 - tf / 2;
+      var bot = new THREE.Mesh(GEO[kf], mat); bot.position.y = -h / 2 + tf / 2;
+      g.add(top, bot, new THREE.Mesh(GEO[kw], mat));
+      return g;
+    }
+    /* --- раскос между двумя точками --- */
+    var UP = new THREE.Vector3(0, 1, 0);
+    function member(ax, ay, bx, by, s, mat) {
+      var a = new THREE.Vector3(ax, ay, 0), b = new THREE.Vector3(bx, by, 0);
+      var len = a.distanceTo(b);
+      var m = new THREE.Mesh(new THREE.BoxGeometry(s, len, s), mat);
+      m.position.copy(a).add(b).multiplyScalar(0.5);
+      m.quaternion.setFromUnitVectors(UP, b.clone().sub(a).normalize());
+      return m;
+    }
+    /* --- болт М24, ось Z --- */
+    var GB_SHANK = new THREE.CylinderGeometry(0.013, 0.013, 0.2, 12);
+    var GB_HEAD  = new THREE.CylinderGeometry(0.022, 0.022, 0.017, 6);
+    function boltM24(mat) {
+      var g = new THREE.Group();
+      g.add(new THREE.Mesh(GB_SHANK, mat));
+      var h = new THREE.Mesh(GB_HEAD, mat); h.position.y = 0.1; g.add(h);
+      var n = new THREE.Mesh(GB_HEAD, mat); n.position.y = -0.1; g.add(n);
+      g.rotation.x = Math.PI / 2;
+      return g;
+    }
+
+    /* --- ферма --- */
+    function buildTruss(ms) {
+      var t = new THREE.Group();
+      t.add(ibeam(SPAN, 0.25, 0.15, 0.014, 0.009, ms.steel));                       // нижний пояс
+      var top = ibeam(SPAN, 0.25, 0.15, 0.014, 0.009, ms.steel);
+      top.position.y = HGT; t.add(top);                                             // верхний пояс
+      var n = SPAN / PANEL, x;
+      for (var i = 0; i <= n; i++) {
+        x = -SPAN / 2 + i * PANEL;
+        t.add(member(x, 0.12, x, HGT - 0.12, 0.11, ms.dark));                       // стойки
+        if (i < n) {
+          var x2 = x + PANEL;
+          var up = (i % 2 === 0);
+          t.add(member(x, up ? 0.12 : HGT - 0.12, x2, up ? HGT - 0.12 : 0.12, 0.1, ms.dark));
+        }
+      }
+      return t;
+    }
+
+    var truss = buildTruss(M);
+    scene.add(truss);
+
+    /* --- узел в середине нижнего пояса: фасонки + 16 болтов --- */
+    var node = new THREE.Group();
+    node.position.set(0, 0, 0);
+    var GPL = new THREE.BoxGeometry(0.64, 0.52, 0.012);
+    [0.081, -0.081].forEach(function (z, idx) {
+      var pl = new THREE.Mesh(GPL, M.primer);
+      pl.position.set(0, 0.17, z);
+      node.add(pl);
+      explodables.push({ o: pl, base: pl.position.clone(), dir: new THREE.Vector3(0, 0.1, idx ? -0.34 : 0.34), spin: 0 });
+    });
+    [-0.22, -0.075, 0.075, 0.22].forEach(function (bx) {
+      [0.05, 0.29].forEach(function (by, r) {
+        var b = boltM24(M.bolt);
+        b.position.set(bx, by, 0);
+        node.add(b);
+        explodables.push({
+          o: b, base: b.position.clone(),
+          dir: new THREE.Vector3(bx * 0.5, (r ? 0.42 : -0.18) + by * 0.2, (bx > 0 ? 1 : -1) * (0.5 + Math.abs(bx))),
+          spin: (bx > 0 ? 1 : -1) * (2.4 + r)
+        });
+      });
+    });
+    truss.add(node);
+
+    /* --- каркас: ещё четыре фермы, колонны, прогоны, земля --- */
+    frameGroup = new THREE.Group();
+    [-12, -6, 6, 12].forEach(function (z) {
+      var c = truss.clone(true);
+      c.position.z = z;
+      c.traverse(function (o) { if (o.isMesh && F[o.material.name]) o.material = F[o.material.name]; });
+      frameGroup.add(c);
+    });
+    var GCOL = new THREE.BoxGeometry(0.42, COL_H, 0.42);
+    var GBASE = new THREE.BoxGeometry(0.8, 0.06, 0.8);
+    [-12, -6, 0, 6, 12].forEach(function (z) {
+      [-SPAN / 2, SPAN / 2].forEach(function (x) {
+        var col = new THREE.Mesh(GCOL, F.steel);
+        col.position.set(x, -COL_H / 2 - 0.13, z); frameGroup.add(col);
+        var bp = new THREE.Mesh(GBASE, F.primer);
+        bp.position.set(x, -COL_H - 0.1, z); frameGroup.add(bp);
+      });
+    });
+    var GPUR = new THREE.BoxGeometry(0.09, 0.09, 25);
+    for (var px = -12; px <= 12; px += 3) {
+      var pur = new THREE.Mesh(GPUR, F.dark);
+      pur.position.set(px, HGT + 0.17, 0); frameGroup.add(pur);
+    }
+    var groundMat = new THREE.MeshStandardMaterial({
+      color: 0x15191c, roughness: 0.96, metalness: 0.0, transparent: true, opacity: 0
+    });
+    var ground = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), groundMat);
+    ground.rotation.x = -Math.PI / 2; ground.position.y = -COL_H - 0.14;
+    frameGroup.add(ground);
+    var grid = new THREE.GridHelper(120, 40, 0x39434a, 0x252c30);
+    grid.position.y = -COL_H - 0.13;
+    frameGroup.add(grid);
+    scene.add(frameGroup);
+
+    /* --- пыль в луче света --- */
+    (function () {
+      var n = 700, pos = new Float32Array(n * 3);
+      for (var i = 0; i < n; i++) {
+        pos[i * 3]     = (Math.random() - 0.5) * 70;
+        pos[i * 3 + 1] = (Math.random() - 0.35) * 26;
+        pos[i * 3 + 2] = (Math.random() - 0.5) * 70;
+      }
+      var g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      dust = new THREE.Points(g, new THREE.PointsMaterial({
+        color: 0x9db0ba, size: 0.035, sizeAttenuation: true, transparent: true, opacity: 0.4, depthWrite: false
+      }));
+      scene.add(dust);
+    })();
+
+    /* --- траектория камеры: один непрерывный отъезд --- */
+    var KEYS = [
+      { p: [0.44, 0.36, 0.80], t: [0.02, 0.15, 0] },
+      { p: [1.12, 0.34, 0.98], t: [0.38, 0.08, 0] },
+      { p: [0.28, 0.50, 1.10], t: [0.00, 0.18, 0] },
+      { p: [1.60, 3.30, 20.0], t: [0.00, 1.20, 0] },
+      { p: [22.0, 13.0, 28.0], t: [0.00, -1.0, 0] },
+      { p: [29.0, 3.20, 21.0], t: [0.00, -1.6, 0] }
+    ];
+    var cp = new THREE.Vector3(), ct = new THREE.Vector3(), off = new THREE.Vector3();
+
+    var onResize = function () {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    };
+    window.addEventListener('resize', onResize);
+    onResize();
+
+    var applyScene = function (p, time) {
+      var k = p * (KEYS.length - 1);
+      var i = clamp(Math.floor(k), 0, KEYS.length - 2);
+      var f = sm(0, 1, k - i);
+      var A = KEYS[i], B = KEYS[i + 1];
+      ct.set(lerp(A.t[0], B.t[0], f), lerp(A.t[1], B.t[1], f), lerp(A.t[2], B.t[2], f));
+      cp.set(lerp(A.p[0], B.p[0], f), lerp(A.p[1], B.p[1], f), lerp(A.p[2], B.p[2], f));
+
+      /* узкий экран — отходим дальше, иначе 24 метра не влезают в кадр */
+      var fit = clamp(1.72 / camera.aspect, 1, 2.1);
+      off.copy(cp).sub(ct).multiplyScalar(fit);
+      /* едва заметный дрейф, чтобы кадр дышал на паузе */
+      var a = Math.sin(time * 0.00012) * 0.02;
+      var ox = off.x * Math.cos(a) - off.z * Math.sin(a);
+      var oz = off.x * Math.sin(a) + off.z * Math.cos(a);
+      camera.position.set(ct.x + ox, ct.y + off.y, ct.z + oz);
+      camera.lookAt(ct);
+
+      /* узел разлетается на 02 и собирается обратно к 03 */
+      var ex = 1 - clamp(Math.abs(p - 0.40) / 0.135, 0, 1);
+      ex = ex * ex * (3 - 2 * ex);
+      for (var e = 0; e < explodables.length; e++) {
+        var it = explodables[e];
+        it.o.position.copy(it.base).addScaledVector(it.dir, ex);
+        if (it.spin) it.o.rotation.z = ex * it.spin;
+      }
+
+      /* каркас проявляется между 03 и 04 */
+      var op = sm(0.62, 0.80, p);
+      for (var m = 0; m < fadeMats.length; m++) fadeMats[m].opacity = op;
+      groundMat.opacity = op * 0.95;
+      grid.material.opacity = op * 0.42;
+      grid.material.transparent = true;
+      frameGroup.visible = op > 0.002;
+
+      if (dust) dust.rotation.y = time * 0.000015;
+    };
+    var render = function () { renderer.render(scene, camera); };
+    var scene_update = applyScene;
+    window.__scene = { u: scene_update, r: render };
+  }
+
+  /* ---------------- общий цикл ---------------- */
+  var cur = progress(), tgt = cur;
+  var ticking = false;
+  window.addEventListener('scroll', function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(function () { ticking = false; }); }
+  }, { passive: true });
+
+  function loop(time) {
+    requestAnimationFrame(loop);
+    tgt = progress();
+    cur = reduce ? tgt : cur + (tgt - cur) * 0.075;
+    if (Math.abs(tgt - cur) < 0.0002) cur = tgt;
+    ui(cur);
+    if (window.__scene) { window.__scene.u(cur, time || 0); window.__scene.r(); }
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
