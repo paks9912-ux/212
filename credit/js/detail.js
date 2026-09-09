@@ -23,7 +23,8 @@
     /* если ниже будет красная карточка про пропуски — бейдж в шапке не дублируем */
     var missedCard = !r.isClosed && l.payMode === 'monthly' && l.model !== 'fixed' && r.missed > 0;
     h += '<div class="hero">' +
-      '<div class="lbl">' + (r.isClosed ? 'Заём закрыт' : r.isPaidOff ? 'Долг погашен' : 'Долг на сегодня') + '</div>' +
+      '<div class="lbl">' + (r.isClosed ? 'Заём закрыт' : r.isPaidOff ? 'Долг погашен'
+        : l.issuedAt > U.today() ? 'Будет выдано' : 'Долг на сегодня') + '</div>' +
       '<div class="amt num"' + (r.isOverdue ? ' style="color:var(--red)"' : '') + '>' + m(r.isClosed ? 0 : r.totalDue) + '</div>' +
       (alt != null ? '<div class="delta">≈ ' + U.money(alt) + '</div>' : '') +
       '<div class="delta" style="margin-top:8px">' +
@@ -32,7 +33,7 @@
       progress(r) + '</div>';
 
     /* ---- ежемесячные проценты: главное на экране ---- */
-    if (!r.isClosed && l.payMode === 'monthly' && l.model !== 'fixed') {
+    if (!r.isClosed && l.payMode === 'monthly' && l.model !== 'fixed' && l.issuedAt <= U.today()) {
       var perM = CALC.perMonth(l, r.balance);
       if (r.missed) {
         h += '<div class="card pad" style="margin-top:12px;background:var(--danger-soft)">' +
@@ -46,7 +47,9 @@
           '<div style="font-size:13px;color:var(--text-2)">Следующий платёж процентов</div>' +
           '<div style="font-size:28px;font-weight:700;letter-spacing:-.5px;margin-top:3px" class="num">' + m(r.nextPay.due) + '</div>' +
           '<div style="font-size:13px;color:var(--text-2);margin-top:2px">' +
-          U.fmtDateFull(r.nextPay.date) + ' · ' + U.relDate(r.nextPay.date) + '</div></div>';
+          U.fmtDateFull(r.nextPay.date) +
+          (U.relDate(r.nextPay.date) !== U.fmtDate(r.nextPay.date) ? ' · ' + U.relDate(r.nextPay.date) : '') +
+          '</div></div>';
       }
       h += '<div style="font-size:13px;color:var(--text-2);margin:8px 4px 0">' +
         'Каждый месяц: <b style="color:var(--text)">' + m(perM) + '</b> процентами. ' +
@@ -115,7 +118,9 @@
       '</div>';
 
     var pays = (l.payments || []).slice().sort(function (a, b) { return a.date < b.date ? 1 : -1; });
-    h += '<h2 class="sec">Платежи' + (pays.length ? ' · ' + pays.length : '') + '</h2>';
+    h += '<h2 class="sec">Платежи' + (pays.length ? ' · ' + pays.length : '') +
+      (pays.length ? '<button class="act" data-act="pay-edit">' + (V.payEdit ? 'Готово' : 'Изменить') + '</button>' : '') +
+      '</h2>';
     if (!pays.length) {
       h += '<div class="card pad" style="color:var(--text-2);font-size:15px">Платежей ещё не было.</div>';
     } else {
@@ -128,12 +133,17 @@
           if (a.int > 0.5) parts.push('проценты ' + m(a.int));
           if (a.prin > 0.5) parts.push('тело ' + m(a.prin));
         }
-        h += '<button class="row tap" data-act="del-pay" data-id="' + l.id + '" data-pid="' + p.id + '">' +
+        /* строка сама по себе ничего не делает — удаление только явной кнопкой */
+        h += '<div class="row">' +
           '<span class="grow"><span class="ttl">' + U.fmtDate(p.date, true) + '</span>' +
           '<span class="sub">' + (parts.join(' · ') || 'зачтено') + (p.note ? ' · ' + esc(p.note) : '') + '</span></span>' +
-          '<span class="val"><span class="v1 num" style="color:var(--accent)">+' + m(p.amount) + '</span></span></button>';
+          (V.payEdit
+            ? '<button class="btn danger sm" data-act="del-pay" data-id="' + l.id + '" data-pid="' + p.id + '">Удалить</button>'
+            : '<span class="val"><span class="v1 num" style="color:var(--accent)">+' + m(p.amount) + '</span></span>') +
+          '</div>';
       });
-      h += '</div><div class="hint">Нажмите на платёж, чтобы удалить его.</div>';
+      h += '</div>';
+      if (V.payEdit) h += '<div class="hint">Удалённый платёж можно вернуть в течение шести секунд.</div>';
     }
 
     h += '<div style="margin:26px 0 10px">';
@@ -163,7 +173,7 @@
     var h = V.topbarBack(c.name, '<button data-act="edit-client" data-id="' + c.id + '">Изменить</button>');
     h += '<div class="wrap">';
     h += '<div style="display:flex;flex-direction:column;align-items:center;text-align:center;padding:6px 0 18px">' +
-      '<div class="avatar" style="width:76px;height:76px;font-size:28px;background:' + U.color(c.name) + '">' + esc(U.initials(c.name)) + '</div>' +
+      '<div class="avatar" style="width:76px;height:76px;font-size:28px;--h:' + U.hue(c.name) + '">' + esc(U.initials(c.name)) + '</div>' +
       '<div style="font-size:24px;font-weight:700;margin-top:10px;letter-spacing:-.3px">' + esc(c.name) + '</div>' +
       (c.phone ? '<div style="font-size:15px;color:var(--text-2);margin-top:2px">' + esc(c.phone) + '</div>' : '') +
       (c.note ? '<div style="font-size:14px;color:var(--text-2);margin-top:6px;max-width:420px">' + esc(c.note) + '</div>' : '') +
@@ -272,7 +282,10 @@
     h += '<div class="list" id="box-fixed"' + (d.model !== 'fixed' ? ' style="display:none"' : '') + '>' +
       '<div class="field"><label>Вернёт всего</label><input id="f-return" type="text" inputmode="decimal" placeholder="0" value="' + (d.returnAmount || '') + '"></div></div>';
 
-    h += '<div class="list" style="margin-top:12px">' +
+    /* редко используемое убрано под кнопку: значения по умолчанию уже в настройках */
+    h += '<button type="button" class="more-toggle" id="f-more-btn" aria-expanded="false">' +
+      '<span>Дополнительно</span><span class="caret">▶</span></button>' +
+      '<div class="list" id="f-more" hidden style="margin-top:8px">' +
       '<div class="field"><label>Пеня</label><input id="f-penalty" type="text" inputmode="decimal" value="' + (d.penaltyRate || 0) + '"><span class="unit">% в день</span></div>' +
       '<div class="field"><label style="min-width:auto;flex:1;font-size:16px">После срока проценты не растут</label>' +
       '<input id="f-stop" type="checkbox" style="flex:none;width:auto;-webkit-appearance:checkbox;appearance:checkbox;transform:scale(1.3)"' + (d.stopAccrual ? ' checked' : '') + '></div>' +
@@ -288,6 +301,13 @@
       onOpen: function (bd) {
         var $ = function (x) { return bd.querySelector(x); };
         function seg(id) { var b = bd.querySelector('#' + id + ' .on'); return b ? b.dataset : {}; }
+
+        var mb = $('#f-more-btn');
+        mb.addEventListener('click', function () {
+          var box = $('#f-more'), open = box.hidden;
+          box.hidden = !open;
+          mb.setAttribute('aria-expanded', open ? 'true' : 'false');
+        });
         function model() { return seg('f-model').model || 'simple'; }
         function rateMode() { return seg('f-ratemode').rm || 'percent'; }
         function payMode() { return seg('f-paymode').pm || 'monthly'; }
@@ -403,6 +423,28 @@
       onSave: function (bd) {
         var $ = function (x) { return bd.querySelector(x); };
         var segOn = function (id) { var b = bd.querySelector('#' + id + ' .on'); return b ? b.dataset : {}; };
+
+        /* ошибку показываем у самого поля, а не всплывашкой, которая исчезнет */
+        function clearErrs() {
+          U.$$('.field.err', bd).forEach(function (f) { f.classList.remove('err'); });
+          U.$$('.field-err', bd).forEach(function (e) { e.remove(); });
+        }
+        function bad(sel, msg) {
+          clearErrs();
+          var el = $(sel), f = el && el.closest('.field');
+          if (!f) { U.toast(msg); return false; }
+          var hidden = f.closest('[hidden]');
+          if (hidden) { hidden.hidden = false; var b = $('#f-more-btn'); if (b) b.setAttribute('aria-expanded', 'true'); }
+          f.classList.add('err');
+          var note = document.createElement('div');
+          note.className = 'field-err';
+          note.textContent = msg;
+          f.parentNode.insertBefore(note, f.nextSibling);
+          try { f.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { }
+          if (el.focus) el.focus();
+          return false;
+        }
+        clearErrs();
         var rm = segOn('f-ratemode').rm || 'percent';
         var principal = U.num($('#f-principal').value);
         var dr = {
@@ -421,21 +463,38 @@
           stopAccrual: $('#f-stop').checked,
           note: $('#f-note').value.trim()
         };
-        if (!dr.principal || dr.principal <= 0) { U.toast('Укажите сумму займа'); return false; }
-        if (dr.model === 'fixed' && dr.returnAmount < dr.principal) { U.toast('Сумма возврата меньше выданной'); return false; }
-        if (dr.model === 'simple' && rm === 'amount' && !U.num($('#f-rateamt').value)) { U.toast('Укажите месячный платёж'); return false; }
+        if (!dr.principal || dr.principal <= 0) return bad('#f-principal', 'Укажите сумму займа');
+        if (dr.model === 'fixed' && dr.returnAmount < dr.principal) return bad('#f-return', 'Вернуть должны больше, чем выдали');
+        if (dr.model === 'simple' && rm === 'amount' && !U.num($('#f-rateamt').value)) return bad('#f-rateamt', 'Укажите месячный платёж');
+        if (dr.model === 'simple' && rm === 'percent' && !dr.rate) return bad('#f-rate', 'Укажите ставку');
+        if (dr.dueAt && dr.dueAt < dr.issuedAt) return bad('#f-due', 'Дата возврата раньше выдачи');
 
         var cid = $('#f-client').value;
         if (cid === '__new') {
           var nm = $('#f-cname').value.trim();
-          if (!nm) { U.toast('Введите имя клиента'); return false; }
+          if (!nm) return bad('#f-cname', 'Введите имя клиента');
           var ex = DB.clientByName(nm);
           cid = ex ? ex.id : DB.addClient({ name: nm, phone: $('#f-cphone').value.trim() }).id;
         }
         dr.clientId = cid;
 
-        if (l) { DB.updLoan(l.id, dr); U.toast('Изменения сохранены'); App.go('#/loan/' + l.id); }
-        else { var nl = DB.addLoan(dr); U.toast('Заём выдан'); App.go('#/loan/' + nl.id); }
+        function commit() {
+          if (l) { DB.updLoan(l.id, dr); U.toast('Изменения сохранены'); App.go('#/loan/' + l.id); }
+          else { var nl = DB.addLoan(dr); U.toast('Заём выдан'); App.go('#/loan/' + nl.id); }
+        }
+
+        /* дата в будущем — частая опечатка: проценты по такому займу ещё не идут */
+        if (dr.issuedAt > U.today()) {
+          App.ask({
+            title: 'Дата выдачи в будущем',
+            text: 'Заём датирован ' + U.fmtDateFull(dr.issuedAt) + ' — это ' +
+              U.days(U.diffDays(U.today(), dr.issuedAt)) + ' вперёд. До этого дня проценты начисляться не будут. Так и задумано?',
+            ok: 'Да, оставить', cancel: 'Исправить',
+            onOk: function () { commit(); App.closeSheet(); }
+          });
+          return false;
+        }
+        commit();
         return true;
       }
     });

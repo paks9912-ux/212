@@ -111,6 +111,31 @@
     setTimeout(function () { s.bg.remove(); s.sh.remove(); }, 340);
   };
 
+  /* ---------- подсказка с отменой ----------
+     Удаление больше не бесповоротно: шесть секунд действие можно вернуть. */
+  App.undoable = function (msg, undo) {
+    var t = U.$('#toast');
+    if (!t) { U.toast(msg); return; }
+    clearTimeout(U._tt);
+    t.classList.add('wide');
+    t.innerHTML = '<span>' + U.esc(msg) + '</span><button class="undo" id="undo-btn">Вернуть</button>';
+    t.classList.add('in');
+
+    var close = function () {
+      t.classList.remove('in');
+      setTimeout(function () { t.classList.remove('wide'); t.textContent = ''; }, 260);
+    };
+    U._tt = setTimeout(close, 6000);
+    var b = U.$('#undo-btn');
+    if (b) b.addEventListener('click', function () {
+      clearTimeout(U._tt);
+      close();
+      undo();
+      U.toast('Возвращено');
+      App.render();
+    });
+  };
+
   /* ---------- диалог подтверждения (вместо системного confirm) ---------- */
   App.ask = function (opt) {
     var bg = document.createElement('div');
@@ -298,16 +323,16 @@
       });
     },
 
+    'pay-edit': function () { V.payEdit = !V.payEdit; App.render(); },
+
     'del-pay': function (d) {
       var l = DB.loan(d.id); if (!l) return;
       var p = l.payments.filter(function (x) { return x.id === d.pid; })[0];
       if (!p) return;
-      App.ask({
-        title: 'Удалить платёж?',
-        text: U.money(p.amount) + ' от ' + U.fmtDate(p.date, true) + '. Долг пересчитается заново.',
-        ok: 'Удалить', danger: true,
-        onOk: function () { DB.delPayment(d.id, d.pid); U.toast('Платёж удалён'); App.render(); }
-      });
+      var snap = DB.delPayment(d.id, d.pid);
+      App.render();
+      App.undoable('Платёж ' + U.money(p.amount, l.currency) + ' удалён',
+        function () { DB.restorePayment(snap); });
     },
     'close-loan': function (d) {
       var r = CALC.loan(DB.loan(d.id));
@@ -328,21 +353,32 @@
       U.toast('Заём снова активен'); App.render();
     },
     'del-loan': function (d) {
+      var l = DB.loan(d.id);
+      var n = l ? (l.payments || []).length : 0;
       App.ask({
         title: 'Удалить заём?',
-        text: 'Вместе со всеми платежами по нему. Отменить это будет нельзя.',
+        text: n ? 'Вместе с историей платежей (' + n + '). Шесть секунд можно будет вернуть.'
+                : 'Шесть секунд можно будет вернуть.',
         ok: 'Удалить', danger: true,
-        onOk: function () { DB.delLoan(d.id); U.toast('Заём удалён'); App.go('#/loans'); }
+        onOk: function () {
+          var snap = DB.delLoan(d.id);
+          App.go('#/loans');
+          App.undoable('Заём удалён', function () { DB.restoreLoan(snap); });
+        }
       });
     },
     'del-client': function (d) {
       var c = DB.client(d.id), n = DB.loansOf(d.id).length;
       App.ask({
         title: 'Удалить ' + (c ? c.name : 'клиента') + '?',
-        text: n ? 'Вместе с займами (' + n + ') и всей историей платежей. Отменить это будет нельзя.'
-                : 'Отменить это будет нельзя.',
+        text: n ? 'Вместе с займами (' + n + ') и историей платежей. Шесть секунд можно будет вернуть.'
+                : 'Шесть секунд можно будет вернуть.',
         ok: 'Удалить', danger: true,
-        onOk: function () { DB.delClient(d.id); U.toast('Клиент удалён'); App.go('#/clients'); }
+        onOk: function () {
+          var snap = DB.delClient(d.id);
+          App.go('#/clients');
+          App.undoable('Клиент удалён', function () { DB.restoreClient(snap); });
+        }
       });
     },
     filter: function (d) { V.loansFilter = d.f; App.render(); },

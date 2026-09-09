@@ -5,7 +5,7 @@
   var U = {};
 
   /* Номер сборки. При выпуске обновляется здесь, в index.html (?v=) и в sw.js */
-  U.BUILD = '2.2';
+  U.BUILD = '2.3';
   U.BUILD_DATE = '9 сентября 2026';
 
   /* ---------- id ---------- */
@@ -159,12 +159,13 @@
     U._tt = setTimeout(function () { t.classList.remove('in'); }, 2300);
   };
 
-  /* цвет аватара по имени — стабильный */
-  var PALETTE = ['#0a84ff', '#30d158', '#ff9f0a', '#ff453a', '#bf5af2', '#64d2ff', '#ffd60a', '#ff375f', '#5e5ce6', '#66d4cf'];
-  U.color = function (str) {
+  /* Тон аватара по имени — стабильный. Светлоту задаёт тема (см. --av-*),
+     поэтому инициалы читаются и на светлом, и на тёмном фоне. */
+  var HUES = [210, 145, 32, 355, 275, 195, 55, 330, 245, 172];
+  U.hue = function (str) {
     var h = 0, s = String(str || '?');
     for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-    return PALETTE[h % PALETTE.length];
+    return HUES[h % HUES.length];
   };
   U.initials = function (name) {
     var p = String(name || '?').trim().split(/\s+/);

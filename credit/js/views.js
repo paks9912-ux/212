@@ -17,7 +17,7 @@
 
   /* ============ общие кусочки ============ */
   V.avatar = function (name) {
-    return '<div class="avatar" style="background:' + U.color(name) + '">' + esc(U.initials(name)) + '</div>';
+    return '<div class="avatar" style="--h:' + U.hue(name) + '">' + esc(U.initials(name)) + '</div>';
   };
 
   /* Итог, который может не сводиться в базовую валюту */
@@ -111,7 +111,7 @@
     var active = loans.filter(function (l) { return l.status !== 'closed'; }).length;
     var sub = active ? active + ' ' + U.plural(active, 'активный заём', 'активных займа', 'активных займов')
       : (loans.length ? 'нет активных займов' : (c.phone ? esc(c.phone) : 'без займов'));
-    return '<button class="row tap" data-act="client" data-id="' + c.id + '">' +
+    return '<button class="row tap' + (p.overdueCount ? ' wrap2' : '') + '" data-act="client" data-id="' + c.id + '">' +
       V.avatar(c.name) +
       '<span class="grow"><span class="ttl">' + esc(c.name) + '</span><span class="sub">' + sub +
       (p.overdueCount ? ' · <b style="color:var(--red)">просрочка</b>' : '') + '</span></span>' +
@@ -218,11 +218,11 @@
       owed.forEach(function (x) {
         var c = x.client, p = x.p;
         var sub = x.missed
-          ? '<span class="badge bad">просрочка ' + x.missed + ' мес</span>'
+          ? '<span class="badge bad">просрочка</span>'
           : (p.activeCount + ' ' + U.plural(p.activeCount, 'заём', 'займа', 'займов') +
             ' · ' + V.sum(p.outstanding, p.cur.outstanding));
         var v2 = x.next ? (x.missed ? 'не платит с ' : 'платёж ') + U.fmtDate(x.next.date) : '';
-        p1 += '<button class="row tap" data-act="client" data-id="' + c.id + '">' + V.avatar(c.name) +
+        p1 += '<button class="row tap' + (x.missed ? ' wrap2' : '') + '" data-act="client" data-id="' + c.id + '">' + V.avatar(c.name) +
           '<span class="grow"><span class="ttl">' + esc(c.name) + '</span>' +
           '<span class="sub">' + sub + '</span></span>' +
           '<span class="val"><span class="v1 num" style="color:' + (x.missed ? 'var(--red)' : 'var(--accent)') + '">' +
@@ -230,7 +230,7 @@
           (v2 ? '<span class="v2">' + esc(v2) + '</span>' : '') + '</span>' +
           '<span class="chev">' + V.ICON.chev + '</span></button>';
       });
-      p1 += '</div><div class="hint">Проценты на сегодняшний день. Каждый день сумма растёт.</div>';
+      p1 += '</div><div class="hint">Проценты на сегодняшний день — каждый день сумма растёт. Строка открывает клиента.</div>';
     } else {
       p1 = '<div class="card pad" style="color:var(--text-2);font-size:15px">Непогашенных процентов на сегодня нет.</div>';
     }
@@ -241,7 +241,7 @@
       p2 += '<div class="deck-sum">Платежи по графику на месяц вперёд: <b>' + due.length +
         ' из ' + s.activeCount + '</b></div><div class="list" id="due-list">';
       due.forEach(function (x) { p2 += V.dueRow(x); });
-      p2 += '</div><div class="hint">Нажмите строку, чтобы открыть заём и принять платёж.</div>';
+      p2 += '</div><div class="hint">Строка открывает заём — там принимается платёж.</div>';
     } else {
       p2 = '<div class="card pad" style="color:var(--text-2);font-size:15px">В ближайший месяц платежей нет.</div>';
     }
@@ -255,19 +255,22 @@
         var c = x.client, p = x.p;
         var bits = p.activeCount + ' ' + U.plural(p.activeCount, 'заём', 'займа', 'займов') +
           ' · ' + V.sum(p.outstanding, p.cur.outstanding);
-        p3 += '<button class="row tap" data-act="client" data-id="' + c.id + '">' + V.avatar(c.name) +
+        p3 += '<button class="row tap' + (p.overdueCount ? ' wrap2' : '') + '" data-act="client" data-id="' + c.id + '">' + V.avatar(c.name) +
           '<span class="grow"><span class="ttl">' + esc(c.name) + '</span>' +
           '<span class="sub">' + (p.overdueCount ? '<span class="badge bad">просрочка</span> ' : '') + bits + '</span></span>' +
           '<span class="val"><span class="v1 num" style="color:var(--accent)">' + V.sum(x.month, x.curMonth) + '</span>' +
           '<span class="v2">' + (x.startsAt ? 'с ' + U.fmtDate(x.startsAt) : V.sum(x.day, x.curDay) + ' в день') + '</span></span>' +
           '<span class="chev">' + V.ICON.chev + '</span></button>';
       });
-      p3 += '</div><div class="hint">Проценты при нынешних остатках долга.</div>';
+      p3 += '</div><div class="hint">Проценты при нынешних остатках долга. Строка открывает клиента.</div>';
     } else {
       p3 = '<div class="card pad" style="color:var(--text-2);font-size:15px">Активных займов нет.</div>';
     }
 
-    var labels = ['На сегодня', 'Платежи', 'Доход'];
+    h += '<div class="btn-row"><button class="btn" data-act="quick-pay">Принять платёж</button>' +
+      '<button class="btn sec" data-act="new-loan">＋ Выдать заём</button></div>';
+
+    var labels = ['Долг сегодня', 'Когда платят', 'Доход в месяц'];
     var act = Math.min(2, Math.max(0, U.num(V.deckPage)));
     h += '<div class="deck"><div class="seg deck-tabs" id="deck-tabs">' +
       labels.map(function (t, i) {
@@ -281,9 +284,6 @@
       '<div class="deck-dots" id="deck-dots">' +
       labels.map(function (t, i) { return '<i class="' + (i === act ? 'on' : '') + '"></i>'; }).join('') +
       '</div></div>';
-
-    h += '<div class="btn-row"><button class="btn" data-act="quick-pay">Принять платёж</button>' +
-      '<button class="btn sec" data-act="new-loan">＋ Выдать заём</button></div>';
 
     /* ---------- 3. месяц ---------- */
     var expects = V.hasMoney(s.monthDue, s.cur.monthDue);
@@ -421,7 +421,7 @@
 
     var h = V.topbar('Клиенты', '<button data-act="new-client" style="font-size:26px;font-weight:300">＋</button>');
     h += '<div class="wrap"><h1 class="big">Клиенты</h1>';
-    if (DB.clients().length > 6) {
+    if (DB.clients().length) {
       h += '<div class="search">' + V.ICON.search +
         '<input id="qc" type="search" placeholder="Поиск по имени или телефону" value="' + esc(V.clientsQuery) + '" autocomplete="off"></div>';
     }
@@ -626,6 +626,8 @@
     /* картинки и шрифты могли ещё дорисовываться — уточняем высоту */
     setTimeout(function () { if (pages[V.deckPage]) track.style.height = pages[V.deckPage].offsetHeight + 'px'; }, 120);
   };
+
+  V.payEdit = false;
 
   w.V = V;
 })(window);

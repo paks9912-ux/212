@@ -156,9 +156,21 @@
       if (c) { Object.assign(c, patch); this.save(); }
       return c;
     },
+    /* Удаление возвращает снимок — по нему запись восстанавливается целиком */
     delClient: function (id) {
+      var self = this;
+      var ci = this.data.clients.findIndex(function (c) { return c.id === id; });
+      var snap = { client: ci >= 0 ? this.data.clients[ci] : null, at: ci, loans: [] };
+      this.data.loans.forEach(function (l, i) { if (l.clientId === id) snap.loans.push({ loan: l, at: i }); });
       this.data.loans = this.data.loans.filter(function (l) { return l.clientId !== id; });
-      this.data.clients = this.data.clients.filter(function (c) { return c.id !== id; });
+      if (ci >= 0) this.data.clients.splice(ci, 1);
+      this.save();
+      return snap;
+    },
+    restoreClient: function (snap) {
+      if (!snap || !snap.client) return;
+      this.data.clients.splice(Math.min(snap.at, this.data.clients.length), 0, snap.client);
+      snap.loans.forEach(function (x) { DB.data.loans.splice(Math.min(x.at, DB.data.loans.length), 0, x.loan); });
       this.save();
     },
     /* найти по имени или создать */
@@ -188,7 +200,16 @@
       return l;
     },
     delLoan: function (id) {
-      this.data.loans = this.data.loans.filter(function (l) { return l.id !== id; });
+      var i = this.data.loans.findIndex(function (l) { return l.id === id; });
+      if (i < 0) return null;
+      var snap = { loan: this.data.loans[i], at: i };
+      this.data.loans.splice(i, 1);
+      this.save();
+      return snap;
+    },
+    restoreLoan: function (snap) {
+      if (!snap || !snap.loan) return;
+      this.data.loans.splice(Math.min(snap.at, this.data.loans.length), 0, snap.loan);
       this.save();
     },
 
@@ -212,9 +233,22 @@
     },
     delPayment: function (loanId, payId) {
       var l = this.loan(loanId);
-      if (!l) return;
-      l.payments = l.payments.filter(function (p) { return p.id !== payId; });
+      if (!l) return null;
+      var i = l.payments.findIndex(function (p) { return p.id === payId; });
+      if (i < 0) return null;
+      var snap = { loanId: loanId, payment: l.payments[i], at: i, wasClosed: l.status === 'closed' };
+      l.payments.splice(i, 1);
       if (l.status === 'closed' && CALC.loan(l).totalDue > 0.49) { l.status = 'active'; l.closedAt = null; }
+      this.save();
+      return snap;
+    },
+    restorePayment: function (snap) {
+      if (!snap) return;
+      var l = this.loan(snap.loanId);
+      if (!l) return;
+      l.payments.splice(Math.min(snap.at, l.payments.length), 0, snap.payment);
+      l.payments.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
+      if (snap.wasClosed) { l.status = 'closed'; l.closedAt = l.closedAt || snap.payment.date; }
       this.save();
     },
 
