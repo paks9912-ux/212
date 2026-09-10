@@ -711,3 +711,6 @@ section[id],main[id]{scroll-margin-top:120px}
 .clients-list h3{padding-bottom:12px;border-bottom:1px solid var(--rule-strong);margin-bottom:14px}
 .clients-list ul{list-style:none;display:grid;gap:8px}
 .clients-list li{font-size:.92rem;color:var(--steel-on-paper);line-height:1.4}
+
+/* метка на карточке, у которой есть страница кейса: клик перестаёт быть случайностью */
+.proj-meta .case-flag{color:var(--accent-soft);border:1px solid currentColor;padding:2px 7px;border-radius:2px;font-size:.72rem}

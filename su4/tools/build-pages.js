@@ -136,7 +136,7 @@ const projectCard = (p, up) => {
   return `      <article class="proj reveal${p.ready ? '' : ' proj--flat'}" data-cat="${p.tags.join(' ')}">
         <div class="ph-frame">${img(p.img, p.title, ' loading="lazy"')}</div>
         <div class="proj-body">
-          <div class="proj-meta"><span class="cat">${esc(p.cat)}</span><span>Год · —</span></div>
+          <div class="proj-meta"><span class="cat">${esc(p.cat)}</span><span>Год · —</span>${p.ready ? '<span class="case-flag">Есть кейс</span>' : ''}</div>
           <h3 class="h3">${esc(p.title)}</h3>
           <p>${esc(p.text)}</p>
         </div>${link}
