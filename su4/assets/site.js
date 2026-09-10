@@ -53,7 +53,9 @@
   /* header */
   var header=d.getElementById('header');
   if(header){
-    var onScroll=function(){header.classList.toggle('is-scrolled',w.scrollY>24);};
+    /* над видео шапка прозрачная; на странице без тёмного первого экрана — сразу светлая */
+    var hasHero=!!d.querySelector('.hero, .case-hero');
+    var onScroll=function(){header.classList.toggle('is-scrolled', !hasHero || w.scrollY>24);};
     onScroll(); w.addEventListener('scroll',onScroll,{passive:true});
   }
 
@@ -80,14 +82,28 @@
   top.addEventListener('click',function(){w.scrollTo({top:0,behavior:calmMotion?'auto':'smooth'});});
   d.body.appendChild(top);
 
+  /* оглавление направлений: наведение меняет превью справа */
+  var pv=d.querySelector('.dirs-preview'), cap=d.getElementById('dirsCap');
+  if(pv){
+    var pvImgs=pv.querySelectorAll('img');
+    d.querySelectorAll('.dir[data-idx]').forEach(function(a){
+      var show=function(){
+        var i=a.getAttribute('data-idx');
+        pvImgs.forEach(function(im){im.classList.toggle('on', im.getAttribute('data-for')===i);});
+        if(cap) cap.textContent=(a.querySelector('.h3')||{}).textContent||'';
+      };
+      a.addEventListener('mouseenter',show); a.addEventListener('focus',show);
+    });
+  }
+
   /* показать остальные объекты: без перехода на отдельную страницу */
   var moreBtn=d.getElementById('moreProjects');
   if(moreBtn){
     moreBtn.addEventListener('click',function(){
-      var rest=d.querySelectorAll('.proj--more');
+      var rest=d.querySelectorAll('.plate--more');
       rest.forEach(function(e){e.hidden=false;});
       moreBtn.setAttribute('aria-expanded','true');
-      moreBtn.remove();
+      moreBtn.remove(); moreBtn=null;
     });
   }
 
@@ -133,8 +149,9 @@
   }
 
   /* фильтр проектов */
-  var fbtns=d.querySelectorAll('.filters button'), cards=d.querySelectorAll('#projectGrid .proj');
+  var fbtns=d.querySelectorAll('.filters button'), cards=d.querySelectorAll('#projectGrid .plate');
   fbtns.forEach(function(b){b.addEventListener('click',function(){
+    if(moreBtn){ d.querySelectorAll('.plate--more').forEach(function(e){e.hidden=false;}); moreBtn.remove(); moreBtn=null; }
     fbtns.forEach(function(x){x.setAttribute('aria-pressed',x===b)});
     var f=b.getAttribute('data-f');
     cards.forEach(function(c){var ok=f==='all'||(c.getAttribute('data-cat')||'').split(' ').indexOf(f)>-1;c.classList.toggle('hidden',!ok);});

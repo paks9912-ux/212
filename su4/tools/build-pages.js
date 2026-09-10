@@ -51,9 +51,6 @@ const head = (title, meta, depth) => {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(meta)}">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="${up}assets/site.css">
 </head>
 <body>
@@ -70,7 +67,7 @@ const header = (up, cta, parent) => `
       <span>Назад</span>
     </button>
     <a class="logo" href="${up}index.html" aria-label="СУ №4 — на главную">
-      <img class="logo-img" src="${up}assets/logo-white@2x.png" alt="ЗАО «Строительное управление №4»" width="120" height="120" data-logo>
+      <img class="logo-img logo-img--white" src="${up}assets/logo-white@2x.png" alt="ЗАО «Строительное управление №4»" width="120" height="120" data-logo><img class="logo-img logo-img--color" src="${up}assets/logo@2x.png" alt="" width="120" height="120" aria-hidden="true">
       <span class="logo-mark" aria-hidden="true">4</span>
       <span class="logo-text">СУ №4<small>Строительное управление · 1952</small></span>
     </a>
@@ -126,17 +123,15 @@ const footer = up => `
 </html>
 `;
 
-/* Карточка объекта — не ссылка: страницы есть не у всех объектов,
-   а разное поведение одинаковых карточек читается как случайность.
-   Разбор объекта открывается отдельной текстовой ссылкой под сеткой. */
-const projectCard = (p, up) => `      <article class="proj proj--flat reveal" data-cat="${p.tags.join(' ')}">
+/* Объект на странице направления — лист: фотография и подпись, без коробки и без ссылки. */
+const projectCard = (p, up) => `      <figure class="plate reveal" data-cat="${p.tags.join(' ')}" style="--ratio:4 / 3">
         <div class="ph-frame">${img(p.img, p.title, ' loading="lazy"')}</div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">${esc(p.cat)}</span><span>Год · —</span></div>
+        <figcaption>
+          <span class="mono">${esc(p.cat)} · Год —</span>
           <h3 class="h3">${esc(p.title)}</h3>
           <p>${esc(p.text)}</p>
-        </div>
-      </article>`;
+        </figcaption>
+      </figure>`;
 
 /* ---------- страница услуги ---------- */
 function servicePage(s) {
@@ -214,14 +209,14 @@ ${s.gallery.items.map(([f, alt, cap]) => `      <figure class="reveal"><div clas
       <h2 class="display h2" id="h-cases">Объекты направления.</h2>
       <a class="link-arrow" href="${up}index.html#projects">Все проекты ${arrow}</a>
     </div>
-    <div class="more-projects">
+    <div class="plates">
 ${cases.map(p => projectCard(p, up)).join('\n')}
     </div>
   </div>
 </section>`;
 
   const askSec = `
-<section class="sec" id="ask" aria-labelledby="h-ask">
+<section class="sec dark" id="ask" aria-labelledby="h-ask">
   <div class="wrap ask">
     <div>
       <div class="sec-index" style="margin-bottom:20px">${sec()} / Запрос</div>
@@ -313,11 +308,11 @@ function aboutPage() {
   const timeline = `<div class="timeline-wrap" tabindex="0" aria-label="Хронология компании, прокручивается по горизонтали">
       <ol class="timeline">
         <li class="tl key"><div class="yr">1952</div><h3 class="h3">Первые 11 объектов</h3><p>8 десятиквартирных домов, склад, авторемонтные мастерские и станция «Заводская» в будущем городе Кара-Балта.</p>
-          <div class="ph-frame" data-src="history-e1736502756427.jpeg"><img src="assets/img/history-e1736502756427.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1520" height="1067"></div></li>
+          <div class="ph-frame" data-src="history-e1736502756427.jpeg"><img src="../assets/img/history-e1736502756427.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1520" height="1067"></div></li>
         <li class="tl"><div class="yr">1953</div><h3 class="h3">Школа за 53 дня</h3><p>33 сданных объекта, среди них первая школа посёлка на 400 учащихся — ныне школа-гимназия №6.</p></li>
         <li class="tl"><div class="yr">1954</div><h3 class="h3">Ясли, детский сад, столовая</h3><p>Строится промышленная площадка, строится городок.</p></li>
         <li class="tl key"><div class="yr">1956</div><h3 class="h3">Строительное управление №4</h3><p>Организация получает своё нынешнее имя.</p>
-          <div class="ph-frame" data-src="history2-e1736502853612.jpeg"><img src="assets/img/history2-e1736502853612.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1515" height="950"></div></li>
+          <div class="ph-frame" data-src="history2-e1736502853612.jpeg"><img src="../assets/img/history2-e1736502853612.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1515" height="950"></div></li>
         <li class="tl"><div class="yr">1956–1991</div><h3 class="h3">Город и промышленность</h3><p>ГМЗ, АРЗ, ЦРММ, ТЭЦ, ЗСИ, жилой городок на 30 000 жителей, больничный городок, спорткомплекс, школы и детские сады.</p></li>
         <li class="tl key"><div class="yr">1999</div><h3 class="h3">Бишкек–Ош</h3><p>Участок Кара-Балта – перевал Тоо-Ашуу автодороги Бишкек–Ош: генподрядчик — Samsung, СУ №4 — в составе исполнителей.</p></li>
         <li class="tl"><div class="yr">2018–2023</div><h3 class="h3">Нефтегаз и резервуары</h3><p>Постоянный партнёр ОАО «Кыргызнефтегаз»; резервуары для питьевой воды для «Профит Экспресс» и «Профи НСК».</p></li>
@@ -402,7 +397,7 @@ function aboutPage() {
   </div>
 </section>
 
-<section class="sec" id="ask" aria-labelledby="h-ask" style="padding-top:0">
+<section class="sec dark" id="ask" aria-labelledby="h-ask">
   <div class="wrap">
     <hr class="hr" style="margin-bottom:var(--sec-y)">
     <div class="case-cta">

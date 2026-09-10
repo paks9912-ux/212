@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>СУ №4 — промышленное строительство полного цикла с 1952 года</title>
 <meta name="description" content="ЗАО «Строительное управление №4»: металлоконструкции, резервуары, сборный железобетон, бескаркасные сооружения и дорожное строительство. Собственное производство, монтаж и ввод в эксплуатацию. Кыргызстан, с 1952 года.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/site.css">
 </head>
 <body>
@@ -18,7 +15,7 @@
 <header class="header" id="header">
   <div class="wrap">
     <a class="logo" href="#top" aria-label="СУ №4 — на главную">
-      <img class="logo-img" src="assets/logo-white@2x.png" alt="ЗАО «Строительное управление №4»" width="48" height="48" data-logo>
+      <img class="logo-img logo-img--white" src="assets/logo-white@2x.png" alt="ЗАО «Строительное управление №4»" width="120" height="120" data-logo><img class="logo-img logo-img--color" src="assets/logo@2x.png" alt="" width="120" height="120" aria-hidden="true">
       <span class="logo-mark" aria-hidden="true">4</span>
       <span class="logo-text">СУ №4<small>Строительное управление · 1952</small></span>
     </a>
@@ -87,8 +84,9 @@
       <h2 class="display h2" id="h-services">Выберите свой объект.</h2>
       <p class="lead muted" style="font-size:1rem">Шесть направлений, одна производственная база. У каждого — параметры, объекты и форма запроса.</p>
     </div>
+    <div class="dirs-wrap">
     <div class="dirs" role="list">
-      <a class="dir reveal" href="services/karkasnoe-stroitelstvo/index.html" role="listitem">
+      <a class="dir reveal" href="services/karkasnoe-stroitelstvo/index.html" role="listitem" data-idx="0">
         <span class="idx">01</span>
         <div class="thumb ph-frame" data-src="jbmk-700x500.png"><img src="assets/img/karkas/jbmk3.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="960" height="720"></div>
         <div><h3 class="h3">Склады и промышленные здания</h3>
@@ -96,7 +94,7 @@
           <div class="spec"><span>Пролёт 12–30 м</span><span>Колонны до 12 м</span><span>СНиП · ГОСТ</span></div></div>
         <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
       </a>
-      <a class="dir reveal" href="services/metallokonstrukcii/index.html" role="listitem">
+      <a class="dir reveal" href="services/metallokonstrukcii/index.html" role="listitem" data-idx="1">
         <span class="idx">02</span>
         <div class="thumb ph-frame" data-src="rezervuary9-700x520.jpg"><img src="assets/img/metal/rezervuary9.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1280" height="960"></div>
         <div><h3 class="h3">Металлоконструкции и резервуары</h3>
@@ -104,7 +102,7 @@
           <div class="spec"><span>РГС 1–500 м³</span><span>РВС 100–10 000 м³</span><span>До 300 т / мес</span></div></div>
         <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
       </a>
-      <a class="dir reveal" href="services/beskarkasnye-sooruzheniya/index.html" role="listitem">
+      <a class="dir reveal" href="services/beskarkasnye-sooruzheniya/index.html" role="listitem" data-idx="2">
         <span class="idx">03</span>
         <div class="thumb ph-frame" data-src="beskarkas-700x520.jpg"><img src="assets/img/beskarkas/beskarkas.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1076" height="905"></div>
         <div><h3 class="h3">Ангары и хранилища</h3>
@@ -112,7 +110,7 @@
           <div class="spec"><span>Пролёт 12–30 м</span><span>Высота 3–15 м</span><span>1000–1500 м² за месяц</span></div></div>
         <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
       </a>
-      <a class="dir reveal" href="services/dorozhnoe-stroitelstvo/index.html" role="listitem">
+      <a class="dir reveal" href="services/dorozhnoe-stroitelstvo/index.html" role="listitem" data-idx="3">
         <span class="idx">04</span>
         <div class="thumb ph-frame" data-src="dorogi-700x520.jpg"><img src="assets/img/dorogi/dorogi.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="780" height="948"></div>
         <div><h3 class="h3">Дороги и городская инфраструктура</h3>
@@ -120,7 +118,7 @@
           <div class="spec"><span>АБЗ 1000 т / смену</span><span>ЩМА</span><span>70+ единиц техники</span></div></div>
         <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
       </a>
-      <a class="dir reveal" href="services/beton-i-zhbi/index.html" role="listitem">
+      <a class="dir reveal" href="services/beton-i-zhbi/index.html" role="listitem" data-idx="4">
         <span class="idx">05</span>
         <div class="thumb ph-frame" data-src="uslugisu4-700x520.webp"><img src="assets/img/uslugisu4-700x520.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="850" height="1133"></div>
         <div><h3 class="h3">Бетон и железобетонные изделия</h3>
@@ -128,7 +126,7 @@
           <div class="spec"><span>ЖБИ до 30 м³ / смену</span><span>Бордюр до 1000 м / смену</span></div></div>
         <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
       </a>
-      <a class="dir reveal" href="services/proektirovanie/index.html" role="listitem">
+      <a class="dir reveal" href="services/proektirovanie/index.html" role="listitem" data-idx="5">
         <span class="idx">06</span>
         <div class="thumb ph-frame" data-src="montaj.webp"><img src="assets/img/montaj.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="960" height="1280"></div>
         <div><h3 class="h3">Проект и ввод в эксплуатацию</h3>
@@ -136,6 +134,18 @@
           <div class="spec"><span>КЖ · КМ · АР · ОВ · ВК</span><span>BIM</span><span>Экспертиза</span></div></div>
         <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
       </a>
+    </div>
+    <aside class="dirs-preview" aria-hidden="true">
+      <div class="ph-frame">
+        <img src="assets/img/karkas/jbmk3.jpg" alt="" loading="lazy" data-for="0" class="on">
+        <img src="assets/img/metal/rezervuary9.jpg" alt="" loading="lazy" data-for="1">
+        <img src="assets/img/beskarkas/beskarkas.jpg" alt="" loading="lazy" data-for="2">
+        <img src="assets/img/dorogi/dorogi.jpg" alt="" loading="lazy" data-for="3">
+        <img src="assets/img/uslugisu4-700x520.jpg" alt="" loading="lazy" data-for="4">
+        <img src="assets/img/montaj.jpg" alt="" loading="lazy" data-for="5">
+      </div>
+      <div class="cap" id="dirsCap">Склады и промышленные здания</div>
+    </aside>
     </div>
   </div>
 </section>
@@ -154,108 +164,98 @@
         <button type="button" aria-pressed="false" data-f="frameless">Бескаркасные</button>
       </div>
     </div>
-    <div class="projects" id="projectGrid">
-      <article class="proj feat proj--flat reveal" data-cat="industry steel">
-        <div class="ph-frame" data-src="djamgyr.webp"><img src="assets/img/djamgyr.jpg" alt="Золоторудное месторождение «Джамгыр» — объект СУ №4" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1000" height="750"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Горнодобывающая отрасль</span><span>Кыргызстан</span><span>Год · —</span></div>
+    <div class="plates" id="projectGrid">
+      <figure class="plate plate--wide reveal" data-cat="industry steel" style="--ratio:16 / 9">
+        <div class="ph-frame"><img src="assets/img/djamgyr.jpg" alt="Золоторудное месторождение «Джамгыр» — объект СУ №4" loading="lazy" width="1000" height="750" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Горнодобывающая отрасль · Кыргызстан · Год —</span>
           <h3 class="h3">Золоторудное месторождение «Джамгыр»</h3>
           <p>Металлоконструкции и строительно-монтажные работы на объекте золотодобычи.</p>
-        </div>
-      </article>
-      <article class="proj proj--flat reveal" data-cat="industry steel">
-        <div class="ph-frame" data-src="zif.webp"><img src="assets/img/zif.jpg" alt="Корпус золотоизвлекательной фабрики" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1000" height="750"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Металлоконструкции</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate plate--tall reveal" data-cat="industry steel" style="--ratio:3 / 4">
+        <div class="ph-frame"><img src="assets/img/zif.jpg" alt="Корпус золотоизвлекательной фабрики" loading="lazy" width="1000" height="750" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Металлоконструкции · Год —</span>
           <h3 class="h3">ЗИФ — золотоизвлекательная фабрика</h3>
-          <p>Металлоконструкции корпуса фабрики.</p>
-        </div>
-        
-        
-      </article>
-      <article class="proj proj--flat reveal" data-cat="industry steel">
-        <div class="ph-frame" data-src="kristallizator-1.webp"><img src="assets/img/kristallizator-1.jpg" alt="Монтаж кристаллизатора на сахарном заводе в Каинды" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1000" height="750"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Промышленный монтаж</span><span>г. Каинды</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate reveal" data-cat="industry steel" style="--ratio:4 / 3">
+        <div class="ph-frame"><img src="assets/img/kristallizator-1.jpg" alt="Монтаж кристаллизатора на сахарном заводе в Каинды" loading="lazy" width="1000" height="750" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Промышленный монтаж · г. Каинды · Год —</span>
           <h3 class="h3">Кристаллизатор сахарного завода</h3>
-          <p>Монтаж технологического оборудования.</p>
-        </div>
-      </article>
-      <article class="proj proj--flat reveal" data-cat="industry steel">
-        <div class="ph-frame" data-src="silosy-1.webp"><img src="assets/img/silosy-1.jpg" alt="Силосы" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="960" height="720"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Резервуары и ёмкости</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate reveal" data-cat="industry steel" style="--ratio:4 / 3">
+        <div class="ph-frame"><img src="assets/img/silosy-1.jpg" alt="Силосы" loading="lazy" width="960" height="720" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Резервуары и ёмкости · Год —</span>
           <h3 class="h3">Силосы</h3>
-          <p>Изготовление и монтаж ёмкостей для хранения.</p>
-        </div>
-      </article>
-      <article class="proj proj--flat reveal" data-cat="industry">
-        <div class="ph-frame" data-src="gazoblok-1.webp"><img src="assets/img/gazoblok-1.jpg" alt="Завод по производству газоблока" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="960" height="720"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Промышленное здание</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate reveal" data-cat="industry" style="--ratio:4 / 3">
+        <div class="ph-frame"><img src="assets/img/gazoblok-1.jpg" alt="Завод по производству газоблока" loading="lazy" width="960" height="720" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Промышленное здание · Год —</span>
           <h3 class="h3">Завод по производству газоблока</h3>
-          <p>Строительство производственного корпуса.</p>
-        </div>
-      </article>
-      <article class="proj proj--flat reveal" data-cat="industry steel">
-        <div class="ph-frame" data-src="promzdaniya.webp"><img src="assets/img/promzdaniya.jpg" alt="Металлокаркас промышленного здания" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1000" height="750"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Металлокаркас</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate plate--half  plate--more reveal" hidden data-cat="industry steel" style="--ratio:16 / 10">
+        <div class="ph-frame"><img src="assets/img/promzdaniya.jpg" alt="Металлокаркас промышленного здания" loading="lazy" width="1000" height="750" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Металлокаркас · Год —</span>
           <h3 class="h3">Металлокаркас промздания</h3>
           <p>Изготовление и монтаж каркаса.</p>
-        </div>
-      </article>
-      <article hidden class="proj proj--more proj--flat reveal" data-cat="steel">
-        <div class="ph-frame" data-src="IMG_20240105_025454.jpg"><img src="assets/img/IMG_20240105_025454.jpg" alt="Резервуары производства СУ №4" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="992" height="744"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Резервуары</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate plate--half  plate--more reveal" hidden data-cat="steel" style="--ratio:16 / 10">
+        <div class="ph-frame"><img src="assets/img/IMG_20240105_025454.jpg" alt="Резервуары производства СУ №4" loading="lazy" width="992" height="744" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Резервуары · Год —</span>
           <h3 class="h3">Резервуары</h3>
           <p>РГС и РВС для воды и нефтепродуктов — в том числе 2 × 400 м³ для питьевой воды («Профи НСК»).</p>
-        </div>
-      </article>
-      <article hidden class="proj proj--more proj--flat reveal" data-cat="roads">
-        <div class="ph-frame" data-src="novopavlovka.webp"><img src="assets/img/novopavlovka.jpg" alt="Строительство дорог в Новопавловке" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="960" height="720"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Дороги</span><span>с. Новопавловка</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate  plate--more reveal" hidden data-cat="roads" style="--ratio:4 / 3">
+        <div class="ph-frame"><img src="assets/img/novopavlovka.jpg" alt="Строительство дорог в Новопавловке" loading="lazy" width="960" height="720" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Дороги · с. Новопавловка · Год —</span>
           <h3 class="h3">Строительство дорог, Новопавловка</h3>
-          <p>Дорожное полотно, бордюры, асфальтобетон собственного производства.</p>
-        </div>
-      </article>
-      <article hidden class="proj proj--more proj--flat reveal" data-cat="frameless">
-        <div class="ph-frame" data-src="beskarkasnye.webp"><img src="assets/img/beskarkasnye.jpg" alt="Бескаркасное сооружение" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="960" height="720"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Бескаркасные</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate  plate--more reveal" hidden data-cat="frameless" style="--ratio:4 / 3">
+        <div class="ph-frame"><img src="assets/img/beskarkasnye.jpg" alt="Бескаркасное сооружение" loading="lazy" width="960" height="720" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Бескаркасные · Год —</span>
           <h3 class="h3">Бескаркасные сооружения</h3>
-          <p>Ангары и склады по бескаркасной технологии.</p>
-        </div>
-      </article>
-      <article hidden class="proj proj--more proj--flat reveal" data-cat="roads">
-        <div class="ph-frame" data-src="kojomberdieva.webp"><img src="assets/img/kojomberdieva.jpg" alt="Улица Кожомбердиева, Кара-Балта" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="960" height="720"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Инфраструктура</span><span>г. Кара-Балта</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate  plate--more reveal" hidden data-cat="roads" style="--ratio:4 / 3">
+        <div class="ph-frame"><img src="assets/img/kojomberdieva.jpg" alt="Улица Кожомбердиева, Кара-Балта" loading="lazy" width="960" height="720" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Инфраструктура · г. Кара-Балта · Год —</span>
           <h3 class="h3">ул. Кожомбердиева</h3>
-          <p>Городская дорожная инфраструктура.</p>
-        </div>
-      </article>
-      <article hidden class="proj proj--more proj--flat reveal" data-cat="roads">
-        <div class="ph-frame" data-src="palmiro.webp"><img src="assets/img/palmiro.jpg" alt="Улица Пальмиро Тольятти" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="960" height="720"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Инфраструктура</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate plate--wide  plate--more reveal" hidden data-cat="roads" style="--ratio:16 / 9">
+        <div class="ph-frame"><img src="assets/img/palmiro.jpg" alt="Улица Пальмиро Тольятти" loading="lazy" width="960" height="720" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Инфраструктура · Год —</span>
           <h3 class="h3">ул. Пальмиро Тольятти</h3>
           <p>Городская дорожная инфраструктура.</p>
-        </div>
-      </article>
-      <article hidden class="proj proj--more proj--flat reveal" data-cat="roads">
-        <div class="ph-frame" data-src="stroitelstvodorog-1.webp"><img src="assets/img/stroitelstvodorog-1.jpg" alt="Строительство дорог" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="960" height="720"></div>
-        <div class="proj-body">
-          <div class="proj-meta"><span class="cat">Дороги</span><span>Год · —</span></div>
+        </figcaption>
+      </figure>
+      <figure class="plate plate--tall  plate--more reveal" hidden data-cat="roads" style="--ratio:3 / 4">
+        <div class="ph-frame"><img src="assets/img/stroitelstvodorog-1.jpg" alt="Строительство дорог" loading="lazy" width="960" height="720" onerror="this.parentElement.classList.add('ph')"></div>
+        <figcaption>
+          <span class="mono">Дороги · Год —</span>
           <h3 class="h3">Строительство дорог</h3>
-          <p>Укладка дорожного полотна по Кыргызстану.</p>
-        </div>
-      </article>
+        </figcaption>
+      </figure>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-top:36px">
-      <button class="btn btn-ghost" type="button" id="moreProjects" aria-expanded="false">Показать ещё 6 объектов
+      <button class="btn btn-ghost" type="button" id="moreProjects" aria-expanded="false">Показать ещё 7 объектов
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg></button>
       <p class="muted" style="font-size:.9rem;max-width:46em">Двенадцать объектов последних лет. Год, локация и параметры заполняются по мере подтверждения компанией.</p>
       <a class="link-arrow" href="projects/djamgyr/index.html">Разбор объекта: месторождение «Джамгыр»<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -378,7 +378,7 @@
 </section>
 
 <!-- ================= 11 ЗАЯВКА ================= -->
-<section class="sec" id="contacts" aria-labelledby="h-cta" style="padding-top:0">
+<section class="sec dark" id="contacts" aria-labelledby="h-cta" style="padding-top:0">
   <div class="wrap">
     <hr class="hr" style="margin-bottom:var(--sec-y)">
 
@@ -454,52 +454,7 @@
   </div>
 </footer>
 
-<!-- ================= ПРИЛОЖЕНИЕ: ВИЗУАЛЬНАЯ СИСТЕМА (не часть сайта) ================= -->
-<section class="sec appendix" id="system" aria-labelledby="h-sys">
-  <div class="wrap">
-    <span class="tag mono">Приложение · визуальная система · не входит в сайт</span>
-    <h2 class="display h2" id="h-sys" style="margin-bottom:40px">Premium Industrial / Engineering</h2>
-    <div class="sys-grid">
-      <div>
-        <div class="sec-index" style="margin-bottom:16px">Палитра</div>
-        <div class="sw">
-          <div style="background:#0B0D10">ink-900<br>#0B0D10<br>ground</div>
-          <div style="background:#121519">ink-800<br>#121519<br>панели</div>
-          <div style="background:#025394;color:#fff">accent-deep<br>#025394<br>синий логотипа</div>
-          <div style="background:#0A6FBE;color:#fff">accent-cta<br>#0A6FBE<br>кнопки</div>
-          <div style="background:#8A929C;color:#0B0D10">steel<br>#8A929C<br>вторичный текст</div>
-          <div style="background:#EEF0F2;color:#0B0D10">paper<br>#EEF0F2<br>светлые секции</div>
-          <div style="background:#F7F8F9;color:#0B0D10">white<br>#F7F8F9<br>текст на тёмном</div>
-          <div style="background:#0985C3;color:#fff">accent<br>#0985C3<br>азур логотипа</div>
-        </div>
-        <ul class="rules" style="margin-top:24px">
-          <li><b>Акцент снят с логотипа СУ №4:</b> синий <code>#025394</code> и азур <code>#0985C3</code>. На графите работает азур (4.8:1), на светлых секциях — синий (6.9:1), кнопки — <code>#0A6FBE</code> с белым текстом (5.2:1). Все три проходят WCAG AA.</li>
-          <li>Акцент — только CTA, индексы секций, линии-маркеры и номера. Никогда не заливает секцию целиком.</li>
-          <li>Секции чередуют графит и «чертёжную бумагу» — ритм без смены палитры.</li>
-          <li>Скругления 2 px. Никаких теней и градиентов, кроме затемнения фото.</li>
-          <li>Линии 1 px с прозрачностью 12–28 % — сетка чертежа, а не рамки карточек.</li>
-        </ul>
-      </div>
-      <div>
-        <div class="sec-index" style="margin-bottom:16px">Типографика</div>
-        <div class="type-scale">
-          <div><span class="mono">Display · 800</span><span class="display" style="font-size:clamp(2rem,4vw,3.4rem)">Manrope 800</span></div>
-          <div><span class="mono">H2 · 800</span><span class="display h2" style="font-size:clamp(1.6rem,3vw,2.4rem)">Заголовок секции</span></div>
-          <div><span class="mono">H3 · 700</span><span class="h3">Подзаголовок карточки</span></div>
-          <div><span class="mono">Lead · 500</span><span class="lead" style="font-size:1.15rem">Вводный абзац секции, 34 символа в строке максимум</span></div>
-          <div><span class="mono">Body · 400</span><span>Основной текст 17 px / 1.6. Ширина колонки — до 65 знаков.</span></div>
-          <div><span class="mono">Label · mono</span><span class="mono" style="color:var(--accent)">JetBrains Mono · 12 px · +8 %</span></div>
-        </div>
-        <ul class="rules" style="margin-top:24px">
-          <li>Manrope — display и текст; JetBrains Mono — «штамп чертежа»: индексы, единицы, характеристики.</li>
-          <li>Цифры — всегда tabular-nums; «+» выносится в надстрочный акцентный знак.</li>
-          <li>Display: −2.5 % трекинг, интерлиньяж 0.96. На мобильных — не меньше 2.6 rem.</li>
-          <li>Motion: только reveal снизу 22 px / 0.8 s, счётчики цифр, hover-стрелки. Respects prefers-reduced-motion.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
+
 
 
 

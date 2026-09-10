@@ -15,8 +15,16 @@ let html = fs.readFileSync(src, 'utf8');
 let images = 0, bytes = 0;
 
 // стили и скрипт — текстом
-html = html.replace(/<link rel="stylesheet" href="((?:\.\.\/)*assets\/[^"]+\.css)">/g,
-  (all, rel) => fs.existsSync(local(rel)) ? '<style>\n' + fs.readFileSync(local(rel), 'utf8') + '</style>' : all);
+html = html.replace(/<link rel="stylesheet" href="((?:\.\.\/)*assets\/[^"]+\.css)">/g, (all, rel) => {
+  if (!fs.existsSync(local(rel))) return all;
+  let css = fs.readFileSync(local(rel), 'utf8');
+  // шрифты лежат рядом со стилями — в одном файле их нужно встроить
+  css = css.replace(/url\((fonts\/[^)]+\.woff2)\)/g, (m, f) => {
+    const file = path.resolve(path.dirname(local(rel)), f);
+    return fs.existsSync(file) ? 'url(data:font/woff2;base64,' + fs.readFileSync(file).toString('base64') + ')' : m;
+  });
+  return '<style>\n' + css + '</style>';
+});
 html = html.replace(/<script src="((?:\.\.\/)*assets\/[^"]+\.js)"><\/script>/g,
   (all, rel) => fs.existsSync(local(rel)) ? '<script>\n' + fs.readFileSync(local(rel), 'utf8') + '</script>' : all);
 
