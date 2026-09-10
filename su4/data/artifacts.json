@@ -1,13 +1,11 @@
 {
   "_комментарий": "Опубликованные адреса страниц. Нужны только для сборки в один файл: внутри артефакта нет соседних файлов, поэтому ссылки ведут на опубликованные страницы. На боевом сайте эти адреса не используются.",
   "index.html": "https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709",
-  "projects/index.html": "https://claude.ai/code/artifact/f10e5e25-2690-4746-98a9-f39a148dfd6e",
   "projects/djamgyr/index.html": "https://claude.ai/code/artifact/cf7183cc-0cbc-4d0a-9b54-82c668ed3283",
   "services/metallokonstrukcii/index.html": "https://claude.ai/code/artifact/05f95ced-e8d2-4573-a784-cdfc737216b6",
   "services/karkasnoe-stroitelstvo/index.html": "https://claude.ai/code/artifact/01b51442-989d-449c-8826-1a27fe7a20ee",
   "services/beskarkasnye-sooruzheniya/index.html": "https://claude.ai/code/artifact/dc15c2a9-5b4a-4cf1-8bb3-abbf1708aecc",
   "services/dorozhnoe-stroitelstvo/index.html": "https://claude.ai/code/artifact/dfde115c-6040-42ff-899b-5f640e2548dd",
   "services/beton-i-zhbi/index.html": "https://claude.ai/code/artifact/f08b63fe-02c6-4468-b08d-4c4efb8fc854",
-  "services/proektirovanie/index.html": "https://claude.ai/code/artifact/d860ba01-2049-493b-b40e-d2599ea3201c",
-  "services/index.html": "https://claude.ai/code/artifact/9ba1831c-aa77-4cdb-a6e0-e3bca8518bdb"
+  "services/proektirovanie/index.html": "https://claude.ai/code/artifact/d860ba01-2049-493b-b40e-d2599ea3201c"
 }
