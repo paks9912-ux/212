@@ -126,22 +126,17 @@ const footer = up => `
 </html>
 `;
 
-/* Карточка кликабельна только там, где есть страница кейса:
-   стрелка и ссылка обещают переход, которого иначе не существует. */
-const projectCard = (p, up) => {
-  const link = p.ready
-    ? `\n        <span class="go" aria-hidden="true">${corner}</span>` +
-      `\n        <a class="cover" href="${up}projects/${p.slug}/index.html" aria-label="Открыть кейс: ${esc(p.title)}"></a>`
-    : '';
-  return `      <article class="proj reveal${p.ready ? '' : ' proj--flat'}" data-cat="${p.tags.join(' ')}">
+/* Карточка объекта — не ссылка: страницы есть не у всех объектов,
+   а разное поведение одинаковых карточек читается как случайность.
+   Разбор объекта открывается отдельной текстовой ссылкой под сеткой. */
+const projectCard = (p, up) => `      <article class="proj proj--flat reveal" data-cat="${p.tags.join(' ')}">
         <div class="ph-frame">${img(p.img, p.title, ' loading="lazy"')}</div>
         <div class="proj-body">
-          <div class="proj-meta"><span class="cat">${esc(p.cat)}</span><span>Год · —</span>${p.ready ? '<span class="case-flag">Есть кейс</span>' : ''}</div>
+          <div class="proj-meta"><span class="cat">${esc(p.cat)}</span><span>Год · —</span></div>
           <h3 class="h3">${esc(p.title)}</h3>
           <p>${esc(p.text)}</p>
-        </div>${link}
+        </div>
       </article>`;
-};
 
 /* ---------- страница услуги ---------- */
 function servicePage(s) {
