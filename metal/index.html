@@ -139,7 +139,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
   <div>лист <b id="sheet">1/18</b></div>
 </div>
 
-<div class="hint" id="hint"><span>↓</span> &nbsp;прокрутка собирает каркас · <b id="pct">0</b>%</div>
+<div class="hint" id="hint"><span>↓</span> &nbsp;прокрутка собирает склад KUKMARA · <b id="pct">0</b>%</div>
 
 <main class="deck">
 
@@ -348,11 +348,13 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p class="eyebrow"><b>13</b> Объект</p>
       <h2>KUKMARA</h2>
       <p>Складское помещение и административно-бытовой корпус в Янгиюльском районе Ташкента,
-      а следом — завод по производству алюминиевой кухонной посуды в Ангрене. Оба объекта
-      на металлокаркасе, оба сданы, по обоим есть благодарственные письма.</p>
+      а следом — завод по производству алюминиевой кухонной посуды в Ангрене. Железобетонные
+      колонны, стальные фермы по всему пролёту, белые сэндвич-панели. Оба объекта сданы,
+      по обоим есть благодарственные письма.</p>
       <ul class="spec">
         <li><span>Заказчики</span><b>ООО «KUKMARA» · СП «KUKMARA FACTORY»</b></li>
-        <li><span>География</span><b>Янгиюльский р-н · Ангрен</b></li>
+        <li><span>Каркас</span><b>ЖБ колонны · стальные фермы</b></li>
+        <li><span>Ограждение</span><b>сэндвич-панели</b></li>
         <li><span>Роль</span><b>генподрядчик</b></li>
       </ul>
     </div>
@@ -470,7 +472,9 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     }
   }
 
-  var SPAN = 24, HGT = 2.4, PANEL = 3, COL_H = 6;
+  var SPAN = 18, PANEL = 1.5, COL_H = 7.2;      /* склад KUKMARA: пролёт 18 м, ЖБ колонны 7,2 м */
+  var EAVE = 1.55, RIDGE = 2.45;                 /* ферма с уклоном верхнего пояса к коньку */
+  var HGT = RIDGE;
   var GL = null;
 
   try { if (window.THREE) GL = init(); } catch (e) { GL = null; }
@@ -663,14 +667,17 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         color: 0x9c4630, map: PRIMER_MAP, roughnessMap: RGH_P, bumpMap: RGH_P,
         bumpScale: 0.0012, metalness: 0.16, roughness: 0.8
       }),
-      bolt: new THREE.MeshStandardMaterial({ color: 0xc8d1d6, metalness: 1.0, roughness: 0.3 })
+      bolt: new THREE.MeshStandardMaterial({ color: 0xc8d1d6, metalness: 1.0, roughness: 0.3 }),
+      conc: new THREE.MeshStandardMaterial({ color: 0x8e8f88, roughness: 0.93, metalness: 0.02 })
     };
+    M.conc.name = 'conc';
     M.steel.name = 'steel'; M.dark.name = 'dark'; M.primer.name = 'primer'; M.bolt.name = 'bolt';
 
     function fade(src) { var m = src.clone(); m.name = src.name; m.transparent = true; m.opacity = 0; return m; }
     var F = { steel: fade(M.steel), dark: fade(M.dark), primer: fade(M.primer), bolt: fade(M.bolt) };
     F.base = fade(M.primer);
-    var fadeMats = [F.steel, F.dark, F.primer, F.bolt, F.base];
+    F.conc = fade(M.conc);
+    var fadeMats = [F.steel, F.dark, F.primer, F.bolt, F.base, F.conc];
 
     /* ============ небо и свет ============ */
     var sky = new THREE.Mesh(new THREE.SphereGeometry(400, 32, 20), new THREE.ShaderMaterial({
@@ -741,18 +748,25 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       g.rotation.x = Math.PI / 2;
       return g;
     }
+    function topY(x) { return RIDGE - Math.abs(x) * (RIDGE - EAVE) / (SPAN / 2); }
+
     function buildTruss(ms) {
       var t = new THREE.Group();
-      t.add(ibeam(SPAN, 0.25, 0.15, 0.014, 0.009, ms.steel));
-      var top = ibeam(SPAN, 0.25, 0.15, 0.014, 0.009, ms.steel);
-      top.position.y = HGT; t.add(top);
+      t.add(ibeam(SPAN, 0.22, 0.13, 0.012, 0.008, ms.steel));          /* нижний пояс */
+      [-1, 1].forEach(function (sg) {                                  /* верхний пояс двумя скатами */
+        var a = new THREE.Vector3(0, RIDGE, 0), b2 = new THREE.Vector3(sg * SPAN / 2, EAVE, 0);
+        var m = new THREE.Mesh(new THREE.BoxGeometry(0.13, a.distanceTo(b2), 0.13), ms.steel);
+        m.position.copy(a).add(b2).multiplyScalar(0.5);
+        m.quaternion.setFromUnitVectors(UP, b2.clone().sub(a).normalize());
+        t.add(m);
+      });
       var n = SPAN / PANEL;
       for (var i = 0; i <= n; i++) {
         var x = -SPAN / 2 + i * PANEL;
-        t.add(member(x, 0.12, x, HGT - 0.12, 0.11, ms.dark));
+        t.add(member(x, 0.11, x, topY(x) - 0.07, 0.075, ms.dark));     /* стойки */
         if (i < n) {
-          var up = (i % 2 === 0);
-          t.add(member(x, up ? 0.12 : HGT - 0.12, x + PANEL, up ? HGT - 0.12 : 0.12, 0.1, ms.dark));
+          var x2 = x + PANEL, up = (i % 2 === 0);
+          t.add(member(x, up ? 0.11 : topY(x) - 0.07, x2, up ? topY(x2) - 0.07 : 0.11, 0.07, ms.dark));
         }
       }
       return t;
@@ -836,8 +850,8 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       return m;
     }
 
-    var BAYS = [-24, -18, -12, -6, 0, 6, 12, 18, 24];   /* девять ферм с шагом 6 м = 48 м длины */
-    var HALF = SPAN / 2;
+    var BAYS = [-30, -24, -18, -12, -6, 0, 6, 12, 18, 24, 30];   /* 11 рам, шаг 6 м, длина 60 м */
+    var HALF = SPAN / 2, LEN = 60;
     var frameGroup = new THREE.Group();
 
     /* каждый элемент едет в проектное положение в своё окно скролла */
@@ -847,24 +861,24 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       return obj;
     }
 
-    /* 1. базы колонн и анкеры */
-    var GCOL = new THREE.BoxGeometry(0.42, COL_H, 0.42);
-    var GBASE = new THREE.BoxGeometry(0.86, 0.07, 0.86);
+    /* 1. фундаменты под ЖБ колонны и анкеры */
+    var GCOL = new THREE.BoxGeometry(0.42, COL_H, 0.6);
+    var GBASE = new THREE.BoxGeometry(1.1, 0.09, 1.2);
     var GANC = new THREE.CylinderGeometry(0.016, 0.016, 0.13, 10);
     var GNUT = new THREE.CylinderGeometry(0.026, 0.026, 0.022, 6);
     BAYS.forEach(function (z, zi) {
       [-HALF, HALF].forEach(function (x) {
-        var d = zi * 0.0012;
+        var d = zi * 0.001;
         var bp = new THREE.Mesh(GBASE, F.base);
-        bp.position.set(x, -COL_H - 0.1, z);
+        bp.position.set(x, -COL_H - 0.11, z);
         stage(bp, 0.406 + d, 0.430 + d, new THREE.Vector3(0, -2.2, 0));
-        if (Math.abs(z) <= 6) {                          /* анкеры только там, где камера подходит близко */
-          [-0.26, 0.26].forEach(function (dx) {
-            [-0.26, 0.26].forEach(function (dz) {
+        if (Math.abs(z) <= 6) {                          /* анкеры только там, где камера подходит вплотную */
+          [-0.32, 0.32].forEach(function (dx) {
+            [-0.36, 0.36].forEach(function (dz) {
               var an = new THREE.Group();
               an.add(new THREE.Mesh(GANC, F.bolt));
               var nu = new THREE.Mesh(GNUT, F.bolt); nu.position.y = 0.042; an.add(nu);
-              an.position.set(x + dx, -COL_H - 0.03, z + dz);
+              an.position.set(x + dx, -COL_H - 0.04, z + dz);
               stage(an, 0.406 + d, 0.430 + d, new THREE.Vector3(0, -2.2, 0));
             });
           });
@@ -872,68 +886,110 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       });
     });
 
-    /* 2. колонны встают по захваткам */
+    /* 2. железобетонные колонны — как на объекте, а не стальные */
     BAYS.forEach(function (z, zi) {
       [-HALF, HALF].forEach(function (x, xi) {
-        var d = (zi * 2 + xi) * 0.0022;
-        var col = new THREE.Mesh(GCOL, F.steel);
-        col.position.set(x, -COL_H / 2 - 0.13, z);
+        var d = (zi * 2 + xi) * 0.0019;
+        var col = new THREE.Mesh(GCOL, F.conc);
+        col.position.set(x, -COL_H / 2 - 0.14, z);
         stage(col, 0.424 + d, 0.468 + d, new THREE.Vector3(0, -COL_H - 1.5, 0));
       });
     });
 
-    /* 3. фермы поднимают собранными и опускают на колонны */
+    /* 3. фермы поднимают собранными и кладут на оголовки колонн */
     var liteTruss = buildTruss(F);
     BAYS.forEach(function (z, zi) {
       if (z === 0) return;                               /* центральная ферма уже в сцене */
       var t = liteTruss.clone(true);
       t.position.z = z;
-      stage(t, 0.446 + zi * 0.0055, 0.500 + zi * 0.0055, new THREE.Vector3(0, 3.4, 0));
+      stage(t, 0.446 + zi * 0.0048, 0.500 + zi * 0.0048, new THREE.Vector3(0, 3.4, 0));
     });
 
-    /* 4. прогоны по верхним поясам */
-    var GPUR = new THREE.BoxGeometry(0.09, 0.09, 49.4);
-    for (var px = -12; px <= 12; px += 3) {
+    /* 4. прогоны по обоим скатам */
+    var GPUR = new THREE.BoxGeometry(0.085, 0.085, LEN + 1.4);
+    for (var px = -9; px <= 9; px += 1.5) {
       var pur = new THREE.Mesh(GPUR, F.dark);
-      pur.position.set(px, HGT + 0.17, 0);
-      stage(pur, 0.490 + (px + 12) * 0.0006, 0.522 + (px + 12) * 0.0006, new THREE.Vector3(0, 4.5, 0));
+      pur.position.set(px, topY(px) + 0.11, 0);
+      stage(pur, 0.490 + (px + 9) * 0.0008, 0.522 + (px + 9) * 0.0008, new THREE.Vector3(0, 4.5, 0));
     }
 
     /* 5. связи — вертикальные по колоннам и горизонтальные по покрытию */
-    [[-24, -18], [-6, 0], [18, 24]].forEach(function (bay, bi) {
+    [[-30, -24], [-6, 0], [24, 30]].forEach(function (bay, bi) {
       [-HALF, HALF].forEach(function (x) {
         var d = bi * 0.004;
-        stage(member3([x, -0.2, bay[0]], [x, -COL_H + 0.2, bay[1]], 0.075, F.dark),
+        stage(member3([x, -0.3, bay[0]], [x, -COL_H + 0.3, bay[1]], 0.07, F.dark),
               0.504 + d, 0.538 + d, new THREE.Vector3(0, -2.5, 0));
-        stage(member3([x, -COL_H + 0.2, bay[0]], [x, -0.2, bay[1]], 0.075, F.dark),
+        stage(member3([x, -COL_H + 0.3, bay[0]], [x, -0.3, bay[1]], 0.07, F.dark),
               0.504 + d, 0.538 + d, new THREE.Vector3(0, -2.5, 0));
-        var sgn = x < 0 ? 1 : -1;
-        stage(member3([x, HGT - 0.17, bay[0]], [x + sgn * 6, HGT - 0.17, bay[1]], 0.07, F.dark),
+        var sgn = x < 0 ? 1 : -1, x2 = x + sgn * 6;
+        stage(member3([x, topY(x) - 0.14, bay[0]], [x2, topY(x2) - 0.14, bay[1]], 0.065, F.dark),
               0.508 + d, 0.542 + d, new THREE.Vector3(0, 3.2, 0));
-        stage(member3([x + sgn * 6, HGT - 0.17, bay[0]], [x, HGT - 0.17, bay[1]], 0.07, F.dark),
+        stage(member3([x2, topY(x2) - 0.14, bay[0]], [x, topY(x) - 0.14, bay[1]], 0.065, F.dark),
               0.508 + d, 0.542 + d, new THREE.Vector3(0, 3.2, 0));
       });
     });
 
-    /* 6. ограждающие конструкции — кровля по прогонам и торцевая стена */
+    /* 6. ограждающие: белые сэндвич-панели, как на объекте */
     var panelMat = new THREE.MeshStandardMaterial({
-      color: 0xc9d0d4, roughness: 0.52, metalness: 0.12, transparent: true, opacity: 0
+      color: 0xe4e8ea, roughness: 0.5, metalness: 0.1, transparent: true, opacity: 0
+    });
+    var accentMat = new THREE.MeshStandardMaterial({
+      color: 0xb8352c, roughness: 0.5, metalness: 0.12, transparent: true, opacity: 0
+    });
+    var glassMat = new THREE.MeshStandardMaterial({
+      color: 0x1d2830, roughness: 0.18, metalness: 0.6, transparent: true, opacity: 0
     });
     var panelMeshes = [];
-    var GROOF = new THREE.BoxGeometry(SPAN - 0.1, 0.11, 5.9);
+    function panel(geo, mat, x, y, z, rz, t0, t1, off) {
+      var m = new THREE.Mesh(geo, mat);
+      m.position.set(x, y, z);
+      if (rz) m.rotation.z = rz;
+      panelMeshes.push(m);
+      stage(m, t0, t1, off);
+      return m;
+    }
+    var SLOPE = Math.atan2(RIDGE - EAVE, HALF);
+    var SLOPE_LEN = Math.sqrt(HALF * HALF + (RIDGE - EAVE) * (RIDGE - EAVE));
+    var GROOF = new THREE.BoxGeometry(SLOPE_LEN, 0.1, 5.9);
     for (var b = 0; b < BAYS.length - 1; b++) {
-      var pnl = new THREE.Mesh(GROOF, panelMat);
-      pnl.position.set(0, HGT + 0.29, (BAYS[b] + BAYS[b + 1]) / 2);
-      panelMeshes.push(pnl);
-      stage(pnl, 0.598 + b * 0.005, 0.640 + b * 0.005, new THREE.Vector3(0, 3.5, 0));
+      var zc = (BAYS[b] + BAYS[b + 1]) / 2, dt = b * 0.0042;
+      [-1, 1].forEach(function (sg) {
+        panel(GROOF, panelMat, sg * HALF / 2, (RIDGE + EAVE) / 2 + 0.2, zc, sg * SLOPE,
+              0.598 + dt, 0.638 + dt, new THREE.Vector3(0, 3.2, 0));
+      });
     }
-    var GWALL = new THREE.BoxGeometry(5.9, COL_H - 0.1, 0.11);
-    for (var w = 0; w < 4; w++) {
-      var wl = new THREE.Mesh(GWALL, panelMat);
-      wl.position.set(-9 + w * 6, -COL_H / 2 - 0.1, -24.35);
-      panelMeshes.push(wl);
-      stage(wl, 0.612 + w * 0.006, 0.652 + w * 0.006, new THREE.Vector3(0, 0, -5));
+    /* стены только по дальней стороне и торцу — ближний фасад оставляем открытым */
+    var GWALL = new THREE.BoxGeometry(0.1, COL_H - 0.2, 5.9);
+    var GBAND = new THREE.BoxGeometry(0.12, 0.5, 5.9);
+    for (var w = 0; w < BAYS.length - 1; w++) {
+      var zw = (BAYS[w] + BAYS[w + 1]) / 2, dw = w * 0.0042;
+      panel(GWALL, panelMat, -HALF - 0.28, -COL_H / 2 - 0.1, zw, 0,
+            0.606 + dw, 0.646 + dw, new THREE.Vector3(-4, 0, 0));
+      panel(GBAND, accentMat, -HALF - 0.30, -1.35, zw, 0,
+            0.612 + dw, 0.650 + dw, new THREE.Vector3(-4, 0, 0));
     }
+    var GEND = new THREE.BoxGeometry(6, COL_H - 0.2, 0.1);
+    for (var e = 0; e < 3; e++) {
+      panel(GEND, panelMat, -6 + e * 6, -COL_H / 2 - 0.1, -LEN / 2 - 0.32, 0,
+            0.618 + e * 0.006, 0.654 + e * 0.006, new THREE.Vector3(0, 0, -5));
+    }
+
+    /* административно-бытовой корпус: два этажа с торца */
+    var abk = new THREE.Group();
+    var abkBody = new THREE.Mesh(new THREE.BoxGeometry(13, 7.4, 9), panelMat);
+    abkBody.position.set(0, -COL_H + 3.6, 0); abk.add(abkBody);
+    [-0.6, 3.1].forEach(function (gy) {
+      var g1 = new THREE.Mesh(new THREE.BoxGeometry(13.2, 1.5, 9.2), glassMat);   /* лента остекления по всем фасадам */
+      g1.position.set(0, -COL_H + 3.6 + gy, 0); abk.add(g1);
+    });
+    var abkBand = new THREE.Mesh(new THREE.BoxGeometry(13.2, 0.55, 9.2), accentMat);
+    abkBand.position.set(0, -COL_H + 1.35, 0); abk.add(abkBand);
+    var stair = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.25, 7.2), accentMat);
+    stair.position.set(7.0, -COL_H + 1.9, 1.2); stair.rotation.x = -0.42; abk.add(stair);
+    abk.position.set(0, 0, LEN / 2 + 5.2);
+    panelMeshes.push(abkBody, abkBand, stair);
+    abk.traverse(function (o) { if (o.isMesh && panelMeshes.indexOf(o) < 0) panelMeshes.push(o); });
+    stage(abk, 0.640, 0.690, new THREE.Vector3(0, 0, 8));
 
     /* автокран: уезжает, когда каркас собран */
     var craneMat = new THREE.MeshStandardMaterial({
@@ -941,14 +997,13 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     });
     var crane = new THREE.Group();
     var chassis = new THREE.Mesh(new THREE.BoxGeometry(7.2, 1.5, 3.0), craneMat);
-    chassis.position.set(0, -5.25, 0); crane.add(chassis);
+    chassis.position.set(0, -6.45, 0); crane.add(chassis);
     var turret = new THREE.Mesh(new THREE.BoxGeometry(3.0, 2.1, 2.6), craneMat);
-    turret.position.set(0.6, -3.6, 0); crane.add(turret);
-    var boom = member3([0.6, -2.8, 0], [-11.5, 8.6, 1.2], 0.85, craneMat);
-    crane.add(boom);
+    turret.position.set(0.6, -4.8, 0); crane.add(turret);
+    crane.add(member3([0.6, -4.0, 0], [-10.5, 7.2, 1.2], 0.8, craneMat));
     var hook = new THREE.Mesh(new THREE.BoxGeometry(0.07, 4.2, 0.07), craneMat);
-    hook.position.set(-11.2, 6.4, 1.15); crane.add(hook);
-    crane.position.set(24, 0, 4);
+    hook.position.set(-10.2, 5.0, 1.15); crane.add(hook);
+    crane.position.set(20, 0, 4);
     crane.scale.setScalar(0.9);
     scene.add(crane);
 
@@ -957,7 +1012,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       transparent: true, opacity: 0
     });
     var ground = new THREE.Mesh(new THREE.PlaneGeometry(600, 600), groundMat);
-    ground.rotation.x = -Math.PI / 2; ground.position.y = -COL_H - 0.14;
+    ground.rotation.x = -Math.PI / 2; ground.position.y = -COL_H - 0.16;
     ground.receiveShadow = true;
     frameGroup.add(ground);
     castAll(truss); castAll(frameGroup); castAll(crane);
@@ -1121,17 +1176,17 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       { p: [1.48, 0.30, 0.86], t: [1.00, 0.11, 0.00] },   /* 04 сварка пояса       */
       { p: [0.50, 0.74, 1.95], t: [0.00, 0.20, 0.00] },   /* 05 разлёт узла        */
       { p: [1.30, 0.72, 1.72], t: [0.30, 0.18, 0.00] },   /* 06 защита металла     */
-      { p: [2.60, 3.80, 26.5], t: [0.00, 1.20, 0.00] },   /* 07 ферма целиком      */
-      { p: [34.0, 16.0, 46.0], t: [0.00, -1.0, 0.00] },   /* 08 монтаж каркаса     */
-      { p: [6.00, -1.8, 15.0], t: [0.00, 0.90, -3.0] },   /* 09 связи изнутри      */
-      { p: [10.6, -4.7, 4.20], t: [12.0, -5.85, 0.00] },  /* 10 базы и анкеры      */
-      { p: [21.0, -2.2, 22.0], t: [1.00, 0.60, -2.0] },   /* 11 вдоль контура      */
-      { p: [22.0, 21.0, 30.0], t: [0.00, -2.0, 0.00] },   /* 12 техника, сверху    */
-      { p: [1.00, 2.20, 48.0], t: [0.00, -0.6, 0.00] },   /* 13 kukmara, с торца   */
-      { p: [-27.0, 2.00, 26.0], t: [0.00, 0.60, 0.00] },  /* 14 golden life        */
-      { p: [-36.0, 13.0, 40.0], t: [0.00, -1.0, 0.00] },  /* 15 porsche            */
-      { p: [-40.0, 5.00, -30.0], t: [0.00, -1.2, 0.00] }, /* 16 жильё, с обратной  */
-      { p: [40.0, 4.20, 30.0], t: [0.00, -1.4, 0.00] }    /* 17 финал              */
+      { p: [2.00, 3.10, 18.0], t: [0.00, 1.10, 0.00] },   /* 07 ферма целиком      */
+      { p: [29.0, 14.0, 41.0], t: [0.00, -3.0, 0.00] },   /* 08 монтаж каркаса     */
+      { p: [4.60, -3.4, 16.0], t: [0.00, 0.30, -4.0] },   /* 09 связи изнутри      */
+      { p: [7.40, -6.0, 3.60], t: [9.00, -7.15, 0.00] },  /* 10 базы и анкеры      */
+      { p: [16.0, -3.6, 23.0], t: [-1.0, 0.20, -4.0] },   /* 11 вдоль контура      */
+      { p: [19.0, 20.0, 29.0], t: [0.00, -3.5, 0.00] },   /* 12 техника, сверху    */
+      { p: [21.0, 8.00, 82.0], t: [0.00, -2.6, 6.00] },   /* 13 kukmara + АБК целиком */
+      { p: [-24.0, 0.00, 27.0], t: [0.00, -1.5, 0.00] },  /* 14 golden life        */
+      { p: [-31.0, 13.0, 39.0], t: [0.00, -2.5, 0.00] },  /* 15 porsche            */
+      { p: [-35.0, 4.00, -36.0], t: [0.00, -2.5, 0.00] }, /* 16 жильё, с обратной  */
+      { p: [35.0, 3.20, 31.0], t: [0.00, -2.6, 0.00] }    /* 17 финал              */
     ];
     var cp = new THREE.Vector3(), ct = new THREE.Vector3(), off = new THREE.Vector3();
     var C_VOID_T = new THREE.Color(0x05070a), C_VOID_H = new THREE.Color(0x0a0e12), C_VOID_S = new THREE.Color(0x140d09);
@@ -1215,8 +1270,11 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       for (var m = 0; m < fadeMats.length; m++) fadeMats[m].opacity = rev;
       groundMat.opacity = rev * 0.96;
       panelMat.opacity = sm(0.596, 0.628, p);
+      accentMat.opacity = panelMat.opacity;
+      glassMat.opacity = panelMat.opacity;
       var panelsOn = panelMat.opacity > 0.004;
       for (var pn = 0; pn < panelMeshes.length; pn++) panelMeshes[pn].visible = panelsOn;
+      abk.visible = panelsOn;
       craneMat.opacity = sm(0.404, 0.432, p) * (1 - sm(0.560, 0.614, p));
       crane.visible = craneMat.opacity > 0.004;
       frameGroup.visible = rev > 0.002;
