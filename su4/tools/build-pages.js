@@ -51,6 +51,15 @@ const head = (title, meta, depth) => {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(meta)}">
+<link rel="icon" href="${up}assets/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="${up}assets/favicon-180.png">
+<meta name="theme-color" content="#0B0D10">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="ЗАО «Строительное управление №4»">
+<meta property="og:title" content="${esc(title)}">
+<meta property="og:description" content="${esc(meta)}">
+<meta property="og:image" content="https://su4.kg/assets/og-cover.jpg">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="${up}assets/site.css">
 </head>
 <body>
