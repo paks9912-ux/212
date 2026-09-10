@@ -146,9 +146,18 @@ ul{list-style:none}
 .header.is-scrolled{height:62px;background:rgba(11,13,16,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line-d)}
 .header .wrap{display:flex;align-items:center;gap:32px;width:100%}
 .logo{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-weight:800;letter-spacing:-.02em;font-size:1.3rem}
-.logo-mark{width:34px;height:34px;border:2px solid var(--white);display:grid;place-items:center;font-family:var(--font-mono);font-size:.8rem;font-weight:500;letter-spacing:0;position:relative}
+.logo-img{height:var(--logo-h,42px);width:auto;flex:none;transition:height .35s var(--ease)}
+.header.is-scrolled .logo-img{height:calc(var(--logo-h,42px) - 8px)}
+.logo-mark{display:none;width:34px;height:34px;border:2px solid var(--white);place-items:center;font-family:var(--font-mono);font-size:.8rem;font-weight:500;letter-spacing:0;position:relative}
 .logo-mark::after{content:"";position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;background:var(--accent)}
+.logo.no-img .logo-img{display:none}
+.logo.no-img .logo-mark{display:grid}
+.logo.no-img .logo-text{display:block}
+.logo-text{display:none}
+@media(min-width:420px){.logo-text{display:block}}
 .logo small{display:block;font-family:var(--font-mono);font-weight:400;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);line-height:1.1;margin-top:2px}
+/* логотип на светлой подложке футера не нужен — футер тёмный; при смене подложки включить .logo--on-paper */
+.logo--on-paper .logo-img{filter:none}
 .nav{display:none;gap:28px;margin-left:auto}
 .header .wrap>.concept-badge{margin-left:auto}
 @media(min-width:1180px){.nav{margin-left:32px}}
@@ -446,8 +455,9 @@ ul{list-style:none}
 <header class="header" id="header">
   <div class="wrap">
     <a class="logo" href="#top" aria-label="СУ №4 — на главную">
+      <img class="logo-img" src="https://su4.kg/wp-content/uploads/2024/12/logo-e1734337749916.png" alt="ЗАО «Строительное управление №4»" width="140" height="42" data-logo>
       <span class="logo-mark" aria-hidden="true">4</span>
-      <span>СУ №4<small>Строительное управление · 1952</small></span>
+      <span class="logo-text">СУ №4<small>Строительное управление · 1952</small></span>
     </a>
     <span class="concept-badge">Концепт · v0.1</span>
     <nav class="nav" aria-label="Основная навигация">
@@ -981,7 +991,7 @@ ul{list-style:none}
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <a class="logo" href="#top" style="margin-bottom:16px"><span class="logo-mark" aria-hidden="true">4</span><span>СУ №4<small>Строительное управление · 1952</small></span></a>
+        <a class="logo" href="#top" style="margin-bottom:16px;--logo-h:52px"><img class="logo-img" src="https://su4.kg/wp-content/uploads/2024/12/logo-e1734337749916.png" alt="ЗАО «Строительное управление №4»" width="170" height="52" loading="lazy" data-logo><span class="logo-mark" aria-hidden="true">4</span><span class="logo-text">СУ №4<small>Строительное управление · 1952</small></span></a>
         <p style="max-width:30em">ЗАО «Строительное управление №4». Промышленное строительство, металлоконструкции, резервуары, железобетон и дороги. Кыргызстан.</p>
       </div>
       <div><h3 class="h3">Навигация</h3><ul><li><a href="#projects">Проекты</a></li><li><a href="#services">Услуги</a></li><li><a href="#production">Производство</a></li><li><a href="#about">О компании</a></li><li><a href="#contacts">Контакты</a></li></ul></div>
@@ -1011,10 +1021,10 @@ ul{list-style:none}
           <div style="background:#C3C9D0;color:#0B0D10">steel-2<br>#C3C9D0<br>текст на тёмном</div>
           <div style="background:#EEF0F2;color:#0B0D10">paper<br>#EEF0F2<br>светлые секции</div>
           <div style="background:#F7F8F9;color:#0B0D10">white<br>#F7F8F9<br>текст на тёмном</div>
-          <div style="background:#E3A51A;color:#1A1300">accent<br>#E3A51A<br>CTA · индексы</div>
+          <div style="background:#E3A51A;color:#1A1300">accent<br>#E3A51A<br>из логотипа · TBD</div>
         </div>
         <ul class="rules" style="margin-top:24px">
-          <li>Акцент один — янтарь дорожной разметки и крановой окраски. Только CTA, индексы секций и линия-маркер. Никогда — фон целой секции.</li>
+          <li><b>Акцент берётся из логотипа СУ №4</b> — сейчас стоит временный янтарь #E3A51A, точный хекс подставляется после сэмплирования логотипа. Меняется одной переменной <code>--accent</code>.</li>
           <li>Секции чередуют графит и «чертёжную бумагу» — ритм без смены палитры.</li>
           <li>Скругления 2 px. Никаких теней и градиентов, кроме затемнения фото.</li>
           <li>Линии 1 px с прозрачностью 12–28 % — сетка чертежа, а не рамки карточек.</li>
@@ -1050,6 +1060,13 @@ ul{list-style:none}
   ['years','years2'].forEach(function(id){var e=d.getElementById(id);if(e)e.textContent=yrs;});
   ['yearNow','yearNow2','yearNow3'].forEach(function(id){var e=d.getElementById(id);if(e)e.textContent=now;});
   d.querySelectorAll('[data-years]').forEach(function(e){e.textContent=yrs;});
+
+  /* логотип: если файл не загрузился — показываем текстовый знак */
+  d.querySelectorAll('[data-logo]').forEach(function(img){
+    function fail(){img.closest('.logo').classList.add('no-img');}
+    if(img.complete&&img.naturalWidth===0)fail();
+    img.addEventListener('error',fail);
+  });
 
   /* header */
   var header=d.getElementById('header');
