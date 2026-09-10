@@ -29,9 +29,20 @@ html = html.replace(/((?:src|poster|data-mp4|data-webm)=")((?:\.\.\/)*assets\/[^
   return a + 'data:' + mime(path.extname(file)) + ';base64,' + data.toString('base64') + b;
 });
 
-// внутренние ссылки между страницами в одном файле не работают — гасим
-html = html.replace(/href="(?:\.\.\/)*(?:index\.html|projects\/[^"]*)"/g, 'href="#" data-placeholder-link');
-html = html.replace(/href="(?:\.\.\/)+index\.html#[^"]*"/g, 'href="#" data-placeholder-link');
+// Внутри одного файла соседних страниц нет. Ссылки на них переводим на
+// опубликованные адреса — иначе переходы по сайту молча не работают.
+const published = JSON.parse(fs.readFileSync(path.join(root, 'data/artifacts.json'), 'utf8'));
+const pageKey = path.relative(root, src).split(path.sep).join('/');
+let linked = 0, stubbed = 0;
+
+html = html.replace(/href="((?:\.\.\/)*[A-Za-z0-9_\-./]*\.html)(#[^"]*)?"/g, (all, rel, hash = '') => {
+  const abs = path.posix.normalize(path.posix.join(path.posix.dirname(pageKey), rel));
+  if (abs === pageKey) return `href="${hash || '#top'}"`;        // ссылка на саму себя
+  const url = published[abs];
+  if (url) { linked++; return `href="${url}${hash}" target="_top"`; }
+  stubbed++; return 'href="#" data-placeholder-link';
+});
+console.log('ссылок на другие страницы: ' + linked + ' переведено на опубликованные, ' + stubbed + ' заглушено');
 
 fs.writeFileSync(out, html);
 console.log('встроено картинок: ' + images + ' (' + (bytes / 1e6).toFixed(1) + ' МБ)');
