@@ -80,35 +80,21 @@
   top.addEventListener('click',function(){w.scrollTo({top:0,behavior:calmMotion?'auto':'smooth'});});
   d.body.appendChild(top);
 
-  /* активный раздел в шапке */
-  var navLinks=[].slice.call(d.querySelectorAll('.secnav a[href^="#"]:not(.secnav-cta)'));
-  var targets=navLinks.map(function(a){return d.getElementById(a.getAttribute('href').slice(1));});
+  /* показать остальные объекты: без перехода на отдельную страницу */
+  var moreBtn=d.getElementById('moreProjects');
+  if(moreBtn){
+    moreBtn.addEventListener('click',function(){
+      var rest=d.querySelectorAll('.proj--more');
+      rest.forEach(function(e){e.hidden=false;});
+      moreBtn.setAttribute('aria-expanded','true');
+      moreBtn.remove();
+    });
+  }
 
   function onProgress(){
     var h=d.documentElement.scrollHeight-w.innerHeight;
     bar2.style.width=(h>0?Math.min(100,w.scrollY/h*100):0)+'%';
     top.classList.toggle('show', w.scrollY>w.innerHeight);
-    /* активен раздел, чей верх ближе всего к шапке сверху,
-       а не тот, что стоит последним в меню */
-    var active=-1, bestTop=-1e9;
-    for(var i=0;i<targets.length;i++){
-      if(!targets[i]) continue;
-      var t=targets[i].getBoundingClientRect().top;
-      if(t<=140 && t>bestTop){ bestTop=t; active=i; }
-    }
-    navLinks.forEach(function(a,i){
-      if(i===active){
-        if(a.getAttribute('aria-current')!=='true'){
-          a.setAttribute('aria-current','true');
-          /* активный пункт подтягивается в видимую часть ленты на телефоне */
-          var box=a.parentElement;
-          if(box && box.scrollWidth>box.clientWidth){
-            var l=a.offsetLeft-box.clientWidth/2+a.offsetWidth/2;
-            box.scrollTo({left:l, behavior:calmMotion?'auto':'smooth'});
-          }
-        }
-      } else a.removeAttribute('aria-current');
-    });
   }
   onProgress(); w.addEventListener('scroll',onProgress,{passive:true});
 

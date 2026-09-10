@@ -79,7 +79,7 @@ const header = (up, cta, parent) => `
       <a href="${up}index.html#projects">Проекты</a>
       <a href="${up}index.html#services">Услуги</a>
       <a href="${up}index.html#production">Производство</a>
-      <a href="${up}index.html#about">О компании</a>
+      <a href="${up}about/index.html">О компании</a>
       <a href="${up}index.html#contacts">Контакты</a>
     </nav>
     <a class="btn btn-primary header-cta" href="#${cta}">Запросить расчёт</a>
@@ -91,7 +91,7 @@ const header = (up, cta, parent) => `
   <a class="item" href="${up}index.html#projects">Проекты <span class="mono">01</span></a>
   <a class="item" href="${up}index.html#services">Услуги <span class="mono">02</span></a>
   <a class="item" href="${up}index.html#production">Производство <span class="mono">03</span></a>
-  <a class="item" href="${up}index.html#about">О компании <span class="mono">04</span></a>
+  <a class="item" href="${up}about/index.html">О компании <span class="mono">04</span></a>
   <a class="item" href="${up}index.html#contacts">Контакты <span class="mono">05</span></a>
   <a class="btn btn-primary" href="#${cta}">Запросить расчёт</a>
 </div>
@@ -311,6 +311,123 @@ ${offerSec}${processSec}${gallerySec}${casesSec}${askSec}${alsoSec}
 ` + footer(up);
 }
 
+
+/* ---------- О компании: история, заказчики, реквизиты ---------- */
+function aboutPage() {
+  const up = UP = '../';
+  const timeline = `<div class="timeline-wrap" tabindex="0" aria-label="Хронология компании, прокручивается по горизонтали">
+      <ol class="timeline">
+        <li class="tl key"><div class="yr">1952</div><h3 class="h3">Первые 11 объектов</h3><p>8 десятиквартирных домов, склад, авторемонтные мастерские и станция «Заводская» в будущем городе Кара-Балта.</p>
+          <div class="ph-frame" data-src="history-e1736502756427.jpeg"><img src="assets/img/history-e1736502756427.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1520" height="1067"></div></li>
+        <li class="tl"><div class="yr">1953</div><h3 class="h3">Школа за 53 дня</h3><p>33 сданных объекта, среди них первая школа посёлка на 400 учащихся — ныне школа-гимназия №6.</p></li>
+        <li class="tl"><div class="yr">1954</div><h3 class="h3">Ясли, детский сад, столовая</h3><p>Строится промышленная площадка, строится городок.</p></li>
+        <li class="tl key"><div class="yr">1956</div><h3 class="h3">Строительное управление №4</h3><p>Организация получает своё нынешнее имя.</p>
+          <div class="ph-frame" data-src="history2-e1736502853612.jpeg"><img src="assets/img/history2-e1736502853612.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')" width="1515" height="950"></div></li>
+        <li class="tl"><div class="yr">1956–1991</div><h3 class="h3">Город и промышленность</h3><p>ГМЗ, АРЗ, ЦРММ, ТЭЦ, ЗСИ, жилой городок на 30 000 жителей, больничный городок, спорткомплекс, школы и детские сады.</p></li>
+        <li class="tl key"><div class="yr">1999</div><h3 class="h3">Бишкек–Ош</h3><p>Участок Кара-Балта – перевал Тоо-Ашуу автодороги Бишкек–Ош: генподрядчик — Samsung, СУ №4 — в составе исполнителей.</p></li>
+        <li class="tl"><div class="yr">2018–2023</div><h3 class="h3">Нефтегаз и резервуары</h3><p>Постоянный партнёр ОАО «Кыргызнефтегаз»; резервуары для питьевой воды для «Профит Экспресс» и «Профи НСК».</p></li>
+        <li class="tl key"><div class="yr num" id="yearNow2">2026</div><h3 class="h3">4500+ объектов</h3><p>45 000+ т металлоконструкций, 1 млн+ м² дорог, 2000+ сооружений связи, 58 партнёров.</p></li>
+      </ol>
+    </div>
+`;
+  return head('О компании — ЗАО «Строительное управление №4»', 'История ЗАО «Строительное управление №4» с 1952 года, заказчики и партнёры, документы компании.', 1) + header(up, 'ask', up + 'index.html') + `
+<main id="top">
+
+<section class="sec" style="padding-top:130px" aria-labelledby="h1">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Хлебные крошки" style="margin-bottom:26px">
+      <a href="${up}index.html">Главная</a><span>/</span><b aria-current="page">О компании</b>
+    </nav>
+    <div class="sec-head">
+      <div class="sec-index">Компания</div>
+      <h1 class="display h2" id="h1">Строим с 1952 года.</h1>
+      <p class="lead muted" style="font-size:1rem">ЗАО «Строительное управление №4», г. Кара-Балта, Чуйская область. Работаем по всему Кыргызстану.</p>
+    </div>
+    <div class="numbers num">
+      <div class="reveal"><div class="val"><span id="years2">74</span></div><div class="lbl"><span class="mono">1952 → сегодня</span>года непрерывной работы</div></div>
+      <div class="reveal"><div class="val"><span>4500</span><sup>+</sup></div><div class="lbl"><span class="mono">за всю историю</span>построенных объектов</div></div>
+      <div class="reveal"><div class="val"><span>95 000</span><sup>+</sup><small>м²</small></div><div class="lbl"><span class="mono">с 1991 года</span>жилья сдано в Кара-Балте</div></div>
+      <div class="reveal"><div class="val"><span>1 000 000</span><sup>+</sup><small>м²</small></div><div class="lbl"><span class="mono">с 1991 года</span>дорожного полотна</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec paper" id="history" aria-labelledby="h-hist">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-index">История</div>
+      <h2 class="display h2" id="h-hist">1952 → сегодня</h2>
+      <p class="lead muted" style="font-size:1rem">Компания старше большинства своих заказчиков.</p>
+    </div>
+    ${timeline}
+  </div>
+</section>
+
+<section class="sec paper" id="clients" aria-labelledby="h-clients" style="padding-top:0">
+  <div class="wrap">
+    <hr class="hr" style="margin-bottom:var(--sec-y)">
+    <div class="sec-head">
+      <div class="sec-index">Заказчики</div>
+      <h2 class="display h2" id="h-clients">58 компаний и муниципалитетов.</h2>
+    </div>
+    <div class="clients-list">
+      <div><h3 class="h3">Промышленность и добыча</h3><ul><li>ОАО «Кыргызнефтегаз»</li><li>Месторождение «Джеруй»</li><li>ОсОО «Асман Ойл Компани»</li><li>ОсОО «Zhongda» China Petrol Company</li><li>ОсОО «Баатыр Голд»</li><li>ОсОО «Халмион Пром»</li><li>Металлопрокатный завод им. М. В. Фрунзе</li><li>ЗАО «Atalyk Group»</li><li>ОсОО «ИнтерГАЗ КG»</li><li>ОсОО «Эмарк-Групп»</li></ul></div>
+      <div><h3 class="h3">Инфраструктура и связь</h3><ul><li>China Road and Bridge Corporation</li><li>ГП «Кыргызавтожол» — служба тоннелей</li><li>ГП «Кыргыз-теплоэнерго»</li><li>ОсОО «Скай Мобайл» (Beeline)</li><li>ОсОО «НУР Телеком» (O!)</li><li>ОсОО «Мостдорстрой»</li><li>ОсОО «Водоканалстрой»</li><li>ОсОО «Электросредазмонтаж»</li><li>ДЭП-9, ДЭП-28, ДЭП-40, ДЭП-42, ДЭУ-9</li><li>ОсОО «Иссык-Куль Дорстрой»</li></ul></div>
+      <div><h3 class="h3">Строительство и подряд</h3><ul><li>ТОО «Транс Азия Констракшин»</li><li>ЭЙЭЙИнжиниринг Груп в КР</li><li>ОсОО «Профи НСК»</li><li>ОсОО «Профит Экспресс»</li><li>ОсОО «Руди Строй»</li><li>ОсОО «Ремстроймост»</li><li>ОсОО «ДСК Бишкек»</li><li>ОсОО «Шер Курулуш»</li><li>ОсОО «ДорСтрой Групп»</li><li>ОсОО «Гарант Строй Кейджи»</li></ul></div>
+      <div><h3 class="h3">Государственные заказчики</h3><ul><li>Мэрия г. Кара-Балта</li><li>Мэрия г. Каинда</li><li>Кантская городская управа</li><li>Айыл окмоту: Новопавловский, Сары-Коо, Ново-Покровский, Ак-Башат, Сокулукский, Крупский, Лебединовский, Первомайский, Беловодский, Суусамырский</li><li>Управление культуры и спорта г. Кара-Балта</li></ul></div>
+    </div>
+    <div class="letters" style="margin-top:34px;max-width:760px">
+      <a href="https://su4.kg/wp-content/uploads/2024/12/Отзыв-КНГ-2024-год.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg><span>Письмо ОАО «Кыргызнефтегаз»</span><span class="mono">PDF</span></a>
+      <a href="https://su4.kg/wp-content/uploads/2024/12/Отзыв-ОАО-СУ№4-Резервуары.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg><span>Письмо ОсОО «Профит Экспресс» — резервуары</span><span class="mono">PDF</span></a>
+      <a href="https://su4.kg/wp-content/uploads/2024/12/Реком-е-письмо-СУ-№4-Резервуары-Саргата.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg><span>Письмо ОсОО «Профи НСК» — 2 × 400 м³</span><span class="mono">PDF</span></a>
+      <a href="https://su4.kg/wp-content/uploads/2025/01/certificate-izdelia.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg><span>Сертификаты материалов</span><span class="mono">PDF</span></a>
+      <a href="https://su4.kg/wp-content/uploads/2024/12/Команда.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>Наша команда</span><span class="mono">PDF</span></a>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="h-req">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-index">Реквизиты</div>
+      <h2 class="display h2" id="h-req">Юридические данные.</h2>
+    </div>
+    <div class="spec-card num" style="max-width:760px">
+      <span class="mono">ЗАО «Строительное управление №4»</span>
+      <ul class="spec-list">
+        <li><span>Адрес</span><span>Кара-Балта, ул. Кожомбердиева 2</span></li>
+        <li><span>Отдел продаж</span><span>+996 704 141 522</span></li>
+        <li><span>Отдел снабжения</span><span>+996 550 114 459</span></li>
+        <li><span>ИНН, ОКПО, банковские реквизиты</span><span>уточняются</span></li>
+        <li><span>Номера лицензий Госстроя КР</span><span>уточняются</span></li>
+        <li><span>Численность сотрудников</span><span>20+ ИТР, 120+ рабочих дорожного направления</span></li>
+      </ul>
+      <p class="mono" style="color:var(--accent-soft);font-size:.7rem">Пустые строки заполняются по данным компании</p>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="ask" aria-labelledby="h-ask" style="padding-top:0">
+  <div class="wrap">
+    <hr class="hr" style="margin-bottom:var(--sec-y)">
+    <div class="case-cta">
+      <div>
+        <div class="sec-index" style="margin-bottom:16px">Работа с нами</div>
+        <h2 class="display h2" id="h-ask">Расскажите о задаче.</h2>
+        <p>Вернёмся с коммерческим предложением: составом работ, распределением затрат и сроками.</p>
+      </div>
+      <div class="actions">
+        <a class="btn btn-primary" href="${up}index.html#contacts">Обсудить проект ${arrow}</a>
+        <a class="btn btn-ghost" href="https://wa.me/996704141522">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+` + footer(up);
+}
+
 let made = 0;
 for (const s of services) {
   const dir = path.join(root, 'services', s.slug);
@@ -319,4 +436,7 @@ for (const s of services) {
   console.log('  услуга: services/' + s.slug + '/index.html');
   made++;
 }
-console.log('готово: страниц ' + made);
+fs.mkdirSync(path.join(root, 'about'), { recursive: true });
+fs.writeFileSync(path.join(root, 'about/index.html'), aboutPage());
+console.log('  страница: about/index.html');
+console.log('готово: страниц ' + (made + 1));

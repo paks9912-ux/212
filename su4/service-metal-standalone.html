@@ -641,28 +641,6 @@ ul{list-style:none}
 /* якорь не должен уезжать под липкую шапку */
 section[id],main[id]{scroll-margin-top:120px}
 
-/* навигация по разделам длинной страницы: одиннадцать секций без неё
-   превращаются в бесконечную ленту без ориентира */
-.secnav{position:sticky;top:62px;z-index:40;background:rgba(11,13,16,.94);
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  border-block:1px solid var(--line-d)}
-.secnav-inner{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--gutter);
-  display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
-.secnav-inner::-webkit-scrollbar{display:none}
-.secnav a{position:relative;white-space:nowrap;padding:15px 14px;font-size:.9rem;color:var(--steel);
-  transition:color .25s var(--ease)}
-.secnav a::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:2px;background:var(--accent);
-  transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
-.secnav a:hover{color:var(--white)}
-.secnav a[aria-current="true"]{color:var(--white)}
-.secnav a[aria-current="true"]::after{transform:none}
-.secnav .secnav-cta{margin-left:auto;color:var(--accent-soft);font-weight:600}
-.secnav .secnav-cta::after{display:none}
-@media(max-width:899px){
-  .secnav{top:0}
-  .secnav .secnav-cta{margin-left:0}
-}
-
 /* Кнопка «Назад». В предпросмотре страница открывается во весь экран,
    браузерной стрелки нет — возврат должен быть на самой странице. */
 .backbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 14px 0 10px;
@@ -676,6 +654,74 @@ section[id],main[id]{scroll-margin-top:120px}
 .crumbs{font-size:.8125rem}
 .crumbs a{box-shadow:inset 0 -1px 0 var(--line-d2);padding-block:6px}
 .crumbs a:hover{box-shadow:inset 0 -1px 0 currentColor}
+
+/* ==========================================================
+   Новая структура главной
+   ========================================================== */
+
+/* полный цикл: главное преимущество компании одной схемой */
+.cycle{display:grid;gap:0;border-top:1px solid var(--rule-strong);margin-bottom:clamp(28px,4vw,44px)}
+@media(min-width:760px){.cycle{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.cycle>div{padding:18px 20px 20px 0;border-bottom:1px solid var(--rule);position:relative}
+@media(min-width:760px){
+  .cycle>div{border-bottom:0;padding-right:28px}
+  .cycle>div+div{padding-left:28px;border-left:1px solid var(--rule)}
+  .cycle>div+div::before{content:"";position:absolute;left:-5px;top:26px;width:9px;height:9px;
+    border-top:1px solid var(--accent-soft);border-right:1px solid var(--accent-soft);transform:rotate(45deg);background:var(--bg,transparent)}
+}
+.cycle .mono{color:var(--accent-soft);display:block;margin-bottom:10px}
+.cycle b{display:block;font-family:var(--font-display);font-weight:700;font-size:1.08rem;letter-spacing:-.01em;margin-bottom:5px}
+.cycle p{color:var(--steel-2);font-size:.9rem}
+
+/* «Почему СУ №4»: причины слева, доказательства справа */
+.why{display:grid;gap:44px}
+@media(min-width:1040px){.why{grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:72px;align-items:start}}
+.why .trust-list{border-top:1px solid var(--rule-strong)}
+.why .trust-list li{border-bottom:1px solid var(--rule);padding:22px 0}
+.why-facts{display:grid;gap:0;border-top:1px solid var(--rule-strong);margin-top:26px}
+@media(min-width:640px){.why-facts{grid-template-columns:repeat(3,1fr)}}
+.why-facts>div{padding:18px 18px 20px 0;border-bottom:1px solid var(--rule)}
+@media(min-width:640px){
+  .why-facts>div{border-bottom:0}
+  .why-facts>div+div{padding-left:18px;border-left:1px solid var(--rule)}
+}
+.why-facts b{display:block;font-family:var(--font-display);font-weight:800;font-size:clamp(1.7rem,3vw,2.5rem);
+  letter-spacing:-.04em;line-height:1;margin-bottom:8px}
+.why-facts sup{font-size:.5em;color:var(--accent);vertical-align:top;position:relative;top:.15em}
+.why-facts span{color:var(--steel-on-paper);font-size:.88rem;line-height:1.35;display:block}
+.why-history{display:flex;flex-wrap:wrap;align-items:center;gap:10px 20px;margin-top:26px;
+  border-top:1px solid var(--rule);padding-top:18px}
+.why-history .mono{color:var(--steel-on-paper)}
+.why-proof{display:grid;gap:22px}
+.why-proof .quote p{font-size:clamp(1.05rem,1.5vw,1.28rem)}
+.why-proof .logo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media(min-width:520px){.why-proof .logo-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.why-proof .logo-grid>div{min-height:92px;padding:12px 14px}
+.why-proof .logo-grid img{max-height:52px}
+.why-proof .letters{margin-top:0}
+
+/* три шага работы одной строкой над формой */
+.steps-line{display:grid;gap:0;border-top:1px solid var(--line-d2);margin-bottom:clamp(36px,5vw,60px)}
+@media(min-width:820px){.steps-line{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.steps-line li{padding:18px 24px 20px 0;border-bottom:1px solid var(--line-d)}
+@media(min-width:820px){
+  .steps-line li{border-bottom:0}
+  .steps-line li+li{padding-left:24px;border-left:1px solid var(--line-d)}
+}
+.steps-line .mono{color:var(--accent-soft);display:block;margin-bottom:8px}
+.steps-line b{display:block;font-family:var(--font-display);font-weight:700;font-size:1.05rem;margin-bottom:4px}
+.steps-line p{color:var(--steel-2);font-size:.9rem}
+
+/* карточки объектов сверх первых шести */
+.proj--more[hidden]{display:none}
+
+/* список заказчиков по группам на странице компании */
+.clients-list{display:grid;gap:32px}
+@media(min-width:700px){.clients-list{grid-template-columns:1fr 1fr;gap:36px 48px}}
+@media(min-width:1100px){.clients-list{grid-template-columns:repeat(4,1fr);gap:40px}}
+.clients-list h3{padding-bottom:12px;border-bottom:1px solid var(--rule-strong);margin-bottom:14px}
+.clients-list ul{list-style:none;display:grid;gap:8px}
+.clients-list li{font-size:.92rem;color:var(--steel-on-paper);line-height:1.4}
 </style>
 </head>
 <body>
@@ -698,7 +744,7 @@ section[id],main[id]{scroll-margin-top:120px}
       <a href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709#projects" target="_top">Проекты</a>
       <a href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709#services" target="_top">Услуги</a>
       <a href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709#production" target="_top">Производство</a>
-      <a href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709#about" target="_top">О компании</a>
+      <a href="https://claude.ai/code/artifact/5dae8ccd-5959-4ea1-baf8-1a050e750dd0" target="_top">О компании</a>
       <a href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709#contacts" target="_top">Контакты</a>
     </nav>
     <a class="btn btn-primary header-cta" href="#ask">Запросить расчёт</a>
@@ -710,7 +756,7 @@ section[id],main[id]{scroll-margin-top:120px}
   <a class="item" href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709#projects" target="_top">Проекты <span class="mono">01</span></a>
   <a class="item" href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709#services" target="_top">Услуги <span class="mono">02</span></a>
   <a class="item" href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709#production" target="_top">Производство <span class="mono">03</span></a>
-  <a class="item" href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709#about" target="_top">О компании <span class="mono">04</span></a>
+  <a class="item" href="https://claude.ai/code/artifact/5dae8ccd-5959-4ea1-baf8-1a050e750dd0" target="_top">О компании <span class="mono">04</span></a>
   <a class="item" href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709#contacts" target="_top">Контакты <span class="mono">05</span></a>
   <a class="btn btn-primary" href="#ask">Запросить расчёт</a>
 </div>
@@ -1040,35 +1086,21 @@ section[id],main[id]{scroll-margin-top:120px}
   top.addEventListener('click',function(){w.scrollTo({top:0,behavior:calmMotion?'auto':'smooth'});});
   d.body.appendChild(top);
 
-  /* активный раздел в шапке */
-  var navLinks=[].slice.call(d.querySelectorAll('.secnav a[href^="#"]:not(.secnav-cta)'));
-  var targets=navLinks.map(function(a){return d.getElementById(a.getAttribute('href').slice(1));});
+  /* показать остальные объекты: без перехода на отдельную страницу */
+  var moreBtn=d.getElementById('moreProjects');
+  if(moreBtn){
+    moreBtn.addEventListener('click',function(){
+      var rest=d.querySelectorAll('.proj--more');
+      rest.forEach(function(e){e.hidden=false;});
+      moreBtn.setAttribute('aria-expanded','true');
+      moreBtn.remove();
+    });
+  }
 
   function onProgress(){
     var h=d.documentElement.scrollHeight-w.innerHeight;
     bar2.style.width=(h>0?Math.min(100,w.scrollY/h*100):0)+'%';
     top.classList.toggle('show', w.scrollY>w.innerHeight);
-    /* активен раздел, чей верх ближе всего к шапке сверху,
-       а не тот, что стоит последним в меню */
-    var active=-1, bestTop=-1e9;
-    for(var i=0;i<targets.length;i++){
-      if(!targets[i]) continue;
-      var t=targets[i].getBoundingClientRect().top;
-      if(t<=140 && t>bestTop){ bestTop=t; active=i; }
-    }
-    navLinks.forEach(function(a,i){
-      if(i===active){
-        if(a.getAttribute('aria-current')!=='true'){
-          a.setAttribute('aria-current','true');
-          /* активный пункт подтягивается в видимую часть ленты на телефоне */
-          var box=a.parentElement;
-          if(box && box.scrollWidth>box.clientWidth){
-            var l=a.offsetLeft-box.clientWidth/2+a.offsetWidth/2;
-            box.scrollTo({left:l, behavior:calmMotion?'auto':'smooth'});
-          }
-        }
-      } else a.removeAttribute('aria-current');
-    });
   }
   onProgress(); w.addEventListener('scroll',onProgress,{passive:true});
 
