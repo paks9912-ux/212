@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="description" content="ООО «Building Future 2007» — генподрядчик из Ташкента: изготовление и монтаж металлоконструкций, монолит, отделка. Объекты KUKMARA, Porsche, Golden Life, ЖК PARKWOOD.">
 <meta name="theme-color" content="#0A0C0E">
+<!-- ЗАМЕНИТЬ на боевой домен после публикации:
+<link rel="canonical" href="https://ваш-домен/">
+<meta property="og:url" content="https://ваш-домен/">
+<meta property="og:image" content="https://ваш-домен/og.jpg"> -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:site_name" content="Building Future 2007">
+<meta property="og:title" content="Building Future 2007 — генподрядчик, Ташкент">
+<meta property="og:description" content="Металлоконструкции, монолит, отделка. 111 человек в штате, свой парк техники. Объекты KUKMARA, Porsche, Golden Life.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230A0C0E'/%3E%3Cpath d='M5 25h22M8 25V11l8-4 8 4v14M12 25v-7h8v7' fill='none' stroke='%23C25236' stroke-width='2'/%3E%3C/svg%3E">
 <title>Building Future 2007</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -117,52 +128,175 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
 .hint span{display:inline-block;animation:nudge 2.6s ease-in-out infinite}
 @keyframes nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(4px)}}
 @media (max-width:820px){.rail,.hint{display:none}.mark{left:20px;top:18px}}
-@media (prefers-reduced-motion:reduce){.hint span{animation:none}.col{transform:none}}
+
+/* ---------- кнопки ---------- */
+.btn{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;
+  padding:14px 24px;border:1px solid var(--line);color:var(--chalk);background:transparent;
+  text-decoration:none;display:inline-block;cursor:pointer;
+  transition:background .22s ease,border-color .22s ease,transform .22s ease}
+.btn-primary{border-color:var(--primer);background:rgba(194,82,54,.16)}
+.btn-primary:hover,.btn-primary:focus-visible{background:rgba(194,82,54,.32);transform:translateY(-2px)}
+.btn-ghost{border-color:rgba(195,205,210,.3);color:var(--zinc)}
+.btn-ghost:hover,.btn-ghost:focus-visible{border-color:var(--zinc);color:var(--chalk);transform:translateY(-2px)}
+.btn.sm{padding:10px 18px;font-size:11px}
+.skip{position:fixed;left:-9999px;top:12px;z-index:20;font-family:var(--mono);font-size:12px;
+  background:var(--ink);color:var(--chalk);padding:12px 18px;border:1px solid var(--primer)}
+.skip:focus{left:12px}
+
+/* ---------- постоянный CTA ---------- */
+.topcta{position:fixed;top:20px;right:22px;z-index:6}
+.mcta{display:none}
+
+/* ---------- цифры на первом экране ---------- */
+.facts{list-style:none;display:flex;flex-wrap:wrap;gap:clamp(18px,3vw,40px);margin:26px 0 0;padding:0}
+.facts li{display:flex;flex-direction:column;gap:3px}
+.facts b{font-family:var(--disp);font-weight:500;font-size:clamp(26px,3vw,38px);color:var(--chalk);
+  line-height:1;font-variant-numeric:tabular-nums}
+.facts span{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--steel)}
+
+/* ---------- почему мы ---------- */
+.col.wide{max-width:48rem}
+.why{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:0;border-top:1px solid var(--line)}
+.why li{display:flex;gap:clamp(14px,2vw,26px);padding:12px 0;border-bottom:1px solid var(--line);
+  align-items:baseline}
+.why i{font-family:var(--mono);font-style:normal;font-size:10.5px;letter-spacing:.14em;
+  color:var(--primer);flex:0 0 auto;padding-top:2px}
+.why b{display:block;font-family:var(--disp);font-weight:500;text-transform:uppercase;
+  letter-spacing:.02em;font-size:clamp(15px,1.5vw,19px);color:var(--chalk);margin-bottom:4px}
+.why span{display:block;font-size:13.5px;line-height:1.55;color:var(--zinc);max-width:46ch}
+
+/* ---------- выгода для заказчика ---------- */
+.gain{margin:16px 0 0;font-family:var(--mono);font-size:11.5px;line-height:1.75;
+  letter-spacing:.03em;color:var(--zinc);max-width:44ch;
+  border-left:2px solid var(--primer);padding-left:14px}
+
+/* ---------- кейсы ---------- */
+.kind{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--primer);margin:-8px 0 16px}
+.caselink{display:inline-block;margin-top:18px;font-family:var(--mono);font-size:11px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--chalk);text-decoration:none;
+  border-bottom:1px solid var(--primer);padding-bottom:4px}
+.caselink span{display:inline-block;transition:transform .22s ease}
+.caselink:hover span,.caselink:focus-visible span{transform:translateX(5px)}
+
+/* ---------- заказчики ---------- */
+.clients{list-style:none;margin:26px 0 0;padding:0;display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0 clamp(16px,3vw,40px)}
+.clients li{font-family:var(--disp);font-weight:500;text-transform:uppercase;letter-spacing:.02em;
+  font-size:clamp(13px,1.25vw,16px);color:var(--chalk);padding:11px 0;
+  border-bottom:1px solid var(--line)}
+
+/* ---------- форма заявки ---------- */
+.lead-form{width:min(38vw,470px);flex:0 0 auto;display:grid;gap:14px;
+  background:rgba(8,10,12,.72);border:1px solid rgba(195,205,210,.14);padding:24px;
+  backdrop-filter:blur(4px);box-shadow:0 18px 44px rgba(0,0,0,.5);
+  opacity:var(--o,1);transform:translateY(calc((1 - var(--o,1)) * 26px))}
+.form-title{font-family:var(--disp);font-weight:500;text-transform:uppercase;letter-spacing:.04em;
+  font-size:19px;color:var(--chalk);margin:0}
+.lead-form .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fld{display:grid;gap:6px}
+.fld>span{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--steel)}
+.fld>span i{color:var(--primer);font-style:normal}
+.fld input,.fld select,.fld textarea{font-family:var(--body);font-size:14px;color:var(--chalk);
+  background:rgba(195,205,210,.05);border:1px solid rgba(195,205,210,.18);padding:10px 12px;
+  width:100%;transition:border-color .2s ease,background .2s ease}
+.fld select{appearance:none;-webkit-appearance:none;padding-right:30px;cursor:pointer;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%237E888E' stroke-width='1.4'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 11px center}
+.fld select option{background:#12161A;color:#EEF2F3}
+.fld textarea{resize:vertical;min-height:74px}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--primer);
+  background:rgba(195,205,210,.09)}
+.fld input::placeholder,.fld textarea::placeholder{color:rgba(126,136,142,.75)}
+.fld.invalid input{border-color:#c9503f}
+.err{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:#d4695a;font-style:normal}
+.fld.file{gap:8px}
+.fld.file input[type=file]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.fld.file .filename{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--zinc);
+  border:1px dashed rgba(195,205,210,.28);padding:11px 12px;cursor:pointer;display:block;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fld.file:hover .filename{border-color:var(--primer)}
+.lead-form .submit{width:100%;margin-top:2px}
+.lead-form .submit[disabled]{opacity:.6;cursor:progress}
+.form-note{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--steel);
+  margin:0;line-height:1.6}
+.form-done{border:1px solid var(--primer);background:rgba(194,82,54,.12);padding:16px}
+.form-done b{display:block;font-family:var(--disp);text-transform:uppercase;letter-spacing:.04em;
+  font-size:17px;color:var(--chalk);margin-bottom:6px}
+.form-done p{font-size:13px;line-height:1.6;margin:0}
+.form-done a{color:var(--chalk)}
+
+/* ---------- контакты ---------- */
+.spec.contacts a{color:var(--chalk);text-decoration:none;border-bottom:1px solid var(--line)}
+.spec.contacts a:hover{border-color:var(--primer)}
+
+/* ---------- рельс с названиями разделов ---------- */
+.rail{position:fixed;left:clamp(8px,2vw,34px);top:50%;transform:translateY(-50%);z-index:5;
+  display:flex;flex-direction:column;align-items:flex-start}
+.rail button{appearance:none;background:none;border:0;padding:4px 6px;margin:0;cursor:pointer;
+  display:flex;align-items:center;gap:11px;color:inherit;font:inherit}
+.rail .pip{width:5px;height:5px;border:1px solid var(--steel);transform:rotate(45deg);
+  flex:0 0 auto;transition:background .25s ease,border-color .25s ease}
+.rail .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--steel);white-space:nowrap;opacity:0;transform:translateX(-5px);
+  transition:opacity .25s ease,transform .25s ease}
+.rail button:hover .pip{border-color:var(--zinc)}
+.rail:hover .lbl,.rail button:focus-visible .lbl{opacity:.9;transform:none}
+.rail .lbl{background:rgba(8,10,12,.86);padding:3px 8px;border:1px solid var(--line)}
+.rail button[aria-current="step"] .pip{background:var(--primer);border-color:var(--primer)}
+.rail button[aria-current="step"] .lbl{color:var(--chalk)}
+.rail button:focus-visible{outline:1px solid var(--primer);outline-offset:2px}
+
+@media (max-width:1180px){ .rail .lbl{display:none} }
+@media (max-width:820px){
+  .topcta{display:none}
+  .rail{display:none}
+  .stamp{display:none}
+  .mcta{display:flex;gap:10px;position:fixed;left:0;right:0;bottom:0;z-index:7;
+    padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(8,10,12,.92);border-top:1px solid var(--line);backdrop-filter:blur(8px)}
+  .mcta .btn{flex:1 1 auto;text-align:center;padding:14px 10px;font-size:11px}
+  .mcta .btn-ghost{flex:0 0 38%}
+  .beat,.beat.low,.beat.high{padding-bottom:calc(12vh + 64px)}
+  .lead-form{width:100%;padding:18px}
+  .lead-form .row{grid-template-columns:1fr}
+  #lead{min-height:auto;padding-top:14vh}
+  .facts{gap:16px}
+  .facts li{flex:1 1 28%}
+}
+
+@media (prefers-reduced-motion:reduce){.hint span{animation:none}.col,.shots,.lead-form{transform:none}}
 </style>
 
 </head>
 <body>
+<a class="skip" href="#deck">Перейти к содержанию</a>
 <canvas id="gl" aria-hidden="true"></canvas>
 <div class="scrim" aria-hidden="true"></div>
 
-<div class="mark"><b>Building Future 2007</b> · генподрядчик</div>
+<header class="mark"><b>Building Future 2007</b> · генподрядчик</header>
+<div class="topcta"><a class="btn btn-primary sm" href="#lead">Обсудить проект</a></div>
 
-<div class="rail" aria-hidden="true">
-  <div class="tip"></div><div class="bar"></div>
-  <i class="on"></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <i></i><div class="bar"></div>
-  <div class="tip"></div>
-</div>
+<nav class="rail" id="rail" aria-label="Разделы страницы"></nav>
 
 <div class="stamp" aria-hidden="true">
   <div>объект <b id="obj">компания</b></div>
   <div>масштаб <b id="scale">1:2</b></div>
-  <div>лист <b id="sheet">1/18</b></div>
+  <div>лист <b id="sheet">1/21</b></div>
 </div>
 
 <div class="hint" id="hint"><span>↓</span> &nbsp;прокрутка собирает склад KUKMARA · <b id="pct">0</b>%</div>
 
-<main class="deck">
+<div class="mcta">
+  <a class="btn btn-primary" href="#lead">Обсудить проект</a>
+  <a class="btn btn-ghost" href="tel:+998998306243">Позвонить</a>
+</div>
+
+<main class="deck" id="deck">
 
   <section class="beat" id="b0">
     <div class="col">
-      <p class="eyebrow"><b>00</b> ООО · Ташкент</p>
+      <p class="eyebrow"><b>00</b> Генподрядчик · Ташкент</p>
       <h1>BUILDING<br>FUTURE</h1>
       <svg class="dim" viewBox="0 0 340 24" role="img" aria-label="2007–2026, более 18 лет в отрасли">
         <line x1="8" y1="16" x2="332" y2="16" stroke="currentColor" stroke-width="1"/>
@@ -171,8 +305,36 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         <polyline points="322,12.5 332,16 322,19.5" fill="none" stroke="currentColor" stroke-width="1"/>
         <text x="170" y="9" text-anchor="middle">2007 — 2026 · более 18 лет в отрасли</text>
       </svg>
-      <p class="lead">Генеральный подрядчик из Ташкента. Металлокаркас, монолит и отделка —
-      от анкеров в фундаменте до закрытого контура. 111 человек в штате и свой парк техники.</p>
+      <p class="lead">Металлоконструкции · Монолит · Отделка. Полный цикл: от анкеров
+      в фундаменте до закрытого контура.</p>
+      <ul class="facts">
+        <li><b>18+</b><span>лет в отрасли</span></li>
+        <li><b>111</b><span>человек в штате</span></li>
+        <li><b>14</b><span>единиц своей техники</span></li>
+      </ul>
+      <div class="act">
+        <a class="btn btn-primary" href="#lead">Обсудить проект</a>
+        <a class="btn btn-ghost" href="#lead">Получить расчёт</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="beat" id="why">
+    <div class="col wide">
+      <p class="eyebrow"><b>01</b> Почему мы</p>
+      <h2>Почему Building Future</h2>
+      <ol class="why">
+        <li><i>01</i><div><b>Свои бригады</b><span>111 специалистов в штате. Не зависим
+          от случайного набора субподрядчиков под каждый объект.</span></div></li>
+        <li><i>02</i><div><b>Собственный парк техники</b><span>14 единиц спецтехники.
+          Не ждём аренду и не подстраиваем график под чужой парк.</span></div></li>
+        <li><i>03</i><div><b>Инженерный состав</b><span>12 специалистов инженерно-технического
+          профиля: прорабы, ПТО, инженер по технике безопасности.</span></div></li>
+        <li><i>04</i><div><b>Контроль геометрии</b><span>Два геодезиста в штате. Отметки и оси
+          проверяются своими силами на каждом этапе монтажа.</span></div></li>
+        <li><i>05</i><div><b>Один подрядчик</b><span>От металлоконструкций и монолита
+          до закрытого контура. Ответственность не делится между смежниками.</span></div></li>
+      </ol>
     </div>
   </section>
 
@@ -183,6 +345,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Монолитчики, арматурщики, опалубщики и сварщики-монтажники — свои бригады,
       а не набор субподрядчиков под каждый объект. Инженерный состав — 12 человек,
       средний стаж по компании 15 лет.</p>
+      <p class="gain">Свои бригады → не зависим от набора субподрядчиков → сроки не плавают</p>
       <ul class="spec">
         <li><span>Арматурщики</span><b>28</b></li>
         <li><span>Монолитчики</span><b>24</b></li>
@@ -200,6 +363,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Колонны, стропильные фермы и балки покрытия, прогоны, связи, фахверк, площадки
       и лестницы, закладные детали под ограждающие конструкции. Считаем и ставим весь
       комплект целиком, а не отдельные позиции из чужой спецификации.</p>
+      <p class="gain">Один комплект от одного подрядчика → нет стыков ответственности → некому кивать на смежника</p>
       <ul class="spec">
         <li><span>Несущие</span><b>колонны · фермы · балки</b></li>
         <li><span>Второстепенные</span><b>прогоны · фахверк</b></li>
@@ -215,6 +379,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Прокат режем и собираем в готовые отправочные марки до выезда на площадку.
       На объект приезжают детали с готовыми отверстиями и закладными, а не заготовки,
       которые монтажники подгоняют по месту на высоте.</p>
+      <p class="gain">Отверстия и закладные в цехе → меньше подгонки на высоте → быстрее монтаж и меньше переделок</p>
       <ul class="spec">
         <li><span>Раскрой</span><b>по рабочим чертежам</b></li>
         <li><span>Отверстия</span><b>в цехе, не по месту</b></li>
@@ -236,6 +401,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Заводские соединения варим в цехе, на стенде: там шов кладут в удобном положении
       и его видно со всех сторон. Работают свои сварщики-монтажники — двенадцать человек
       в отдельной бригаде со своим бригадиром.</p>
+      <p class="gain">Шов кладут в цехе в нижнем положении → стабильное качество → меньше замечаний при приёмке</p>
       <ul class="spec">
         <li><span>Сварщики-монтажники</span><b>12</b></li>
         <li><span>Заводские соединения</span><b>сварные</b></li>
@@ -251,6 +417,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Монтажные соединения собираем на болтах через фасонки. Такой узел встаёт быстрее,
       не зависит от погоды и его качество видно сразу. Варить на высоте беремся только там,
       где проект не оставляет другого решения.</p>
+      <p class="gain">Монтажные соединения на болтах → работа не встаёт из-за погоды → предсказуемый график</p>
       <ul class="spec">
         <li><span>Монтажные</span><b>болтовые</b></li>
         <li><span>Заводские</span><b>сварные</b></li>
@@ -266,6 +433,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Конструкции уходят на объект уже защищёнными: подготовка поверхности, грунт
       и покрывной слой по системе, заложенной в проект. Там, где проект требует цинка, —
       горячее цинкование.</p>
+      <p class="gain">Покрытие наносим до подъёма → нет покраски на высоте → меньше лесов и меньше сроков</p>
       <ul class="spec">
         <li><span>Подготовка</span><b>очистка поверхности</b></li>
         <li><span>Покрытие</span><b>по системе проекта</b></li>
@@ -281,6 +449,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Фермы и рамы собираем внизу и поднимаем целиком. Меньше времени на высоте —
       меньше риска для людей и меньше зависимости от ветра, чем при поэлементной сборке
       наверху. И геометрию проще проверить, пока конструкция лежит на стеллаже.</p>
+      <p class="gain">Крупные блоки собираем на земле → меньше работ на высоте → безопаснее и меньше зависимость от ветра</p>
       <ul class="spec">
         <li><span>Сборка</span><b>на земле</b></li>
         <li><span>Подъём</span><b>целыми блоками</b></li>
@@ -302,6 +471,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Колонны, фермы, прогоны, связи — по захваткам, с геодезической выверкой на каждом
       этапе. В штате два геодезиста, поэтому отметки и оси проверяются своими силами
       и сразу, а не когда каркас уже стоит.</p>
+      <p class="gain">Геодезия своими силами → ошибку ловим на этапе → не переделываем смонтированное</p>
       <ul class="spec">
         <li><span>Геодезисты</span><b>2</b></li>
         <li><span>Автокраны</span><b>50 т · 30 т</b></li>
@@ -323,6 +493,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Вертикальные связи по колоннам и горизонтальные по покрытию. Именно они не дают
       каркасу сложиться от ветра вдоль здания: сама по себе ферма работает только в своей
       плоскости и поперёк неё держать ничего не может.</p>
+      <p class="gain">Жёсткость закладываем сразу → каркас держит ветровую нагрузку вдоль здания → нет усилений задним числом</p>
       <ul class="spec">
         <li><span>Вертикальные</span><b>по колоннам</b></li>
         <li><span>Горизонтальные</span><b>по покрытию</b></li>
@@ -344,6 +515,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Каркас начинается не с колонны, а с анкеров в фундаменте. Базы садятся на них,
       выводятся по отметке подливкой и рихтуются до подъёма следующего элемента. Ошибка
       на этом этапе тянется вверх через весь каркас и наверху уже не лечится.</p>
+      <p class="gain">Выверка до подъёма следующего элемента → отклонения не копятся → каркас встаёт по проекту</p>
       <ul class="spec">
         <li><span>Крепление</span><b>анкерные болты</b></li>
         <li><span>Выверка</span><b>по отметке и осям</b></li>
@@ -365,6 +537,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>После каркаса идут прогоны, профнастил и сэндвич-панели. Так закрывали склад
       и административно-бытовой корпус KUKMARA и завод в Ангрене: один подрядчик
       от анкеров до закрытого контура, без стыка ответственности посередине.</p>
+      <p class="gain">Каркас и ограждение — один подрядчик → нет паузы между этапами → объект закрывается быстрее</p>
       <ul class="spec">
         <li><span>Кровля</span><b>по прогонам</b></li>
         <li><span>Стены</span><b>сэндвич-панели</b></li>
@@ -386,6 +559,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       <p>Четырнадцать единиц спецтехники в собственности. Технику не арендуем — она стоит
       на площадке столько, сколько нужно объекту, а не столько, на сколько хватило сметы
       на аренду.</p>
+      <p class="gain">Техника своя → не ждём аренду → график не зависит от чужого парка</p>
       <ul class="spec">
         <li><span>Башенный кран</span><b>LIEBHERR 290HC</b></li>
         <li><span>Автокраны</span><b>SANY 50 т · 30 т</b></li>
@@ -400,6 +574,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     <div class="col">
       <p class="eyebrow"><b>13</b> Объект</p>
       <h2>KUKMARA</h2>
+      <p class="kind">Производственно-складской комплекс</p>
       <p>Складское помещение и административно-бытовой корпус в Янгиюльском районе Ташкента,
       а следом — завод по производству алюминиевой кухонной посуды в Ангрене. Железобетонные
       колонны, стальные фермы по всему пролёту, белые сэндвич-панели. Оба объекта сданы,
@@ -410,6 +585,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         <li><span>Ограждение</span><b>сэндвич-панели</b></li>
         <li><span>Роль</span><b>генподрядчик</b></li>
       </ul>
+      <a class="caselink" href="#lead" data-type="Производственное здание">Обсудить похожий объект <span aria-hidden="true">→</span></a>
     </div>
       <div class="shots">
         <figure>
@@ -427,6 +603,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     <div class="col">
       <p class="eyebrow"><b>14</b> Объект</p>
       <h2>ТЦ Golden Life</h2>
+      <p class="kind">Торгово-развлекательный центр · реконструкция</p>
       <p>Реконструкция действующего торгово-развлекательного центра в Сергелийском районе:
       изготовление и монтаж металлоконструкции. Внутри — более ста магазинов, Texnomart,
       Idea, korzinka.</p>
@@ -435,6 +612,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         <li><span>Район</span><b>Сергелийский</b></li>
         <li><span>Магазинов</span><b>100+</b></li>
       </ul>
+      <a class="caselink" href="#lead" data-type="Торговый центр">Обсудить похожий объект <span aria-hidden="true">→</span></a>
     </div>
       <div class="shots">
         <figure>
@@ -448,6 +626,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     <div class="col">
       <p class="eyebrow"><b>15</b> Объект</p>
       <h2>Дилерский центр Porsche</h2>
+      <p class="kind">Дилерский центр</p>
       <p>Автосалон по концепции Destination Porsche: не только продажи, но и кафе,
       аксессуары и пространство для встреч владельцев. Наши работы — бетон и монтаж
       металлоконструкции. Ташкент, Янги Узбекистан.</p>
@@ -456,6 +635,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         <li><span>Работы</span><b>бетон · монтаж МК</b></li>
         <li><span>Старт</span><b>26.09.2024</b></li>
       </ul>
+      <a class="caselink" href="#lead" data-type="Коммерческое здание">Обсудить похожий объект <span aria-hidden="true">→</span></a>
     </div>
       <div class="shots">
         <figure>
@@ -469,6 +649,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     <div class="col">
       <p class="eyebrow"><b>16</b> Жильё</p>
       <h2>PARKWOOD и Мехригиё</h2>
+      <p class="kind">Жилые комплексы</p>
       <p>PARKWOOD — жилой комплекс в Мирабадском районе Ташкента, квартиры с отделкой
       в экологичном стиле. Мехригиё — комплекс в Сергелийском районе. Монолит, наши
       бригады, наш башенный кран.</p>
@@ -477,6 +658,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         <li><span>Застройщик</span><b>ООО «PERSPECTIVE-BUILDING»</b></li>
         <li><span>Мехригиё</span><b>Сергелийский р-н</b></li>
       </ul>
+      <a class="caselink" href="#lead" data-type="Жилой комплекс">Обсудить похожий объект <span aria-hidden="true">→</span></a>
     </div>
       <div class="shots">
         <figure>
@@ -486,26 +668,117 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       </div>
   </section>
 
+  <section class="beat" id="trust">
+    <div class="col wide">
+      <p class="eyebrow"><b>18</b> Заказчики</p>
+      <h2>Нам доверяют</h2>
+      <ul class="clients">
+        <li>Ташкентский металлургический завод</li>
+        <li>ООО «KUKMARA»</li>
+        <li>СП ООО «KUKMARA FACTORY»</li>
+        <li>Дилерский центр Porsche</li>
+        <li>ТЦ Golden Life</li>
+        <li>ООО «BEK MEGA SERGELI»</li>
+        <li>ООО «PERSPECTIVE-BUILDING»</li>
+      </ul>
+      <p class="gain">По объектам KUKMARA и KUKMARA FACTORY заказчики прислали благодарственные
+      письма, по Porsche — рекомендацию от ООО «TEMIRSTEEL».</p>
+    </div>
+  </section>
+
+  <section class="beat" id="lead">
+    <div class="col">
+      <p class="eyebrow"><b>19</b> Заявка</p>
+      <h2>Есть объект?</h2>
+      <p>Пришлите проект, BOQ или просто предполагаемый объём работ. Оценим задачу
+      и обсудим решение — без обязательств с вашей стороны.</p>
+      <div class="act">
+        <a class="btn btn-ghost" href="tel:+998998306243">Позвонить</a>
+        <a class="tel" href="mailto:buildingfuture2007@mail.ru">buildingfuture2007@mail.ru</a>
+      </div>
+    </div>
+
+    <form class="lead-form" id="leadForm" novalidate aria-labelledby="leadFormTitle">
+      <p class="form-title" id="leadFormTitle">Отправить запрос</p>
+      <div class="row">
+        <label class="fld"><span>Имя <i aria-hidden="true">*</i></span>
+          <input name="name" type="text" autocomplete="name" required>
+          <em class="err" hidden>Укажите имя</em></label>
+        <label class="fld"><span>Компания</span>
+          <input name="company" type="text" autocomplete="organization"></label>
+      </div>
+      <div class="row">
+        <label class="fld"><span>Телефон <i aria-hidden="true">*</i></span>
+          <input name="phone" type="tel" inputmode="tel" autocomplete="tel"
+                 placeholder="+998 __ ___ __ __" required>
+          <em class="err" hidden>Укажите телефон — минимум 9 цифр</em></label>
+        <label class="fld"><span>Тип объекта</span>
+          <select name="kind" id="leadKind">
+            <option>Производственное здание</option>
+            <option>Складской комплекс</option>
+            <option>Торговый центр</option>
+            <option>Коммерческое здание</option>
+            <option>Жилой комплекс</option>
+            <option>Другое</option>
+          </select></label>
+      </div>
+      <label class="fld"><span>Объём работ или комментарий</span>
+        <textarea name="note" rows="3" placeholder="Пролёт, площадь, сроки, что уже есть из документации"></textarea></label>
+      <label class="fld file">
+        <span>Проект или BOQ</span>
+        <input type="file" id="leadFile" accept=".pdf,.dwg,.xls,.xlsx,.doc,.docx,.zip,.rar,.jpg,.png">
+        <span class="filename" id="leadFileName">Файл не выбран</span>
+      </label>
+      <button class="btn btn-primary submit" type="submit">Отправить запрос</button>
+      <p class="form-note">Нажимая кнопку, вы соглашаетесь на обработку контактных данных.</p>
+      <div class="form-done" id="leadDone" hidden role="status">
+        <b>Запрос собран</b>
+        <p id="leadDoneText">Открылось письмо с вашими данными. Прикрепите файл и отправьте —
+        или позвоните по <a href="tel:+998998306243">+998 99 830 62 43</a>.</p>
+      </div>
+    </form>
+  </section>
+
   <section class="beat" id="b17">
     <div class="col">
-      <p class="eyebrow"><b>17</b> Контакты</p>
+      <p class="eyebrow"><b>20</b> Контакты</p>
       <h2>Обсудим объект</h2>
       <p>Ташкент, Сергелийский район, Сергели 7а-4-23. Пришлите проект или объём —
       посчитаем и приедем на площадку.</p>
       <div class="act">
-        <a class="btn" href="tel:+998998306243">+998 99 830 62 43</a>
-        <a class="tel" href="mailto:buildingfuture2007@mail.ru">buildingfuture2007@mail.ru</a>
+        <a class="btn btn-primary" href="tel:+998998306243">Позвонить</a>
+        <a class="btn btn-ghost" href="mailto:buildingfuture2007@mail.ru">Написать</a>
+        <a class="btn btn-ghost" href="#lead">Отправить проект</a>
       </div>
-      <ul class="spec">
-        <li><span>Нам доверяли</span><b>Ташкентский металлургический завод</b></li>
-        <li><span></span><b>KUKMARA · KUKMARA FACTORY</b></li>
-        <li><span></span><b>Porsche · Golden Life</b></li>
-        <li><span></span><b>BEK MEGA SERGELI · PERSPECTIVE-BUILDING</b></li>
+      <ul class="spec contacts">
+        <li><span>Телефон</span><b><a href="tel:+998998306243">+998 99 830 62 43</a></b></li>
+        <li><span>Почта</span><b><a href="mailto:buildingfuture2007@mail.ru">buildingfuture2007@mail.ru</a></b></li>
+        <li><span>Адрес</span><b>Ташкент, Сергелийский р-н, Сергели 7а-4-23</b></li>
       </ul>
     </div>
   </section>
 
 </main>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "GeneralContractor",
+  "name": "ООО «Building Future 2007»",
+  "description": "Генеральный подрядчик из Ташкента: изготовление и монтаж металлоконструкций, монолитные и общестроительные работы, отделка.",
+  "telephone": "+998998306243",
+  "email": "buildingfuture2007@mail.ru",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Сергели 7а-4-23",
+    "addressLocality": "Ташкент",
+    "addressRegion": "Сергелийский район",
+    "addressCountry": "UZ"
+  },
+  "areaServed": ["Ташкент", "Ташкентская область"],
+  "knowsAbout": ["Металлоконструкции", "Монолитные работы", "Общестроительные и отделочные работы"]
+}
+</script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -513,18 +786,40 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
   'use strict';
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var beats  = [].slice.call(document.querySelectorAll('.beat'));
-  var dots   = [].slice.call(document.querySelectorAll('.rail i'));
+  var rail = document.getElementById('rail');
+  var dots = [];
   var elSheet = document.getElementById('sheet');
   var elScale = document.getElementById('scale');
   var elPct   = document.getElementById('pct');
   var elObj   = document.getElementById('obj');
   var elHint  = document.getElementById('hint');
-  var SCALES = ['1:2', '1:2', '1:20', '1:5', '1:5', '1:2', '1:10', '1:50', '1:200',
-                '1:100', '1:20', '1:150', '1:200', '1:200', '1:200', '1:200', '1:200', '1:200'];
-  var OBJ = ['компания', 'команда', 'состав каркаса', 'изготовление', 'сварка', 'узлы',
-             'защита металла', 'укрупнение', 'монтаж', 'связи', 'базы', 'контур',
-             'техника', 'kukmara', 'golden life', 'porsche', 'жильё', 'контакты'];
-  var LAST = 17;
+  var SCALES = ['1:2', '1:2', '1:20', '1:30', '1:5', '1:5', '1:2', '1:10', '1:50', '1:200',
+                '1:100', '1:20', '1:150', '1:200', '1:200', '1:200', '1:200', '1:200',
+                '1:500', '1:500', '1:200'];
+  var OBJ = ['компания', 'почему мы', 'команда', 'состав каркаса', 'изготовление', 'сварка',
+             'узлы', 'защита металла', 'укрупнение', 'монтаж', 'связи', 'базы', 'контур',
+             'техника', 'kukmara', 'golden life', 'porsche', 'жильё', 'нам доверяют',
+             'заявка', 'контакты'];
+  var LAST = 20;
+
+  /* рельс строится по списку разделов: видно, где ты сейчас и что дальше */
+  (function () {
+    if (!rail) return;
+    for (var i = 0; i < OBJ.length; i++) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.setAttribute('data-i', i);
+      btn.setAttribute('aria-label', 'Раздел ' + (i + 1) + ' из ' + OBJ.length + ': ' + OBJ[i]);
+      btn.innerHTML = '<span class="pip"></span><span class="lbl">' +
+        (i < 10 ? '0' + i : i) + ' — ' + OBJ[i] + '</span>';
+      btn.addEventListener('click', function () {
+        var n = +this.getAttribute('data-i');
+        if (beats[n]) beats[n].scrollIntoView({ block: 'start' });
+      });
+      rail.appendChild(btn);
+      dots.push(btn);
+    }
+  })();
 
   function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
   function sm(a, b, x) { var t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
@@ -539,11 +834,14 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
   /* ---------------- текст и приборная панель ---------------- */
   function ui(p) {
     var i = clamp(Math.round(p * LAST), 0, LAST);
-    elSheet.textContent = (i + 1) + '/18';
+    elSheet.textContent = (i + 1) + '/21';
     elScale.textContent = SCALES[i];
     elObj.textContent = OBJ[i];
     elPct.textContent = Math.round(p * 100);
-    for (var d = 0; d < dots.length; d++) dots[d].classList.toggle('on', d === i);
+    for (var d = 0; d < dots.length; d++) {
+      if (d === i) dots[d].setAttribute('aria-current', 'step');
+      else dots[d].removeAttribute('aria-current');
+    }
     elHint.style.setProperty('--hint', (1 - sm(0, 0.06, p)).toFixed(2));
     for (var b = 0; b < beats.length; b++) {
       var r = beats[b].getBoundingClientRect();
@@ -561,13 +859,27 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
   try { if (window.THREE) GL = init(); } catch (e) { GL = null; }
 
   function init() {
+    /* три уровня качества: слабое устройство не должно ронять кадр, сильное — недополучать */
     var mobile = window.innerWidth < 820;
-    var LOW = mobile || (navigator.hardwareConcurrency || 8) <= 4;
+    var cores = navigator.hardwareConcurrency || 4;
+    var mem = navigator.deviceMemory || 4;
+    var TIER = (mobile || cores <= 4 || mem <= 4) ? 0 : ((cores <= 8 || mem <= 8) ? 1 : 2);
+    var QUAL = {
+      pr: [1.3, 1.7, 2][TIER],
+      aa: TIER > 0,
+      shadow: [1024, 2048, 4096][TIER],
+      sparks: [110, 200, 300][TIER],
+      dust: [220, 430, 760][TIER],
+      bloomDiv: [4, 3, 2][TIER],
+      bloom: TIER > 0,
+      fenceStep: [7, 5, 3.5][TIER]
+    };
+    var LOW = TIER === 0;
 
     var renderer = new THREE.WebGLRenderer({
-      canvas: document.getElementById('gl'), antialias: !LOW, powerPreference: 'high-performance'
+      canvas: document.getElementById('gl'), antialias: QUAL.aa, powerPreference: 'high-performance'
     });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, LOW ? 1.5 : 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, QUAL.pr));
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.outputEncoding = THREE.sRGBEncoding;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -865,7 +1177,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     scene.add(new THREE.HemisphereLight(0xa8bcc6, 0x0e1214, 0.42));
     var key = new THREE.DirectionalLight(0xfff0d8, 1.85); key.position.set(9, 14, 7); scene.add(key);
     key.castShadow = true;
-    key.shadow.mapSize.set(LOW ? 1024 : 4096, LOW ? 1024 : 4096);
+    key.shadow.mapSize.set(QUAL.shadow, QUAL.shadow);
     key.shadow.bias = -0.0005; key.shadow.normalBias = 0.025;
     (function (sc) {
       sc.left = -76; sc.right = 76; sc.top = 76; sc.bottom = -76;
@@ -1030,7 +1342,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         var d = zi * 0.001;
         var bp = new THREE.Mesh(GBASE, F.base);
         bp.position.set(x, -COL_H - 0.11, z);
-        stage(bp, 0.406 + d, 0.430 + d, new THREE.Vector3(0, -2.2, 0));
+        stage(bp, 0.386 + d, 0.410 + d, new THREE.Vector3(0, -2.2, 0));
         if (Math.abs(z) <= 6) {                          /* анкеры только там, где камера подходит вплотную */
           [-0.32, 0.32].forEach(function (dx) {
             [-0.36, 0.36].forEach(function (dz) {
@@ -1038,7 +1350,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
               an.add(new THREE.Mesh(GANC, F.bolt));
               var nu = new THREE.Mesh(GNUT, F.bolt); nu.position.y = 0.042; an.add(nu);
               an.position.set(x + dx, -COL_H - 0.04, z + dz);
-              stage(an, 0.406 + d, 0.430 + d, new THREE.Vector3(0, -2.2, 0));
+              stage(an, 0.386 + d, 0.410 + d, new THREE.Vector3(0, -2.2, 0));
             });
           });
         }
@@ -1051,7 +1363,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
         var d = (zi * 2 + xi) * 0.0014;
         var col = new THREE.Mesh(GCOL, F.conc);
         col.position.set(x, -COL_H / 2 - 0.14, z);
-        stage(col, 0.424 + d, 0.468 + d, new THREE.Vector3(0, -COL_H - 1.5, 0));
+        stage(col, 0.400 + d, 0.442 + d, new THREE.Vector3(0, -COL_H - 1.5, 0));
       });
     });
 
@@ -1061,7 +1373,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       if (z === 0) return;                               /* центральная ферма уже в сцене */
       var t = liteTruss.clone(true);
       t.position.z = z;
-      stage(t, 0.446 + zi * 0.0035, 0.500 + zi * 0.0035, new THREE.Vector3(0, 3.4, 0));
+      stage(t, 0.420 + zi * 0.0035, 0.472 + zi * 0.0035, new THREE.Vector3(0, 3.4, 0));
     });
 
     /* 4. прогоны по обоим скатам */
@@ -1069,7 +1381,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     for (var px = -12; px <= 12; px += 1.5) {
       var pur = new THREE.Mesh(GPUR, F.dark);
       pur.position.set(px, topY(px) + 0.11, 0);
-      stage(pur, 0.490 + (px + 12) * 0.0006, 0.522 + (px + 12) * 0.0006, new THREE.Vector3(0, 4.5, 0));
+      stage(pur, 0.462 + (px + 12) * 0.0006, 0.492 + (px + 12) * 0.0006, new THREE.Vector3(0, 4.5, 0));
     }
 
     /* 5. связи — вертикальные по колоннам и горизонтальные по покрытию */
@@ -1077,14 +1389,14 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       [-HALF, HALF].forEach(function (x) {
         var d = bi * 0.004;
         stage(member3([x, -0.3, bay[0]], [x, -COL_H + 0.3, bay[1]], 0.07, F.dark),
-              0.504 + d, 0.538 + d, new THREE.Vector3(0, -2.5, 0));
+              0.476 + d, 0.508 + d, new THREE.Vector3(0, -2.5, 0));
         stage(member3([x, -COL_H + 0.3, bay[0]], [x, -0.3, bay[1]], 0.07, F.dark),
-              0.504 + d, 0.538 + d, new THREE.Vector3(0, -2.5, 0));
+              0.476 + d, 0.508 + d, new THREE.Vector3(0, -2.5, 0));
         var sgn = x < 0 ? 1 : -1, x2 = x + sgn * 6;
         stage(member3([x, topY(x) - 0.14, bay[0]], [x2, topY(x2) - 0.14, bay[1]], 0.065, F.dark),
-              0.508 + d, 0.542 + d, new THREE.Vector3(0, 3.2, 0));
+              0.480 + d, 0.512 + d, new THREE.Vector3(0, 3.2, 0));
         stage(member3([x2, topY(x2) - 0.14, bay[0]], [x, topY(x) - 0.14, bay[1]], 0.065, F.dark),
-              0.508 + d, 0.542 + d, new THREE.Vector3(0, 3.2, 0));
+              0.480 + d, 0.512 + d, new THREE.Vector3(0, 3.2, 0));
       });
     });
 
@@ -1119,7 +1431,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       var zc = (BAYS[b] + BAYS[b + 1]) / 2, dt = b * 0.0034;
       [-1, 1].forEach(function (sg) {
         panel(GROOF, roofMat, sg * HALF / 2, (RIDGE + EAVE) / 2 + 0.2, zc, sg * SLOPE,
-              0.598 + dt, 0.638 + dt, new THREE.Vector3(0, 3.2, 0));
+              0.566 + dt, 0.604 + dt, new THREE.Vector3(0, 3.2, 0));
       });
     }
     /* стены только по дальней стороне и торцу — ближний фасад оставляем открытым */
@@ -1128,14 +1440,14 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     for (var w = 0; w < BAYS.length - 1; w++) {
       var zw = (BAYS[w] + BAYS[w + 1]) / 2, dw = w * 0.0034;
       panel(GWALL, panelMat, -HALF - 0.28, -COL_H / 2 - 0.1, zw, 0,
-            0.606 + dw, 0.646 + dw, new THREE.Vector3(-4, 0, 0));
+            0.572 + dw, 0.610 + dw, new THREE.Vector3(-4, 0, 0));
       panel(GBAND, accentMat, -HALF - 0.30, -1.35, zw, 0,
-            0.612 + dw, 0.650 + dw, new THREE.Vector3(-4, 0, 0));
+            0.578 + dw, 0.616 + dw, new THREE.Vector3(-4, 0, 0));
     }
     var GEND = new THREE.BoxGeometry(6, COL_H - 0.2, 0.1);
     for (var e = 0; e < 4; e++) {
       panel(GEND, panelMat, -9 + e * 6, -COL_H / 2 - 0.1, -LEN / 2 - 0.32, 0,
-            0.618 + e * 0.006, 0.654 + e * 0.006, new THREE.Vector3(0, 0, -5));
+            0.584 + e * 0.006, 0.620 + e * 0.006, new THREE.Vector3(0, 0, -5));
     }
 
     /* административно-бытовой корпус: два этажа с торца */
@@ -1153,7 +1465,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     abk.position.set(0, 0, LEN / 2 + 5.2);
     panelMeshes.push(abkBody, abkBand, stair);
     abk.traverse(function (o) { if (o.isMesh && panelMeshes.indexOf(o) < 0) panelMeshes.push(o); });
-    stage(abk, 0.640, 0.690, new THREE.Vector3(0, 0, 8));
+    stage(abk, 0.600, 0.648, new THREE.Vector3(0, 0, 8));
 
     /* обжитая площадка: без неё каркас выглядит рендером, а не стройкой */
     var GRD = -COL_H - 0.16;
@@ -1221,7 +1533,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     var GFENCE = new THREE.BoxGeometry(3.4, 1.9, 0.05);
     var GPOST = new THREE.BoxGeometry(0.1, 2.05, 0.1);
     [42, -42].forEach(function (fx) {
-      for (var fz = -58; fz <= 58; fz += 3.5) {
+      for (var fz = -58; fz <= 58; fz += QUAL.fenceStep) {
         put(new THREE.Mesh(GFENCE, mFence), fx, GRD + 1.0, fz);
         put(new THREE.Mesh(GPOST, mFence), fx, GRD + 1.02, fz + 1.75);
       }
@@ -1367,7 +1679,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     var CUTP = new THREE.Vector3(0.62, 0.128, 0.082);      /* плазменный рез по полке */
     var WELDP = new THREE.Vector3(0.97, 0.118, 0.05);      /* сварочная ванна на поясе */
     var EMIT = CUTP.clone();
-    var SPN = LOW ? 130 : 300;
+    var SPN = QUAL.sparks;
     var spPos = new Float32Array(SPN * 3), spVel = new Float32Array(SPN * 3), spLife = new Float32Array(SPN);
     for (var s0 = 0; s0 < SPN; s0++) spLife[s0] = Math.random();
     var spGeo = new THREE.BufferGeometry();
@@ -1414,7 +1726,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
 
     /* ============ пыль ============ */
     var dust = (function () {
-      var n = LOW ? 320 : 760, pos = new Float32Array(n * 3);
+      var n = QUAL.dust, pos = new Float32Array(n * 3);
       for (var i = 0; i < n; i++) {
         pos[i * 3] = (Math.random() - 0.5) * 80;
         pos[i * 3 + 1] = (Math.random() - 0.3) * 30;
@@ -1431,7 +1743,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
 
     /* ============ постобработка: свечение, зерно, виньетка ============ */
     var W = window.innerWidth, H = window.innerHeight, PR = renderer.getPixelRatio();
-    var DIV = LOW ? 4 : 2;
+    var DIV = QUAL.bloomDiv;
     var rtOpts = { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat };
     var rtScene = new THREE.WebGLRenderTarget(1, 1, rtOpts);
     rtScene.texture.encoding = THREE.sRGBEncoding;
@@ -1513,7 +1825,8 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     var KEYS = [
       { p: [0.90, 0.60, 1.60], t: [0.02, 0.18, 0.00] },   /* 00 узел крупно        */
       { p: [-0.95, 0.55, 1.50], t: [-0.05, 0.18, 0.00] }, /* 01 узел с другой стороны */
-      { p: [3.20, 2.20, 7.50], t: [0.00, 1.00, 0.00] },   /* 02 состав каркаса     */
+      { p: [3.20, 2.20, 7.50], t: [0.00, 1.00, 0.00] },   /* 02 команда            */
+      { p: [5.60, 1.90, 10.5], t: [0.00, 1.10, 0.00] },   /* 03 состав каркаса     */
       { p: [1.55, 0.52, 1.30], t: [0.60, 0.14, 0.00] },   /* 03 плазменный рез     */
       { p: [1.48, 0.30, 0.86], t: [1.00, 0.11, 0.00] },   /* 04 сварка пояса       */
       { p: [0.50, 0.74, 1.95], t: [0.00, 0.20, 0.00] },   /* 05 разлёт узла        */
@@ -1527,8 +1840,10 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       { p: [26.0, 9.50, 98.0], t: [0.00, -2.6, 8.00] },   /* 13 kukmara + АБК целиком */
       { p: [-29.0, 0.00, 32.0], t: [0.00, -1.5, 0.00] },  /* 14 golden life        */
       { p: [-38.0, 15.0, 47.0], t: [0.00, -2.5, 0.00] },  /* 15 porsche            */
-      { p: [-43.0, 5.00, -44.0], t: [0.00, -2.5, 0.00] }, /* 16 жильё, с обратной  */
-      { p: [43.0, 3.60, 38.0], t: [0.00, -2.6, 0.00] }    /* 17 финал              */
+      { p: [-43.0, 5.00, -44.0], t: [0.00, -2.5, 0.00] }, /* 17 жильё, с обратной  */
+      { p: [-26.0, 19.0, 62.0], t: [0.00, -3.0, 0.00] },  /* 18 нам доверяют       */
+      { p: [34.0, 8.00, 70.0], t: [0.00, -3.0, 4.00] },   /* 19 заявка             */
+      { p: [43.0, 3.60, 38.0], t: [0.00, -2.6, 0.00] }    /* 20 контакты           */
     ];
     var cp = new THREE.Vector3(), ct = new THREE.Vector3(), off = new THREE.Vector3();
     var C_VOID_T = new THREE.Color(0x05070a), C_VOID_H = new THREE.Color(0x0a0e12), C_VOID_S = new THREE.Color(0x140d09);
@@ -1568,15 +1883,15 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       );
       camera.lookAt(ct);
       /* макро уводим правее текста, общий план возвращаем к центру, иначе каркас режется краем */
-      if (camera.aspect > 1.1) camera.rotateY(0.19 - sm(0.38, 0.48, p) * 0.11);
-      camera.rotateZ(sm(0.93, 1, p) * 0.035);
+      if (camera.aspect > 1.1) camera.rotateY(0.19 - sm(0.355, 0.455, p) * 0.11);
+      camera.rotateZ(sm(0.945, 1, p) * 0.035);
 
       /* чертёж → металл */
       wireMat.opacity = 0;
       wire.visible = false;
 
       /* 01 — плазменный рез, 02 — сварка на кондукторе */
-      var wPlasma = bump(p, 3 / 17, 0.032), wWeld = bump(p, 4 / 17, 0.032);
+      var wPlasma = bump(p, 4 / 20, 0.028), wWeld = bump(p, 5 / 20, 0.028);
       var cut = Math.max(wPlasma, wWeld);
       sparkStep(cut, wWeld > wPlasma);
       var flick = 0.55 + Math.random() * 0.45;
@@ -1585,7 +1900,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       flare.scale.setScalar(0.07 + cut * 0.08 * flick);
 
       /* узел разлетается на 02 и собирается обратно к 03 */
-      var ex = bump(p, 5 / 17, 0.042);
+      var ex = bump(p, 6 / 20, 0.036);
       for (var e = 0; e < explodables.length; e++) {
         var it = explodables[e];
         it.o.position.copy(it.base).addScaledVector(it.dir, ex);
@@ -1593,7 +1908,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       }
 
       /* горячее цинкование на листе 04: сурик уходит в цинк */
-      var zinc = sm(0.315, 0.372, p);
+      var zinc = sm(0.318, 0.368, p);
       var wantMap = zinc < 0.5 ? PRIMER_MAP : ZINC_MAP;
       if (M.primer.map !== wantMap) {
         M.primer.map = wantMap; M.primer.needsUpdate = true;
@@ -1608,20 +1923,20 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       F.primer.roughness = M.primer.roughness;
 
       /* каркас собирается по этапам: базы, колонны, фермы, прогоны, связи, контур */
-      var rev = sm(0.402, 0.428, p);
+      var rev = sm(0.383, 0.406, p);
       for (var m = 0; m < fadeMats.length; m++) fadeMats[m].opacity = rev;
       groundMat.opacity = rev * 0.98;
       dirtMat.opacity = rev;
-      panelMat.opacity = sm(0.596, 0.628, p);
+      panelMat.opacity = sm(0.563, 0.596, p);
       accentMat.opacity = panelMat.opacity;
       roofMat.opacity = panelMat.opacity;
       glassMat.opacity = panelMat.opacity;
       var panelsOn = panelMat.opacity > 0.004;
       for (var pn = 0; pn < panelMeshes.length; pn++) panelMeshes[pn].visible = panelsOn;
       abk.visible = panelsOn;
-      craneMat.opacity = sm(0.404, 0.432, p) * (1 - sm(0.560, 0.614, p));
+      craneMat.opacity = sm(0.385, 0.410, p) * (1 - sm(0.525, 0.578, p));
       craneDark.opacity = craneMat.opacity;
-      var siteOn = sm(0.404, 0.436, p);
+      var siteOn = sm(0.385, 0.412, p);
       for (var sm2 = 0; sm2 < siteMats.length; sm2++) siteMats[sm2].opacity = siteOn;
       site.visible = siteOn > 0.004;
       crane.visible = craneMat.opacity > 0.004;
@@ -1636,7 +1951,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       }
 
       /* пустота → закат */
-      var sun = sm(0.40, 0.88, p);
+      var sun = sm(0.38, 0.86, p);
       var u = sky.material.uniforms;
       u.cTop.value.copy(C_VOID_T).lerp(C_DUSK_T, sun);
       u.cHor.value.copy(C_VOID_H).lerp(C_DUSK_H, sun);
@@ -1646,7 +1961,7 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       key.intensity = 1.85 + sun * 0.7;
       key.position.set(9 - sun * 20, 14 - sun * 11, 7 + sun * 16);
       renderer.toneMappingExposure = 0.94 + sun * 0.1;
-      mComp.uniforms.amt.value = 0.2 + sun * 0.14 + cut * 0.4;
+      mComp.uniforms.amt.value = QUAL.bloom ? (0.2 + sun * 0.14 + cut * 0.4) : 0;
 
       dust.rotation.y = time * 0.000015;
       dust.material.opacity = 0.42 - sun * 0.18;
@@ -1657,19 +1972,31 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       renderer.setRenderTarget(rtScene);
       renderer.clear();
       renderer.render(scene, camera);
-      mBlurA.uniforms.dir.value.set(1 / rtA.width, 0);
-      mBlurB.uniforms.dir.value.set(0, 1 / rtA.height);
-      pass(mBright, rtA);
-      pass(mBlurA, rtB);
-      pass(mBlurB, rtA);
+      if (QUAL.bloom) {                       /* три прохода свечения — первое, чем жертвуем */
+        mBlurA.uniforms.dir.value.set(1 / rtA.width, 0);
+        mBlurB.uniforms.dir.value.set(0, 1 / rtA.height);
+        pass(mBright, rtA);
+        pass(mBlurA, rtB);
+        pass(mBlurB, rtA);
+      }
       pass(mComp, null);
     }
 
-    return { update: update, render: render };
+    /* если кадр просел — сначала гасим свечение, потом снижаем разрешение рендера */
+    var adapted = 0;
+    function adapt(avgMs) {
+      if (adapted >= 2 || avgMs < 34) return;
+      adapted++;
+      if (adapted === 1 && QUAL.bloom) QUAL.bloom = false;
+      else { renderer.setPixelRatio(Math.max(1, renderer.getPixelRatio() * 0.75)); resize(); }
+    }
+
+    return { update: update, render: render, adapt: adapt };
   }
 
   /* ---------------- общий цикл ---------------- */
   var cur = progress(), tgt = cur;
+  var fAcc = 0, fNum = 0, fPrev = 0;
   function loop(time) {
     requestAnimationFrame(loop);
     tgt = progress();
@@ -1677,8 +2004,85 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
     if (Math.abs(tgt - cur) < 0.0002) cur = tgt;
     ui(cur);
     if (GL) { GL.update(cur, time || 0); GL.render(); }
+    if (fPrev && time - fPrev < 400) { fAcc += time - fPrev; fNum++; }
+    fPrev = time;
+    if (fNum >= 120) { if (GL && GL.adapt) GL.adapt(fAcc / fNum); fAcc = 0; fNum = 0; }
   }
   requestAnimationFrame(loop);
+
+  /* ---------------- форма заявки ---------------- */
+  (function () {
+    var form = document.getElementById('leadForm');
+    if (!form) return;
+    var fileIn = document.getElementById('leadFile');
+    var fileName = document.getElementById('leadFileName');
+    var done = document.getElementById('leadDone');
+    var doneText = document.getElementById('leadDoneText');
+    var kind = document.getElementById('leadKind');
+    var submit = form.querySelector('.submit');
+
+    fileIn.addEventListener('change', function () {
+      fileName.textContent = fileIn.files && fileIn.files[0] ? fileIn.files[0].name : 'Файл не выбран';
+    });
+
+    /* переход из кейса подставляет тип объекта */
+    [].forEach.call(document.querySelectorAll('.caselink'), function (a) {
+      a.addEventListener('click', function () {
+        var t = a.getAttribute('data-type');
+        for (var i = 0; i < kind.options.length; i++) {
+          if (kind.options[i].text === t) { kind.selectedIndex = i; break; }
+        }
+      });
+    });
+
+    function mark(el, bad) {
+      var fld = el.parentNode;
+      fld.classList.toggle('invalid', bad);
+      var e = fld.querySelector('.err');
+      if (e) e.hidden = !bad;
+    }
+    function digits(v) { return (v.match(/\d/g) || []).length; }
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var el = form.elements;
+      var badName = !el.name.value.trim();
+      var badPhone = digits(el.phone.value) < 9;
+      mark(el.name, badName);
+      mark(el.phone, badPhone);
+      if (badName || badPhone) { (badName ? el.name : el.phone).focus(); return; }
+
+      submit.disabled = true;
+      var label = submit.textContent;
+      submit.textContent = 'Отправляем…';
+
+      var lines = [
+        'Имя: ' + el.name.value.trim(),
+        'Компания: ' + (el.company.value.trim() || '—'),
+        'Телефон: ' + el.phone.value.trim(),
+        'Тип объекта: ' + kind.value,
+        'Объём работ: ' + (el.note.value.trim() || '—'),
+        'Файл: ' + (fileIn.files && fileIn.files[0] ? fileIn.files[0].name + ' (прикрепите к письму)' : '—')
+      ];
+
+      /* Точка подключения CRM или бота: замените блок ниже на
+         fetch('/api/lead', { method: 'POST', body: new FormData(form) }) */
+      setTimeout(function () {
+        window.location.href = 'mailto:buildingfuture2007@mail.ru' +
+          '?subject=' + encodeURIComponent('Заявка с сайта — ' + kind.value) +
+          '&body=' + encodeURIComponent(lines.join('\n'));
+        submit.disabled = false;
+        submit.textContent = label;
+        if (fileIn.files && fileIn.files[0]) {
+          doneText.innerHTML = 'Открылось письмо с вашими данными. Прикрепите к нему файл ' +
+            '<b>' + fileIn.files[0].name + '</b> и отправьте — или позвоните по ' +
+            '<a href="tel:+998998306243">+998 99 830 62 43</a>.';
+        }
+        done.hidden = false;
+        done.scrollIntoView({ block: 'nearest' });
+      }, 500);
+    });
+  })();
 })();
 </script>
 </body>
