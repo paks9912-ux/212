@@ -13,6 +13,26 @@
     img.addEventListener('error',fail);
   });
 
+  /* фоновое видео первого экрана.
+     Постер показывается всегда; сам файл грузим только когда это уместно:
+     не при экономии трафика, не при отключённой анимации и не на узких экранах,
+     где полмегабайта платит пользователь мобильного интернета. */
+  var hv=d.getElementById('heroVideo');
+  if(hv){
+    var conn=navigator.connection||{}, saveData=conn.saveData===true,
+        slow=/^(slow-)?2g$/.test(conn.effectiveType||''),
+        calm=w.matchMedia('(prefers-reduced-motion: reduce)').matches,
+        narrow=w.matchMedia('(max-width: 719px)').matches;
+    if(!saveData && !slow && !calm && !narrow){
+      ['webm','mp4'].forEach(function(fmt){
+        var src=hv.getAttribute('data-'+fmt); if(!src) return;
+        var el=d.createElement('source'); el.src=src; el.type='video/'+fmt; hv.appendChild(el);
+      });
+      hv.preload='auto'; hv.load();
+      var go=hv.play(); if(go&&go.catch)go.catch(function(){});
+    }
+  }
+
   /* header */
   var header=d.getElementById('header');
   if(header){

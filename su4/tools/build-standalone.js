@@ -8,7 +8,7 @@ const src = path.resolve(root, process.argv[2] || 'index.html');
 const out = path.resolve(root, process.argv[3] || 'concept-standalone.html');
 const dir = path.dirname(src);
 
-const mime = ext => ({ '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp' }[ext] || 'application/octet-stream');
+const mime = ext => ({ '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.mp4': 'video/mp4', '.webm': 'video/webm' }[ext] || 'application/octet-stream');
 const local = rel => path.resolve(dir, rel.split('?')[0]);
 
 let html = fs.readFileSync(src, 'utf8');
@@ -20,8 +20,8 @@ html = html.replace(/<link rel="stylesheet" href="((?:\.\.\/)*assets\/[^"]+\.css
 html = html.replace(/<script src="((?:\.\.\/)*assets\/[^"]+\.js)"><\/script>/g,
   (all, rel) => fs.existsSync(local(rel)) ? '<script>\n' + fs.readFileSync(local(rel), 'utf8') + '</script>' : all);
 
-// картинки — data: URI
-html = html.replace(/(src=")((?:\.\.\/)*assets\/[^"]+)(")/g, (all, a, rel, b) => {
+// картинки, постеры и видео — data: URI
+html = html.replace(/((?:src|poster|data-mp4|data-webm)=")((?:\.\.\/)*assets\/[^"]+)(")/g, (all, a, rel, b) => {
   const file = local(rel);
   if (!fs.existsSync(file)) return all;
   const data = fs.readFileSync(file);
