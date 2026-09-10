@@ -34,6 +34,18 @@
   .hi{color:#025394!important}
   .foot-note{color:#79828C!important;border-color:#C0C6CC!important}
 }
+
+/* сетка фактов по четыре в ряд */
+.figs.four{grid-template-columns:1fr;gap:0}
+@media(min-width:640px){.figs.four{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1040px){.figs.four{grid-template-columns:repeat(4,1fr)}}
+.figs.four .fig{padding:14px 16px 16px 0}
+.figs.four .fig b{font-size:clamp(1.5rem,2.6vw,2.5rem);display:flex;flex-wrap:wrap;align-items:baseline;gap:.28em;min-height:2.05em;align-content:flex-start}
+.figs.four .fig span{font-size:.86rem;margin-top:6px}
+@media(min-width:640px){.figs.four .fig{border-bottom:1px solid var(--rule)}}
+@media(min-width:1040px){.figs.four .fig{border-bottom:0}}
+.figs.four+.figs.four{border-top:0}
+.slide.light .figs.four .fig{border-color:#C9CFD5}
 </style>
 <style>
 :root{
@@ -265,7 +277,7 @@ ul{list-style:none;margin:0;padding:0}
         <span>Коммерческое предложение</span><span>ЗАО «Строительное управление №4»</span><span>Кара-Балта · su4.kg</span>
       </div>
       <h1 class="hero-h1">Новый сайт: <em>тот же завод, другой разговор с заказчиком.</em></h1>
-      <p class="lead">Сначала — что показали замеры сайта. Потом — что изменилось. Каждую цифру можно перепроверить самим, я покажу как.</p>
+      <p class="lead">Сайт замерен браузером — цифры ниже можно перепроверить самим.</p>
       <div class="title-foot mono">
         <span>Листать: стрелки, пробел или свайп</span><span>Обзор слайдов — клавиша O</span>
       </div>
@@ -276,85 +288,94 @@ ul{list-style:none;margin:0;padding:0}
   <section class="slide" data-title="Если коротко">
     <div class="inner">
       <span class="kicker">01 / Если коротко</span>
-      <h2>Три вещи, которые изменились.</h2>
-      <div class="figs">
-        <div class="fig"><b>Быстрее<br>в 4 раза</b><span>страница стала легче: на слабой связи открывается за секунды, а не за минуту</span></div>
-        <div class="fig"><b>Понятно<br>с первого экрана</b><span>видно, что компания строит и производит, и с какими размерами работает</span></div>
-        <div class="fig"><b>Работает<br>в телефоне</b><span>то же самое, что на компьютере: и посмотреть, и позвонить, и оставить заявку</span></div>
+      <h2>Что изменилось.</h2>
+      <div class="figs four">
+        <div class="fig"><b>4,5×</b><span>легче страница</span></div>
+        <div class="fig"><b>6×</b><span>меньше обращений к серверу</span></div>
+        <div class="fig"><b>0 из 219</b><span>текстов ниже нормы читаемости</span></div>
+        <div class="fig"><b>17</b><span>рабочих размеров вместо нуля</span></div>
       </div>
-      <p class="lead">Дальше — то же самое, но с цифрами. Каждую можно перепроверить самим, покажу как.</p>
+      <div class="figs four">
+        <div class="fig"><b>9</b><span>страниц вместо одной длинной</span></div>
+        <div class="fig"><b>6</b><span>направлений с параметрами</span></div>
+        <div class="fig"><b>12</b><span>объектов с фильтром</span></div>
+        <div class="fig"><b>5</b><span>каналов связи на каждой странице</span></div>
+      </div>
     </div>
   </section>
 
   <!-- 03 -->
-  <section class="slide" data-title="Как проверяли">
+  <section class="slide" data-title="Ожидание">
     <div class="inner">
-      <span class="kicker">02 / Как проверяли</span>
-      <h2>Ничего на глаз — открыли и засекли.</h2>
-      <p class="lead">Сайт su4.kg открыли в обычном браузере на компьютере и на телефоне и замерили: сколько ждём ответа, сколько всего скачивается, сколько кнопок мельче пальца. Всё это браузер показывает сам, без специальных программ.</p>
-      <div class="figs">
-        <div class="fig"><b>3 раза</b><span>замеряли время ответа, чтобы не поймать одну удачную попытку</span></div>
-        <div class="fig"><b>2 экрана</b><span>компьютер и телефон — цифры по каждому отдельно</span></div>
-        <div class="fig"><b>Проверьте сами</b><span>откройте сайт, нажмите F12 и вкладку «Сеть» — увидите те же числа</span></div>
+      <span class="kicker">02 / Сколько ждёт заказчик</span>
+      <h2>Две секунды тишины, потом ещё минута.</h2>
+      <div class="figs four">
+        <div class="fig"><b>2 с</b><span>сайт молчит до первой буквы</span></div>
+        <div class="fig"><b>1,5 мин <i>→</i> 20 с</b><span>полная загрузка при связи 1 Мбит/с</span></div>
+        <div class="fig"><b>11,5 <i>→</i> 2,5 МБ</b><span>скачивает телефон за одно открытие</span></div>
+        <div class="fig"><b>178 <i>→</i> 29</b><span>раз браузер идёт за файлами</span></div>
       </div>
-      <p class="lead">Это не претензия к прошлым исполнителям. Сайт собран на готовой основе с набором дополнений — так делают быстро и недорого, и на старте это оправданно. Дальше видно, во что это обходится сегодня.</p>
+      <p class="lead">Снабженец не ждёт: закрывает и открывает следующего подрядчика из поиска.</p>
     </div>
   </section>
 
   <!-- 04 -->
-  <section class="slide" data-title="Ожидание">
+  <section class="slide" data-title="Что грузится">
     <div class="inner">
-      <span class="kicker">03 / Сколько ждёт заказчик</span>
-      <h2>Две секунды сайт молчит. Потом ещё грузится.</h2>
-      <div class="figs">
-        <div class="fig"><b>2 секунды</b><span>сайт не показывает вообще ничего — как гудок в трубке, которую не берут</span></div>
-        <div class="fig"><b>≈ 1,5 минуты</b><span>полностью грузится главная при слабой связи на объекте</span></div>
-        <div class="fig"><b>≈ 20 секунд</b><span>грузится новая главная при такой же связи</span></div>
+      <span class="kicker">03 / Откуда берётся вес</span>
+      <h2>Сто файлов оформления вместо двух.</h2>
+      <div class="figs four">
+        <div class="fig"><b>56 <i>→</i> 1</b><span>файл оформления</span></div>
+        <div class="fig"><b>44 <i>→</i> 1</b><span>скрипт</span></div>
+        <div class="fig"><b>20 <i>→</i> 0</b><span>вставок кода в разметке</span></div>
+        <div class="fig"><b>2040 <i>→</i> 692</b><span>элемента на странице</span></div>
       </div>
-      <p class="lead">Считали по-честному: связь 1 мегабит в секунду — обычное дело за городом. Старая главная тянет 11,5 мегабайта, новая — 2,5 вместе с видео. <b class="hi">Разница в четыре с половиной раза.</b></p>
+      <p class="lead">Каждое дополнение приносило свои файлы — и они грузились всегда, даже когда не нужны.</p>
     </div>
   </section>
 
   <!-- 05 -->
-  <section class="slide light" data-title="Почему это важно">
+  <section class="slide light" data-title="Читаемость">
     <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">04 / Почему это важно</span>
-      <h2>Снабженец смотрит сайт с телефона, прямо на объекте.</h2>
-      <p class="lead">Он открывает три-четыре подрядчика подряд и пишет тому, кто загрузился и ответил на его вопрос. Медленный сайт он просто закрывает — и это никак не видно в отчётах, потому что заявки, которой не было, никто не считает.</p>
-      <div class="path">
-        <div class="step"><span class="n">Что видит</span><b>Белый экран</b><p>Пока грузится, показывать нечего.</p></div>
-        <div class="step"><span class="n">Что делает</span><b>Закрывает</b><p>И открывает следующего подрядчика из поиска.</p></div>
-        <div class="step"><span class="n">Что теряется</span><b>Заявка</b><p>Она не приходит и нигде не отображается.</p></div>
-        <div class="step"><span class="n">Что сделали</span><b>Убрали лишнее</b><p>Оставили только то, что реально нужно странице.</p></div>
+      <span class="kicker" style="color:#0A6FBE">04 / Читаемость — взгляд дизайнера</span>
+      <h2>Текст должен читаться, а не угадываться.</h2>
+      <div class="figs four">
+        <div class="fig"><b>25 из 84 <i>→</i> 0 из 219</b><span>текстов ниже нормы контраста</span></div>
+        <div class="fig"><b>180 <i>→</i> 92</b><span>знаков в самой длинной строке</span></div>
+        <div class="fig"><b>5 <i>→</i> 1</b><span>абзацев шире нормы</span></div>
+        <div class="fig"><b>16 <i>→</i> 17 px</b><span>размер основного текста</span></div>
       </div>
+      <p class="foot-note mono">Нормы: контраст 4,5:1 по стандарту доступности, длина строки 45–75 знаков. Проверено на всех текстах главной.</p>
     </div>
   </section>
 
   <!-- 06 -->
-  <section class="slide" data-title="Лишний груз">
+  <section class="slide light" data-title="Порядок">
     <div class="inner">
-      <span class="kicker">05 / Откуда берётся вес</span>
-      <h2>Сто отдельных файлов вместо одного комплекта.</h2>
-      <p class="lead">Чтобы показать одну страницу, браузер сходил за файлами <b class="hi">178 раз</b>. Это как везти на площадку сто машин по одному ящику вместо двух машин с полным комплектом: доедет всё, но в конце дня, а не к обеду.</p>
-      <div class="figs">
-        <div class="fig"><b>178 <i>→</i> 29</b><span>обращений к серверу, чтобы открыть одну главную страницу</span></div>
-        <div class="fig"><b>100 <i>→</i> 2</b><span>файлов оформления: каждое дополнение приносило своё, и грузилось всегда</span></div>
-        <div class="fig"><b>11,5 <i>→</i> 2,5 МБ</b><span>скачивает телефон при одном открытии страницы</span></div>
+      <span class="kicker" style="color:#0A6FBE">05 / Порядок — взгляд дизайнера</span>
+      <h2>Одна сетка вместо двадцати трёх.</h2>
+      <div class="figs four">
+        <div class="fig"><b>23 <i>→</i> 12</b><span>разных левых краёв у блоков</span></div>
+        <div class="fig"><b>7 <i>→</i> 0</b><span>видов скругления углов</span></div>
+        <div class="fig"><b>14 <i>→</i> 7</b><span>цветов фона на странице</span></div>
+        <div class="fig"><b>11 <i>→</i> 7</b><span>разных оформлений кнопок</span></div>
       </div>
+      <p class="lead">Когда у каждого блока свой отступ, свой радиус и своя кнопка — глаз не находит систему и не доверяет.</p>
     </div>
   </section>
 
   <!-- 07 -->
-  <section class="slide" data-title="Название страницы">
+  <section class="slide" data-title="Структура">
     <div class="inner">
-      <span class="kicker">06 / Как сайт видит поиск</span>
-      <h2>У страницы не было названия — как у ящика без маркировки.</h2>
-      <p class="lead">Поисковая система читает страницу сверху вниз и ищет главный заголовок: о чём это вообще. На старой главной такого заголовка нет ни одного — есть 28 подзаголовков без верхнего. Внутри всё есть, а понять, что это за компания, машине не по чему.</p>
-      <div class="figs">
-        <div class="fig"><b>0 <i>→</i> 1</b><span>главных заголовков: теперь прямо написано, чем занимается компания</span></div>
-        <div class="fig"><b>174 <i>→</i> 51</b><span>ссылок на одной странице: меньше развилок — понятнее выбор</span></div>
-        <div class="fig"><b>38 <i>→</i> 2</b><span>ссылок, которые никуда не ведут: нажал и ничего не произошло</span></div>
+      <span class="kicker">06 / Структура и поиск</span>
+      <h2>У страницы не было названия.</h2>
+      <div class="figs four">
+        <div class="fig"><b>0 <i>→</i> 1</b><span>главный заголовок страницы</span></div>
+        <div class="fig"><b>28 <i>→</i> 5</b><span>подзаголовков подряд</span></div>
+        <div class="fig"><b>174 <i>→</i> 51</b><span>ссылок на одной странице</span></div>
+        <div class="fig"><b>38 <i>→</i> 2</b><span>ссылки, ведущие в никуда</span></div>
       </div>
+      <p class="lead">Поиск читает заголовок первым: без него он не понимает, чья это страница и о чём.</p>
     </div>
   </section>
 
@@ -363,30 +384,31 @@ ul{list-style:none;margin:0;padding:0}
     <div class="inner">
       <span class="kicker">07 / Фотографии</span>
       <h2>Текст уезжает из-под пальца, пока грузятся фото.</h2>
-      <p class="lead">Когда для фотографии заранее не отведено место, страница собирается рывками: начал читать строку — она уехала вниз. На старой главной так ведут себя <b class="hi">77 фотографий из 99</b>.</p>
-      <div class="figs">
-        <div class="fig"><b>7,5 <i>→</i> 1,6 МБ</b><span>весят фотографии главной — раньше это две трети всей страницы</span></div>
-        <div class="fig"><b>77 <i>→</i> 1</b><span>фотографий без заранее отведённого места: страница больше не дёргается</span></div>
-        <div class="fig"><b>10 <i>→</i> 0</b><span>снимков без подписи: теперь их находит поиск по картинкам</span></div>
+      <div class="figs four">
+        <div class="fig"><b>99 <i>→</i> 32</b><span>фотографии на главной</span></div>
+        <div class="fig"><b>77 <i>→</i> 1</b><span>без заранее отведённого места</span></div>
+        <div class="fig"><b>7,5 <i>→</i> 1,6 МБ</b><span>весят все снимки страницы</span></div>
+        <div class="fig"><b>7 <i>→</i> 5</b><span>разных пропорций кадра</span></div>
       </div>
-    </div>
-  </section>
-
-  <!-- 08-б -->
-  <section class="slide light" data-title="Телефон и форма">
-    <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">08 / Телефон и форма</span>
-      <h2>В половину кнопок трудно попасть пальцем.</h2>
-      <div class="figs">
-        <div class="fig"><b>48 <i>→</i> 1</b><span>кнопок и ссылок мельче подушечки пальца — раньше приходилось целиться</span></div>
-        <div class="fig"><b>3 из 5 <i>→</i> 0 из 7</b><span>полей формы без подписи: человек не понимал, что вводить в пустую строку</span></div>
-        <div class="fig"><b>+996</b><span>код страны набирали вручную — теперь он уже стоит в поле</span></div>
-      </div>
-      <p class="lead">При нажатии на поле телефона сразу открывается клавиатура с цифрами, а не с буквами. Вводятся девять цифр — и всё. К заявке можно приложить файл технического задания прямо с телефона.</p>
+      <p class="lead">Плюс 105 фотографий пересобраны заново: кадрирование под нужную пропорцию и мягкая резкость.</p>
     </div>
   </section>
 
   <!-- 09 -->
+  <section class="slide light" data-title="Телефон и форма">
+    <div class="inner">
+      <span class="kicker" style="color:#0A6FBE">08 / Телефон и форма</span>
+      <h2>В половину кнопок трудно попасть пальцем.</h2>
+      <div class="figs four">
+        <div class="fig"><b>48 <i>→</i> 1</b><span>кнопок мельче подушечки пальца</span></div>
+        <div class="fig"><b>3 из 5 <i>→</i> 0 из 7</b><span>полей формы без подписи</span></div>
+        <div class="fig"><b>+996</b><span>уже стоит в поле телефона</span></div>
+        <div class="fig"><b>9 цифр</b><span>вводит заказчик, клавиатура — цифровая</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 -->
   <section class="slide light" data-title="Первый экран">
     <div class="inner">
       <span class="kicker" style="color:#0A6FBE">09 / Первый экран</span>
@@ -395,18 +417,18 @@ ul{list-style:none;margin:0;padding:0}
         <div class="shot">
           <span class="tag was">Было</span>
           <figure><img src="{{old_hero}}" alt="Первый экран сайта до изменений: слоган и одна кнопка"></figure>
-          <p class="cap">«Профессиональный подход, качество и надёжность» — так может сказать любая компания.</p>
+          <p class="cap">Слоган, который подойдёт любой компании страны.</p>
         </div>
         <div class="shot">
           <span class="tag now">Стало</span>
           <figure><img src="{{new_hero}}" alt="Первый экран после изменений: направления, видео сварки, четыре показателя"></figure>
-          <p class="cap"><b>Металлоконструкции, резервуары, железобетон, дороги</b> — и рядом 1952, 4500+, 300 т/мес, 1 000 000+ м².</p>
+          <p class="cap"><b>Четыре направления и четыре цифры:</b> 1952, 4500+, 300 т/мес, 1 000 000+ м².</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 10 -->
+  <!-- 11 -->
   <section class="slide" data-title="Телефон">
     <div class="inner">
       <span class="kicker">10 / Телефон</span>
@@ -415,23 +437,23 @@ ul{list-style:none;margin:0;padding:0}
         <div class="shot">
           <span class="tag was">Было</span>
           <figure><img src="{{old_mob}}" alt="Первый экран на телефоне до изменений: тёмный блок со слоганом"></figure>
-          <p class="cap">Слоган и кнопка, половина экрана пустая.</p>
+          <p class="cap">Половина экрана пустая.</p>
         </div>
         <div class="shot">
           <span class="tag now">Стало</span>
           <figure><img src="{{new_mob}}" alt="Первый экран на телефоне после изменений"></figure>
-          <p class="cap">Видео, показатели, кнопка звонка внизу экрана.</p>
+          <p class="cap">Видео, цифры, кнопка звонка внизу.</p>
         </div>
         <div class="shot">
           <span class="tag now">Стало</span>
           <figure><img src="{{mob_serv}}" alt="Направления на телефоне: фотография и параметры"></figure>
-          <p class="cap">Направления с фотографией и параметрами.</p>
+          <p class="cap">Направления с параметрами.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 11 -->
+  <!-- 12 -->
   <section class="slide light" data-title="Направления">
     <div class="inner">
       <span class="kicker" style="color:#0A6FBE">11 / Направления</span>
@@ -440,18 +462,18 @@ ul{list-style:none;margin:0;padding:0}
         <div class="shot">
           <span class="tag was">Было</span>
           <figure><img src="{{old_serv}}" alt="Блок услуг до изменений: сплошной текст"></figure>
-          <p class="cap">Списки текстом, общие формулировки, ни одного параметра.</p>
+          <p class="cap">Списки текстом, ни одного размера.</p>
         </div>
         <div class="shot">
           <span class="tag now">Стало</span>
           <figure><img src="{{new_serv}}" alt="Каталог направлений: шесть строк с параметрами и фотографиями"></figure>
-          <p class="cap"><b>17 рабочих параметров</b> прямо на главной: пролёты, высоты, тонны в месяц, объёмы резервуаров.</p>
+          <p class="cap"><b>17 рабочих размеров:</b> пролёты, высоты, тонны в месяц, объёмы резервуаров.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 12 -->
+  <!-- 13 -->
   <section class="slide" data-title="Объекты">
     <div class="inner">
       <span class="kicker">12 / Объекты</span>
@@ -459,153 +481,153 @@ ul{list-style:none;margin:0;padding:0}
       <div class="cols-2">
         <div class="shot">
           <figure><img src="{{new_proj}}" alt="Раздел объектов с фильтром по отраслям"></figure>
-          <p class="cap">Фильтр сразу показывает, сколько объектов в отрасли: промышленность 6, резервуары 6, дороги 4.</p>
+          <p class="cap">Промышленность 6 · резервуары 6 · дороги 4 · бескаркасные 1.</p>
         </div>
         <div class="shot">
           <figure><img src="{{lightbox}}" alt="Просмотр фотографии на весь экран с лентой миниатюр"></figure>
-          <p class="cap">Фото открывается целиком: увеличение, листание колесом и свайпом, подпись под кадром.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 13 -->
-  <section class="slide light" data-title="Новые страницы">
-    <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">13 / Чего не было совсем</span>
-      <h2>Шесть страниц направлений, разбор объекта и история компании.</h2>
-      <div class="cols-3">
-        <div class="shot">
-          <figure><img src="{{new_page}}" alt="Страница направления «Металлоконструкции и резервуары»"></figure>
-          <p class="cap">Что делаем, из чего, какие параметры, форма запроса — по каждому направлению.</p>
-        </div>
-        <div class="shot">
-          <figure><img src="{{case}}" alt="Страница объекта «Джамгыр»"></figure>
-          <p class="cap">Разбор объекта: задача, работы, фотографии площадки.</p>
-        </div>
-        <div class="shot">
-          <figure><img src="{{about}}" alt="Страница «О компании» с историей с 1952 года"></figure>
-          <p class="cap">История с 1952 года, заказчики, письма и документы.</p>
+          <p class="cap">Увеличение, листание колесом и свайпом, подпись под кадром.</p>
         </div>
       </div>
     </div>
   </section>
 
   <!-- 14 -->
+  <section class="slide light" data-title="Новые страницы">
+    <div class="inner">
+      <span class="kicker" style="color:#0A6FBE">13 / Чего не было совсем</span>
+      <h2>Шесть страниц направлений, разбор объекта, история компании.</h2>
+      <div class="cols-3">
+        <div class="shot">
+          <figure><img src="{{new_page}}" alt="Страница направления «Металлоконструкции и резервуары»"></figure>
+          <p class="cap">Параметры, объекты, форма запроса по направлению.</p>
+        </div>
+        <div class="shot">
+          <figure><img src="{{case}}" alt="Страница объекта «Джамгыр»"></figure>
+          <p class="cap">Задача, работы, фотографии площадки.</p>
+        </div>
+        <div class="shot">
+          <figure><img src="{{about}}" alt="Страница «О компании» с историей с 1952 года"></figure>
+          <p class="cap">История с 1952 года, заказчики, письма.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 15 -->
   <section class="slide" data-title="Все цифры разом">
     <div class="inner tight">
       <span class="kicker">14 / Все цифры разом</span>
       <h2>Главная страница: было и стало.</h2>
       <div class="tables">
         <table class="ft">
-          <thead><tr><th>Что смотрели</th><th>Было</th><th>Стало</th></tr></thead>
+          <thead><tr><th>Скорость и вес</th><th>Было</th><th>Стало</th></tr></thead>
           <tbody>
-            <tr><td>Сколько ждём ответа сервера<span class="tech">время до первой буквы</span></td><td class="was">2 с</td><td class="now">—</td></tr>
-            <tr><td>Сколько скачивает телефон<span class="tech">вес страницы</span></td><td class="was">11,5 МБ</td><td class="now">2,5 МБ</td></tr>
-            <tr><td>Из этого — фотографии<span class="tech">вес изображений</span></td><td class="was">7,5 МБ</td><td class="now">1,6 МБ</td></tr>
-            <tr><td>Сколько раз браузер идёт за файлами<span class="tech">запросов к серверу</span></td><td class="was">178</td><td class="now">29</td></tr>
-            <tr><td>Файлов оформления<span class="tech">стили и скрипты</span></td><td class="was">100</td><td class="now">2</td></tr>
-            <tr><td>Фотографий на главной<span class="tech">изображений в разметке</span></td><td class="was">99</td><td class="now">32</td></tr>
-            <tr><td>Из них дёргают страницу<span class="tech">без заданных размеров</span></td><td class="was">77</td><td class="now">1</td></tr>
+            <tr><td>Ответ сервера</td><td class="was">2 с</td><td class="now">—</td></tr>
+            <tr><td>Загрузка при связи 1 Мбит/с</td><td class="was">1,5 мин</td><td class="now">20 с</td></tr>
+            <tr><td>Скачивает телефон</td><td class="was">11,5 МБ</td><td class="now">2,5 МБ</td></tr>
+            <tr><td>Из этого фотографии</td><td class="was">7,5 МБ</td><td class="now">1,6 МБ</td></tr>
+            <tr><td>Обращений к серверу</td><td class="was">178</td><td class="now">29</td></tr>
+            <tr><td>Файлов оформления и скриптов</td><td class="was">100</td><td class="now">2</td></tr>
+            <tr><td>Элементов на странице</td><td class="was">2040</td><td class="now">692</td></tr>
+            <tr><td>Фотографий без заданных размеров</td><td class="was">77</td><td class="now">1</td></tr>
           </tbody>
         </table>
         <table class="ft">
-          <thead><tr><th>Что смотрели</th><th>Было</th><th>Стало</th></tr></thead>
+          <thead><tr><th>Как сделано и читается</th><th>Было</th><th>Стало</th></tr></thead>
           <tbody>
-            <tr><td>Есть ли у страницы название<span class="tech">заголовок H1</span></td><td class="was">нет</td><td class="now">есть</td></tr>
-            <tr><td>Ссылок на одной странице<span class="tech">развилок для читателя</span></td><td class="was">174</td><td class="now">51</td></tr>
-            <tr><td>Ссылок, которые никуда не ведут<span class="tech">пустые ссылки</span></td><td class="was">38</td><td class="now">2</td></tr>
-            <tr><td>Кнопок мельче пальца на телефоне<span class="tech">цель меньше 40 точек</span></td><td class="was">48</td><td class="now">1</td></tr>
-            <tr><td>Полей формы без подписи<span class="tech">поле без названия</span></td><td class="was">3 из 5</td><td class="now">0 из 7</td></tr>
-            <tr><td>Снимков без подписи для поиска<span class="tech">без текста alt</span></td><td class="was">10</td><td class="now">0</td></tr>
-            <tr><td>Рабочих размеров на главной<span class="tech">пролёты, тонны, объёмы</span></td><td class="was">0</td><td class="now">17</td></tr>
+            <tr><td>Текстов ниже нормы контраста</td><td class="was">25 из 84</td><td class="now">0 из 219</td></tr>
+            <tr><td>Знаков в самой длинной строке</td><td class="was">180</td><td class="now">92</td></tr>
+            <tr><td>Разных левых краёв у блоков</td><td class="was">23</td><td class="now">12</td></tr>
+            <tr><td>Видов скругления углов</td><td class="was">7</td><td class="now">0</td></tr>
+            <tr><td>Цветов фона</td><td class="was">14</td><td class="now">7</td></tr>
+            <tr><td>Кнопок мельче пальца</td><td class="was">48</td><td class="now">1</td></tr>
+            <tr><td>Полей формы без подписи</td><td class="was">3 из 5</td><td class="now">0 из 7</td></tr>
+            <tr><td>Рабочих размеров на главной</td><td class="was">0</td><td class="now">17</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="foot-note mono">Замеры сделаны в браузере на одинаковых экранах в один день. Проверить можно самим: F12 → вкладка «Сеть». Прочерк — сравнивать пока не с чем: новый сайт ещё не на хостинге.</p>
-    </div>
-  </section>
-
-  <!-- 15 -->
-  <section class="slide" data-title="Путь к заявке">
-    <div class="inner">
-      <span class="kicker">15 / Путь заказчика</span>
-      <h2>Четыре шага от первого экрана до письма в отдел продаж.</h2>
-      <div class="path">
-        <div class="step"><span class="n">Шаг 01</span><b>Первый экран</b><p>Понял, что компания строит и производит сама.</p></div>
-        <div class="step"><span class="n">Шаг 02</span><b>Своё направление</b><p>Нашёл свою задачу среди шести и увидел параметры.</p></div>
-        <div class="step"><span class="n">Шаг 03</span><b>Объекты</b><p>Убедился, что такое уже строили, посмотрел фотографии.</p></div>
-        <div class="step"><span class="n">Шаг 04</span><b>Заявка</b><p>Написал в WhatsApp, позвонил или оставил форму с файлом ТЗ.</p></div>
-      </div>
-      <p class="lead">На каждой странице внизу — форма запроса именно по этому направлению, а на телефоне кнопка звонка всегда на экране.</p>
+      <p class="foot-note mono">Замеры браузером на экране 1440 и на телефоне, в один день. Проверить самим: F12 → «Сеть». Прочерк — новый сайт ещё не на хостинге.</p>
     </div>
   </section>
 
   <!-- 16 -->
-  <section class="slide light" data-title="Что входит">
+  <section class="slide" data-title="Путь к заявке">
     <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">16 / Что входит в работу</span>
-      <h2>Что вы получаете.</h2>
-      <div class="cols-2">
-        <ul class="list" style="border-color:#C9CFD5">
-          <li style="border-color:#C9CFD5"><span class="n" style="color:#0A6FBE">01</span><div><b>Девять готовых страниц</b><p style="color:#4A525B">Главная, шесть направлений, разбор объекта, «О компании» — с текстами, фотографиями и параметрами.</p></div></li>
-          <li style="border-color:#C9CFD5"><span class="n" style="color:#0A6FBE">02</span><div><b>Работа на всех экранах</b><p style="color:#4A525B">Телефон, планшет, монитор. Проверено на ширинах 390, 768, 1024 и 1440 точек.</p></div></li>
-          <li style="border-color:#C9CFD5"><span class="n" style="color:#0A6FBE">03</span><div><b>Формы заявки и связь</b><p style="color:#4A525B">Форма с приложением ТЗ на каждой странице, WhatsApp, Telegram, два телефона и почта.</p></div></li>
-        </ul>
-        <ul class="list" style="border-color:#C9CFD5">
-          <li style="border-color:#C9CFD5"><span class="n" style="color:#0A6FBE">04</span><div><b>Исходники без привязки</b><p style="color:#4A525B">Обычные файлы: любой хостинг, никакой ежемесячной платы за платформу, правки своими силами.</p></div></li>
-          <li style="border-color:#C9CFD5"><span class="n" style="color:#0A6FBE">05</span><div><b>Основа для поиска</b><p style="color:#4A525B">Заголовки, описания страниц, подписи к фотографиям и карточка ссылки для мессенджеров.</p></div></li>
-          <li style="border-color:#C9CFD5"><span class="n" style="color:#0A6FBE">06</span><div><b>Инструкция по правкам</b><p style="color:#4A525B">Как добавить объект, поменять фотографию или параметры — описано в файле рядом с сайтом.</p></div></li>
-        </ul>
+      <span class="kicker">15 / Путь заказчика</span>
+      <h2>Четыре шага до письма в отдел продаж.</h2>
+      <div class="path">
+        <div class="step"><span class="n">Шаг 01</span><b>Первый экран</b><p>Понял, что строим и производим сами.</p></div>
+        <div class="step"><span class="n">Шаг 02</span><b>Направление</b><p>Нашёл свою задачу и увидел параметры.</p></div>
+        <div class="step"><span class="n">Шаг 03</span><b>Объекты</b><p>Убедился, что такое уже строили.</p></div>
+        <div class="step"><span class="n">Шаг 04</span><b>Заявка</b><p>Написал, позвонил или отправил форму с ТЗ.</p></div>
       </div>
+      <p class="lead">Форма запроса стоит внизу каждой страницы, кнопка звонка на телефоне — всегда на экране.</p>
     </div>
   </section>
 
   <!-- 17 -->
+  <section class="slide light" data-title="Что входит">
+    <div class="inner">
+      <span class="kicker" style="color:#0A6FBE">16 / Что входит в работу</span>
+      <h2>Что вы получаете.</h2>
+      <div class="figs four">
+        <div class="fig"><b>9</b><span>готовых страниц с текстами и фотографиями</span></div>
+        <div class="fig"><b>4</b><span>размера экрана: 390, 768, 1024, 1440</span></div>
+        <div class="fig"><b>7</b><span>форм запроса — по одной на каждой странице</span></div>
+        <div class="fig"><b>105</b><span>фотографий пересобрано и подписано</span></div>
+      </div>
+      <div class="figs four">
+        <div class="fig"><b>0 сом</b><span>ежемесячно за платформу: сайт — это файлы</span></div>
+        <div class="fig"><b>Исходники</b><span>остаются у компании, хостинг любой</span></div>
+        <div class="fig"><b>Поиск</b><span>заголовки, описания, подписи, карточка ссылки</span></div>
+        <div class="fig"><b>Инструкция</b><span>как добавить объект и поменять фото</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18 -->
   <section class="slide light" data-title="Стоимость">
     <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">17 / Стоимость и условия</span>
+      <span class="kicker" style="color:#0A6FBE">17 / Стоимость</span>
       <h2>100 000 сом за всё перечисленное.</h2>
       <div class="price">
         <div class="price-main">
           <span class="mono" style="color:#79828C">Стоимость работ</span>
           <b>100 000 сом</b>
-          <span class="price-note">Единая сумма за девять страниц, тексты, работу со 105 фотографиями и перенос на su4.kg.</span>
+          <span class="price-note">Единой суммой. Оплата и сроки — <span class="tbd" data-fill="условия">по договорённости</span>.</span>
         </div>
         <table class="ft">
           <tbody>
             <tr><td>Дизайн и вёрстка главной страницы</td><td class="now">35 000</td></tr>
             <tr><td>Шесть страниц направлений</td><td class="now">28 000</td></tr>
             <tr><td>Страница объекта и «О компании»</td><td class="now">15 000</td></tr>
-            <tr><td>Тексты, структура, работа с фотографиями</td><td class="now">12 000</td></tr>
-            <tr><td>Перенос на su4.kg, настройка форм, обучение</td><td class="now">10 000</td></tr>
+            <tr><td>Тексты, структура, 105 фотографий</td><td class="now">12 000</td></tr>
+            <tr><td>Перенос на su4.kg, формы, обучение</td><td class="now">10 000</td></tr>
             <tr class="total"><td>Итого</td><td class="now">100 000 сом</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="lead">Отдельной платы за платформу или конструктор нет: сайт — это файлы, которые остаются у компании. Порядок оплаты, срок и поддержка после запуска — <span class="tbd" data-fill="условия">по договорённости</span>.</p>
     </div>
   </section>
 
-  <!-- 18 -->
+  <!-- 19 -->
   <section class="slide" data-title="Что нужно от компании">
     <div class="inner">
       <span class="kicker">18 / Что нужно от компании</span>
       <h2>Три вещи, чтобы запустить.</h2>
       <ul class="list">
-        <li><span class="n">01</span><div><b>Данные по объектам</b><p>Год, заказчик, объём или площадь. Сейчас в карточках честно стоит прочерк и пометка «уточняется» — цифры за компанию мы не придумывали.</p></div></li>
-        <li><span class="n">02</span><div><b>Реквизиты и документы</b><p>ИНН, лицензии и сертификаты для страницы «О компании», текст политики обработки данных для формы.</p></div></li>
-        <li><span class="n">03</span><div><b>Почта для заявок и фотографии</b><p>Адрес, куда приходят заявки с формы, и оригиналы фотографий в большом размере — в архиве сайта они не больше 1024 точек.</p></div></li>
+        <li><span class="n">01</span><div><b>Данные по объектам</b><p>Год, заказчик, объём или площадь. Сейчас в карточках стоит прочерк — цифры за компанию мы не придумывали.</p></div></li>
+        <li><span class="n">02</span><div><b>Реквизиты и документы</b><p>ИНН, лицензии, сертификаты и текст политики обработки данных.</p></div></li>
+        <li><span class="n">03</span><div><b>Почта для заявок и оригиналы фото</b><p>В архиве сайта снимки не больше 1024 точек — для крупных экранов нужны исходники.</p></div></li>
       </ul>
     </div>
   </section>
 
-  <!-- 19 -->
+  <!-- 20 -->
   <section class="slide" data-title="Следующий шаг">
     <div class="inner">
       <span class="kicker">19 / Следующий шаг</span>
       <h2>Откройте сайт с телефона — и скажите «да» или «переделать».</h2>
-      <p class="lead">Сайт работает целиком: переходы между страницами, фильтр объектов, просмотр фотографий, форма заявки. Замечания принимаю списком — правки входят в работу.</p>
       <div class="links">
         <a href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709" target="_blank" rel="noopener">Открыть главную</a>
         <a class="ghost" href="https://claude.ai/code/artifact/05f95ced-e8d2-4573-a784-cdfc737216b6" target="_blank" rel="noopener">Металлоконструкции</a>
