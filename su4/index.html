@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>СУ №4 — промышленное строительство полного цикла с 1952 года</title>
+<meta name="description" content="ЗАО «Строительное управление №4»: металлоконструкции, резервуары, сборный железобетон, бескаркасные сооружения и дорожное строительство. Собственное производство, монтаж и ввод в эксплуатацию. Кыргызстан, с 1952 года.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================
+   СУ №4 — концепт главной · v0.1
+   Визуальная система: PREMIUM INDUSTRIAL / ENGINEERING
+   ========================================================== */
+:root{
+  --ink-900:#0B0D10;   /* ground */
+  --ink-800:#121519;   /* панели на тёмном */
+  --ink-700:#1A1E24;   /* hover-поверхности */
+  --line-d:rgba(247,248,249,.12);
+  --line-d2:rgba(247,248,249,.22);
+  --steel:#8A929C;     /* вторичный текст на тёмном */
+  --steel-2:#C3C9D0;
+  --white:#F7F8F9;
+
+  --paper:#EEF0F2;     /* «чертёжная бумага» */
+  --paper-2:#E3E6EA;
+  --line-l:rgba(11,13,16,.14);
+  --line-l2:rgba(11,13,16,.28);
+  --ink-on-paper:#0B0D10;
+  --steel-on-paper:#5B636D;
+
+  --accent:#E3A51A;
+  --accent-deep:#B8820A;
+  --accent-ink:#1A1300;
+
+  --font-display:"Manrope",ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-body:"Manrope",ui-sans-serif,system-ui,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+
+  --gutter:clamp(16px,4vw,56px);
+  --maxw:1440px;
+  --sec-y:clamp(72px,9vw,140px);
+  --ease:cubic-bezier(.22,.61,.36,1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  background:var(--ink-900);
+  color:var(--white);
+  font-family:var(--font-body);
+  font-size:1.0625rem;
+  line-height:1.6;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+ul{list-style:none}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--gutter)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- типографика ---------- */
+.mono{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;font-weight:500}
+.display{font-family:var(--font-display);font-weight:800;line-height:.96;letter-spacing:-.025em;text-wrap:balance}
+.h1{font-size:clamp(2.3rem,7.2vw,6.6rem)}
+.h2{font-size:clamp(2rem,4.4vw,3.9rem)}
+.h3{font-family:var(--font-display);font-weight:700;font-size:clamp(1.15rem,1.5vw,1.4rem);line-height:1.2;letter-spacing:-.01em}
+.lead{font-size:clamp(1.1rem,1.4vw,1.35rem);line-height:1.5;font-weight:500;max-width:34em}
+.muted{color:var(--steel)}
+.num{font-variant-numeric:tabular-nums}
+
+/* ---------- секции ---------- */
+.sec{padding-block:var(--sec-y);position:relative}
+.sec.paper{background:var(--paper);color:var(--ink-on-paper)}
+.sec.paper .muted{color:var(--steel-on-paper)}
+.sec-head{
+  display:grid;grid-template-columns:minmax(0,1fr);gap:20px 48px;
+  margin-bottom:clamp(36px,5vw,72px);
+}
+@media(min-width:900px){.sec-head{grid-template-columns:auto minmax(0,1fr) auto;align-items:end}}
+@media(min-width:900px){.sec-head-projects{grid-template-columns:auto minmax(0,1fr)}.sec-head-projects .filters{grid-column:1/-1;margin-top:8px}}
+.sec-index{
+  font-family:var(--font-mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;
+  display:flex;align-items:center;gap:12px;color:var(--steel);
+}
+.sec-index::before{content:"";width:28px;height:2px;background:var(--accent)}
+.sec.paper .sec-index{color:var(--steel-on-paper)}
+.sec-head .h2{max-width:14em}
+.sec-head .lead{max-width:30em}
+.hr{border:0;border-top:1px solid var(--line-d)}
+.paper .hr{border-color:var(--line-l)}
+
+/* ---------- кнопки ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:12px;
+  min-height:52px;padding:0 24px;
+  font-weight:600;font-size:.95rem;letter-spacing:.01em;
+  border:1px solid transparent;border-radius:2px;
+  transition:background .25s var(--ease),color .25s var(--ease),border-color .25s var(--ease),transform .25s var(--ease);
+}
+.btn svg{width:18px;height:18px;flex:none;transition:transform .3s var(--ease)}
+.btn:hover svg{transform:translateX(4px)}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover{background:#F0B62E}
+.btn-ghost{border-color:var(--line-d2);color:var(--white)}
+.btn-ghost:hover{border-color:var(--white)}
+.paper .btn-ghost{border-color:var(--line-l2);color:var(--ink-on-paper)}
+.paper .btn-ghost:hover{border-color:var(--ink-on-paper)}
+.link-arrow{display:inline-flex;align-items:center;gap:10px;font-weight:600;border-bottom:1px solid currentColor;padding-bottom:2px}
+.link-arrow svg{width:16px;height:16px;transition:transform .3s var(--ease)}
+.link-arrow:hover svg{transform:translateX(4px)}
+
+/* ---------- изображения с fallback ---------- */
+.ph-frame{position:relative;overflow:hidden;background:var(--ink-800)}
+.ph-frame img{width:100%;height:100%;object-fit:cover}
+.ph-frame.ph img{display:none}
+.ph-frame.ph::before{
+  content:"";position:absolute;inset:0;
+  background:
+    repeating-linear-gradient(135deg,rgba(247,248,249,.05) 0 2px,transparent 2px 14px),
+    linear-gradient(160deg,#1E232A,#0F1216);
+}
+.ph-frame.ph::after{
+  content:"PLACEHOLDER · " attr(data-src);
+  position:absolute;left:14px;bottom:12px;right:14px;
+  font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--steel-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.paper .ph-frame.ph::before{
+  background:
+    repeating-linear-gradient(135deg,rgba(11,13,16,.06) 0 2px,transparent 2px 14px),
+    linear-gradient(160deg,#D7DBE0,#C8CDD3);
+}
+.paper .ph-frame.ph::after{color:var(--steel-on-paper)}
+
+/* ---------- header ---------- */
+.header{
+  position:fixed;inset:0 0 auto 0;z-index:50;
+  height:84px;display:flex;align-items:center;
+  transition:height .35s var(--ease),background .35s var(--ease),border-color .35s var(--ease);
+  border-bottom:1px solid transparent;
+}
+.header.is-scrolled{height:62px;background:rgba(11,13,16,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:var(--line-d)}
+.header .wrap{display:flex;align-items:center;gap:32px;width:100%}
+.logo{display:flex;align-items:center;gap:12px;font-family:var(--font-display);font-weight:800;letter-spacing:-.02em;font-size:1.3rem}
+.logo-mark{width:34px;height:34px;border:2px solid var(--white);display:grid;place-items:center;font-family:var(--font-mono);font-size:.8rem;font-weight:500;letter-spacing:0;position:relative}
+.logo-mark::after{content:"";position:absolute;right:-2px;bottom:-2px;width:10px;height:10px;background:var(--accent)}
+.logo small{display:block;font-family:var(--font-mono);font-weight:400;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--steel);line-height:1.1;margin-top:2px}
+.nav{display:none;gap:28px;margin-left:auto}
+.header .wrap>.concept-badge{margin-left:auto}
+@media(min-width:1180px){.nav{margin-left:32px}}
+.nav a{font-weight:500;font-size:.95rem;color:var(--steel-2);position:relative;padding:6px 0}
+.nav a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:1px;background:var(--accent);transition:right .3s var(--ease)}
+.nav a:hover{color:var(--white)}
+.nav a:hover::after{right:0}
+.header-cta{display:none}
+.burger{margin-left:auto;width:48px;height:48px;display:grid;place-items:center;border:1px solid var(--line-d2);border-radius:2px}
+.burger span{display:block;width:20px;height:2px;background:var(--white);position:relative}
+.burger span::before,.burger span::after{content:"";position:absolute;left:0;width:20px;height:2px;background:var(--white);transition:transform .3s var(--ease)}
+.burger span::before{top:-6px}.burger span::after{top:6px}
+@media(min-width:1024px){
+  .nav{display:flex}
+  .header-cta{display:inline-flex;min-height:44px;padding:0 18px;font-size:.9rem}
+  .burger{display:none}
+}
+.mobile-menu{
+  position:fixed;inset:0;z-index:60;background:var(--ink-900);
+  display:flex;flex-direction:column;padding:96px var(--gutter) 40px;
+  transform:translateY(-100%);transition:transform .45s var(--ease);
+}
+.mobile-menu.open{transform:none}
+.mobile-menu a.item{font-family:var(--font-display);font-weight:800;font-size:2.2rem;letter-spacing:-.02em;padding:14px 0;border-bottom:1px solid var(--line-d);display:flex;justify-content:space-between;align-items:center}
+.mobile-menu a.item .mono{color:var(--steel)}
+.mobile-menu .btn{margin-top:auto;justify-content:center}
+.mobile-close{position:absolute;top:18px;right:var(--gutter);width:48px;height:48px;border:1px solid var(--line-d2);display:grid;place-items:center;border-radius:2px;font-size:1.4rem}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:min(92svh,980px);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+.hero-media{position:absolute;inset:0}
+.hero-media .ph-frame{position:absolute;inset:0}
+.hero-media::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(11,13,16,.55) 0%,rgba(11,13,16,.15) 35%,rgba(11,13,16,.75) 75%,var(--ink-900) 100%);
+}
+.hero-grid{
+  position:absolute;inset:0;pointer-events:none;opacity:.35;
+  background-image:linear-gradient(var(--line-d) 1px,transparent 1px),linear-gradient(90deg,var(--line-d) 1px,transparent 1px);
+  background-size:120px 120px;
+  mask-image:linear-gradient(180deg,transparent,#000 40%,transparent);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 40%,transparent);
+}
+.hero-body{position:relative;padding-top:150px;padding-bottom:clamp(32px,5vw,64px)}
+.hero-eyebrow{display:flex;flex-wrap:wrap;gap:10px 22px;color:var(--steel-2);margin-bottom:28px}
+.hero-eyebrow span+span::before{content:"";color:var(--accent)}
+@media(min-width:760px){.hero-eyebrow span+span::before{content:"·";margin-right:22px}}
+.hero .h1{max-width:12.5em;margin-bottom:28px}
+.hero .h1 em{font-style:normal;color:var(--accent)}
+.hero-row{display:grid;gap:28px;align-items:end}
+@media(min-width:900px){.hero-row{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px}
+/* title block — «штамп чертежа» */
+.titleblock{
+  position:relative;border-top:1px solid var(--line-d2);
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+}
+@media(min-width:720px){.titleblock{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.titleblock>div{padding:20px 20px 22px 0;border-bottom:1px solid var(--line-d);position:relative;min-width:0}
+.titleblock>div+div{padding-left:20px;border-left:1px solid var(--line-d)}
+@media(min-width:720px){.titleblock>div{border-bottom:0}}
+@media(max-width:719px){.titleblock>div:nth-child(3){border-left:0;padding-left:0}}
+.titleblock .val{font-family:var(--font-display);font-weight:800;font-size:clamp(1.6rem,3.2vw,2.8rem);letter-spacing:-.03em;line-height:1;margin-bottom:8px;overflow-wrap:anywhere}
+.titleblock .val sup{font-size:.5em;vertical-align:top;top:.15em;position:relative;color:var(--accent)}
+.titleblock .lbl{color:var(--steel)}
+
+/* ---------- 02 о компании ---------- */
+.about-grid{display:grid;gap:40px}
+@media(min-width:1000px){.about-grid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:80px}}
+.about-years{font-family:var(--font-display);font-weight:800;letter-spacing:-.04em;line-height:.9;font-size:clamp(5rem,14vw,12rem);color:var(--ink-on-paper)}
+.about-years small{display:block;font-family:var(--font-mono);font-weight:500;font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:var(--steel-on-paper);margin-top:16px}
+.about-range{display:flex;align-items:center;gap:14px;margin-top:28px;font-family:var(--font-mono);font-size:.8rem;letter-spacing:.06em;color:var(--steel-on-paper)}
+.about-range i{flex:1;height:1px;background:var(--line-l2);position:relative}
+.about-range i::after{content:"";position:absolute;right:0;top:-3px;width:7px;height:7px;background:var(--accent)}
+.facts{display:grid;gap:0;border-top:1px solid var(--line-l2);margin-top:32px}
+.facts li{display:grid;grid-template-columns:2.2em 1fr;gap:16px;padding:18px 0;border-bottom:1px solid var(--line-l);align-items:baseline}
+.facts .mono{color:var(--accent-deep)}
+.facts b{font-weight:600;display:block}
+.facts p{color:var(--steel-on-paper);font-size:.95rem}
+.about-media{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:36px}
+.about-media .ph-frame{aspect-ratio:4/3}
+.about-media .ph-frame:first-child{grid-column:span 2;aspect-ratio:16/8}
+
+/* ---------- 03 направления ---------- */
+.dirs{border-top:1px solid var(--line-l2)}
+.dir{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:16px 24px;align-items:center;
+  padding:26px 0;border-bottom:1px solid var(--line-l);position:relative;
+  transition:padding-left .35s var(--ease);
+}
+.dir .idx{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.1em;color:var(--steel-on-paper);width:2.4em}
+.dir .h3{margin-bottom:6px;font-size:clamp(1.35rem,2.4vw,2.1rem);font-weight:800;letter-spacing:-.02em;line-height:1.05}
+.dir p{color:var(--steel-on-paper);max-width:46em;font-size:.98rem}
+.dir .spec{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.dir .spec span{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;padding:6px 9px;border:1px solid var(--line-l2);border-radius:2px;color:var(--ink-on-paper)}
+.dir .arrow{width:52px;height:52px;border:1px solid var(--line-l2);border-radius:50%;display:grid;place-items:center;transition:background .3s var(--ease),border-color .3s var(--ease),color .3s var(--ease)}
+.dir .arrow svg{width:20px;height:20px;transition:transform .3s var(--ease)}
+.dir .thumb{display:none}
+@media(min-width:1000px){
+  .dir{grid-template-columns:3em 220px minmax(0,1fr) auto}
+  .dir .thumb{display:block;width:220px;aspect-ratio:4/3;opacity:.0;transform:scale(.96);transition:opacity .4s var(--ease),transform .5s var(--ease)}
+  .dir:hover .thumb,.dir:focus-within .thumb{opacity:1;transform:none}
+}
+.dir:hover .arrow,.dir:focus-within .arrow{background:var(--ink-on-paper);color:var(--white);border-color:var(--ink-on-paper)}
+.dir:hover .arrow svg{transform:translate(2px,-2px)}
+.dir::after{content:"";position:absolute;left:0;bottom:-1px;width:0;height:2px;background:var(--accent);transition:width .5s var(--ease)}
+.dir:hover::after{width:100%}
+
+/* ---------- 04 проекты ---------- */
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.filters button{
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;
+  padding:10px 14px;border:1px solid var(--line-d2);border-radius:2px;color:var(--steel-2);
+  transition:all .25s var(--ease);min-height:40px;
+}
+.filters button[aria-pressed="true"]{background:var(--white);color:var(--ink-900);border-color:var(--white)}
+.filters button:hover{border-color:var(--white);color:var(--white)}
+.projects{display:grid;gap:16px;grid-template-columns:repeat(6,minmax(0,1fr))}
+.proj{grid-column:span 6;position:relative;display:flex;flex-direction:column;background:var(--ink-800);border:1px solid var(--line-d);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.proj.hidden{display:none}
+@media(min-width:720px){.proj{grid-column:span 3}}
+@media(min-width:1100px){
+  .proj{grid-column:span 2}
+  .proj.feat{grid-column:span 4;grid-row:span 2}
+}
+.proj .ph-frame{aspect-ratio:4/3}
+.proj.feat .ph-frame{aspect-ratio:16/10;flex:1}
+.proj img{transition:transform .8s var(--ease)}
+.proj:hover img{transform:scale(1.04)}
+.proj-body{padding:20px 22px 24px;display:grid;gap:10px}
+.proj-meta{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--steel);font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+.proj-meta .cat{color:var(--accent)}
+.proj .h3{font-size:clamp(1.15rem,1.6vw,1.5rem)}
+.proj.feat .h3{font-size:clamp(1.5rem,2.6vw,2.4rem);letter-spacing:-.02em}
+.proj p{color:var(--steel-2);font-size:.95rem;max-width:44em}
+.proj .ph-tag{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);opacity:.8}
+.proj .go{position:absolute;top:16px;right:16px;width:44px;height:44px;border-radius:50%;background:rgba(11,13,16,.6);backdrop-filter:blur(6px);display:grid;place-items:center;opacity:0;transform:translateY(-6px);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.proj .go svg{width:18px;height:18px}
+.proj:hover .go{opacity:1;transform:none}
+.proj a.cover{position:absolute;inset:0;z-index:1}
+.proj a.cover:focus-visible{outline-offset:-2px}
+
+/* ---------- 05 производство ---------- */
+.prod-hero{display:grid;gap:24px}
+@media(min-width:1000px){.prod-hero{grid-template-columns:minmax(0,7fr) minmax(0,5fr);align-items:stretch}}
+.prod-hero .ph-frame{aspect-ratio:16/10;min-height:100%}
+.spec-card{background:var(--ink-800);border:1px solid var(--line-d);padding:clamp(24px,3vw,40px);display:flex;flex-direction:column;gap:22px}
+.spec-card .mono{color:var(--accent)}
+.spec-list{border-top:1px solid var(--line-d)}
+.spec-list li{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,auto);gap:16px;padding:12px 0;border-bottom:1px solid var(--line-d);font-size:.95rem;align-items:baseline}
+.spec-list li span:last-child{font-family:var(--font-mono);font-size:.8rem;letter-spacing:.02em;color:var(--white);text-align:right;overflow-wrap:anywhere}
+@media(min-width:720px){.spec-list li span:last-child{white-space:nowrap}}
+.spec-list li span:first-child{color:var(--steel-2)}
+.prod-steps{display:grid;gap:16px;margin-top:16px}
+@media(min-width:720px){.prod-steps{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1100px){.prod-steps{grid-template-columns:repeat(4,1fr)}}
+.step{border-top:2px solid var(--line-d2);padding-top:18px;position:relative}
+.step::before{content:"";position:absolute;top:-2px;left:0;width:36px;height:2px;background:var(--accent)}
+.step .mono{color:var(--steel);margin-bottom:12px;display:block}
+.step .h3{margin-bottom:8px}
+.step p{color:var(--steel-2);font-size:.93rem}
+.prod-road{display:grid;gap:24px;margin-top:16px}
+@media(min-width:1000px){.prod-road{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:stretch}}
+.prod-road .ph-frame{aspect-ratio:4/3;min-height:100%}
+
+/* ---------- 06 цифры ---------- */
+.numbers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line-l2);border-left:1px solid var(--line-l2)}
+@media(min-width:900px){.numbers{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.numbers>div{padding:clamp(24px,3vw,44px) clamp(18px,2.4vw,32px);border-right:1px solid var(--line-l2);border-bottom:1px solid var(--line-l2);min-height:180px;display:flex;flex-direction:column;justify-content:space-between;gap:20px}
+.numbers .val{font-family:var(--font-display);font-weight:800;letter-spacing:-.04em;line-height:.95;font-size:clamp(2.4rem,5.4vw,5rem);color:var(--ink-on-paper)}
+.numbers .val small{font-size:.42em;letter-spacing:-.01em;margin-left:.15em;color:var(--steel-on-paper)}
+.numbers .val sup{font-size:.45em;color:var(--accent-deep);vertical-align:top;position:relative;top:.1em}
+.numbers .lbl{color:var(--steel-on-paper);font-size:.92rem;line-height:1.35}
+.numbers .lbl .mono{display:block;color:var(--accent-deep);margin-bottom:6px;font-size:.66rem}
+
+/* ---------- 07 доверие ---------- */
+.trust{display:grid;gap:56px}
+@media(min-width:1000px){.trust{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:80px;align-items:start}}
+.trust-sticky{position:sticky;top:100px}
+.trust-list{border-top:1px solid var(--line-d2)}
+.trust-list li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px 28px;padding:28px 0;border-bottom:1px solid var(--line-d);align-items:start}
+.trust-list .n{font-family:var(--font-display);font-weight:800;font-size:clamp(2rem,3.4vw,3rem);letter-spacing:-.04em;line-height:1;color:var(--accent);width:2.1ch;font-variant-numeric:tabular-nums}
+.trust-list .h3{margin-bottom:8px;font-size:clamp(1.25rem,1.9vw,1.7rem)}
+.trust-list p{color:var(--steel-2);max-width:40em;font-size:.98rem}
+
+/* ---------- 08 история ---------- */
+.timeline-wrap{overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin-inline:calc(-1*var(--gutter));padding-inline:var(--gutter);scrollbar-width:thin;scrollbar-color:var(--line-l2) transparent}
+.timeline{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,320px);gap:0;position:relative;padding-top:36px;min-width:max-content}
+.timeline::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--line-l2)}
+.tl{scroll-snap-align:start;padding:0 28px 0 0;position:relative;margin-right:28px}
+.tl::before{content:"";position:absolute;top:-36px;left:0;width:1px;height:28px;background:var(--line-l2)}
+.tl::after{content:"";position:absolute;top:-40px;left:-4px;width:9px;height:9px;background:var(--paper);border:1px solid var(--line-l2)}
+.tl.key::after{background:var(--accent);border-color:var(--accent)}
+.tl .yr{font-family:var(--font-display);font-weight:800;font-size:clamp(2.2rem,4vw,3.4rem);letter-spacing:-.04em;line-height:1;margin-bottom:14px}
+.tl .h3{margin-bottom:8px;font-size:1.15rem}
+.tl p{color:var(--steel-on-paper);font-size:.93rem}
+.tl .ph-frame{aspect-ratio:4/3;margin-top:18px}
+.tl-hint{display:flex;align-items:center;gap:10px;color:var(--steel-on-paper);margin-top:20px}
+
+/* ---------- 09 партнёры ---------- */
+.partners{display:grid;gap:48px}
+@media(min-width:1000px){.partners{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:80px}}
+.quote{border-left:2px solid var(--accent);padding-left:24px}
+.quote p{font-family:var(--font-display);font-weight:600;font-size:clamp(1.2rem,1.9vw,1.6rem);line-height:1.35;letter-spacing:-.01em;text-wrap:balance}
+.quote footer{margin-top:18px;color:var(--steel-on-paper);font-size:.9rem}
+.letters{display:grid;gap:10px;margin-top:32px}
+.letters a{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line-l2);border-radius:2px;font-size:.92rem;transition:background .25s var(--ease)}
+.letters a:hover{background:var(--paper-2)}
+.letters a svg{width:18px;height:18px;color:var(--accent-deep)}
+.letters a .mono{color:var(--steel-on-paper)}
+.logo-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border-top:1px solid var(--line-l2);border-left:1px solid var(--line-l2)}
+@media(min-width:720px){.logo-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:1000px){.logo-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.logo-grid>div{border-right:1px solid var(--line-l2);border-bottom:1px solid var(--line-l2);min-height:96px;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;font-weight:600;font-size:.86rem;line-height:1.25;color:var(--ink-on-paper);letter-spacing:-.005em}
+.logo-grid>div.more{font-family:var(--font-mono);font-weight:500;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--accent-deep)}
+
+/* ---------- 10 процесс ---------- */
+.process{display:grid;gap:16px;counter-reset:step}
+@media(min-width:900px){.process{grid-template-columns:repeat(3,1fr)}}
+.pstep{background:var(--ink-800);border:1px solid var(--line-d);padding:clamp(24px,3vw,36px);display:flex;flex-direction:column;gap:14px;min-height:300px;position:relative}
+.pstep .n{font-family:var(--font-mono);font-size:.75rem;letter-spacing:.1em;color:var(--accent)}
+.pstep .h3{font-size:clamp(1.3rem,1.8vw,1.6rem)}
+.pstep p,.pstep li{color:var(--steel-2);font-size:.95rem}
+.pstep ul{display:grid;gap:6px;margin-top:auto;padding-top:14px;border-top:1px solid var(--line-d)}
+.pstep li::before{content:"— ";color:var(--accent)}
+
+/* ---------- 11 форма ---------- */
+.cta{display:grid;gap:48px}
+@media(min-width:1000px){.cta{grid-template-columns:minmax(0,6fr) minmax(0,6fr);gap:80px;align-items:start}}
+.cta .h2{margin-bottom:20px}
+.channels{display:grid;gap:10px;margin-top:32px}
+.channels a{display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:14px 16px;border:1px solid var(--line-d);border-radius:2px;transition:border-color .25s var(--ease),background .25s var(--ease)}
+.channels a:hover{border-color:var(--line-d2);background:var(--ink-800)}
+.channels svg{width:20px;height:20px;color:var(--accent)}
+.channels .mono{color:var(--steel)}
+.channels b{font-weight:600;font-variant-numeric:tabular-nums}
+.form{background:var(--ink-800);border:1px solid var(--line-d);padding:clamp(22px,3vw,40px);display:grid;gap:18px}
+.field{display:grid;gap:8px}
+.field label{font-family:var(--font-mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--steel)}
+.field input,.field select,.field textarea{
+  width:100%;min-height:52px;padding:14px 14px;
+  background:var(--ink-900);border:1px solid var(--line-d2);border-radius:2px;color:var(--white);
+  font:inherit;font-size:1rem;transition:border-color .25s var(--ease);
+}
+.field select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--steel) 50%),linear-gradient(135deg,var(--steel) 50%,transparent 50%);background-position:calc(100% - 20px) 50%,calc(100% - 15px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+.field textarea{min-height:110px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent)}
+.form-row{display:grid;gap:18px}
+@media(min-width:640px){.form-row{grid-template-columns:1fr 1fr}}
+.form .btn{justify-content:center}
+.form-note{color:var(--steel);font-size:.82rem}
+.form-ok{display:none;padding:18px;border:1px solid var(--accent);color:var(--white);border-radius:2px}
+.form.sent .form-ok{display:block}
+
+/* ---------- footer ---------- */
+.footer{border-top:1px solid var(--line-d);padding-block:56px 32px;color:var(--steel-2);font-size:.92rem}
+.footer-grid{display:grid;gap:36px}
+@media(min-width:900px){.footer-grid{grid-template-columns:2fr 1fr 1fr 1fr}}
+.footer .h3{color:var(--white);margin-bottom:12px;font-size:1rem}
+.footer ul{display:grid;gap:8px}
+.footer a:hover{color:var(--white)}
+.footer-bottom{display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between;margin-top:48px;padding-top:24px;border-top:1px solid var(--line-d);color:var(--steel);font-size:.8rem}
+
+/* ---------- приложение: визуальная система ---------- */
+.appendix{background:#07080A;border-top:2px dashed var(--line-d2)}
+.appendix .tag{display:inline-flex;align-items:center;gap:10px;padding:8px 12px;border:1px dashed var(--accent);color:var(--accent);margin-bottom:28px}
+.sw{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:720px){.sw{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:1100px){.sw{grid-template-columns:repeat(8,1fr)}}
+.sw>div{aspect-ratio:1/1.15;border:1px solid var(--line-d);display:flex;flex-direction:column;justify-content:flex-end;padding:12px;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.04em;line-height:1.4}
+.type-scale{display:grid;gap:22px;border-top:1px solid var(--line-d);padding-top:24px}
+.type-scale>div{display:grid;grid-template-columns:120px 1fr;gap:20px;align-items:baseline;border-bottom:1px solid var(--line-d);padding-bottom:18px}
+.type-scale .mono{color:var(--steel)}
+.sys-grid{display:grid;gap:48px}
+@media(min-width:1000px){.sys-grid{grid-template-columns:1fr 1fr;gap:64px}}
+.rules{display:grid;gap:12px;border-top:1px solid var(--line-d);padding-top:20px}
+.rules li{display:grid;grid-template-columns:auto 1fr;gap:14px;color:var(--steel-2);font-size:.95rem}
+.rules li::before{content:"—";color:var(--accent)}
+
+/* ---------- motion ---------- */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .8s var(--ease),transform .9s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important;animation:none!important}
+  .reveal{opacity:1;transform:none}
+}
+.concept-badge{display:none;font-family:var(--font-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;padding:5px 8px;border:1px dashed var(--accent);color:var(--accent);align-self:center;white-space:nowrap}
+@media(min-width:1180px){.concept-badge{display:inline-block}}
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="header" id="header">
+  <div class="wrap">
+    <a class="logo" href="#top" aria-label="СУ №4 — на главную">
+      <span class="logo-mark" aria-hidden="true">4</span>
+      <span>СУ №4<small>Строительное управление · 1952</small></span>
+    </a>
+    <span class="concept-badge">Концепт · v0.1</span>
+    <nav class="nav" aria-label="Основная навигация">
+      <a href="#projects">Проекты</a>
+      <a href="#services">Услуги</a>
+      <a href="#production">Производство</a>
+      <a href="#about">О компании</a>
+      <a href="#contacts">Контакты</a>
+    </nav>
+    <a class="btn btn-primary header-cta" href="#contacts">Обсудить проект</a>
+    <button class="burger" id="burger" aria-label="Открыть меню" aria-expanded="false" aria-controls="mobileMenu"><span></span></button>
+  </div>
+</header>
+<div class="mobile-menu" id="mobileMenu" aria-hidden="true">
+  <button class="mobile-close" id="mobileClose" aria-label="Закрыть меню">×</button>
+  <a class="item" href="#projects">Проекты <span class="mono">01</span></a>
+  <a class="item" href="#services">Услуги <span class="mono">02</span></a>
+  <a class="item" href="#production">Производство <span class="mono">03</span></a>
+  <a class="item" href="#about">О компании <span class="mono">04</span></a>
+  <a class="item" href="#contacts">Контакты <span class="mono">05</span></a>
+  <a class="btn btn-primary" href="#contacts">Обсудить проект</a>
+</div>
+
+<main id="top">
+
+<!-- ================= 01 HERO ================= -->
+<section class="hero" aria-labelledby="h1">
+  <div class="hero-media" aria-hidden="true">
+    <div class="ph-frame" data-src="rezervuary5.jpg">
+      <img src="https://su4.kg/wp-content/uploads/2025/01/rezervuary5.jpg" alt="" fetchpriority="high" onerror="this.parentElement.classList.add('ph')">
+    </div>
+    <div class="hero-grid"></div>
+  </div>
+  <div class="wrap hero-body">
+    <div class="hero-eyebrow mono">
+      <span>ЗАО «Строительное управление №4»</span>
+      <span>Кара-Балта · Кыргызстан</span>
+      <span>На рынке с 1952 года</span>
+    </div>
+    <h1 class="display h1" id="h1">Промышленное строительство полного цикла — <em>с 1952&nbsp;года.</em></h1>
+    <div class="hero-row">
+      <p class="lead">Металлоконструкции, резервуары, сборный железобетон, бескаркасные сооружения и дороги. Собственное производство, монтаж и ввод объекта в эксплуатацию.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#contacts">Обсудить проект
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn-ghost" href="#projects">Смотреть проекты</a>
+      </div>
+    </div>
+    <div class="titleblock num" style="margin-top:clamp(36px,5vw,64px)" role="list" aria-label="Ключевые показатели">
+      <div role="listitem"><div class="val">1952</div><div class="lbl mono">Год основания</div></div>
+      <div role="listitem"><div class="val"><span data-count="4500">4500</span><sup>+</sup></div><div class="lbl mono">Построенных объектов</div></div>
+      <div role="listitem"><div class="val"><span data-count="45000">45 000</span><sup>+</sup></div><div class="lbl mono">Тонн металлоконструкций</div></div>
+      <div role="listitem"><div class="val"><span data-count="1000000">1 000 000</span><sup>+</sup></div><div class="lbl mono">м² дорожного полотна</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 02 О КОМПАНИИ ================= -->
+<section class="sec paper" id="about" aria-labelledby="h-about">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-index">02 / Кто мы</div>
+      <h2 class="display h2" id="h-about">От 11 объектов в 1952-м — до 4500+ сегодня.</h2>
+      <a class="link-arrow" href="#" data-placeholder-link>Подробнее о компании
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <div class="about-grid">
+      <div class="reveal">
+        <div class="about-years num"><span id="years">74</span><small>года непрерывной работы</small></div>
+        <div class="about-range num"><span>1952</span><i></i><span id="yearNow">2026</span></div>
+      </div>
+      <div class="reveal">
+        <p class="lead">Строительное управление №4 выросло вместе с городом Кара-Балта: первая школа, жилой городок на 30 000 жителей, промышленная площадка. Сегодня это подрядчик, который проектирует, производит и монтирует промышленные объекты по всему Кыргызстану.</p>
+        <ul class="facts">
+          <li><span class="mono">01</span><div><b>Собственная производственная база</b><p>Цеха металлоконструкций 3000 м², асфальтобетонный и бетонный заводы, линии ЖБИ, станок для бескаркасных ангаров.</p></div></li>
+          <li><span class="mono">02</span><div><b>Полный цикл — от проекта до ввода</b><p>Проектирование (КЖ, КМ, АР, ОВ, ВК), экспертиза, производство, монтаж, исполнительная документация, ввод в эксплуатацию.</p></div></li>
+          <li><span class="mono">03</span><div><b>Работаем по всему Кыргызстану</b><p>Штаб-квартира и производство — г. Кара-Балта, Чуйская область. Объекты — от Чуйской долины до Тоо-Ашуу.</p></div></li>
+          <li><span class="mono">04</span><div><b>58 партнёров за годы работы</b><p>Кыргызнефтегаз, China Road and Bridge Corporation, Atalyk Group, месторождение «Джеруй», Скай Мобайл, НУР Телеком, мэрии и айыл окмоту.</p></div></li>
+        </ul>
+        <div class="about-media">
+          <div class="ph-frame" data-src="history-e1736502756427.jpeg"><img src="https://su4.kg/wp-content/uploads/2025/01/history-e1736502756427.jpeg" alt="Архивная фотография: строительство первых объектов СУ №4 в Кара-Балте" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+          <div class="ph-frame" data-src="history1.jpeg"><img src="https://su4.kg/wp-content/uploads/2025/01/history1.jpeg" alt="Архивная фотография из истории СУ №4" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+          <div class="ph-frame" data-src="history3-3.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/history3-3.webp" alt="Архивная фотография из истории СУ №4" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 03 НАПРАВЛЕНИЯ ================= -->
+<section class="sec paper" id="services" aria-labelledby="h-services" style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-index">03 / Что мы делаем</div>
+      <h2 class="display h2" id="h-services">Шесть направлений. Одна производственная база.</h2>
+      <p class="lead muted" style="font-size:1rem">Каждое направление — отдельная страница с характеристиками, объектами и формой запроса.</p>
+    </div>
+    <div class="dirs" role="list">
+      <a class="dir reveal" href="#" role="listitem" data-placeholder-link>
+        <span class="idx">01</span>
+        <div class="thumb ph-frame" data-src="jbmk-700x500.png"><img src="https://su4.kg/wp-content/uploads/2025/01/jbmk-700x500.png" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div><h3 class="h3">Каркасное строительство: сборный железобетон + металлокаркас</h3>
+          <p>Склады, распределительные центры, логистические хабы, АБК. Фундамент и колонны из сборного ж/б, покрытие — металлические фермы. Быстрее, дешевле и без огнезащиты ж/б колонн.</p>
+          <div class="spec"><span>Пролёт 12–30 м</span><span>Колонны до 12 м</span><span>СНиП · ГОСТ</span></div></div>
+        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+      </a>
+      <a class="dir reveal" href="#" role="listitem" data-placeholder-link>
+        <span class="idx">02</span>
+        <div class="thumb ph-frame" data-src="rezervuary9-700x520.jpg"><img src="https://su4.kg/wp-content/uploads/2025/01/rezervuary9-700x520.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div><h3 class="h3">Металлоконструкции и резервуары</h3>
+          <p>Изготовление и монтаж металлоконструкций промышленного назначения: промздания, резервуары для нефтепродуктов и воды, оборудование горнодобывающей отрасли — корпуса ЗИФ, сгустители, чаны выщелачивания, бункеры.</p>
+          <div class="spec"><span>РГС 1–500 м³</span><span>РВС 100–10 000 м³</span><span>До 300 т / мес</span></div></div>
+        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+      </a>
+      <a class="dir reveal" href="#" role="listitem" data-placeholder-link>
+        <span class="idx">03</span>
+        <div class="thumb ph-frame" data-src="beskarkas-700x520.jpg"><img src="https://su4.kg/wp-content/uploads/2025/01/beskarkas-700x520.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div><h3 class="h3">Бескаркасные сооружения</h3>
+          <p>Ангары, склады холодного и тёплого исполнения, зернохранилища, овощехранилища, птицефабрики, цеха лёгкой промышленности, быстровозводимые общежития и АБК — с инженерными сетями под ключ.</p>
+          <div class="spec"><span>Пролёт 12–30 м</span><span>Высота 3–15 м</span><span>1000–1500 м² за месяц</span></div></div>
+        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+      </a>
+      <a class="dir reveal" href="#" role="listitem" data-placeholder-link>
+        <span class="idx">04</span>
+        <div class="thumb ph-frame" data-src="dorogi-700x520.jpg"><img src="https://su4.kg/wp-content/uploads/2025/01/dorogi-700x520.jpg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div><h3 class="h3">Дорожное строительство</h3>
+          <p>Собственный карьер ПГС, асфальтобетонный завод, битумная база с ж/д путями и парк дорожной техники. В 1999 году — участок Кара-Балта – Тоо-Ашуу автодороги Бишкек–Ош совместно с Samsung.</p>
+          <div class="spec"><span>АБЗ 1000 т / смену</span><span>ЩМА</span><span>70+ единиц техники</span></div></div>
+        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+      </a>
+      <a class="dir reveal" href="#" role="listitem" data-placeholder-link>
+        <span class="idx">05</span>
+        <div class="thumb ph-frame" data-src="uslugisu4-700x520.webp"><img src="https://su4.kg/wp-content/uploads/2024/12/uslugisu4-700x520.webp" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div><h3 class="h3">Бетон и железобетонные изделия</h3>
+          <p>Собственный бетонный завод и линии ЖБИ: сборные фундаменты и колонны, бордюры, изделия дорожного направления. Вся продукция сертифицирована Госстроем КР.</p>
+          <div class="spec"><span>ЖБИ до 30 м³ / смену</span><span>Бордюр до 1000 м / смену</span></div></div>
+        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+      </a>
+      <a class="dir reveal" href="#" role="listitem" data-placeholder-link>
+        <span class="idx">06</span>
+        <div class="thumb ph-frame" data-src="montaj.webp"><img src="https://su4.kg/wp-content/uploads/2024/12/montaj.webp" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div><h3 class="h3">Проектирование и ввод в эксплуатацию</h3>
+          <p>Земельный отвод, геология, согласование ИТУ и АПУ, проектирование по технологии BIM, экспертиза проекта, ввод здания в эксплуатацию. Одна ответственная сторона на весь цикл.</p>
+          <div class="spec"><span>КЖ · КМ · АР · ОВ · ВК</span><span>BIM</span><span>Экспертиза</span></div></div>
+        <span class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 04 ПРОЕКТЫ ================= -->
+<section class="sec" id="projects" aria-labelledby="h-projects">
+  <div class="wrap">
+    <div class="sec-head sec-head-projects">
+      <div class="sec-index">04 / Проекты</div>
+      <h2 class="display h2" id="h-projects">Объекты, которые работают.</h2>
+      <div class="filters" role="group" aria-label="Фильтр проектов">
+        <button type="button" aria-pressed="true" data-f="all">Все</button>
+        <button type="button" aria-pressed="false" data-f="industry">Промышленность</button>
+        <button type="button" aria-pressed="false" data-f="steel">Резервуары и м/к</button>
+        <button type="button" aria-pressed="false" data-f="roads">Инфраструктура и дороги</button>
+        <button type="button" aria-pressed="false" data-f="frameless">Бескаркасные</button>
+      </div>
+    </div>
+    <div class="projects" id="projectGrid">
+      <article class="proj feat reveal" data-cat="industry steel">
+        <div class="ph-frame" data-src="djamgyr.webp"><img src="https://su4.kg/wp-content/uploads/2024/10/djamgyr.webp" alt="Золоторудное месторождение «Джамгыр» — объект СУ №4" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Горнодобывающая отрасль</span><span>Кыргызстан</span><span>Год · —</span></div>
+          <h3 class="h3">Золоторудное месторождение «Джамгыр»</h3>
+          <p>Металлоконструкции и строительно-монтажные работы на объекте золотодобычи.</p>
+          <span class="ph-tag">Описание кейса · placeholder, уточнить роль и объёмы</span>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: Джамгыр"></a>
+      </article>
+      <article class="proj reveal" data-cat="industry steel">
+        <div class="ph-frame" data-src="zif.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/zif.webp" alt="Корпус золотоизвлекательной фабрики" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Металлоконструкции</span><span>Год · —</span></div>
+          <h3 class="h3">ЗИФ — золотоизвлекательная фабрика</h3>
+          <p>Металлоконструкции корпуса фабрики.</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: ЗИФ"></a>
+      </article>
+      <article class="proj reveal" data-cat="industry steel">
+        <div class="ph-frame" data-src="kristallizator-1.webp"><img src="https://su4.kg/wp-content/uploads/2024/10/kristallizator-1.webp" alt="Монтаж кристаллизатора на сахарном заводе в Каинды" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Промышленный монтаж</span><span>г. Каинды</span><span>Год · —</span></div>
+          <h3 class="h3">Кристаллизатор сахарного завода</h3>
+          <p>Монтаж технологического оборудования.</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: кристаллизатор"></a>
+      </article>
+      <article class="proj reveal" data-cat="industry steel">
+        <div class="ph-frame" data-src="silosy-1.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/silosy-1.webp" alt="Силосы" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Резервуары и ёмкости</span><span>Год · —</span></div>
+          <h3 class="h3">Силосы</h3>
+          <p>Изготовление и монтаж ёмкостей для хранения.</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: силосы"></a>
+      </article>
+      <article class="proj reveal" data-cat="industry">
+        <div class="ph-frame" data-src="gazoblok-1.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/gazoblok-1.webp" alt="Завод по производству газоблока" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Промышленное здание</span><span>Год · —</span></div>
+          <h3 class="h3">Завод по производству газоблока</h3>
+          <p>Строительство производственного корпуса.</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: завод газоблока"></a>
+      </article>
+      <article class="proj reveal" data-cat="industry steel">
+        <div class="ph-frame" data-src="promzdaniya.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/promzdaniya.webp" alt="Металлокаркас промышленного здания" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Металлокаркас</span><span>Год · —</span></div>
+          <h3 class="h3">Металлокаркас промздания</h3>
+          <p>Изготовление и монтаж каркаса.</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: металлокаркас"></a>
+      </article>
+      <article class="proj reveal" data-cat="steel">
+        <div class="ph-frame" data-src="IMG_20240105_025454.jpg"><img src="https://su4.kg/wp-content/uploads/2024/12/IMG_20240105_025454.jpg" alt="Резервуары производства СУ №4" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Резервуары</span><span>Год · —</span></div>
+          <h3 class="h3">Резервуары</h3>
+          <p>РГС и РВС для воды и нефтепродуктов — в том числе 2 × 400 м³ для питьевой воды («Профи НСК»).</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: резервуары"></a>
+      </article>
+      <article class="proj reveal" data-cat="roads">
+        <div class="ph-frame" data-src="novopavlovka.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/novopavlovka.webp" alt="Строительство дорог в Новопавловке" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Дороги</span><span>с. Новопавловка</span><span>Год · —</span></div>
+          <h3 class="h3">Строительство дорог, Новопавловка</h3>
+          <p>Дорожное полотно, бордюры, асфальтобетон собственного производства.</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: Новопавловка"></a>
+      </article>
+      <article class="proj reveal" data-cat="frameless">
+        <div class="ph-frame" data-src="beskarkasnye.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/beskarkasnye.webp" alt="Бескаркасное сооружение" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Бескаркасные</span><span>Год · —</span></div>
+          <h3 class="h3">Бескаркасные сооружения</h3>
+          <p>Ангары и склады по бескаркасной технологии.</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: бескаркасные"></a>
+      </article>
+      <article class="proj reveal" data-cat="roads">
+        <div class="ph-frame" data-src="kojomberdieva.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/kojomberdieva.webp" alt="Улица Кожомбердиева, Кара-Балта" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Инфраструктура</span><span>г. Кара-Балта</span><span>Год · —</span></div>
+          <h3 class="h3">ул. Кожомбердиева</h3>
+          <p>Городская дорожная инфраструктура.</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: ул. Кожомбердиева"></a>
+      </article>
+      <article class="proj reveal" data-cat="roads">
+        <div class="ph-frame" data-src="palmiro.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/palmiro.webp" alt="Улица Пальмиро Тольятти" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Инфраструктура</span><span>Год · —</span></div>
+          <h3 class="h3">ул. Пальмиро Тольятти</h3>
+          <p>Городская дорожная инфраструктура.</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: ул. Пальмиро Тольятти"></a>
+      </article>
+      <article class="proj reveal" data-cat="roads">
+        <div class="ph-frame" data-src="stroitelstvodorog-1.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/stroitelstvodorog-1.webp" alt="Строительство дорог" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+        <div class="proj-body">
+          <div class="proj-meta"><span class="cat">Дороги</span><span>Год · —</span></div>
+          <h3 class="h3">Строительство дорог</h3>
+          <p>Укладка дорожного полотна по Кыргызстану.</p>
+        </div>
+        <span class="go" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17L17 7M8 7h9v9"/></svg></span>
+        <a class="cover" href="#" data-placeholder-link aria-label="Открыть кейс: строительство дорог"></a>
+      </article>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;margin-top:40px">
+      <p class="muted" style="font-size:.9rem;max-width:40em">12 объектов с текущего сайта. Год, локация и роль СУ №4 по каждому кейсу — заполняются из ваших данных.</p>
+      <a class="btn btn-ghost" href="#" data-placeholder-link>Все проекты
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 05 ПРОИЗВОДСТВО ================= -->
+<section class="sec" id="production" aria-labelledby="h-prod" style="padding-top:0">
+  <div class="wrap">
+    <hr class="hr" style="margin-bottom:var(--sec-y)">
+    <div class="sec-head">
+      <div class="sec-index">05 / Собственное производство</div>
+      <h2 class="display h2" id="h-prod">Мы не покупаем конструкции. Мы их делаем.</h2>
+      <p class="lead muted" style="font-size:1rem">Металл, бетон, асфальт и ЖБИ — на собственных площадках в Кара-Балте. Контроль сроков и качества на каждом переделе.</p>
+    </div>
+
+    <div class="prod-hero">
+      <div class="ph-frame reveal" data-src="montaj.webp"><img src="https://su4.kg/wp-content/uploads/2024/12/montaj.webp" alt="Цех металлоконструкций СУ №4" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+      <aside class="spec-card reveal num" aria-label="Паспорт производства металлоконструкций">
+        <span class="mono">Паспорт цеха металлоконструкций</span>
+        <ul class="spec-list">
+          <li><span>Площадь цехов</span><span>3000 м²</span></li>
+          <li><span>Выпуск металлоконструкций</span><span>до 300 т / мес</span></li>
+          <li><span>Ленточно-пильная резка, сечение</span><span>до 500 × 500 мм</span></li>
+          <li><span>Плазменная резка ЧПУ</span><span>до 70 мм</span></li>
+          <li><span>Лазерная резка ЧПУ</span><span>до 25 мм</span></li>
+          <li><span>Сварка</span><span>п/автомат в газе · автомат под флюсом</span></li>
+          <li><span>Защита</span><span>холодное цинкование · порошковая окраска</span></li>
+          <li><span>Проектирование</span><span>BIM · КМ</span></li>
+        </ul>
+        <a class="link-arrow" href="#" data-placeholder-link style="align-self:flex-start">Страница производства
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      </aside>
+    </div>
+
+    <div class="prod-steps">
+      <div class="step reveal"><span class="mono">Этап 01</span><h3 class="h3">BIM-проектирование</h3><p>3D-модель конструкций сверяется с разделами КЖ, ОВ, ВК, ТХ — расхождения при монтаже сводятся к минимуму ещё на стадии проекта.</p></div>
+      <div class="step reveal"><span class="mono">Этап 02</span><h3 class="h3">Заготовка и раскрой</h3><p>Сортовой прокат — на ленточно-пильных станках; листовой — на плазменном и лазерном ЧПУ-станках.</p></div>
+      <div class="step reveal"><span class="mono">Этап 03</span><h3 class="h3">Сварка</h3><p>Полуавтоматическая сварка в среде защитных газов и автоматическая под флюсом.</p></div>
+      <div class="step reveal"><span class="mono">Этап 04</span><h3 class="h3">Окраска и отгрузка</h3><p>Грунтовка и окраска по ТЗ проекта: цинконаполненные грунты, порошковая окраска. Далее — монтаж собственными бригадами.</p></div>
+    </div>
+
+    <div class="prod-road" style="margin-top:clamp(40px,5vw,72px)">
+      <aside class="spec-card reveal num" aria-label="Дорожно-строительная база">
+        <span class="mono">Дорожно-строительная база</span>
+        <ul class="spec-list">
+          <li><span>Карьер ПГС</span><span>марка М1000+</span></li>
+          <li><span>Дробильно-сортировочный комплекс</span><span>1000 т / смену</span></li>
+          <li><span>Битумная база с ж/д путями</span><span>8000 т</span></li>
+          <li><span>Асфальтобетонный завод (ЩМА)</span><span>1000 т / смену</span></li>
+          <li><span>Пресс для бордюров</span><span>до 1000 м / смену</span></li>
+          <li><span>Участок ЖБИ дорожного направления</span><span>до 30 м³ / смену</span></li>
+          <li><span>Парк дорожно-строительной техники</span><span>70+ единиц</span></li>
+          <li><span>ИТР / дорожные рабочие</span><span>20+ / 120+</span></li>
+          <li><span>Сертификация продукции</span><span>Госстрой КР</span></li>
+        </ul>
+      </aside>
+      <div class="ph-frame reveal" data-src="remontdorog-1.webp"><img src="https://su4.kg/wp-content/uploads/2025/01/remontdorog-1.webp" alt="Дорожно-строительная техника СУ №4 на укладке асфальта" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 06 ЦИФРЫ ================= -->
+<section class="sec paper" id="numbers" aria-labelledby="h-num">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-index">06 / Масштаб</div>
+      <h2 class="display h2" id="h-num">Цифры за 74 года.</h2>
+      <p class="lead muted" style="font-size:1rem">Все показатели — из открытых данных компании.</p>
+    </div>
+    <div class="numbers num">
+      <div class="reveal"><div class="val"><span id="years2">74</span></div><div class="lbl"><span class="mono">С 1952</span>года на строительном рынке</div></div>
+      <div class="reveal"><div class="val"><span data-count="4500">4500</span><sup>+</sup></div><div class="lbl"><span class="mono">Всего</span>построенных объектов</div></div>
+      <div class="reveal"><div class="val"><span data-count="45000">45 000</span><sup>+</sup><small>т</small></div><div class="lbl"><span class="mono">Металл</span>изготовлено металлоконструкций</div></div>
+      <div class="reveal"><div class="val"><span data-count="1000000">1 000 000</span><sup>+</sup><small>м²</small></div><div class="lbl"><span class="mono">Дороги</span>уложенного дорожного полотна</div></div>
+      <div class="reveal"><div class="val"><span data-count="100000">100 000</span><sup>+</sup><small>м²</small></div><div class="lbl"><span class="mono">Промышленность</span>промышленных и складских сооружений</div></div>
+      <div class="reveal"><div class="val"><span data-count="2000">2000</span><sup>+</sup></div><div class="lbl"><span class="mono">Связь</span>смонтированных сооружений сотовой связи</div></div>
+      <div class="reveal"><div class="val"><span data-count="95000">95 000</span><sup>+</sup><small>м²</small></div><div class="lbl"><span class="mono">Жильё</span>сдано в Кара-Балте с 1991 года</div></div>
+      <div class="reveal"><div class="val"><span data-count="58">58</span></div><div class="lbl"><span class="mono">Партнёры</span>компаний и муниципалитетов-заказчиков</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 07 ДОВЕРИЕ ================= -->
+<section class="sec" id="trust" aria-labelledby="h-trust">
+  <div class="wrap trust">
+    <div class="trust-sticky">
+      <div class="sec-index" style="margin-bottom:20px">07 / Почему нам доверяют сложные проекты</div>
+      <h2 class="display h2" id="h-trust">Одна ответственная сторона на весь цикл.</h2>
+      <p class="muted" style="margin-top:20px;max-width:30em">Заказчику не нужно сводить проектировщика, завод, монтажников и дорожников: у СУ №4 все переделы внутри.</p>
+      <a class="btn btn-primary" href="#contacts" style="margin-top:28px">Запросить предложение
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <ol class="trust-list">
+      <li class="reveal"><span class="n">01</span><div><h3 class="h3">Собственное производство и техника</h3><p>Цеха металлоконструкций, АБЗ, бетонный завод, линии ЖБИ и 70+ единиц техники. Сроки не зависят от субподрядчиков.</p></div></li>
+      <li class="reveal"><span class="n">02</span><div><h3 class="h3">Полный цикл: проект → производство → монтаж → ввод</h3><p>Проектирование в BIM, экспертиза, изготовление, монтаж собственными бригадами, исполнительная документация и ввод в эксплуатацию.</p></div></li>
+      <li class="reveal"><span class="n">03</span><div><h3 class="h3">74 года непрерывной работы</h3><p>Компания строит с 1952 года — от первой школы Кара-Балты до объектов нефтегазовой и горнодобывающей отрасли.</p></div></li>
+      <li class="reveal"><span class="n">04</span><div><h3 class="h3">Опыт технологически сложных объектов</h3><p>Корпуса ЗИФ, сгустители и чаны выщелачивания, резервуары РВС до 10 000 м³, участок трассы Бишкек–Ош через Тоо-Ашуу.</p></div></li>
+      <li class="reveal"><span class="n">05</span><div><h3 class="h3">Лицензии, сертификаты и контроль качества</h3><p>Продукция сертифицирована Госстроем КР. Входной, операционный и приёмочный контроль по СНиП, ГОСТ и международным стандартам; технадзор заказчика — по запросу.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= 08 ИСТОРИЯ ================= -->
+<section class="sec paper" id="history" aria-labelledby="h-hist">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-index">08 / История</div>
+      <h2 class="display h2" id="h-hist">1952 → сегодня</h2>
+      <p class="lead muted" style="font-size:1rem">Компания старше большинства своих заказчиков.</p>
+    </div>
+    <div class="timeline-wrap" tabindex="0" aria-label="Хронология компании, прокручивается по горизонтали">
+      <ol class="timeline">
+        <li class="tl key"><div class="yr">1952</div><h3 class="h3">Первые 11 объектов</h3><p>8 десятиквартирных домов, склад, авторемонтные мастерские и станция «Заводская» в будущем городе Кара-Балта.</p>
+          <div class="ph-frame" data-src="history-e1736502756427.jpeg"><img src="https://su4.kg/wp-content/uploads/2025/01/history-e1736502756427.jpeg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div></li>
+        <li class="tl"><div class="yr">1953</div><h3 class="h3">Школа за 53 дня</h3><p>33 сданных объекта, среди них первая школа посёлка на 400 учащихся — ныне школа-гимназия №6.</p></li>
+        <li class="tl"><div class="yr">1954</div><h3 class="h3">Ясли, детский сад, столовая</h3><p>Строится промышленная площадка, строится городок.</p></li>
+        <li class="tl key"><div class="yr">1956</div><h3 class="h3">Строительное управление №4</h3><p>Организация получает своё нынешнее имя.</p>
+          <div class="ph-frame" data-src="history2-e1736502853612.jpeg"><img src="https://su4.kg/wp-content/uploads/2025/01/history2-e1736502853612.jpeg" alt="" loading="lazy" onerror="this.parentElement.classList.add('ph')"></div></li>
+        <li class="tl"><div class="yr">1956–1991</div><h3 class="h3">Город и промышленность</h3><p>ГМЗ, АРЗ, ЦРММ, ТЭЦ, ЗСИ, жилой городок на 30 000 жителей, больничный городок, спорткомплекс, школы и детские сады.</p></li>
+        <li class="tl key"><div class="yr">1999</div><h3 class="h3">Бишкек–Ош</h3><p>Участок Кара-Балта – перевал Тоо-Ашуу автодороги Бишкек–Ош: генподрядчик — Samsung, СУ №4 — в составе исполнителей.</p></li>
+        <li class="tl"><div class="yr">2018–2023</div><h3 class="h3">Нефтегаз и резервуары</h3><p>Постоянный партнёр ОАО «Кыргызнефтегаз»; резервуары для питьевой воды для «Профит Экспресс» и «Профи НСК».</p></li>
+        <li class="tl key"><div class="yr num" id="yearNow2">2026</div><h3 class="h3">4500+ объектов</h3><p>45 000+ т металлоконструкций, 1 млн+ м² дорог, 2000+ сооружений связи, 58 партнёров.</p></li>
+      </ol>
+    </div>
+    <div class="tl-hint mono"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg> Листайте вбок</div>
+  </div>
+</section>
+
+<!-- ================= 09 ПАРТНЁРЫ ================= -->
+<section class="sec paper" id="partners" aria-labelledby="h-partners" style="padding-top:0">
+  <div class="wrap">
+    <hr class="hr" style="margin-bottom:var(--sec-y)">
+    <div class="sec-head">
+      <div class="sec-index">09 / Заказчики и партнёры</div>
+      <h2 class="display h2" id="h-partners">58 компаний и муниципалитетов.</h2>
+    </div>
+    <div class="partners">
+      <div class="reveal">
+        <blockquote class="quote">
+          <p>«ЗАО «СУ-4» зарекомендовало себя ответственной, исполнительной компанией, обеспечивающей высокий уровень выполнения строительно-монтажных работ в требуемые сроки и отличного качества».</p>
+          <footer>Директор департамента по транспорту и общим вопросам, ОАО «Кыргызнефтегаз» · партнёр 2020–2023</footer>
+        </blockquote>
+        <div class="letters">
+          <a href="https://su4.kg/wp-content/uploads/2024/12/Отзыв-КНГ-2024-год.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg><span>Письмо ОАО «Кыргызнефтегаз»</span><span class="mono">PDF</span></a>
+          <a href="https://su4.kg/wp-content/uploads/2024/12/Отзыв-ОАО-СУ№4-Резервуары.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg><span>Письмо ОсОО «Профит Экспресс» — резервуары</span><span class="mono">PDF</span></a>
+          <a href="https://su4.kg/wp-content/uploads/2024/12/Реком-е-письмо-СУ-№4-Резервуары-Саргата.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/></svg><span>Письмо ОсОО «Профи НСК» — 2 × 400 м³</span><span class="mono">PDF</span></a>
+          <a href="https://su4.kg/wp-content/uploads/2025/01/certificate-izdelia.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6 6 1-4.5 4.5L18 20l-6-3-6 3 1.5-6.5L3 9l6-1z"/></svg><span>Сертификаты материалов</span><span class="mono">PDF</span></a>
+        </div>
+      </div>
+      <div class="logo-grid reveal" aria-label="Ключевые заказчики">
+        <div>ОАО «Кыргызнефтегаз»</div>
+        <div>China Road and Bridge Corporation</div>
+        <div>ЗАО «Atalyk Group»</div>
+        <div>Месторождение «Джеруй»</div>
+        <div>ОсОО «Скай Мобайл»</div>
+        <div>ОсОО «НУР Телеком»</div>
+        <div>ОсОО «Асман Ойл Компани»</div>
+        <div>ГП «Кыргыз-теплоэнерго»</div>
+        <div>ТОО «Транс Азия Констракшин»</div>
+        <div>«Zhongda» China Petrol Company</div>
+        <div>ГП «Кыргызавтожол» — служба тоннелей</div>
+        <div>Мэрия г. Кара-Балта</div>
+        <div>ОсОО «Мостдорстрой»</div>
+        <div>ОсОО «Электросредазмонтаж»</div>
+        <div>Металлопрокатный завод им. М.В. Фрунзе</div>
+        <div class="more"><a href="#" data-placeholder-link>+ ещё 43 →</a></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 10 ПРОЦЕСС ================= -->
+<section class="sec" id="process" aria-labelledby="h-process">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-index">10 / Как мы работаем</div>
+      <h2 class="display h2" id="h-process">Три шага от запроса до сдачи объекта.</h2>
+    </div>
+    <ol class="process">
+      <li class="pstep reveal"><span class="n">Шаг 01</span><h3 class="h3">Коммерческое предложение</h3><p>Анализируем запрос и формируем смету с прозрачной структурой.</p>
+        <ul><li>описание работ</li><li>распределение затрат</li><li>оценка сроков</li></ul></li>
+      <li class="pstep reveal"><span class="n">Шаг 02</span><h3 class="h3">Договор</h3><p>Согласуем условия, вносим правки, фиксируем обязательства обеих сторон.</p>
+        <ul><li>условия и оговорки</li><li>правки по итогам обсуждения</li><li>подписание</li></ul></li>
+      <li class="pstep reveal"><span class="n">Шаг 03</span><h3 class="h3">Реализация и сдача</h3><p>Строим по проектной документации, ведём технический контроль на каждом этапе; по желанию заказчика — его технадзор.</p>
+        <ul><li>контроль на каждом этапе</li><li>исполнительно-техническая документация</li><li>ввод в эксплуатацию</li></ul></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= 11 ЗАЯВКА ================= -->
+<section class="sec" id="contacts" aria-labelledby="h-cta" style="padding-top:0">
+  <div class="wrap">
+    <hr class="hr" style="margin-bottom:var(--sec-y)">
+    <div class="cta">
+      <div>
+        <div class="sec-index" style="margin-bottom:20px">11 / Обсудить проект</div>
+        <h2 class="display h2" id="h-cta">Расскажите о задаче — вернёмся с предложением.</h2>
+        <p class="muted" style="max-width:32em">Металлоконструкции, резервуар, здание или дорога — опишите объект в двух словах. Отдел продаж отвечает в рабочее время.</p>
+        <div class="channels num">
+          <a href="https://wa.me/996704141522"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 1-13.4 7.8L3 21l1.2-4.6A9 9 0 1 1 21 12z"/></svg><span><b>WhatsApp</b></span><span class="mono">быстрый ответ</span></a>
+          <a href="tel:+996704141522"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L8 9.7a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.7a2 2 0 0 1 1.7 2z"/></svg><span><b>+996 704 141 522</b></span><span class="mono">отдел продаж</span></a>
+          <a href="tel:+996550114459"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L8 9.7a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.7a2 2 0 0 1 1.7 2z"/></svg><span><b>+996 550 114 459</b></span><span class="mono">отдел снабжения</span></a>
+          <a href="https://t.me/+996704141522"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg><span><b>Telegram</b></span><span class="mono">@su4</span></a>
+        </div>
+      </div>
+      <form class="form" id="leadForm" novalidate>
+        <div class="form-row">
+          <div class="field"><label for="f-name">Имя</label><input id="f-name" name="name" type="text" autocomplete="name" required placeholder="Как к вам обращаться"></div>
+          <div class="field"><label for="f-company">Компания</label><input id="f-company" name="company" type="text" autocomplete="organization" placeholder="Название организации"></div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label for="f-phone">Телефон</label><input id="f-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required placeholder="+996"></div>
+          <div class="field"><label for="f-email">Email</label><input id="f-email" name="email" type="email" autocomplete="email" placeholder="для отправки КП"></div>
+        </div>
+        <div class="field"><label for="f-type">Что требуется</label>
+          <select id="f-type" name="type" required>
+            <option value="">Выберите направление</option>
+            <option>Металлоконструкции</option>
+            <option>Резервуары РГС / РВС</option>
+            <option>Каркасное здание (ж/б + металл)</option>
+            <option>Бескаркасное сооружение</option>
+            <option>Дорожное строительство</option>
+            <option>ЖБИ / бетон</option>
+            <option>Проектирование</option>
+            <option>Другое</option>
+          </select></div>
+        <div class="field"><label for="f-msg">Коротко об объекте <span style="text-transform:none;letter-spacing:0">(необязательно)</span></label><textarea id="f-msg" name="message" placeholder="Площадь, локация, сроки, наличие проекта"></textarea></div>
+        <button class="btn btn-primary" type="submit">Отправить запрос
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        <p class="form-note">Нажимая кнопку, вы соглашаетесь с обработкой персональных данных. Заявка уходит в отдел продаж СУ №4.</p>
+        <div class="form-ok" role="status">Запрос отправлен. Мы свяжемся с вами в рабочее время — обычно в течение одного дня.</div>
+      </form>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <a class="logo" href="#top" style="margin-bottom:16px"><span class="logo-mark" aria-hidden="true">4</span><span>СУ №4<small>Строительное управление · 1952</small></span></a>
+        <p style="max-width:30em">ЗАО «Строительное управление №4». Промышленное строительство, металлоконструкции, резервуары, железобетон и дороги. Кыргызстан.</p>
+      </div>
+      <div><h3 class="h3">Навигация</h3><ul><li><a href="#projects">Проекты</a></li><li><a href="#services">Услуги</a></li><li><a href="#production">Производство</a></li><li><a href="#about">О компании</a></li><li><a href="#contacts">Контакты</a></li></ul></div>
+      <div><h3 class="h3">Контакты</h3><ul class="num"><li><a href="tel:+996704141522">+996 704 141 522</a> <span class="mono muted" style="font-size:.62rem">продажи</span></li><li><a href="tel:+996550114459">+996 550 114 459</a> <span class="mono muted" style="font-size:.62rem">снабжение</span></li><li><a href="https://go.2gis.com/DDprr" target="_blank" rel="noopener">Кара-Балта, ул. Кожомбердиева 2<br>Жайылский р-н, Чуйская обл.</a></li></ul></div>
+      <div><h3 class="h3">Соцсети</h3><ul><li><a href="https://www.instagram.com/su4.kg" target="_blank" rel="noopener">Instagram</a></li><li><a href="https://youtube.com/@su4kg" target="_blank" rel="noopener">YouTube</a></li><li><a href="https://tiktok.com/@su4.kg" target="_blank" rel="noopener">TikTok</a></li><li><a href="https://t.me/+996704141522" target="_blank" rel="noopener">Telegram</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="yearNow3">2026</span> ЗАО «Строительное управление №4»</span>
+      <span class="mono">Кыргызстан · с 1952 года</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= ПРИЛОЖЕНИЕ: ВИЗУАЛЬНАЯ СИСТЕМА (не часть сайта) ================= -->
+<section class="sec appendix" id="system" aria-labelledby="h-sys">
+  <div class="wrap">
+    <span class="tag mono">Приложение · визуальная система · не входит в сайт</span>
+    <h2 class="display h2" id="h-sys" style="margin-bottom:40px">Premium Industrial / Engineering</h2>
+    <div class="sys-grid">
+      <div>
+        <div class="sec-index" style="margin-bottom:16px">Палитра</div>
+        <div class="sw">
+          <div style="background:#0B0D10">ink-900<br>#0B0D10<br>ground</div>
+          <div style="background:#121519">ink-800<br>#121519<br>панели</div>
+          <div style="background:#1A1E24">ink-700<br>#1A1E24<br>hover</div>
+          <div style="background:#8A929C;color:#0B0D10">steel<br>#8A929C<br>вторичный текст</div>
+          <div style="background:#C3C9D0;color:#0B0D10">steel-2<br>#C3C9D0<br>текст на тёмном</div>
+          <div style="background:#EEF0F2;color:#0B0D10">paper<br>#EEF0F2<br>светлые секции</div>
+          <div style="background:#F7F8F9;color:#0B0D10">white<br>#F7F8F9<br>текст на тёмном</div>
+          <div style="background:#E3A51A;color:#1A1300">accent<br>#E3A51A<br>CTA · индексы</div>
+        </div>
+        <ul class="rules" style="margin-top:24px">
+          <li>Акцент один — янтарь дорожной разметки и крановой окраски. Только CTA, индексы секций и линия-маркер. Никогда — фон целой секции.</li>
+          <li>Секции чередуют графит и «чертёжную бумагу» — ритм без смены палитры.</li>
+          <li>Скругления 2 px. Никаких теней и градиентов, кроме затемнения фото.</li>
+          <li>Линии 1 px с прозрачностью 12–28 % — сетка чертежа, а не рамки карточек.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="sec-index" style="margin-bottom:16px">Типографика</div>
+        <div class="type-scale">
+          <div><span class="mono">Display · 800</span><span class="display" style="font-size:clamp(2rem,4vw,3.4rem)">Manrope 800</span></div>
+          <div><span class="mono">H2 · 800</span><span class="display h2" style="font-size:clamp(1.6rem,3vw,2.4rem)">Заголовок секции</span></div>
+          <div><span class="mono">H3 · 700</span><span class="h3">Подзаголовок карточки</span></div>
+          <div><span class="mono">Lead · 500</span><span class="lead" style="font-size:1.15rem">Вводный абзац секции, 34 символа в строке максимум</span></div>
+          <div><span class="mono">Body · 400</span><span>Основной текст 17 px / 1.6. Ширина колонки — до 65 знаков.</span></div>
+          <div><span class="mono">Label · mono</span><span class="mono" style="color:var(--accent)">JetBrains Mono · 12 px · +8 %</span></div>
+        </div>
+        <ul class="rules" style="margin-top:24px">
+          <li>Manrope — display и текст; JetBrains Mono — «штамп чертежа»: индексы, единицы, характеристики.</li>
+          <li>Цифры — всегда tabular-nums; «+» выносится в надстрочный акцентный знак.</li>
+          <li>Display: −2.5 % трекинг, интерлиньяж 0.96. На мобильных — не меньше 2.6 rem.</li>
+          <li>Motion: только reveal снизу 22 px / 0.8 s, счётчики цифр, hover-стрелки. Respects prefers-reduced-motion.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<script>
+(function(){
+  var d=document, w=window;
+  /* годы считаем от 1952 */
+  var now=new Date().getFullYear(), yrs=now-1952;
+  ['years','years2'].forEach(function(id){var e=d.getElementById(id);if(e)e.textContent=yrs;});
+  ['yearNow','yearNow2','yearNow3'].forEach(function(id){var e=d.getElementById(id);if(e)e.textContent=now;});
+  d.querySelectorAll('[data-years]').forEach(function(e){e.textContent=yrs;});
+
+  /* header */
+  var header=d.getElementById('header');
+  function onScroll(){header.classList.toggle('is-scrolled',w.scrollY>24);}
+  onScroll(); w.addEventListener('scroll',onScroll,{passive:true});
+
+  /* mobile menu */
+  var burger=d.getElementById('burger'), menu=d.getElementById('mobileMenu'), close=d.getElementById('mobileClose');
+  function setMenu(open){menu.classList.toggle('open',open);menu.setAttribute('aria-hidden',!open);burger.setAttribute('aria-expanded',open);d.body.style.overflow=open?'hidden':'';}
+  burger.addEventListener('click',function(){setMenu(true)});
+  close.addEventListener('click',function(){setMenu(false)});
+  menu.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){setMenu(false)})});
+
+  /* placeholder-ссылки внутренних страниц */
+  d.querySelectorAll('[data-placeholder-link]').forEach(function(a){
+    a.setAttribute('title','Внутренняя страница — следующий этап');
+    a.addEventListener('click',function(e){e.preventDefault();});
+  });
+
+  /* reveal: элементы ниже первого экрана появляются при скролле */
+  var reduce=w.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var items=[].slice.call(d.querySelectorAll('.reveal'));
+  if(reduce||!('IntersectionObserver' in w)){items.forEach(function(e){e.classList.add('in')});}
+  else{
+    var vh=w.innerHeight;
+    items.forEach(function(e){if(e.getBoundingClientRect().top<vh*.9)e.classList.add('in');});
+    var io=new IntersectionObserver(function(entries){entries.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target);}});},{rootMargin:'0px 0px -8% 0px'});
+    items.forEach(function(e){if(!e.classList.contains('in'))io.observe(e);});
+  }
+
+  /* счётчики */
+  function fmt(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ');}
+  var counters=[].slice.call(d.querySelectorAll('[data-count]'));
+  if(!reduce&&'IntersectionObserver' in w){
+    var co=new IntersectionObserver(function(entries){entries.forEach(function(en){
+      if(!en.isIntersecting)return; co.unobserve(en.target);
+      var el=en.target, target=+el.getAttribute('data-count'), t0=performance.now(), dur=1400;
+      (function tick(t){var p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,3); el.textContent=fmt(target*e); if(p<1)requestAnimationFrame(tick);})(t0);
+    });},{threshold:.4});
+    counters.forEach(function(c){co.observe(c)});
+  }
+
+  /* фильтр проектов */
+  var fbtns=d.querySelectorAll('.filters button'), cards=d.querySelectorAll('#projectGrid .proj');
+  fbtns.forEach(function(b){b.addEventListener('click',function(){
+    fbtns.forEach(function(x){x.setAttribute('aria-pressed',x===b)});
+    var f=b.getAttribute('data-f');
+    cards.forEach(function(c){var ok=f==='all'||(c.getAttribute('data-cat')||'').split(' ').indexOf(f)>-1;c.classList.toggle('hidden',!ok);});
+  })});
+
+  /* форма — демонстрация */
+  var form=d.getElementById('leadForm');
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    if(!form.checkValidity()){form.reportValidity();return;}
+    form.classList.add('sent');
+  });
+})();
+</script>
+</body>
+</html>
