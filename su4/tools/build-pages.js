@@ -62,9 +62,13 @@ const head = (title, meta, depth) => {
 `;
 };
 
-const header = (up, cta) => `
+const header = (up, cta, parent) => `
 <header class="header" id="header">
   <div class="wrap">
+    <button class="backbtn" type="button" data-parent="${parent || up + 'index.html'}" aria-label="Вернуться назад">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+      <span>Назад</span>
+    </button>
     <a class="logo" href="${up}index.html" aria-label="СУ №4 — на главную">
       <img class="logo-img" src="${up}assets/logo-white@2x.png" alt="ЗАО «Строительное управление №4»" width="120" height="120" data-logo>
       <span class="logo-mark" aria-hidden="true">4</span>
@@ -282,7 +286,7 @@ ${s.formOptions.map(o => `          <option>${esc(o)}</option>`).join('\n')}
   </div>
 </section>`;
 
-  return head(`${s.title} — СУ №4`, s.meta, 2) + header(up, 'ask') + `
+  return head(`${s.title} — СУ №4`, s.meta, 2) + header(up, 'ask', up + 'services/index.html') + `
 <main id="top">
 
 <section class="case-hero" aria-labelledby="h1">

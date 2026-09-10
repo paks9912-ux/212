@@ -36,6 +36,20 @@
     }
   }
 
+  /* «Назад»: сначала история браузера, иначе — родительский раздел.
+     В предпросмотре истории может не быть, поэтому нужен запасной путь. */
+  var back=d.querySelector('.backbtn');
+  if(back){
+    back.addEventListener('click',function(){
+      var parent=back.getAttribute('data-parent');
+      if(w.history.length>1 && d.referrer && d.referrer!==location.href){ w.history.back();
+        /* если история никуда не привела за 400 мс — уходим в родительский раздел */
+        var was=location.href;
+        setTimeout(function(){ if(location.href===was && parent) location.href=parent; },400);
+      } else if(parent){ location.href=parent; }
+    });
+  }
+
   /* header */
   var header=d.getElementById('header');
   if(header){
