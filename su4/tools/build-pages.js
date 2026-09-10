@@ -73,7 +73,7 @@ const header = (up, cta) => `
     <span class="concept-badge">Концепт · v0.1</span>
     <nav class="nav" aria-label="Основная навигация">
       <a href="${up}projects/index.html">Проекты</a>
-      <a href="${up}index.html#services">Услуги</a>
+      <a href="${up}services/index.html">Услуги</a>
       <a href="${up}index.html#production">Производство</a>
       <a href="${up}index.html#about">О компании</a>
       <a href="${up}index.html#contacts">Контакты</a>
@@ -85,7 +85,7 @@ const header = (up, cta) => `
 <div class="mobile-menu" id="mobileMenu" aria-hidden="true">
   <button class="mobile-close" id="mobileClose" aria-label="Закрыть меню">×</button>
   <a class="item" href="${up}projects/index.html">Проекты <span class="mono">01</span></a>
-  <a class="item" href="${up}index.html#services">Услуги <span class="mono">02</span></a>
+  <a class="item" href="${up}services/index.html">Услуги <span class="mono">02</span></a>
   <a class="item" href="${up}index.html#production">Производство <span class="mono">03</span></a>
   <a class="item" href="${up}index.html#about">О компании <span class="mono">04</span></a>
   <a class="item" href="${up}index.html#contacts">Контакты <span class="mono">05</span></a>
@@ -101,7 +101,7 @@ const footer = up => `
         <a class="logo" href="${up}index.html" style="margin-bottom:16px;--logo-h:64px"><img class="logo-img" src="${up}assets/logo-white@2x.png" alt="ЗАО «Строительное управление №4»" width="120" height="120" loading="lazy" data-logo><span class="logo-mark" aria-hidden="true">4</span><span class="logo-text">СУ №4<small>Строительное управление · 1952</small></span></a>
         <p style="max-width:30em">ЗАО «Строительное управление №4». Промышленное строительство, металлоконструкции, резервуары, железобетон и дороги. Кыргызстан.</p>
       </div>
-      <div><h3 class="h3">Услуги</h3><ul>${services.map(s => `<li><a href="${up}services/${s.slug}/index.html">${esc(s.nav)}</a></li>`).join('')}</ul></div>
+      <div><h3 class="h3">Услуги</h3><ul>${services.map(s => `<li><a href="${up}services/${s.slug}/index.html">${esc(s.nav)}</a></li>`).join('')}<li><a href="${up}services/index.html"><b>Все направления →</b></a></li></ul></div>
       <div><h3 class="h3">Контакты</h3><ul class="num"><li><a href="tel:+996704141522">+996 704 141 522</a> <span class="mono muted" style="font-size:.62rem">продажи</span></li><li><a href="tel:+996550114459">+996 550 114 459</a> <span class="mono muted" style="font-size:.62rem">снабжение</span></li><li><a href="https://go.2gis.com/DDprr" target="_blank" rel="noopener">Кара-Балта, ул. Кожомбердиева 2<br>Жайылский р-н, Чуйская обл.</a></li></ul></div>
       <div><h3 class="h3">Соцсети</h3><ul><li><a href="https://www.instagram.com/su4.kg" target="_blank" rel="noopener">Instagram</a></li><li><a href="https://youtube.com/@su4kg" target="_blank" rel="noopener">YouTube</a></li><li><a href="https://tiktok.com/@su4.kg" target="_blank" rel="noopener">TikTok</a></li><li><a href="https://t.me/+996704141522" target="_blank" rel="noopener">Telegram</a></li></ul></div>
     </div>
@@ -257,21 +257,28 @@ ${s.formOptions.map(o => `          <option>${esc(o)}</option>`).join('\n')}
   </div>
 </section>`;
 
+  const idx = services.findIndex(o => o.slug === s.slug);
+  const prev = services[(idx - 1 + services.length) % services.length];
+  const next = services[(idx + 1) % services.length];
   const alsoSec = `
 <section class="sec" aria-labelledby="h-also" style="padding-top:0">
   <div class="wrap">
     <hr class="hr" style="margin-bottom:var(--sec-y)">
     <div class="sec-head">
-      <div class="sec-index">Другие направления</div>
+      <div class="sec-index">Соседние направления</div>
       <h2 class="display h2" id="h-also">Компания закрывает весь цикл.</h2>
+      <a class="link-arrow" href="${up}services/index.html">Все направления ${arrow}</a>
     </div>
-    <div class="dirs" role="list">
-${others.map((o, i) => `      <a class="dir reveal" href="${up}services/${o.slug}/index.html" role="listitem">
-        <span class="idx">${String(i + 1).padStart(2, '0')}</span>
-        <div><h3 class="h3">${esc(o.nav)}</h3><p>${esc(o.lead)}</p></div>
-        <span class="arrow" aria-hidden="true">${corner}</span>
-      </a>`).join('\n')}
-    </div>
+    <nav class="pager" aria-label="Переход между направлениями">
+      <a class="pager-prev" href="${up}services/${prev.slug}/index.html">
+        <span class="mono">Предыдущее</span>
+        <span class="ttl">${esc(prev.nav)}</span>
+      </a>
+      <a class="pager-next" href="${up}services/${next.slug}/index.html">
+        <span class="mono">Следующее</span>
+        <span class="ttl">${esc(next.nav)}</span>
+      </a>
+    </nav>
   </div>
 </section>`;
 
@@ -286,7 +293,7 @@ ${others.map((o, i) => `      <a class="dir reveal" href="${up}services/${o.slug
   <div class="wrap case-hero-body">
     <nav class="crumbs" aria-label="Хлебные крошки">
       <a href="${up}index.html">Главная</a><span>/</span>
-      <a href="${up}index.html#services">Услуги</a><span>/</span>
+      <a href="${up}services/index.html">Услуги</a><span>/</span>
       <b aria-current="page">${esc(s.nav)}</b>
     </nav>
     <h1 class="display h1" id="h1">${esc(s.title)}</h1>
@@ -347,6 +354,58 @@ ${projects.map(p => projectCard(p, up)).join('\n')}
 ` + footer(up);
 }
 
+
+/* ---------- раздел услуг ---------- */
+function servicesIndex() {
+  const up = UP = '../';
+  return head('Услуги СУ №4 — шесть направлений', 'Направления ЗАО «Строительное управление №4»: каркасное строительство, металлоконструкции и резервуары, бескаркасные сооружения, дорожное строительство, бетон и ЖБИ, проектирование.', 1) + header(up, 'ask') + `
+<main id="top">
+
+<section class="sec" style="padding-top:130px" aria-labelledby="h1">
+  <div class="wrap">
+    <nav class="crumbs" aria-label="Хлебные крошки" style="margin-bottom:26px">
+      <a href="${up}index.html">Главная</a><span>/</span><b aria-current="page">Услуги</b>
+    </nav>
+    <div class="sec-head">
+      <div class="sec-index">Направления</div>
+      <h1 class="display h2" id="h1">Шесть направлений, одна производственная база.</h1>
+      <p class="lead muted" style="font-size:1rem">Компания проектирует, производит и монтирует — заказчику не нужно сводить между собой проектировщика, завод и монтажников.</p>
+    </div>
+    <div class="offer" style="margin-top:8px">
+${services.map((s, i) => `      <article class="reveal">
+        <div class="ph-frame">${img(s.hero, s.title, ' loading="lazy"')}</div>
+        <div class="body">
+          <span class="mono">${String(i + 1).padStart(2, '0')}</span>
+          <h2 class="h3">${esc(s.nav)}</h2>
+          <p>${esc(s.lead)}</p>
+          <div class="chips">${s.stamp.slice(0, 2).map(([k, v]) => `<span>${esc(v)}</span>`).join('')}</div>
+          <a class="link-arrow" href="${up}services/${s.slug}/index.html" style="align-self:flex-start;margin-top:14px">Подробнее ${arrow}</a>
+        </div>
+      </article>`).join('\n')}
+    </div>
+  </div>
+</section>
+
+<section class="sec paper" id="ask" aria-labelledby="h-ask">
+  <div class="wrap">
+    <div class="case-cta" style="background:transparent;border-color:var(--line-l2);color:var(--ink-on-paper)">
+      <div>
+        <div class="sec-index" style="margin-bottom:16px">Не нашли своё</div>
+        <h2 class="display h2" id="h-ask">Опишите задачу — подскажем направление.</h2>
+        <p style="color:var(--steel-on-paper)">Часть объектов закрывается сразу несколькими направлениями: каркас, металл и дороги на одной площадке.</p>
+      </div>
+      <div class="actions">
+        <a class="btn btn-primary" href="${up}index.html#contacts">Обсудить проект ${arrow}</a>
+        <a class="btn btn-ghost" href="https://wa.me/996704141522">WhatsApp</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+` + footer(up);
+}
+
 let made = 0;
 for (const s of services) {
   const dir = path.join(root, 'services', s.slug);
@@ -355,6 +414,8 @@ for (const s of services) {
   console.log('  услуга: services/' + s.slug + '/index.html');
   made++;
 }
+fs.writeFileSync(path.join(root, 'services/index.html'), servicesIndex());
+console.log('  раздел: services/index.html');
 fs.mkdirSync(path.join(root, 'projects'), { recursive: true });
 fs.writeFileSync(path.join(root, 'projects/index.html'), projectsPage());
 console.log('  список: projects/index.html');

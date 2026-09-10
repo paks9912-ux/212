@@ -592,3 +592,62 @@ ul{list-style:none}
 /* короткая форма запроса на внутренней странице */
 .ask{display:grid;gap:40px}
 @media(min-width:1000px){.ask{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:72px;align-items:start}}
+
+/* ==========================================================
+   Ориентиры: где я нахожусь и куда идти дальше
+   ========================================================== */
+
+/* полоса прочтения — единственный индикатор длины на страницах в 10+ экранов */
+.progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:55;background:var(--accent);transition:width .12s linear}
+
+/* активный раздел в шапке подсвечивается по мере прокрутки */
+.nav a[aria-current="true"]{color:var(--white)}
+.nav a[aria-current="true"]::after{right:0}
+
+/* кнопка «наверх»: без неё возврат с 16 000 px — это работа */
+.totop{position:fixed;right:clamp(16px,2vw,28px);bottom:clamp(16px,2vw,28px);z-index:44;
+  width:48px;height:48px;display:grid;place-items:center;border:1px solid var(--line-d2);border-radius:2px;
+  background:rgba(11,13,16,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--white);
+  opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.totop.show{opacity:1;pointer-events:auto;transform:none}
+.totop:hover{border-color:var(--white)}
+.totop svg{width:20px;height:20px}
+@media(max-width:899px){.totop{bottom:calc(56px + 16px)}}
+
+/* переход к соседним направлениям вместо повторного списка */
+.pager{display:grid;gap:12px;border-top:1px solid var(--rule-strong)}
+@media(min-width:760px){.pager{grid-template-columns:1fr 1fr;gap:0}}
+.pager a{display:grid;gap:8px;padding:26px 0;position:relative}
+.pager a .mono{color:var(--steel)}
+.pager a .ttl{font-family:var(--font-display);font-weight:700;font-size:clamp(1.15rem,1.8vw,1.5rem);letter-spacing:-.015em;line-height:1.15}
+.pager a:hover .ttl{color:var(--accent-soft)}
+.pager-prev{padding-right:20px}
+.pager-next{text-align:right;padding-left:20px}
+@media(min-width:760px){.pager-next{border-left:1px solid var(--rule)}}
+.pager-prev .mono::before{content:"← "}
+.pager-next .mono::after{content:" →"}
+
+/* якорь не должен уезжать под липкую шапку */
+section[id],main[id]{scroll-margin-top:120px}
+
+/* навигация по разделам длинной страницы: одиннадцать секций без неё
+   превращаются в бесконечную ленту без ориентира */
+.secnav{position:sticky;top:62px;z-index:40;background:rgba(11,13,16,.94);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-block:1px solid var(--line-d)}
+.secnav-inner{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--gutter);
+  display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none}
+.secnav-inner::-webkit-scrollbar{display:none}
+.secnav a{position:relative;white-space:nowrap;padding:15px 14px;font-size:.9rem;color:var(--steel);
+  transition:color .25s var(--ease)}
+.secnav a::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:2px;background:var(--accent);
+  transform:scaleX(0);transform-origin:left;transition:transform .3s var(--ease)}
+.secnav a:hover{color:var(--white)}
+.secnav a[aria-current="true"]{color:var(--white)}
+.secnav a[aria-current="true"]::after{transform:none}
+.secnav .secnav-cta{margin-left:auto;color:var(--accent-soft);font-weight:600}
+.secnav .secnav-cta::after{display:none}
+@media(max-width:899px){
+  .secnav{top:0}
+  .secnav .secnav-cta{margin-left:0}
+}

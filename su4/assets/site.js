@@ -19,11 +19,12 @@
      Постер показывается всегда; сам файл грузим только когда это уместно:
      не при экономии трафика, не при отключённой анимации и не на узких экранах,
      где полмегабайта платит пользователь мобильного интернета. */
+  var calmMotion=w.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var hv=d.getElementById('heroVideo');
   if(hv){
     var conn=navigator.connection||{}, saveData=conn.saveData===true,
         slow=/^(slow-)?2g$/.test(conn.effectiveType||''),
-        calm=w.matchMedia('(prefers-reduced-motion: reduce)').matches,
+        calm=calmMotion,
         narrow=w.matchMedia('(max-width: 719px)').matches;
     if(!saveData && !slow && !calm && !narrow){
       ['webm','mp4'].forEach(function(fmt){
@@ -56,6 +57,46 @@
     a.setAttribute('title','Внутренняя страница — следующий этап');
     a.addEventListener('click',function(e){e.preventDefault();});
   });
+
+  /* полоса прочтения и кнопка «наверх»: страница длинная, нужен ориентир */
+  var bar2=d.createElement('div'); bar2.className='progress'; d.body.appendChild(bar2);
+  var top=d.createElement('button'); top.className='totop'; top.type='button';
+  top.setAttribute('aria-label','Наверх');
+  top.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
+  top.addEventListener('click',function(){w.scrollTo({top:0,behavior:calmMotion?'auto':'smooth'});});
+  d.body.appendChild(top);
+
+  /* активный раздел в шапке */
+  var navLinks=[].slice.call(d.querySelectorAll('.secnav a[href^="#"]:not(.secnav-cta)'));
+  var targets=navLinks.map(function(a){return d.getElementById(a.getAttribute('href').slice(1));});
+
+  function onProgress(){
+    var h=d.documentElement.scrollHeight-w.innerHeight;
+    bar2.style.width=(h>0?Math.min(100,w.scrollY/h*100):0)+'%';
+    top.classList.toggle('show', w.scrollY>w.innerHeight);
+    /* активен раздел, чей верх ближе всего к шапке сверху,
+       а не тот, что стоит последним в меню */
+    var active=-1, bestTop=-1e9;
+    for(var i=0;i<targets.length;i++){
+      if(!targets[i]) continue;
+      var t=targets[i].getBoundingClientRect().top;
+      if(t<=140 && t>bestTop){ bestTop=t; active=i; }
+    }
+    navLinks.forEach(function(a,i){
+      if(i===active){
+        if(a.getAttribute('aria-current')!=='true'){
+          a.setAttribute('aria-current','true');
+          /* активный пункт подтягивается в видимую часть ленты на телефоне */
+          var box=a.parentElement;
+          if(box && box.scrollWidth>box.clientWidth){
+            var l=a.offsetLeft-box.clientWidth/2+a.offsetWidth/2;
+            box.scrollTo({left:l, behavior:calmMotion?'auto':'smooth'});
+          }
+        }
+      } else a.removeAttribute('aria-current');
+    });
+  }
+  onProgress(); w.addEventListener('scroll',onProgress,{passive:true});
 
   /* нижняя панель связи: появляется, когда первый экран уехал, и уходит у формы */
   var bar=d.getElementById('callbar'), contacts=d.getElementById('contacts')||d.getElementById('ask')||d.getElementById('discuss');
