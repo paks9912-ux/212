@@ -150,7 +150,7 @@ function servicePage(s) {
       <p class="lead muted" style="font-size:1rem">${esc(s.offer.note)}</p>
     </div>
     <div class="offer">
-${s.offer.items.map((it, i) => `      <article class="reveal">
+${s.offer.items.map((it, i) => `      <article class="reveal" data-zoom="offer">
         <div class="ph-frame">${img(it.img, it.t, ' loading="lazy"')}</div>
         <div class="body">
           <span class="mono">${String(i + 1).padStart(2, '0')}</span>
@@ -196,7 +196,7 @@ ${s.process.steps.map((st, i) => `      <div class="step reveal"><span class="mo
       <p class="lead muted" style="font-size:1rem">${esc(s.gallery.note)}</p>
     </div>
     <div class="gallery">
-${s.gallery.items.map(([f, alt, cap]) => `      <figure class="reveal"><div class="ph-frame">${img(f, alt, ' loading="lazy"')}</div><figcaption>${esc(cap)}</figcaption></figure>`).join('\n')}
+${s.gallery.items.map(([f, alt, cap]) => `      <figure class="reveal" data-zoom="gallery"><div class="ph-frame">${img(f, alt, ' loading="lazy"')}</div><figcaption>${esc(cap)}</figcaption></figure>`).join('\n')}
     </div>
   </div>
 </section>`;
