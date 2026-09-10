@@ -305,6 +305,7 @@ ul{list-style:none}
 .proj .go svg{width:18px;height:18px}
 .proj:hover .go{opacity:1;transform:none}
 .proj a.cover{position:absolute;inset:0;z-index:1}
+.proj--flat:hover img{transform:none}
 .proj a.cover:focus-visible{outline-offset:-2px}
 
 /* ---------- 05 производство ---------- */
