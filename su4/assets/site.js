@@ -1,5 +1,7 @@
 (function(){
   var d=document, w=window;
+  /* без скрипта появление блоков не включается: контент виден сразу */
+  d.documentElement.classList.add('js');
   /* годы считаем от 1952 */
   var now=new Date().getFullYear(), yrs=now-1952;
   ['years','years2'].forEach(function(id){var e=d.getElementById(id);if(e)e.textContent=yrs;});
@@ -54,6 +56,17 @@
     a.setAttribute('title','Внутренняя страница — следующий этап');
     a.addEventListener('click',function(e){e.preventDefault();});
   });
+
+  /* нижняя панель связи: появляется, когда первый экран уехал, и уходит у формы */
+  var bar=d.getElementById('callbar'), contacts=d.getElementById('contacts')||d.getElementById('ask')||d.getElementById('discuss');
+  if(bar){
+    var toggleBar=function(){
+      var past=w.scrollY>w.innerHeight*0.7;
+      var atForm=contacts && contacts.getBoundingClientRect().top < w.innerHeight;
+      bar.classList.toggle('show', past && !atForm);
+    };
+    toggleBar(); w.addEventListener('scroll',toggleBar,{passive:true});
+  }
 
   /* reveal: элементы ниже первого экрана появляются при скролле */
   var reduce=w.matchMedia('(prefers-reduced-motion: reduce)').matches;
