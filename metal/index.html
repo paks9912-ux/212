@@ -1152,6 +1152,66 @@ a:focus-visible,.btn:focus-visible{outline:2px solid var(--primer);outline-offse
       put(new THREE.Mesh(GCONE, mCone), q[0], GRD + 0.31, q[1]);
     });
 
+    /* монтажники: без людей здание читается как макет, а не как объект */
+    var mVest = siteMat(0xc4520f, 0.78, 0.04);
+    var mVest2 = siteMat(0xa8b41c, 0.78, 0.04);
+    var mSleeve = siteMat(0x3b444d, 0.85, 0.03);
+    var mTrouser = siteMat(0x2a3138, 0.88, 0.02);
+    var mSkin = siteMat(0x9a7355, 0.82, 0.0);
+    var mHatW = siteMat(0xe6e8e6, 0.55, 0.05);
+    var mHatO = siteMat(0xdd7a20, 0.55, 0.05);
+
+    var G_LEG = new THREE.BoxGeometry(0.15, 0.86, 0.17);
+    var G_TORSO = new THREE.BoxGeometry(0.44, 0.58, 0.25);
+    var G_ARM = new THREE.BoxGeometry(0.13, 0.54, 0.14);
+    var G_HEAD = new THREE.SphereGeometry(0.105, 12, 10);
+    var G_DOME = new THREE.SphereGeometry(0.135, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2);
+    var G_BRIM = new THREE.CylinderGeometry(0.165, 0.165, 0.022, 16);
+
+    function worker(vest, hat, armLift, stride) {
+      var w = new THREE.Group();
+      [-0.12, 0.12].forEach(function (dx, i) {
+        var leg = new THREE.Mesh(G_LEG, mTrouser);
+        leg.position.set(dx, 0.43, i === 0 ? stride : -stride);
+        if (stride) leg.rotation.x = (i === 0 ? -1 : 1) * 0.32;
+        w.add(leg);
+      });
+      var torso = new THREE.Mesh(G_TORSO, vest);
+      torso.position.y = 1.15; w.add(torso);
+      [-0.285, 0.285].forEach(function (dx, i) {
+        var arm = new THREE.Mesh(G_ARM, mSleeve);
+        arm.position.set(dx, 1.12, 0);
+        arm.rotation.z = (i === 0 ? 1 : -1) * (0.12 + armLift * 0.62);
+        arm.rotation.x = armLift ? -0.5 : 0.06;
+        if (armLift) arm.position.y = 1.24;
+        w.add(arm);
+      });
+      var head = new THREE.Mesh(G_HEAD, mSkin);
+      head.position.y = 1.55; w.add(head);
+      var dome = new THREE.Mesh(G_DOME, hat);
+      dome.position.y = 1.585; w.add(dome);
+      var brim = new THREE.Mesh(G_BRIM, hat);
+      brim.position.y = 1.585; w.add(brim);
+      return w;
+    }
+
+    [
+      [10.6, 2.4, 2.2, mVest, mHatO, 0.45, 0],      /* принимают колонну */
+      [11.9, 4.2, -1.0, mVest2, mHatW, 0.15, 0],
+      [6.0, -14.0, 0.4, mVest, mHatW, 0, 0.1],     /* идёт внутри пролёта */
+      [14.8, -6.5, 2.6, mVest2, mHatO, 0.7, 0],   /* сигналит крановщику */
+      [-9.2, 18.0, 1.2, mVest, mHatW, 0, 0],
+      [16.4, -31.0, 0.9, mVest2, mHatW, 0.2, 0.08],
+      [19.8, -41.5, -0.6, mVest, mHatO, 0, 0],     /* у пачек панелей */
+      [1.5, 31.0, 3.0, mVest2, mHatW, 0, 0.09],    /* у АБК */
+      [14.6, 3.6, 1.7, mVest, mHatW, 0, 0]         /* у базы колонны */
+    ].forEach(function (q) {
+      var w = worker(q[3], q[4], q[5], q[6]);
+      w.position.set(q[0], GRD, q[1]);
+      w.rotation.y = q[2];
+      site.add(w);
+    });
+
     site.visible = false;
     scene.add(site);
 
