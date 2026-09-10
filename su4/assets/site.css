@@ -76,7 +76,7 @@ ul{list-style:none}
   display:grid;grid-template-columns:minmax(0,1fr);gap:20px 48px;
   margin-bottom:clamp(36px,5vw,72px);
 }
-@media(min-width:900px){.sec-head{grid-template-columns:auto minmax(0,1fr) auto;align-items:end}}
+@media(min-width:900px){.sec-head{grid-template-columns:auto minmax(0,2fr) minmax(0,1fr);align-items:end}}
 @media(min-width:900px){.sec-head-projects{grid-template-columns:auto minmax(0,1fr)}.sec-head-projects .filters{grid-column:1/-1;margin-top:8px}}
 .sec-index{
   font-family:var(--font-mono);font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;
@@ -512,3 +512,23 @@ ul{list-style:none}
 .case-cta .h2{font-size:clamp(1.6rem,2.8vw,2.6rem)}
 .case-cta p{color:var(--steel-2);margin-top:12px;max-width:40em}
 .case-cta .actions{display:flex;flex-wrap:wrap;gap:12px}
+
+/* ==========================================================
+   Страница услуги
+   ========================================================== */
+.offer{display:grid;gap:16px}
+@media(min-width:760px){.offer{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.offer article{border:1px solid var(--rule);background:var(--ink-800);display:flex;flex-direction:column}
+.sec.paper .offer article{background:transparent}
+.offer .ph-frame{aspect-ratio:16/10}
+.offer .body{padding:22px 24px 26px;display:flex;flex-direction:column;gap:12px;flex:1}
+.offer .mono{color:var(--accent)}
+.offer .h3{font-size:clamp(1.2rem,1.7vw,1.5rem)}
+.offer p{color:var(--steel-2);font-size:.95rem}
+.sec.paper .offer p{color:var(--steel-on-paper)}
+.offer .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:auto;padding-top:6px}
+.offer .chips span{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:6px 9px;border:1px solid var(--rule-strong);border-radius:2px}
+
+/* короткая форма запроса на внутренней странице */
+.ask{display:grid;gap:40px}
+@media(min-width:1000px){.ask{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:72px;align-items:start}}
