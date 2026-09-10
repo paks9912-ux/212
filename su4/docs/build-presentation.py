@@ -14,7 +14,10 @@ IMAGES = {
     'mob_serv': 'p-mob-serv.jpg', 'new_proj': 'p-new-proj.jpg',
     'new_page': 'p-new-page.jpg', 'new_cta':  'p-new-cta.jpg',
     'lightbox': 'p-lightbox.jpg', 'case':     'p-case.jpg',
-    'about':    'p-about.jpg',
+    'about':    'p-about.jpg',    'tablet':   'p-tablet.jpg',
+    'figure':   'p-figure.jpg',   'trust':    'p-trust.jpg',
+    'prod':     'p-prod.jpg',     'old_proj': 'p-old-proj.jpg',
+    'tourposter': 'tour-poster.jpg',
 }
 
 def fonts_css():
@@ -29,7 +32,13 @@ def fonts_css():
             css = css.replace(prefix + name + ')', 'url(' + uri + ')')
     return css
 
+def video_uri(name, mime='video/mp4'):
+    with open(os.path.join(SHOTS, name), 'rb') as f:
+        return 'data:' + mime + ';base64,' + base64.b64encode(f.read()).decode()
+
 html = open(os.path.join(HERE, 'presentation.src.html'), encoding='utf-8').read()
+html = html.replace('{{tourwebm}}', video_uri('tour.webm', 'video/webm'))
+html = html.replace('{{tour}}', video_uri('tour.mp4'))
 html = html.replace('{{fonts}}', fonts_css())
 for key, name in IMAGES.items():
     html = html.replace('{{' + key + '}}', data_uri(name))

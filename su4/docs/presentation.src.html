@@ -126,6 +126,156 @@
 .slide.light .target{background:rgba(11,13,16,.07)}
 .target-sm{width:22px;height:22px}
 .target-lg{width:48px;height:48px}
+
+/* ---------- компоненты сценария ---------- */
+.inner.wide{max-width:1420px}
+.ba-chip{display:inline-flex;align-items:center;gap:14px;border:1px solid var(--rule-2);padding:12px 20px;
+  font-family:var(--display);text-transform:uppercase;letter-spacing:.08em;font-size:1rem;justify-self:start}
+.ba-chip .was{color:var(--tx-3)}
+.ba-chip .arrow{color:var(--azure-2)}
+.ba-chip .now{color:#fff}
+
+.mini-list{display:grid;gap:0;border-top:1px solid var(--rule);margin:0;padding:0;list-style:none}
+.mini-list li{display:grid;grid-template-columns:2.6em 1fr;gap:14px;align-items:baseline;padding:13px 0;border-bottom:1px solid var(--rule)}
+.mini-list .n{font-family:var(--mono);font-size:.72rem;letter-spacing:.08em;color:var(--azure-2)}
+.mini-list li span:last-child{font-size:clamp(.95rem,1.2vw,1.1rem)}
+.slide.light .mini-list li,.slide.light .mini-list{border-color:#C9CFD5}
+.slide.light .mini-list .n{color:var(--blue)}
+
+.qs{display:flex;flex-wrap:wrap;gap:8px}
+.qs span{border:1px solid var(--rule-2);padding:10px 14px;font-family:var(--display);text-transform:uppercase;
+  letter-spacing:.04em;font-size:clamp(.9rem,1.2vw,1.1rem)}
+.slide.light .qs span{border-color:#B9C0C7}
+
+/* цепочка шагов */
+.chain{display:grid;gap:10px}
+@media(min-width:900px){.chain{grid-auto-flow:column;grid-auto-columns:1fr;gap:0}}
+.chain .node{position:relative;border-top:2px solid var(--rule-2);padding:16px 18px 18px 0;display:grid;gap:6px;align-content:start}
+@media(min-width:900px){.chain .node{padding-right:24px}}
+.chain .node b{font-family:var(--display);font-weight:500;text-transform:uppercase;font-size:clamp(.98rem,1.25vw,1.2rem);line-height:1.15}
+.chain .node span{font-size:.86rem;color:var(--tx-3)}
+.chain .node i.n{font-family:var(--mono);font-style:normal;font-size:.68rem;letter-spacing:.1em;color:var(--azure-2)}
+.chain .node::before{content:"";position:absolute;top:-2px;left:0;width:34px;height:2px;background:var(--azure)}
+.chain-was .node::before{background:#6E7883}
+.chain-was .node b{color:var(--tx-2)}
+@media(min-width:900px){
+  .chain .node::after{content:"→";position:absolute;top:14px;right:6px;color:var(--tx-3);font-size:.9rem}
+  .chain .node:last-child::after{content:none}
+}
+.slide.light .chain .node{border-color:#C9CFD5}
+.slide.light .chain .node span{color:#4A525B}
+.slide.light .chain .node::before{background:var(--blue)}
+.chain-v{grid-auto-flow:row!important;grid-auto-columns:auto!important;gap:6px}
+.chain-v .node{padding:11px 14px 12px 0}
+.slide[data-title="Следующий этап"] .price-main b{font-size:clamp(1.5rem,2.6vw,2.4rem)}
+.slide[data-title="Следующий этап"] .ft td{padding:5px 10px 5px 0;font-size:.9rem}
+.chain-v .node::after{content:none!important}
+
+/* пары было → стало */
+.pairs{display:grid;gap:8px}
+@media(min-width:900px){.pairs{grid-template-columns:1fr 1fr;gap:8px 28px}}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;
+  border-bottom:1px solid var(--rule);padding:10px 0}
+.pair i{font-style:normal;color:var(--azure-2)}
+.p-was{color:var(--tx-3);font-size:.95rem}
+.p-now{font-family:var(--display);text-transform:uppercase;font-weight:500;font-size:clamp(.95rem,1.2vw,1.15rem);color:#fff}
+.slide.light .pair{border-color:#C9CFD5}
+.slide.light .p-now{color:var(--ink)}
+.slide.light .pair i{color:var(--blue)}
+.statement-line{font-family:var(--display);text-transform:uppercase;font-weight:500;
+  font-size:clamp(1.1rem,1.9vw,1.7rem);line-height:1.2;border-top:2px solid var(--azure);padding-top:14px}
+
+.shot-sm figure{max-height:24vh}
+.shot-sm img{height:100%;object-fit:cover;object-position:top center}
+
+/* полосное изображение */
+.bleed{margin:0;border:1px solid var(--rule-2);overflow:hidden;max-height:60vh}
+.bleed img{width:100%;height:100%;object-fit:cover;object-position:top center}
+.slide.light .bleed{border-color:#B9C0C7}
+
+.slide[data-title="Проекты"] .shot figure{max-height:34vh}
+.slide[data-title="Проекты"] .shot img{height:100%;object-fit:cover;object-position:top center}
+
+/* формула доказательства */
+.formula{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:16px 0}
+.formula span{font-family:var(--display);text-transform:uppercase;font-size:clamp(.95rem,1.3vw,1.2rem);color:var(--tx-2)}
+.formula i{font-style:normal;color:var(--tx-3)}
+.formula i.eq{color:var(--azure-2)}
+.formula b{font-family:var(--display);text-transform:uppercase;font-size:clamp(1.05rem,1.6vw,1.5rem);color:var(--azure-2)}
+.slide.light .formula{border-color:#C9CFD5}
+.slide.light .formula b,.slide.light .formula i.eq{color:var(--blue)}
+
+/* декларации */
+.claims{display:grid;gap:8px}
+.claims span{border:1px dashed var(--rule-2);padding:12px 14px;color:var(--tx-3);font-size:1rem}
+.slide.light .claims span{border-color:#B9C0C7;color:#79828C}
+
+/* образцы визуального языка */
+.spec{display:grid;gap:clamp(16px,2.4vw,34px)}
+@media(min-width:1000px){.spec{grid-template-columns:repeat(3,1fr)}}
+.spec-col{min-width:0}
+.type-sample{display:grid;gap:6px}
+.type-sample b{font-family:var(--display);font-weight:600;text-transform:uppercase;font-size:clamp(1.3rem,2.2vw,2rem);line-height:1.08}
+.type-sample p{font-size:.98rem;color:var(--tx-2)}
+.type-sample .mono{color:var(--tx-3)}
+.slide.light .type-sample p{color:#4A525B}
+.sw-lg{width:56px;height:56px}
+.btn-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.fake-btn{display:inline-flex;align-items:center;gap:10px;background:var(--blue);color:#fff;padding:14px 20px;
+  font-family:var(--display);text-transform:uppercase;letter-spacing:.06em;font-size:.9rem}
+.fake-link{font-family:var(--display);text-transform:uppercase;letter-spacing:.06em;font-size:.9rem;
+  box-shadow:inset 0 -1px 0 currentColor;padding-bottom:3px}
+.chip{font-family:var(--mono);font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;padding:7px 10px;border:1px solid var(--rule-2)}
+.slide.light .chip{border-color:#B9C0C7}
+.spec-photo{margin:0;border:1px solid var(--rule-2);overflow:hidden;aspect-ratio:16/10}
+.spec-photo img{width:100%;height:100%;object-fit:cover}
+.slide.light .spec-photo{border-color:#B9C0C7}
+
+/* устройства */
+.devices{display:grid;gap:clamp(14px,2vw,28px);align-items:end}
+.devices figure{max-height:44vh}
+@media(min-width:900px){.devices{grid-template-columns:minmax(0,7fr) minmax(0,3.4fr) minmax(0,2fr)}}
+.dev{display:grid;gap:8px;min-width:0}
+.dev figure{margin:0;border:1px solid var(--rule-2);overflow:hidden;background:#0F1317}
+.dev img{width:100%;height:auto;display:block}
+.dev-desktop figure{aspect-ratio:16/9}
+.dev-desktop img{height:100%;object-fit:cover;object-position:top center}
+.dev-tablet figure{aspect-ratio:3/4}
+.dev-tablet img{height:100%;object-fit:cover;object-position:top center}
+.dev-mobile figure{aspect-ratio:9/16}
+.dev-mobile img{height:100%;object-fit:cover;object-position:top center}
+.dev .mono{color:var(--tx-3)}
+.slide.light .dev figure{border-color:#B9C0C7;background:#fff}
+
+/* запись интерфейса */
+.tour{margin:0;border:1px solid var(--rule-2);background:#0F1317;overflow:hidden;max-height:58vh;display:grid;place-items:center}
+.tour video{width:100%;height:100%;max-height:58vh;object-fit:contain;display:block}
+
+/* что сделано */
+.checks{display:grid;gap:clamp(16px,2.4vw,40px)}
+@media(min-width:840px){.checks{grid-template-columns:repeat(3,1fr)}}
+.checks ul{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.checks li{position:relative;padding-left:26px;font-size:.98rem;color:var(--tx-2)}
+.checks li::before{content:"✓";position:absolute;left:0;top:0;color:var(--azure-2);font-size:.9rem}
+.slide.light .checks li{color:#3F4750}
+.slide.light .checks li::before{color:var(--blue)}
+
+/* что получает компания */
+.gains{display:grid;gap:0;border-top:1px solid var(--rule)}
+@media(min-width:900px){.gains{grid-template-columns:1fr 1fr;column-gap:48px}}
+.gains>div{display:grid;gap:5px;padding:16px 0;border-bottom:1px solid var(--rule)}
+.gains b{font-family:var(--display);font-weight:500;text-transform:uppercase;font-size:clamp(1rem,1.35vw,1.25rem)}
+.gains span{font-size:.92rem;color:var(--tx-3)}
+.slide.light .gains,.slide.light .gains>div{border-color:#C9CFD5}
+
+/* чёрные слайды */
+.slide-black{background:#000}
+.big-statement{font-family:var(--display);font-weight:600;text-transform:uppercase;
+  font-size:clamp(1.8rem,4.4vw,4rem);line-height:1.12;max-width:20em;color:#fff}
+.big-statement.dim{color:var(--azure-2)}
+.ladder{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:clamp(20px,3vw,40px);
+  border-top:1px solid #23282E;padding-top:20px;font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-3)}
+.ladder i{font-style:normal;color:var(--azure-2)}
 </style>
 <style>
 :root{
@@ -350,468 +500,439 @@ ul{list-style:none;margin:0;padding:0}
 
 <div class="deck" id="deck">
 
-  <!-- 01 -->
-  <section class="slide" data-title="Титул">
+  <!-- 01 ОБЛОЖКА -->
+  <section class="slide" data-title="Обложка">
     <div class="inner">
-      <div class="title-eyebrow mono">
-        <span>Коммерческое предложение</span><span>ЗАО «Строительное управление №4»</span><span>Кара-Балта · su4.kg</span>
-      </div>
-      <h1 class="hero-h1">Новый сайт: <em>тот же завод, другой разговор с заказчиком.</em></h1>
-      <p class="lead">Сайт замерен браузером — цифры ниже можно перепроверить самим.</p>
-      <div class="title-foot mono">
-        <span>Листать: стрелки, пробел или свайп</span><span>Обзор слайдов — клавиша O</span>
-      </div>
+      <div class="title-eyebrow mono"><span>ЗАО «Строительное управление №4»</span><span>Кара-Балта · с 1952 года</span></div>
+      <h1 class="hero-h1">Обновление <em>цифрового представительства</em> компании.</h1>
+      <div class="ba-chip"><span class="was">Было</span><span class="arrow">→</span><span class="now">Стало</span></div>
+      <div class="title-foot mono"><span>Листать: стрелки, пробел или свайп</span><span>Обзор слайдов — клавиша O</span></div>
     </div>
   </section>
 
-  <!-- 02 -->
-  <section class="slide" data-title="Если коротко">
+  <!-- 02 С ЧЕГО НАЧАЛИ -->
+  <section class="slide" data-title="Что уже есть">
     <div class="inner">
-      <span class="kicker">01 / Если коротко</span>
-      <h2>Что изменилось.</h2>
+      <span class="kicker">01 / С чего мы начали</span>
+      <h2>Что уже есть у компании.</h2>
       <div class="figs four">
-        <div class="fig"><b>4,5×</b><span>легче страница</span></div>
-        <div class="fig"><b>6×</b><span>меньше обращений к серверу</span></div>
-        <div class="fig"><b>0 из 219</b><span>текстов ниже нормы читаемости</span></div>
-        <div class="fig"><b>17</b><span>рабочих размеров вместо нуля</span></div>
+        <div class="fig"><b>1952</b><span>год основания — 74 года непрерывной работы</span></div>
+        <div class="fig"><b>4500<i>+</i></b><span>построенных объектов</span></div>
+        <div class="fig"><b>45 000 <i>т</i></b><span>металлоконструкций изготовлено с 1991 года</span></div>
       </div>
       <div class="figs four">
-        <div class="fig"><b>9</b><span>страниц вместо одной длинной</span></div>
-        <div class="fig"><b>6</b><span>направлений с параметрами</span></div>
-        <div class="fig"><b>12</b><span>объектов с фильтром</span></div>
-        <div class="fig"><b>5</b><span>каналов связи на каждой странице</span></div>
+        <div class="fig"><b>Производство</b><span>цеха металлоконструкций, бетонный и асфальтобетонный заводы, линии ЖБИ</span></div>
+        <div class="fig"><b>Объекты</b><span>рудники, заводы, склады, резервуары, дороги</span></div>
+        <div class="fig"><b>Заказчики</b><span>горнодобывающие, нефтегазовые, телеком-компании и муниципалитеты</span></div>
+      </div>
+      <p class="lead">Задача была не придумать компании преимущества, которых у неё нет. Задача — правильно показать уже существующие.</p>
+    </div>
+  </section>
+
+  <!-- 03 ТЕКУЩИЙ САЙТ -->
+  <section class="slide light" data-title="Текущий сайт">
+    <div class="inner">
+      <span class="kicker" style="color:#0A6FBE">02 / Текущий сайт</span>
+      <h2>Компания сильнее, чем её цифровое представительство.</h2>
+      <div class="viz two" style="align-items:center">
+        <div class="shot"><figure><img src="{{old_hero}}" alt="Первый экран текущего сайта su4.kg"></figure></div>
+        <div>
+          <p class="lead">На сайте есть практически вся нужная информация: услуги, производство, проекты, история, партнёры, контакты. Дело не в количестве информации.</p>
+          <p class="lead" style="margin-top:14px"><b class="hi">Вопрос в другом:</b> насколько быстро новый посетитель соберёт из неё целостное представление о компании.</p>
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 03 -->
-  <section class="slide" data-title="Ожидание">
+  <!-- 04 ПРОБЛЕМА -->
+  <section class="slide" data-title="Основная проблема">
     <div class="inner">
-      <span class="kicker">02 / Сколько ждёт заказчик</span>
-      <h2>Полторы минуты против двадцати секунд.</h2>
+      <span class="kicker">03 / Основная проблема</span>
+      <h2>Много информации. Мало приоритета.</h2>
       <div class="viz two">
         <div>
-          <div class="viz-head">Полная загрузка при связи 1 Мбит/с</div>
-          <div class="bars">
-            <div class="bar-row bar-was"><span class="bar-lab">Было</span><div class="bar-track"><i class="bar-fill" style="--w:100%"></i></div><b class="bar-val">1,5 мин</b></div>
-            <div class="bar-row bar-now"><span class="bar-lab">Стало</span><div class="bar-track"><i class="bar-fill" style="--w:22%"></i></div><b class="bar-val">20 с</b></div>
-          </div>
+          <ol class="mini-list">
+            <li><span class="n">01</span><span>Информационная перегрузка</span></li>
+            <li><span class="n">02</span><span>Недостаточная визуальная иерархия</span></li>
+            <li><span class="n">03</span><span>Не до конца раскрыто позиционирование</span></li>
+            <li><span class="n">04</span><span>Длинный путь до нужной информации</span></li>
+            <li><span class="n">05</span><span>Проекты воспринимаются как галерея</span></li>
+            <li><span class="n">06</span><span>Обращение не встроено в путь пользователя</span></li>
+          </ol>
         </div>
         <div>
-          <div class="viz-head">Скачивает телефон за одно открытие</div>
-          <div class="bars">
-            <div class="bar-row bar-was"><span class="bar-lab">Было</span><div class="bar-track"><i class="bar-fill" style="--w:100%"></i></div><b class="bar-val">11,5 МБ</b></div>
-            <div class="bar-row bar-now"><span class="bar-lab">Стало</span><div class="bar-track"><i class="bar-fill" style="--w:22%"></i></div><b class="bar-val">2,5 МБ</b></div>
+          <div class="viz-head">На эти вопросы посетитель отвечает за первые секунды</div>
+          <div class="qs">
+            <span>Кто вы?</span><span>Что вы умеете?</span><span>Какой у вас масштаб?</span>
+            <span>Почему вам можно доверять?</span><span>Как с вами начать работу?</span>
           </div>
+          <p class="lead" style="margin-top:18px">Вокруг этих пяти вопросов и построена новая структура.</p>
         </div>
       </div>
-      <p class="lead">Первые две секунды сайт вообще ничего не показывает — столько отвечает сервер. Снабженец не ждёт: закрывает и открывает следующего подрядчика.</p>
     </div>
   </section>
 
-  <!-- 04 -->
-  <section class="slide" data-title="Что грузится">
+  <!-- 05 БЫЛО: ПУТЬ -->
+  <section class="slide" data-title="Путь: было">
     <div class="inner">
-      <span class="kicker">03 / Откуда берётся вес</span>
-      <h2>Каждый квадрат — один поход браузера за файлом.</h2>
-      <div class="dots-pair">
-        <div>
-          <div class="viz-head">Было</div>
-          <div class="dots-field" data-n="178"></div>
-          <div class="dots-cap"><b>178</b><span>обращений к серверу за одну страницу</span></div>
-        </div>
-        <div>
-          <div class="viz-head">Стало</div>
-          <div class="dots-field dots-now" data-n="29"></div>
-          <div class="dots-cap"><b>29</b><span>обращений к серверу за одну страницу</span></div>
-        </div>
+      <span class="kicker">04 / Как пользователь проходит текущий сайт</span>
+      <h2>Пользователь сам решает, что здесь важно.</h2>
+      <div class="chain chain-was">
+        <div class="node"><b>Главная</b></div>
+        <div class="node"><b>Большой объём информации</b></div>
+        <div class="node"><b>Поиск направления</b></div>
+        <div class="node"><b>Переходы между разделами</b></div>
+        <div class="node"><b>Изучение проектов</b></div>
+        <div class="node"><b>Контакты</b></div>
+        <div class="node"><b>Обращение</b></div>
       </div>
-      <div class="figs four">
-        <div class="fig"><b>56 <i>→</i> 1</b><span>файл оформления</span></div>
-        <div class="fig"><b>44 <i>→</i> 1</b><span>скрипт</span></div>
-        <div class="fig"><b>20 <i>→</i> 0</b><span>вставок кода в разметке</span></div>
-        <div class="fig"><b>2040 <i>→</i> 692</b><span>элемента на странице</span></div>
-      </div>
+      <p class="lead">Для информационного корпоративного сайта это нормально. Для коммерческого B2B-сайта путь можно сделать значительно понятнее.</p>
     </div>
   </section>
 
-  <!-- 05 -->
-  <section class="slide light" data-title="Читаемость">
+  <!-- 06 СТАЛО: ЛОГИКА -->
+  <section class="slide" data-title="Путь: стало">
     <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">04 / Читаемость — взгляд дизайнера</span>
-      <h2>Так это выглядит вблизи.</h2>
-      <div class="viz two">
-        <div>
-          <div class="viz-head">Было — настоящие пары цветов с сайта</div>
-          <div class="cx">
-            <div class="cx-item cx-bad" style="background:#4D87C1;color:#69727D"><span>Instagram</span><b>1,3 : 1</b></div>
-            <div class="cx-item cx-bad" style="background:#25D366;color:#69727D"><span>Whatsapp</span><b>2,5 : 1</b></div>
-            <div class="cx-item cx-bad" style="background:#F1001C;color:#FFFFFF"><span>Оставить заявку</span><b>4,4 : 1</b></div>
-          </div>
-        </div>
-        <div>
-          <div class="viz-head">Стало</div>
-          <div class="cx">
-            <div class="cx-item cx-ok" style="background:#0A6FBE;color:#FFFFFF"><span>Обсудить проект</span><b>5,1 : 1</b></div>
-            <div class="cx-item cx-ok" style="background:#EEF0F2;color:#626A73"><span>Подпись под фотографией</span><b>4,8 : 1</b></div>
-            <div class="cx-item cx-ok" style="background:#0B0D10;color:#C3C9D0"><span>Текст на тёмном фоне</span><b>9,7 : 1</b></div>
-          </div>
-        </div>
+      <span class="kicker">05 / Новая логика</span>
+      <h2>Мы изменили не только внешний вид.</h2>
+      <div class="chain chain-now">
+        <div class="node"><b>Позиционирование</b><span>кто перед вами</span></div>
+        <div class="node"><b>Направление</b><span>что умеем</span></div>
+        <div class="node"><b>Проекты</b><span>что уже построено</span></div>
+        <div class="node"><b>Доказательства</b><span>производство и цифры</span></div>
+        <div class="node"><b>Доверие</b><span>письма, документы, история</span></div>
+        <div class="node"><b>Действие</b><span>следующий шаг</span></div>
       </div>
-      <div class="lines">
-        <div class="line-demo line-wide"><span>Было — строка до 180 знаков</span><p>Глаз теряет начало следующей строки: возвращаясь слева направо, читатель промахивается и перечитывает одно и то же место дважды, поэтому длинные строки утомляют быстрее коротких.</p></div>
-        <div class="line-demo line-ok"><span>Стало — 66 знаков</span><p>Глаз находит начало следующей строки без усилий, и текст читается спокойно.</p></div>
-      </div>
-      <p class="foot-note mono">Норма контраста 4,5:1 по стандарту доступности, длина строки 45–75 знаков. Тексты поверх фотографий не учитывались: 20 из 79 ниже нормы против 0 из 123.</p>
+      <p class="lead">Сначала человек понимает, кто перед ним. Потом видит, что компания умеет. Потом получает доказательства. И только потом мы предлагаем следующий шаг.</p>
     </div>
   </section>
 
-  <!-- 06 -->
-  <section class="slide light" data-title="Порядок">
-    <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">05 / Порядок — взгляд дизайнера</span>
-      <h2>Система вместо набора решений.</h2>
-      <div class="viz two">
-        <div>
-          <div class="viz-head">Цвета фона на странице</div>
-          <div class="sw-row">
-            <span class="sw" style="background:#FFFFFF"></span><span class="sw" style="background:#001020"></span>
-            <span class="sw" style="background:#F1001C"></span><span class="sw" style="background:#4F6ACA"></span>
-            <span class="sw" style="background:#000000"></span><span class="sw" style="background:#05101F"></span>
-            <span class="sw" style="background:#4D87C1"></span><span class="sw" style="background:#25D366"></span>
-            <span class="sw" style="background:#2CA5E0"></span><span class="sw" style="background:#CD201F"></span>
-            <span class="sw" style="background:#03E78B"></span><span class="sw" style="background:#49E670"></span>
-            <span class="sw" style="background:#3E99D8"></span><span class="sw" style="background:#DD0000"></span>
-          </div>
-          <div class="sw-cap">Было — 14 цветов, часть пришла вместе с дополнениями</div>
-          <div class="sw-row" style="margin-top:14px">
-            <span class="sw" style="background:#0B0D10"></span><span class="sw" style="background:#E4E7EB"></span>
-            <span class="sw" style="background:#F7F8F9"></span><span class="sw" style="background:#171B21"></span>
-            <span class="sw" style="background:#0A6FBE"></span><span class="sw" style="background:#0985C3"></span>
-          </div>
-          <div class="sw-cap">Стало — 6 цветов, два из них взяты из логотипа</div>
-        </div>
-        <div>
-          <div class="viz-head">Скругление углов</div>
-          <div class="shapes">
-            <span class="shape-box"><i class="shape" style="border-radius:10px"></i><span>10</span></span>
-            <span class="shape-box"><i class="shape" style="border-radius:15px"></i><span>15</span></span>
-            <span class="shape-box"><i class="shape" style="border-radius:20px"></i><span>20</span></span>
-            <span class="shape-box"><i class="shape" style="border-radius:30px"></i><span>30</span></span>
-            <span class="shape-box"><i class="shape" style="border-radius:35px"></i><span>35</span></span>
-            <span class="shape-box"><i class="shape" style="border-radius:50px"></i><span>50</span></span>
-            <span class="shape-box"><i class="shape" style="border-radius:100px"></i><span>100</span></span>
-          </div>
-          <div class="sw-cap">Было — семь разных радиусов на одной странице</div>
-          <div class="shapes" style="margin-top:14px"><span class="shape-box"><i class="shape shape-now"></i><span>0</span></span></div>
-          <div class="sw-cap">Стало — один прямой угол везде</div>
-        </div>
-      </div>
-      <div class="viz two">
-        <div>
-          <div class="viz-head">Левые края блоков — было, 23 линии</div>
-          <div class="rules" data-edges="0,16,32,36,40,72,128,192,304,480,500,504,524,528,732,936,952,960,1080,1148,1368,1440,1804" data-max="1804"></div>
-        </div>
-        <div>
-          <div class="viz-head">Стало — 12 линий одной сетки</div>
-          <div class="rules rules-now" data-edges="0,56,140,164,508,580,736,796,860,960,980,1080" data-max="1440"></div>
-        </div>
-      </div>
+  <!-- 07 НОВАЯ КОНЦЕПЦИЯ -->
+  <section class="slide" data-title="Новая концепция">
+    <div class="inner wide">
+      <span class="kicker">06 / Новая концепция</span>
+      <figure class="bleed"><img src="{{new_hero}}" alt="Первый экран новой версии: промышленное строительство полного цикла с 1952 года"></figure>
+      <p class="lead">Промышленное строительство полного цикла — с 1952 года. Специализация, история и масштаб сразу на первом экране.</p>
     </div>
   </section>
 
-  <!-- 07 -->
-  <section class="slide" data-title="Структура">
-    <div class="inner">
-      <span class="kicker">06 / Структура и поиск</span>
-      <h2>У страницы не было названия.</h2>
-      <div class="figs four">
-        <div class="fig"><b>0 <i>→</i> 1</b><span>главный заголовок страницы</span></div>
-        <div class="fig"><b>28 <i>→</i> 5</b><span>подзаголовков подряд</span></div>
-        <div class="fig"><b>174 <i>→</i> 51</b><span>ссылок на одной странице</span></div>
-        <div class="fig"><b>38 <i>→</i> 2</b><span>ссылки, ведущие в никуда</span></div>
-      </div>
-      <p class="lead">Поиск читает заголовок первым: без него он не понимает, чья это страница и о чём.</p>
-    </div>
-  </section>
-
-  <!-- 08 -->
-  <section class="slide" data-title="Фотографии">
-    <div class="inner">
-      <span class="kicker">07 / Фотографии</span>
-      <h2>Текст уезжает из-под пальца, пока грузятся фото.</h2>
-      <div class="figs four">
-        <div class="fig"><b>99 <i>→</i> 32</b><span>фотографии на главной</span></div>
-        <div class="fig"><b>77 <i>→</i> 1</b><span>без заранее отведённого места</span></div>
-        <div class="fig"><b>7,5 <i>→</i> 1,6 МБ</b><span>весят все снимки страницы</span></div>
-        <div class="fig"><b>7 <i>→</i> 5</b><span>разных пропорций кадра</span></div>
-      </div>
-      <p class="lead">Плюс 105 фотографий пересобраны заново: кадрирование под нужную пропорцию и мягкая резкость.</p>
-    </div>
-  </section>
-
-  <!-- 09 -->
-  <section class="slide light" data-title="Телефон и форма">
-    <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">08 / Телефон и форма</span>
-      <h2>Палец не попадает в кнопку 22 точки.</h2>
-      <div class="viz two">
-        <div>
-          <div class="viz-head">Размер цели и размер пальца</div>
-          <div class="tap">
-            <span class="finger" title="площадь касания пальца"></span>
-            <span class="target target-sm">22</span>
-            <span class="target target-lg">48</span>
-            <span class="sw-cap" style="margin:0">Круг — след пальца, квадраты — цели. Слева было, справа стало.</span>
-          </div>
-          <div class="figs four" style="margin-top:18px">
-            <div class="fig"><b>48 <i>→</i> 1</b><span>кнопок мельче пальца</span></div>
-            <div class="fig"><b>+996</b><span>уже стоит в поле</span></div>
-          </div>
-        </div>
-        <div>
-          <div class="viz-head">Поля формы</div>
-          <div class="cx">
-            <div class="cx-item cx-bad" style="background:#E4E7EB;color:#626A73"><span>Пустая строка без подписи — что вводить?</span><b>3 из 5</b></div>
-            <div class="cx-item cx-ok" style="background:#0B0D10;color:#F2F4F6"><span>Телефон · +996 700 123 456</span><b>0 из 7</b></div>
-          </div>
-          <p class="sw-cap" style="margin-top:12px">На телефоне открывается цифровая клавиатура, вводятся девять цифр.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 10 -->
+  <!-- 08 ПЕРВЫЙ ЭКРАН -->
   <section class="slide light" data-title="Первый экран">
     <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">09 / Первый экран</span>
-      <h2>За пять секунд видно, что мы строим.</h2>
-      <div class="cols-2">
-        <div class="shot">
-          <span class="tag was">Было</span>
-          <figure><img src="{{old_hero}}" alt="Первый экран сайта до изменений: слоган и одна кнопка"></figure>
-          <p class="cap">Слоган, который подойдёт любой компании страны.</p>
-        </div>
-        <div class="shot">
-          <span class="tag now">Стало</span>
-          <figure><img src="{{new_hero}}" alt="Первый экран после изменений: направления, видео сварки, четыре показателя"></figure>
-          <p class="cap"><b>Четыре направления и четыре цифры:</b> 1952, 4500+, 300 т/мес, 1 000 000+ м².</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 11 -->
-  <section class="slide" data-title="Телефон">
-    <div class="inner">
-      <span class="kicker">10 / Телефон</span>
-      <h2>С телефона — то же самое, что с компьютера.</h2>
-      <div class="cols-3 phones" style="align-items:start">
-        <div class="shot">
-          <span class="tag was">Было</span>
-          <figure><img src="{{old_mob}}" alt="Первый экран на телефоне до изменений: тёмный блок со слоганом"></figure>
-          <p class="cap">Половина экрана пустая.</p>
-        </div>
-        <div class="shot">
-          <span class="tag now">Стало</span>
-          <figure><img src="{{new_mob}}" alt="Первый экран на телефоне после изменений"></figure>
-          <p class="cap">Видео, цифры, кнопка звонка внизу.</p>
-        </div>
-        <div class="shot">
-          <span class="tag now">Стало</span>
-          <figure><img src="{{mob_serv}}" alt="Направления на телефоне: фотография и параметры"></figure>
-          <p class="cap">Направления с параметрами.</p>
+      <span class="kicker" style="color:#0A6FBE">07 / Первый экран</span>
+      <h2>Что клиент должен понять за первые секунды?</h2>
+      <div class="viz two" style="align-items:center">
+        <div class="shot"><figure><img src="{{new_hero}}" alt="Первый экран новой версии"></figure></div>
+        <div>
+          <div class="figs four" style="grid-template-columns:1fr 1fr">
+            <div class="fig"><b>1952</b><span>год основания</span></div>
+            <div class="fig"><b>4500<i>+</i></b><span>объектов</span></div>
+            <div class="fig"><b>300 <i>т</i></b><span>металлоконструкций в месяц</span></div>
+            <div class="fig"><b>1 000 000<i>+</i></b><span>м² дорожного полотна</span></div>
+          </div>
+          <span class="fake-btn">Обсудить проект →</span>
+          <p class="lead" style="margin-top:14px">Первый экран не пытается рассказать всё сразу: он даёт понять, куда человек попал, показывает масштаб и предлагает продолжить.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 12 -->
-  <section class="slide light" data-title="Направления">
-    <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">11 / Направления</span>
-      <h2>Не «качественные решения», а пролёт 12–30 метров.</h2>
-      <div class="cols-2">
-        <div class="shot">
-          <span class="tag was">Было</span>
-          <figure><img src="{{old_serv}}" alt="Блок услуг до изменений: сплошной текст"></figure>
-          <p class="cap">Списки текстом, ни одного размера.</p>
-        </div>
-        <div class="shot">
-          <span class="tag now">Стало</span>
-          <figure><img src="{{new_serv}}" alt="Каталог направлений: шесть строк с параметрами и фотографиями"></figure>
-          <p class="cap"><b>17 рабочих размеров:</b> пролёты, высоты, тонны в месяц, объёмы резервуаров.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 13 -->
-  <section class="slide" data-title="Объекты">
-    <div class="inner">
-      <span class="kicker">12 / Объекты</span>
-      <h2>Двенадцать объектов, фильтр по отраслям, фото на весь экран.</h2>
-      <div class="cols-2">
-        <div class="shot">
-          <figure><img src="{{new_proj}}" alt="Раздел объектов с фильтром по отраслям"></figure>
-          <p class="cap">Промышленность 6 · резервуары 6 · дороги 4 · бескаркасные 1.</p>
-        </div>
-        <div class="shot">
-          <figure><img src="{{lightbox}}" alt="Просмотр фотографии на весь экран с лентой миниатюр"></figure>
-          <p class="cap">Увеличение, листание колесом и свайпом, подпись под кадром.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 14 -->
-  <section class="slide light" data-title="Новые страницы">
-    <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">13 / Чего не было совсем</span>
-      <h2>Шесть страниц направлений, разбор объекта, история компании.</h2>
-      <div class="cols-3">
-        <div class="shot">
-          <figure><img src="{{new_page}}" alt="Страница направления «Металлоконструкции и резервуары»"></figure>
-          <p class="cap">Параметры, объекты, форма запроса по направлению.</p>
-        </div>
-        <div class="shot">
-          <figure><img src="{{case}}" alt="Страница объекта «Джамгыр»"></figure>
-          <p class="cap">Задача, работы, фотографии площадки.</p>
-        </div>
-        <div class="shot">
-          <figure><img src="{{about}}" alt="Страница «О компании» с историей с 1952 года"></figure>
-          <p class="cap">История с 1952 года, заказчики, письма.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 15 -->
-  <section class="slide" data-title="Все цифры разом">
+  <!-- 09 БЫЛО → СТАЛО -->
+  <section class="slide" data-title="Было → Стало">
     <div class="inner tight">
-      <span class="kicker">14 / Все цифры разом</span>
-      <h2>Главная страница: было и стало.</h2>
+      <span class="kicker">08 / Было → Стало</span>
+      <h2>Мы поменяли способ, которым компания рассказывает о себе.</h2>
+      <div class="viz two">
+        <div class="shot shot-sm"><span class="tag was">Текущий сайт</span><figure><img src="{{old_hero}}" alt="Текущий сайт"></figure></div>
+        <div class="shot shot-sm"><span class="tag now">Новая концепция</span><figure><img src="{{new_hero}}" alt="Новая концепция"></figure></div>
+      </div>
+      <div class="pairs">
+        <div class="pair"><span class="p-was">Информация</span><i>→</i><span class="p-now">Позиционирование</span></div>
+        <div class="pair"><span class="p-was">Перечень услуг</span><i>→</i><span class="p-now">Структурированные направления</span></div>
+        <div class="pair"><span class="p-was">Галерея проектов</span><i>→</i><span class="p-now">Доказательство компетенций</span></div>
+        <div class="pair"><span class="p-was">Контакт</span><i>→</i><span class="p-now">Следующий шаг</span></div>
+      </div>
+      <p class="statement-line">Мы не сделали сайт просто красивее. Мы сделали его понятнее для клиента.</p>
+    </div>
+  </section>
+
+  <!-- 10 УСЛУГИ -->
+  <section class="slide light" data-title="Услуги">
+    <div class="inner">
+      <span class="kicker" style="color:#0A6FBE">09 / Направления</span>
+      <h2>От списка услуг — к задаче клиента.</h2>
+      <div class="viz two" style="align-items:center">
+        <div class="shot"><figure><img src="{{new_serv}}" alt="Каталог направлений с параметрами и фотографиями"></figure></div>
+        <div>
+          <p class="lead">Клиент приходит не изучать деятельность компании. У него есть конкретная задача: пролёт, высота, объём резервуара, тонны в месяц.</p>
+          <div class="figs four" style="grid-template-columns:1fr 1fr;margin-top:16px">
+            <div class="fig"><b>6</b><span>направлений, у каждого своя страница</span></div>
+            <div class="fig"><b>17</b><span>рабочих размеров прямо в списке</span></div>
+          </div>
+          <p class="lead">Задача сайта — как можно быстрее привести человека к нужному направлению.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 11 ПРОЕКТЫ -->
+  <section class="slide" data-title="Проекты">
+    <div class="inner tight">
+      <span class="kicker">10 / Проекты</span>
+      <h2>Проекты — это не просто фотографии.</h2>
+      <div class="viz two">
+        <div class="shot"><figure><img src="{{new_proj}}" alt="Раздел объектов с фильтром по отраслям"></figure></div>
+        <div class="shot"><figure><img src="{{case}}" alt="Разбор объекта «Джамгыр»"></figure></div>
+      </div>
+      <div class="formula">
+        <span>Объект</span><i>+</i><span>Направление</span><i>+</i><span>Масштаб</span><i>+</i><span>Результат</span>
+        <i class="eq">=</i><b>Доказательство компетенции</b>
+      </div>
+      <p class="foot-note mono">В карточках используются только подтверждённые данные. Где параметров пока нет — стоит пометка «уточняется».</p>
+    </div>
+  </section>
+
+  <!-- 12 ДОВЕРИЕ -->
+  <section class="slide light" data-title="Доверие">
+    <div class="inner">
+      <span class="kicker" style="color:#0A6FBE">11 / Доверие</span>
+      <h2>Слова создают обещание. Факты создают доверие.</h2>
+      <div class="viz two">
+        <div>
+          <div class="viz-head">Декларации</div>
+          <div class="claims">
+            <span>Мы надёжная компания</span>
+            <span>Большой опыт</span>
+            <span>Высокое качество</span>
+            <span>Индивидуальный подход</span>
+          </div>
+        </div>
+        <div>
+          <div class="viz-head">Факты, которые можно проверить</div>
+          <div class="figs four" style="grid-template-columns:1fr 1fr">
+            <div class="fig"><b>1952</b><span>год основания</span></div>
+            <div class="fig"><b>45 000 <i>т</i></b><span>металлоконструкций с 1991 года</span></div>
+            <div class="fig"><b>4500<i>+</i></b><span>объектов</span></div>
+            <div class="fig"><b>4</b><span>письма заказчиков в PDF на сайте</span></div>
+          </div>
+        </div>
+      </div>
+      <p class="lead">Вместо того чтобы говорить, что компания надёжная, мы показываем факты — вывод клиент делает сам.</p>
+    </div>
+  </section>
+
+  <!-- 13 ВИЗУАЛЬНЫЙ ЯЗЫК -->
+  <section class="slide" data-title="Визуальный язык">
+    <div class="inner tight">
+      <span class="kicker">12 / Визуальный язык</span>
+      <h2>Визуально компания должна соответствовать своему масштабу.</h2>
+      <div class="spec">
+        <div class="spec-col">
+          <div class="viz-head">Типографика</div>
+          <div class="type-sample">
+            <b>ПРОМЫШЛЕННОЕ<br>СТРОИТЕЛЬСТВО</b>
+            <span class="mono">Oswald · заголовки</span>
+            <p>Металлоконструкции, резервуары, сборный железобетон и дороги.</p>
+            <span class="mono">Golos Text · текст</span>
+            <span class="mono num">300 т / мес · РВС 100–10 000 м³</span>
+            <span class="mono">JetBrains Mono · данные</span>
+          </div>
+        </div>
+        <div class="spec-col">
+          <div class="viz-head">Цвет из логотипа</div>
+          <div class="sw-row">
+            <span class="sw sw-lg" style="background:#0B0D10"></span>
+            <span class="sw sw-lg" style="background:#EEF0F2"></span>
+            <span class="sw sw-lg" style="background:#025394"></span>
+            <span class="sw sw-lg" style="background:#0985C3"></span>
+          </div>
+          <div class="sw-cap">Графит · бумага · синий и лазурный с логотипа</div>
+          <div class="viz-head" style="margin-top:18px">Кнопки и связи</div>
+          <div class="btn-row">
+            <span class="fake-btn">Обсудить проект →</span>
+            <span class="fake-link">Смотреть проекты →</span>
+          </div>
+          <div class="btn-row" style="margin-top:10px">
+            <span class="chip">Пролёт 12–30 м</span><span class="chip">До 300 т / мес</span>
+          </div>
+        </div>
+        <div class="spec-col">
+          <div class="viz-head">Фотография объекта</div>
+          <figure class="spec-photo"><img src="{{new_page}}" alt="Страница направления с фотографиями объектов"></figure>
+          <div class="sw-cap">Реальные объекты вместо стоковых картинок</div>
+        </div>
+      </div>
+      <p class="lead">Строгий промышленный подход: интерфейс современный, но это по-прежнему строительная компания, а не технологический стартап.</p>
+    </div>
+  </section>
+
+  <!-- 14 MOBILE -->
+  <section class="slide light" data-title="Экраны">
+    <div class="inner">
+      <span class="kicker" style="color:#0A6FBE">13 / Экраны</span>
+      <h2>Один сайт — разные сценарии.</h2>
+      <div class="devices">
+        <div class="dev dev-desktop"><figure><img src="{{new_hero}}" alt="Версия для компьютера"></figure><span class="mono">Компьютер · 1440</span></div>
+        <div class="dev dev-tablet"><figure><img src="{{tablet}}" alt="Версия для планшета"></figure><span class="mono">Планшет · 820</span></div>
+        <div class="dev dev-mobile"><figure><img src="{{new_mob}}" alt="Версия для телефона"></figure><span class="mono">Телефон · 390</span></div>
+      </div>
+      <p class="lead">Это не уменьшенная версия для компьютера: на узком экране меняются порядок блоков, размеры, навигация и способ взаимодействия.</p>
+    </div>
+  </section>
+
+  <!-- 15 ИНТЕРАКТИВ -->
+  <section class="slide" data-title="Интерфейс в движении">
+    <div class="inner wide">
+      <span class="kicker">14 / Интерфейс в движении</span>
+      <h2>Современный интерфейс — это не эффект ради эффекта.</h2>
+      <figure class="tour">
+        <video poster="{{tourposter}}" controls muted playsinline preload="metadata"><source src="{{tourwebm}}" type="video/webm"><source src="{{tour}}" type="video/mp4"></video>
+      </figure>
+      <p class="lead">Запись работы сайта: первый экран, каталог направлений, фильтр объектов, просмотр фотографии, форма заявки. Движение помогает понять интерфейс, а не украшает его.</p>
+    </div>
+  </section>
+
+  <!-- 16 USER JOURNEY -->
+  <section class="slide" data-title="Путь клиента">
+    <div class="inner">
+      <span class="kicker">15 / Как новый сайт ведёт клиента</span>
+      <h2>Пять шагов от интереса до обращения.</h2>
+      <div class="chain chain-now chain-5">
+        <div class="node"><i class="n">01</i><b>Увидел</b><span>понимает масштаб</span></div>
+        <div class="node"><i class="n">02</i><b>Заинтересовался</b><span>находит нужное направление</span></div>
+        <div class="node"><i class="n">03</i><b>Убедился</b><span>видит реальные объекты и цифры</span></div>
+        <div class="node"><i class="n">04</i><b>Доверился</b><span>понимает возможности компании</span></div>
+        <div class="node"><i class="n">05</i><b>Связался</b><span>обращение — естественный шаг</span></div>
+      </div>
+      <p class="lead">Мы не обещаем, что новый сайт сам увеличит продажи — для этого нужны данные после запуска. Мы делаем путь понятнее и убираем препятствия между интересом и обращением.</p>
+    </div>
+  </section>
+
+  <!-- 17 ЧТО СДЕЛАНО -->
+  <section class="slide light" data-title="Что сделано">
+    <div class="inner">
+      <span class="kicker" style="color:#0A6FBE">16 / Что было сделано</span>
+      <h2>За визуальной частью — переработка структуры.</h2>
+      <div class="checks">
+        <div>
+          <div class="viz-head">UX</div>
+          <ul><li>Аудит текущего сайта</li><li>Информационная архитектура</li><li>Путь пользователя</li><li>Навигация и возвраты</li></ul>
+        </div>
+        <div>
+          <div class="viz-head">UI</div>
+          <ul><li>Визуальная система</li><li>Типографика и цвет</li><li>Компоненты</li><li>Девять страниц</li><li>Адаптация под экраны</li></ul>
+        </div>
+        <div>
+          <div class="viz-head">Разработка</div>
+          <ul><li>HTML, CSS, JavaScript</li><li>Адаптив и мобильная навигация</li><li>Анимации и просмотр фото</li><li>Формы заявки</li><li>Оптимизация загрузки</li></ul>
+        </div>
+      </div>
+      <p class="foot-note mono">Здесь перечислено только то, что уже сделано и работает. Наполнение данными и запуск — следующий этап.</p>
+    </div>
+  </section>
+
+  <!-- 18 ЧТО ПОЛУЧАЕТ КОМПАНИЯ -->
+  <section class="slide" data-title="Что получает компания">
+    <div class="inner">
+      <span class="kicker">17 / Что получает СУ №4</span>
+      <h2>Обновление того, как компания представляет себя.</h2>
+      <div class="gains">
+        <div><b>Понятное позиционирование</b><span>с первого экрана видно специализацию и масштаб</span></div>
+        <div><b>Удобная навигация</b><span>два уровня, возврат туда, откуда пришли</span></div>
+        <div><b>Реальный масштаб</b><span>цифры, производство, объекты вместо деклараций</span></div>
+        <div><b>Сильная подача проектов</b><span>фильтр по отраслям и разбор объекта</span></div>
+        <div><b>Современное представительство</b><span>единая визуальная система и работа на всех экранах</span></div>
+        <div><b>Понятный путь к обращению</b><span>форма и связь на каждой странице</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 19 ГЛАВНЫЙ СЛАЙД -->
+  <section class="slide slide-black" data-title="Главная мысль">
+    <div class="inner">
+      <p class="big-statement">Компания уже имеет историю, опыт и масштаб.</p>
+      <p class="big-statement dim">Задача нового сайта — сделать это очевидным для каждого нового клиента.</p>
+    </div>
+  </section>
+
+  <!-- 20 СЛЕДУЮЩИЙ ЭТАП -->
+  <section class="slide light" data-title="Следующий этап">
+    <div class="inner">
+      <span class="kicker" style="color:#0A6FBE">18 / Следующий этап</span>
+      <h2>От концепции — к запуску.</h2>
+      <div class="viz two">
+        <div>
+          <div class="chain chain-now chain-v">
+            <div class="node"><b>Финализация дизайна</b><span>правки по замечаниям</span></div>
+            <div class="node"><b>Наполнение</b><span>данные объектов, реквизиты, фотографии</span></div>
+            <div class="node"><b>Перенос на su4.kg</b><span>хостинг, домен, почта для заявок</span></div>
+            <div class="node"><b>Тестирование</b><span>экраны, формы, скорость</span></div>
+            <div class="node"><b>Запуск</b><span>передача исходников и обучение</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="price-main">
+            <span class="mono" style="color:#79828C">Стоимость проекта</span>
+            <b>100 000 сом</b>
+            <span class="price-note">Девять страниц, тексты, работа со 105 фотографиями, перенос на su4.kg и передача исходников.</span>
+          </div>
+          <table class="ft" style="margin-top:18px">
+            <tbody>
+              <tr><td>Дизайн и вёрстка главной</td><td class="now">35 000</td></tr>
+              <tr><td>Шесть страниц направлений</td><td class="now">28 000</td></tr>
+              <tr><td>Объект и «О компании»</td><td class="now">15 000</td></tr>
+              <tr><td>Тексты, структура, фотографии</td><td class="now">12 000</td></tr>
+              <tr><td>Перенос, формы, обучение</td><td class="now">10 000</td></tr>
+              <tr class="total"><td>Итого</td><td class="now">100 000 сом</td></tr>
+            </tbody>
+          </table>
+          <p class="foot-note mono">Сроки и порядок оплаты — <span class="tbd" data-fill="условия">по договорённости</span>. Отдельной платы за платформу нет: сайт остаётся файлами компании.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 21 ФИНАЛ -->
+  <section class="slide slide-black" data-title="Финал">
+    <div class="inner">
+      <p class="big-statement">СУ №4 уже доказала свой уровень в реальных проектах.</p>
+      <p class="big-statement dim">Теперь этот уровень должен быть виден и в цифровом пространстве.</p>
+      <div class="ladder">
+        <span>От информации</span><i>→</i><span>к структуре</span><i>→</i><span>к доверию</span><i>→</i><span>к действию</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 22 ПРИЛОЖЕНИЕ -->
+  <section class="slide" data-title="Приложение: замеры">
+    <div class="inner tight">
+      <span class="kicker">Приложение / Замеры браузером</span>
+      <h2>Если понадобятся цифры.</h2>
       <div class="tables">
         <table class="ft">
-          <thead><tr><th>Скорость и вес</th><th>Было</th><th>Стало</th></tr></thead>
+          <thead><tr><th>Скорость и вес главной</th><th>Было</th><th>Стало</th></tr></thead>
           <tbody>
             <tr><td>Ответ сервера</td><td class="was">2 с</td><td class="now">—</td></tr>
             <tr><td>Загрузка при связи 1 Мбит/с</td><td class="was">1,5 мин</td><td class="now">20 с</td></tr>
             <tr><td>Скачивает телефон</td><td class="was">11,5 МБ</td><td class="now">2,5 МБ</td></tr>
-            <tr><td>Из этого фотографии</td><td class="was">7,5 МБ</td><td class="now">1,6 МБ</td></tr>
             <tr><td>Обращений к серверу</td><td class="was">178</td><td class="now">29</td></tr>
             <tr><td>Файлов оформления и скриптов</td><td class="was">100</td><td class="now">2</td></tr>
             <tr><td>Элементов на странице</td><td class="was">2040</td><td class="now">692</td></tr>
-            <tr><td>Фотографий без заданных размеров</td><td class="was">77</td><td class="now">1</td></tr>
           </tbody>
         </table>
         <table class="ft">
           <thead><tr><th>Как сделано и читается</th><th>Было</th><th>Стало</th></tr></thead>
           <tbody>
-            <tr><td>Текстов ниже нормы контраста</td><td class="was">25 из 84</td><td class="now">0 из 219</td></tr>
+            <tr><td>Текстов ниже нормы контраста</td><td class="was">20 из 79</td><td class="now">0 из 123</td></tr>
             <tr><td>Знаков в самой длинной строке</td><td class="was">180</td><td class="now">92</td></tr>
             <tr><td>Разных левых краёв у блоков</td><td class="was">23</td><td class="now">12</td></tr>
-            <tr><td>Видов скругления углов</td><td class="was">7</td><td class="now">0</td></tr>
-            <tr><td>Цветов фона</td><td class="was">14</td><td class="now">7</td></tr>
+            <tr><td>Цветов фона</td><td class="was">14</td><td class="now">6</td></tr>
             <tr><td>Кнопок мельче пальца</td><td class="was">48</td><td class="now">1</td></tr>
-            <tr><td>Полей формы без подписи</td><td class="was">3 из 5</td><td class="now">0 из 7</td></tr>
             <tr><td>Рабочих размеров на главной</td><td class="was">0</td><td class="now">17</td></tr>
           </tbody>
         </table>
       </div>
-      <p class="foot-note mono">Замеры браузером на экране 1440 и на телефоне, в один день. Проверить самим: F12 → «Сеть». Прочерк — новый сайт ещё не на хостинге.</p>
-    </div>
-  </section>
-
-  <!-- 16 -->
-  <section class="slide" data-title="Путь к заявке">
-    <div class="inner">
-      <span class="kicker">15 / Путь заказчика</span>
-      <h2>Четыре шага до письма в отдел продаж.</h2>
-      <div class="path">
-        <div class="step"><span class="n">Шаг 01</span><b>Первый экран</b><p>Понял, что строим и производим сами.</p></div>
-        <div class="step"><span class="n">Шаг 02</span><b>Направление</b><p>Нашёл свою задачу и увидел параметры.</p></div>
-        <div class="step"><span class="n">Шаг 03</span><b>Объекты</b><p>Убедился, что такое уже строили.</p></div>
-        <div class="step"><span class="n">Шаг 04</span><b>Заявка</b><p>Написал, позвонил или отправил форму с ТЗ.</p></div>
-      </div>
-      <p class="lead">Форма запроса стоит внизу каждой страницы, кнопка звонка на телефоне — всегда на экране.</p>
-    </div>
-  </section>
-
-  <!-- 17 -->
-  <section class="slide light" data-title="Что входит">
-    <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">16 / Что входит в работу</span>
-      <h2>Что вы получаете.</h2>
-      <div class="figs four">
-        <div class="fig"><b>9</b><span>готовых страниц с текстами и фотографиями</span></div>
-        <div class="fig"><b>4</b><span>размера экрана: 390, 768, 1024, 1440</span></div>
-        <div class="fig"><b>7</b><span>форм запроса — по одной на каждой странице</span></div>
-        <div class="fig"><b>105</b><span>фотографий пересобрано и подписано</span></div>
-      </div>
-      <div class="figs four">
-        <div class="fig"><b>0 сом</b><span>ежемесячно за платформу: сайт — это файлы</span></div>
-        <div class="fig"><b>Исходники</b><span>остаются у компании, хостинг любой</span></div>
-        <div class="fig"><b>Поиск</b><span>заголовки, описания, подписи, карточка ссылки</span></div>
-        <div class="fig"><b>Инструкция</b><span>как добавить объект и поменять фото</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 18 -->
-  <section class="slide light" data-title="Стоимость">
-    <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">17 / Стоимость</span>
-      <h2>100 000 сом за всё перечисленное.</h2>
-      <div class="price">
-        <div class="price-main">
-          <span class="mono" style="color:#79828C">Стоимость работ</span>
-          <b>100 000 сом</b>
-          <span class="price-note">Единой суммой. Оплата и сроки — <span class="tbd" data-fill="условия">по договорённости</span>.</span>
-        </div>
-        <table class="ft">
-          <tbody>
-            <tr><td>Дизайн и вёрстка главной страницы</td><td class="now">35 000</td></tr>
-            <tr><td>Шесть страниц направлений</td><td class="now">28 000</td></tr>
-            <tr><td>Страница объекта и «О компании»</td><td class="now">15 000</td></tr>
-            <tr><td>Тексты, структура, 105 фотографий</td><td class="now">12 000</td></tr>
-            <tr><td>Перенос на su4.kg, формы, обучение</td><td class="now">10 000</td></tr>
-            <tr class="total"><td>Итого</td><td class="now">100 000 сом</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- 19 -->
-  <section class="slide" data-title="Что нужно от компании">
-    <div class="inner">
-      <span class="kicker">18 / Что нужно от компании</span>
-      <h2>Три вещи, чтобы запустить.</h2>
-      <ul class="list">
-        <li><span class="n">01</span><div><b>Данные по объектам</b><p>Год, заказчик, объём или площадь. Сейчас в карточках стоит прочерк — цифры за компанию мы не придумывали.</p></div></li>
-        <li><span class="n">02</span><div><b>Реквизиты и документы</b><p>ИНН, лицензии, сертификаты и текст политики обработки данных.</p></div></li>
-        <li><span class="n">03</span><div><b>Почта для заявок и оригиналы фото</b><p>В архиве сайта снимки не больше 1024 точек — для крупных экранов нужны исходники.</p></div></li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- 20 -->
-  <section class="slide" data-title="Следующий шаг">
-    <div class="inner">
-      <span class="kicker">19 / Следующий шаг</span>
-      <h2>Откройте сайт с телефона — и скажите «да» или «переделать».</h2>
-      <div class="links">
-        <a href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709" target="_blank" rel="noopener">Открыть главную</a>
-        <a class="ghost" href="https://claude.ai/code/artifact/05f95ced-e8d2-4573-a784-cdfc737216b6" target="_blank" rel="noopener">Металлоконструкции</a>
-        <a class="ghost" href="https://claude.ai/code/artifact/cf7183cc-0cbc-4d0a-9b54-82c668ed3283" target="_blank" rel="noopener">Объект «Джамгыр»</a>
-        <a class="ghost" href="https://su4.kg" target="_blank" rel="noopener">Текущий сайт</a>
-      </div>
-      <div class="signature">
-        <div><span class="mono">Предложение подготовил</span><b class="tbd" data-fill="имя и компания">имя — уточняется</b></div>
-        <div><span class="mono">Связь</span><b class="tbd" data-fill="телефон и почта">телефон и почта — уточняется</b></div>
-        <div><span class="mono">Дата</span><b class="tbd" data-fill="дата">дата — уточняется</b></div>
-      </div>
+      <p class="foot-note mono">Замеры сделаны браузером на одинаковых экранах в один день. Проверить можно самим: F12 → вкладка «Сеть». Прочерк — новый сайт ещё не на хостинге.</p>
     </div>
   </section>
 
