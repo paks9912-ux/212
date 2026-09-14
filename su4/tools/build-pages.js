@@ -299,7 +299,7 @@ ${s.formOptions.map(o => `          <option>${esc(o)}</option>`).join('\n')}
       <div class="field"><label for="f-msg">Параметры <span style="text-transform:none;letter-spacing:0">(необязательно)</span></label><textarea id="f-msg" name="message" placeholder="Объём, габариты, локация, сроки"></textarea></div>
       <div class="field"><label for="f-file">Чертёж или техзадание <span style="text-transform:none;letter-spacing:0">(до 25 МБ)</span></label><input id="f-file" name="file" type="file" accept=".pdf,.dwg,.dxf,.doc,.docx,.xls,.xlsx,.jpg,.png,.zip,.rar"></div>
       <button class="btn btn-primary" type="submit">Отправить запрос ${arrow}</button>
-      <p class="form-note"><b style="color:var(--white)">Отвечаем в течение рабочего дня.</b> Заявка уходит в отдел продаж СУ №4. Отправляя форму, вы соглашаетесь с <a href="#" data-placeholder-link style="border-bottom:1px solid currentColor">обработкой персональных данных</a>.</p>
+      <p class="form-note"><b style="color:var(--white)">Отвечаем в течение рабочего дня.</b> Заявка уходит в отдел продаж СУ №4. Отправляя форму, вы соглашаетесь с обработкой персональных данных.</p>
       <div class="form-ok" role="status">Запрос отправлен. Мы свяжемся с вами в рабочее время — обычно в течение одного дня.</div>
     </form>
   </div>
