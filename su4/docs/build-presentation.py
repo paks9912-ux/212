@@ -3,6 +3,31 @@ import base64, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 SHOTS = os.path.join(HERE, 'shots')
 
+
+# ---------------------------------------------------------------
+# Данные автора предложения. Заполните — и пересоберите презентацию.
+# Пустая строка в url убирает ссылку и QR-код со слайдов.
+AUTHOR = {
+    'name':  'Имя Фамилия',                 # как подписываемся
+    'role':  'Дизайн и разработка сайтов',  # чем занимаетесь, одна строка
+    'url':   'https://example.com',         # ссылка на портфолио
+    'phone': '+996 700 000 000',
+    'email': 'hello@example.com',
+}
+# ---------------------------------------------------------------
+
+def qr_uri(url):
+    """QR-код ссылки на портфолио — чтобы заказчик открыл его прямо с экрана."""
+    import io
+    import qrcode
+    q = qrcode.QRCode(box_size=8, border=1,
+                      error_correction=qrcode.constants.ERROR_CORRECT_M)
+    q.add_data(url)
+    q.make(fit=True)
+    buf = io.BytesIO()
+    q.make_image(fill_color='#0B0D10', back_color='white').save(buf, format='PNG')
+    return 'data:image/png;base64,' + base64.b64encode(buf.getvalue()).decode()
+
 def data_uri(name):
     with open(os.path.join(SHOTS, name), 'rb') as f:
         return 'data:image/jpeg;base64,' + base64.b64encode(f.read()).decode()
@@ -42,6 +67,16 @@ html = html.replace('{{tour}}', video_uri('tour.mp4'))
 html = html.replace('{{fonts}}', fonts_css())
 for key, name in IMAGES.items():
     html = html.replace('{{' + key + '}}', data_uri(name))
+
+label = AUTHOR['url'].replace('https://', '').replace('http://', '').rstrip('/')
+html = html.replace('{{author_name}}', AUTHOR['name'])
+html = html.replace('{{author_role}}', AUTHOR['role'])
+html = html.replace('{{author_url_label}}', label)
+html = html.replace('{{author_url}}', AUTHOR['url'])
+html = html.replace('{{author_phone_href}}', AUTHOR['phone'].replace(' ', ''))
+html = html.replace('{{author_phone}}', AUTHOR['phone'])
+html = html.replace('{{author_email}}', AUTHOR['email'])
+html = html.replace('{{author_qr}}', qr_uri(AUTHOR['url']) if AUTHOR['url'] else '')
 
 out = os.path.join(HERE, 'presentation.html')
 open(out, 'w', encoding='utf-8').write(html)

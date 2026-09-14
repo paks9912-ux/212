@@ -286,11 +286,35 @@
 /* чёрные слайды */
 .slide-black{background:#000}
 .big-statement{font-family:var(--display);font-weight:600;text-transform:uppercase;
-  font-size:clamp(1.8rem,4.4vw,4rem);line-height:1.12;max-width:20em;color:#fff}
+  font-size:clamp(1.7rem,3.9vw,3.5rem);line-height:1.12;max-width:20em;color:#fff}
 .big-statement.dim{color:var(--azure-2)}
-.ladder{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:clamp(20px,3vw,40px);
+.ladder{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:clamp(14px,2vw,28px);
   border-top:1px solid #23282E;padding-top:20px;font-family:var(--mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--tx-3)}
 .ladder i{font-style:normal;color:var(--azure-2)}
+
+/* ---------- подпись автора ---------- */
+.author{display:grid;gap:clamp(16px,2.6vw,40px);border-top:1px solid #23282E;padding-top:20px;margin-top:8px;align-items:center}
+@media(min-width:760px){.author{grid-template-columns:minmax(0,1fr) auto}}
+.author-lines{display:grid;gap:14px}
+@media(min-width:900px){.author-lines{grid-template-columns:repeat(3,auto);justify-content:start;gap:12px 44px}}
+.author-lines>div{display:grid;gap:5px;align-content:start}
+.author-lines .mono{color:var(--tx-3)}
+.author-lines b{font-family:var(--display);font-weight:500;text-transform:uppercase;font-size:clamp(1.05rem,1.5vw,1.3rem);line-height:1.15;color:#fff}
+.author-role{font-size:.88rem;color:var(--tx-2)}
+.author-link{color:var(--azure-2);text-decoration:none;font-size:.98rem;box-shadow:inset 0 -1px 0 rgba(79,178,232,.45);width:max-content}
+.author-link:hover{box-shadow:inset 0 -1px 0 currentColor}
+.qr{margin:0;display:grid;gap:8px;justify-items:center}
+.qr img{width:clamp(88px,9vw,118px);height:auto;background:#fff;padding:6px;display:block}
+.qr figcaption{color:var(--tx-3);font-size:.6rem;letter-spacing:.08em;text-align:center}
+.slide.light .author{border-color:#C9CFD5}
+.slide.light .author-lines b{color:var(--ink)}
+.slide.light .author-link{color:var(--blue);box-shadow:inset 0 -1px 0 rgba(10,111,190,.4)}
+@media print{
+  .author{border-color:#C0C6CC!important}
+  .author-link{color:#025394!important;box-shadow:none!important}
+  .author-lines .mono,.qr figcaption{color:#79828C!important}
+  .author-lines b{color:#0B0D10!important}
+}
 </style>
 <style>
 :root{
@@ -521,7 +545,10 @@ ul{list-style:none;margin:0;padding:0}
       <div class="title-eyebrow mono"><span>ЗАО «Строительное управление №4»</span><span>Кара-Балта · с 1952 года</span></div>
       <h1 class="hero-h1">Обновление <em>цифрового представительства</em> компании.</h1>
       <div class="ba-chip"><span class="was">Было</span><span class="arrow">→</span><span class="now">Стало</span></div>
-      <div class="title-foot mono"><span>Листать: стрелки, пробел или свайп</span><span>Обзор слайдов — клавиша O</span></div>
+      <div class="title-foot mono">
+        <span>Имя Фамилия · example.com</span>
+        <span>Листать: стрелки, пробел или свайп</span>
+      </div>
     </div>
   </section>
 
@@ -914,6 +941,14 @@ ul{list-style:none;margin:0;padding:0}
       <p class="big-statement dim">Теперь этот уровень должен быть виден и в цифровом пространстве.</p>
       <div class="ladder">
         <span>От информации</span><i>→</i><span>к структуре</span><i>→</i><span>к доверию</span><i>→</i><span>к действию</span>
+      </div>
+      <div class="author">
+        <div class="author-lines">
+          <div><span class="mono">Предложение подготовил</span><b>Имя Фамилия</b><span class="author-role">Дизайн и разработка сайтов</span></div>
+          <div><span class="mono">Портфолио</span><a class="author-link" href="https://example.com" target="_blank" rel="noopener">example.com</a></div>
+          <div><span class="mono">Связь</span><a class="author-link" href="tel:+996700000000">+996 700 000 000</a><a class="author-link" href="mailto:hello@example.com">hello@example.com</a></div>
+        </div>
+        <figure class="qr"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAANgAAADYCAIAAAAGQrq6AAAD5ElEQVR4nO3dQYpUMRRA0WpxKIL7X6Qgzr8rCBJJzE3XOVOb39+uSwaPpPLxPM8LTvty+gXg9RIiEUIkQYgkCJEEIZIgRBK+jv7h2/cf//M9/tnvXz+XPGf0/x09f/fPz7r987IikiBEEoRIghBJECIJQiRBiCQM54gjq+Zes2bnZLvnarPzwlmr5o63fF5WRBKESIIQSRAiCUIkQYgkCJGE6TniyKr52am516p9hKvmi7v/DrXPy4pIghBJECIJQiRBiCQIkQQhkrBsjni7Vfv/as+5hRWRBCGSIEQShEiCEEkQIglCJOHTzhF3nztmLSsiCUIkQYgkCJEEIZIgRBKESMKyOeLt++ROnWuefc4qtc/LikiCEEkQIglCJEGIJAiRBCGSMD1HvGU/32e9f3nV+egaKyIJQiRBiCQIkQQhkiBEEoRIwsfzPKffYQv3mtzFikiCEEkQIglCJEGIJAiRBCGSMNyPWLvnY9X7nNovuPv3jpzavzj7e62IJAiRBCGSIEQShEiCEEkQIgnT+xF3z5lq54VX/fxut7zPiBWRBCGSIEQShEiCEEkQIglCJGF6P+Iqt8zzaueIV73P7r/z7HOsiCQIkQQhkiBEEoRIghBJECIJx+5rXjV/WmX3eeHd54tr+w5n38eKSIIQSRAiCUIkQYgkCJEEIZIwnCOe+j6/3c+p7Xes3ad8av+lFZEEIZIgRBKESIIQSRAiCUIkYfu55tr3IL7beefa+fQRKyIJQiRBiCQIkQQhkiBEEoRIwvCelVvuax655Z7iVX/n3fPCVXNK349ImhBJECIJQiRBiCQIkQQhkrBsjrj750dq3wu426l9oqueY45ImhBJECIJQiRBiCQIkQQhkrDsnpVZp+ZYt6idR969H9SKSIIQSRAiCUIkQYgkCJEEIZIw3I94u1Pfvzir9v2R7lnhrQmRBCGSIEQShEiCEEkQIgnb71nZbTT32n0+unbPSm0u6FwzVxIiCUIkQYgkCJEEIZIgRBKmzzXX5lKrnJo73n5/tPua+VSESIIQSRAiCUIkQYgkCJGEZd+PeMs8bPe+w93zwlP7RHffo2NFJEGIJAiRBCGSIEQShEiCEEk4ds/K7VbNO2/Zp7j7Pa2IJAiRBCGSIEQShEiCEEkQIgnmiH+xav/iqftUZp06r21FJEGIJAiRBCGSIEQShEiCEElYNkes3Tsya/ecb3audmqe575m3poQSRAiCUIkQYgkCJEEIZIwPUe85R7nVXO72v0rp+adu+eLVkQShEiCEEkQIglCJEGIJAiRhI/neU6/A1gRaRAiCUIkQYgkCJEEIZIgRBL+AEeJfiAFiDyAAAAAAElFTkSuQmCC" alt="QR-код со ссылкой на портфолио"><figcaption class="mono">Портфолио — наведите камеру</figcaption></figure>
       </div>
     </div>
   </section>
