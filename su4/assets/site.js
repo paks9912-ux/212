@@ -243,6 +243,7 @@
         c.classList.toggle('hidden',!ok); if(ok)n++;
       });
       if(fnote) fnote.textContent=(f==='all'?'Показаны все объекты — ':'Показано ')+n+' '+word(n);
+      if(grid0) grid0.classList.toggle('filtered', f!=='all');   /* выбранный раздел — одинаковые карточки */
       /* если сетка ушла вверх за шапку — подтягиваем её обратно в кадр */
       var grid=d.getElementById('projectGrid');
       if(grid){var t=grid.getBoundingClientRect().top; if(t<64||t>w.innerHeight*.6) w.scrollTo({top:grid.getBoundingClientRect().top+w.scrollY-96,behavior:'smooth'});}

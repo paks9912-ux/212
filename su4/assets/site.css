@@ -249,13 +249,17 @@ ul,ol{list-style:none}
 .plates{transition:opacity .22s var(--ease);display:grid;gap:clamp(30px,3.5vw,52px) clamp(16px,2vw,28px);grid-template-columns:repeat(12,minmax(0,1fr))}
 .plate{grid-column:span 12;margin:0;display:flex;flex-direction:column;transition:opacity .3s var(--ease)}
 @media(min-width:720px){.plate{grid-column:span 6}.plate--wide{grid-column:span 12}}
-@media(min-width:1060px){.plate{grid-column:span 4}.plate--wide{grid-column:span 8}.plate--tall{grid-column:span 4}.plate--half{grid-column:span 6}}
+@media(min-width:1060px){.plate{grid-column:span 4}.plate--wide{grid-column:span 8}.plate--tall{grid-column:span 4}.plate--half{grid-column:span 6}
+  .plates.filtered .plate{grid-column:span 4}
+  .plates.filtered .plate .ph-frame{aspect-ratio:4 / 3}
+}
+@media(min-width:720px) and (max-width:1059px){.plates.filtered .plate{grid-column:span 6}.plates.filtered .plate .ph-frame{aspect-ratio:4 / 3}}
 .plate .ph-frame{aspect-ratio:var(--ratio,4 / 3);width:100%}
 @media(max-width:719px){.plate .ph-frame{aspect-ratio:4 / 3}}
 .plate figcaption{padding-top:14px;margin-top:14px;border-top:1px solid var(--rule-strong);display:grid;gap:8px}
 .plate .mono{color:var(--tx-3);letter-spacing:.07em}
 .plate .h3{font-size:clamp(1.15rem,1.6vw,1.5rem)}
-.plate--wide .h3,.plate--half .h3{font-size:clamp(1.6rem,2.6vw,2.4rem)}
+.plate--wide .h3,.plate--half .h3{font-size:clamp(1.3rem,1.9vw,1.75rem)}
 .plate p{color:var(--tx-2);font-size:.95rem;max-width:46em}
 .plate[hidden],.plate.hidden{display:none}
 .proj{display:none}
