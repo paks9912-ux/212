@@ -1,5 +1,5 @@
 # Сборка презентации: подставляет снимки из shots/ в presentation.src.html
-import base64, os
+import base64, os, re
 HERE = os.path.dirname(os.path.abspath(__file__))
 SHOTS = os.path.join(HERE, 'shots')
 
@@ -81,4 +81,29 @@ html = html.replace('{{author_qr}}', qr_uri(AUTHOR['url']) if AUTHOR['url'] else
 
 out = os.path.join(HERE, 'presentation.html')
 open(out, 'w', encoding='utf-8').write(html)
-print('готово:', round(os.path.getsize(out) / 1048576, 2), 'МБ')
+
+# Артефакт получает голый фрагмент: обвязку <head> дорисовывает площадка.
+# Для файла на диске и для хостинга нужен полноценный документ, иначе телефон
+# отрисует страницу шириной 980px, а кириллица может приехать без charset.
+SHELL = """<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0D10">
+<meta name="robots" content="noindex">
+<title>{title}</title>
+</head>
+<body>
+{body}
+</body>
+</html>
+"""
+m = re.match(r'\s*<title>(.*?)</title>\s*', html, re.S)
+title, body = (m.group(1), html[m.end():]) if m else ('СУ №4', html)
+standalone = os.path.join(HERE, 'presentation-standalone.html')
+open(standalone, 'w', encoding='utf-8').write(
+    SHELL.format(title=title, body=body))
+
+print('готово:', round(os.path.getsize(out) / 1048576, 2), 'МБ',
+      '| отдельный файл:', round(os.path.getsize(standalone) / 1048576, 2), 'МБ')

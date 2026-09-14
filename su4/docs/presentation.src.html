@@ -342,14 +342,15 @@ img{display:block;max-width:100%}
 
 /* ---------- каркас показа ---------- */
 .deck{position:fixed;inset:0;overflow:hidden}
-.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
-  padding:calc(var(--pad) + 26px) var(--pad) calc(var(--pad) + 34px);overflow:hidden}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:flex-start;
+  padding:calc(var(--pad) + 26px) var(--pad) calc(var(--pad) + 34px);
+  overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain}
 .slide.on{display:flex}
 .slide.enter{animation:slideIn .5s var(--ease) both}
 @keyframes slideIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 .slide.light{background:var(--paper);color:var(--ink)}
 .slide.light .mono{color:#79828C}
-.inner{width:100%;max-width:1320px;margin-inline:auto;display:grid;gap:clamp(16px,2.2vw,34px);align-content:center;min-height:0}
+.inner{width:100%;max-width:1320px;margin-inline:auto;margin-block:auto;display:grid;gap:clamp(16px,2.2vw,34px);align-content:safe center;min-height:0}
 
 /* ---------- служебные элементы ---------- */
 .bar{position:fixed;left:0;right:0;top:0;height:3px;background:rgba(255,255,255,.08);z-index:30}
@@ -464,6 +465,19 @@ ul{list-style:none;margin:0;padding:0}
   .arrows{bottom:56px}
   .hud{padding-bottom:14px}
   .dots{display:none}
+  /* кнопки сверху и стрелки снизу не должны накрывать текст */
+  .slide{-webkit-overflow-scrolling:touch;
+    padding-top:calc(var(--pad) + 62px);padding-bottom:calc(var(--pad) + 124px)}
+  /* текст прокручивается под управлением — делаем его непрозрачным */
+  .arrows button,.tool{background:#0E1115}
+  body.on-light .arrows button,body.on-light .tool{background:#fff}
+  /* растянутая подложка снизу: текст уходит под неё, а не под сами кнопки */
+  .hud{padding-top:82px;background:linear-gradient(to top,var(--ink) 58%,rgba(11,13,16,0))}
+  body.on-light .hud{background:linear-gradient(to top,var(--paper) 58%,rgba(238,240,242,0))}
+  .arrows button,.tool{width:42px;height:42px}
+  .tools{background:linear-gradient(to bottom,var(--ink) 58%,rgba(11,13,16,0));padding:8px 0 16px;top:0;left:0;right:0;
+    justify-content:flex-end;padding-right:var(--pad)}
+  body.on-light .tools{background:linear-gradient(to bottom,var(--paper) 58%,rgba(238,240,242,0))}
 }
 
 /* ---------- блоки коммерческого предложения ---------- */
@@ -490,7 +504,7 @@ ul{list-style:none;margin:0;padding:0}
   body{overflow:visible;background:#fff;color:#0B0D10;font-size:11pt}
   .bar,.hud,.arrows,.tools,.overview{display:none!important}
   .deck{position:static}
-  .slide{position:static;display:flex!important;break-after:page;page-break-after:always;min-height:170mm;padding:0 0 10mm;
+  .slide{position:static;display:flex!important;overflow:visible;break-after:page;page-break-after:always;min-height:170mm;padding:0 0 10mm;
     background:#fff!important;color:#0B0D10!important;animation:none!important}
   .slide:last-child{break-after:auto;page-break-after:auto}
   .slide h1,.slide h2,.slide .cap b,.fig b,.list b,.step b,.signature b{color:#0B0D10!important}
@@ -1121,6 +1135,7 @@ ul{list-style:none;margin:0;padding:0}
     [].forEach.call(dots.children,function(d,k){d.setAttribute('aria-current',k===i)});
     [].forEach.call(grid.children,function(d,k){d.setAttribute('aria-current',k===i)});
     document.body.classList.toggle('on-light', s.classList.contains('light'));
+    s.scrollTop=0;
     if(history.replaceState) history.replaceState(null,'','#'+(i+1));
   }
   function next(){ go(i+1); }
@@ -1144,8 +1159,13 @@ ul{list-style:none;margin:0;padding:0}
 
   /* колесо и свайп */
   var lock=0;
+  /* слайд выше экрана (телефон, низкое окно) — вертикаль отдаём прокрутке слайда */
+  function tall(){ var s=slides[i]; return s.scrollHeight>s.clientHeight+4; }
+  function atEdge(d){ var s=slides[i];
+    return d<0 ? s.scrollTop<=0 : s.scrollTop+s.clientHeight>=s.scrollHeight-1; }
   window.addEventListener('wheel',function(e){
     if(overview.classList.contains('open')) return;
+    if(tall()&&Math.abs(e.deltaY)>=Math.abs(e.deltaX)&&!atEdge(e.deltaY)) return;
     var now=Date.now(); if(now-lock<520) return;
     var d=Math.abs(e.deltaX)>Math.abs(e.deltaY)?e.deltaX:e.deltaY;
     if(Math.abs(d)<14) return;
@@ -1161,7 +1181,7 @@ ul{list-style:none;margin:0;padding:0}
     if(!tracking) return; tracking=false;
     var t=e.changedTouches[0], dx=t.clientX-sx, dy=t.clientY-sy;
     if(Math.abs(dx)>56&&Math.abs(dx)>Math.abs(dy)) dx<0?next():prev();
-    else if(Math.abs(dy)>90&&Math.abs(dy)>Math.abs(dx)) dy<0?next():prev();
+    else if(!tall()&&Math.abs(dy)>90&&Math.abs(dy)>Math.abs(dx)) dy<0?next():prev();
   },{passive:true});
 
   /* обзор */
