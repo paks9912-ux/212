@@ -624,10 +624,12 @@
     /* открытие и закрытие */
     function open(){
       panel.hidden=false; fab.setAttribute('aria-expanded','true');
+      d.documentElement.classList.add('ask-open');
       setTimeout(function(){ input.focus(); },50);
     }
     function close(){
-      panel.hidden=true; fab.setAttribute('aria-expanded','false'); fab.focus();
+      panel.hidden=true; fab.setAttribute('aria-expanded','false');
+      d.documentElement.classList.remove('ask-open'); fab.focus();
     }
     fab.addEventListener('click',open);
     d.getElementById('askClose').addEventListener('click',close);

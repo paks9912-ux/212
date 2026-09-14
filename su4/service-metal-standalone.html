@@ -459,10 +459,11 @@ ul,ol{list-style:none}
 
 /* ---------- ориентиры ---------- */
 .progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:55;background:var(--azure);transition:width .12s linear}
-.totop{position:fixed;right:clamp(16px,2vw,28px);bottom:clamp(16px,2vw,28px);z-index:44;width:48px;height:48px;display:grid;place-items:center;border:1px solid var(--rule-strong);background:rgba(238,240,242,.9);backdrop-filter:blur(10px);color:var(--ink);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.totop{position:fixed;right:clamp(16px,2vw,28px);bottom:calc(clamp(16px,2vw,28px) + 52px + 12px);z-index:44;width:48px;height:48px;display:grid;place-items:center;border:1px solid var(--rule-strong);background:rgba(238,240,242,.9);backdrop-filter:blur(10px);color:var(--ink);opacity:0;pointer-events:none;transform:translateY(10px);transition:opacity .3s var(--ease),transform .3s var(--ease)}
 .totop.show{opacity:1;pointer-events:auto;transform:none}
+.ask-open .totop{opacity:0;pointer-events:none}   /* панель помощника открыта — стрелка не мешает */
 .totop svg{width:20px;height:20px}
-@media(max-width:899px){.totop{bottom:calc(56px + 16px)}}
+@media(max-width:899px){.totop{bottom:calc(56px + 14px + 46px + 10px)}}
 .callbar{position:fixed;left:0;right:0;bottom:0;z-index:45;display:grid;grid-template-columns:1fr 1fr;background:rgba(11,13,16,.94);backdrop-filter:blur(12px);border-top:1px solid var(--rule-strong);transform:translateY(110%);transition:transform .35s var(--ease);color:#fff}
 .callbar.show{transform:none}
 .callbar a{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;font-size:1rem;color:#fff}
@@ -1649,10 +1650,12 @@ section[id],main[id]{scroll-margin-top:84px}
     /* открытие и закрытие */
     function open(){
       panel.hidden=false; fab.setAttribute('aria-expanded','true');
+      d.documentElement.classList.add('ask-open');
       setTimeout(function(){ input.focus(); },50);
     }
     function close(){
-      panel.hidden=true; fab.setAttribute('aria-expanded','false'); fab.focus();
+      panel.hidden=true; fab.setAttribute('aria-expanded','false');
+      d.documentElement.classList.remove('ask-open'); fab.focus();
     }
     fab.addEventListener('click',open);
     d.getElementById('askClose').addEventListener('click',close);
