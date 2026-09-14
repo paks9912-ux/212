@@ -300,6 +300,23 @@
   .author-lines .mono,.qr figcaption{color:#79828C!important}
   .author-lines b{color:#0B0D10!important}
 }
+
+.slide[data-title="Автоматизация"] .shot figure{max-height:31vh}
+.slide[data-title="Автоматизация"] .shot img{height:100%;object-fit:cover;object-position:top left}
+.slide[data-title="Автоматизация"] .list li{padding:9px 0}
+.slide[data-title="Автоматизация"] .list p{font-size:.88rem}
+.slide[data-title="Другие работы"] .inner,.slide[data-title="Автоматизация"] .inner{gap:clamp(8px,1.1vw,16px)}
+.slide[data-title="Другие работы"] .shot-sm figure{max-height:23vh}
+.slide[data-title="Другие работы"] .works-list>div{padding:9px 0}
+.slide[data-title="Другие работы"] .works-list span{font-size:.85rem}
+
+/* список прочих работ */
+.works-list{display:grid;gap:0;border-top:1px solid var(--rule)}
+@media(min-width:840px){.works-list{grid-template-columns:repeat(3,1fr);column-gap:36px}}
+.works-list>div{display:grid;gap:4px;padding:12px 0;border-bottom:1px solid var(--rule)}
+.works-list b{font-family:var(--display);font-weight:500;text-transform:uppercase;font-size:clamp(1rem,1.3vw,1.2rem)}
+.works-list span{font-size:.9rem;color:var(--tx-3)}
+.slide.light .works-list,.slide.light .works-list>div{border-color:#C9CFD5}
 </style>
 <style>
 :root{
@@ -858,6 +875,32 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 17-б ДРУГИЕ РАБОТЫ -->
+  <section class="slide" data-title="Другие работы">
+    <div class="inner tight">
+      <span class="kicker">17 / Другие работы</span>
+      <h2>Не только сайты — работающие системы.</h2>
+      <div class="viz two">
+        <div class="shot shot-sm">
+          <span class="tag now">СУ №4 · сайт</span>
+          <figure><img src="{{new_hero}}" alt="Новый сайт СУ №4"></figure>
+          <p class="cap">Девять страниц, каталог направлений с параметрами, объекты, формы заявки.</p>
+        </div>
+        <div class="shot shot-sm">
+          <span class="tag now">СУ-4 · AI-диспетчер</span>
+          <figure><img src="{{disp}}" alt="Прототип AI-диспетчера для СУ-4: телефон директора и мини-кабинет"></figure>
+          <p class="cap">Прототип для этой же компании: управление объектами из WhatsApp.</p>
+        </div>
+      </div>
+      <div class="works-list">
+        <div><b>KYOTO</b><span>сайт доставки, корзина, приём заказов и админка для кухни</span></div>
+        <div><b>SAKURA</b><span>доставка суши по Ташкенту: витрина и заказ без посредников</span></div>
+        <div><b>Аудиты и разборы</b><span>что мешает заказывать, где теряются заявки, как чинить</span></div>
+      </div>
+      <p class="foot-note mono">Полный список работ — по ссылке на портфолио на последнем слайде.</p>
+    </div>
+  </section>
+
   <!-- 18 ЧТО ПОЛУЧАЕТ КОМПАНИЯ -->
   <section class="slide" data-title="Что получает компания">
     <div class="inner">
@@ -871,6 +914,28 @@ ul{list-style:none;margin:0;padding:0}
         <div><b>Современное представительство</b><span>единая визуальная система и работа на всех экранах</span></div>
         <div><b>Понятный путь к обращению</b><span>форма и связь на каждой странице</span></div>
       </div>
+    </div>
+  </section>
+
+  <!-- 18-б АВТОМАТИЗАЦИЯ -->
+  <section class="slide light" data-title="Автоматизация">
+    <div class="inner tight">
+      <span class="kicker" style="color:#0A6FBE">19 / Что можно сделать после сайта</span>
+      <h2>Директор управляет объектами из WhatsApp.</h2>
+      <div class="viz two" style="align-items:start">
+        <div class="shot"><figure><img src="{{disp}}" alt="AI-диспетчер СУ-4: чат директора и мини-кабинет"></figure>
+          <p class="cap">Прототип уже собран и работает как демонстрация — открывается по ссылке, кнопки нажимаются.</p>
+        </div>
+        <div>
+          <ul class="list" style="border-color:#C9CFD5">
+            <li style="border-color:#C9CFD5"><span class="n" style="color:#0A6FBE">01</span><div><b>Утром — одна сводка</b><p style="color:#4A525B">Состояние объектов, техники и рисков в четырёх строках. Решения приходят карточками с кнопками «одобрить» и «отклонить».</p></div></li>
+            <li style="border-color:#C9CFD5"><span class="n" style="color:#0A6FBE">02</span><div><b>Прорабы отчитываются как привыкли</b><p style="color:#4A525B">Текстом, голосом или фото в WhatsApp. Система сама достаёт объёмы, сравнивает с планом и уточняет причину отставания.</p></div></li>
+            <li style="border-color:#C9CFD5"><span class="n" style="color:#0A6FBE">03</span><div><b>До директора доходит только важное</b><p style="color:#4A525B">Четыре уровня: часть система решает сама, часть уходит ответственному, часть — начальнику производства.</p></div></li>
+            <li style="border-color:#C9CFD5"><span class="n" style="color:#0A6FBE">04</span><div><b>Тендеры и техника под присмотром</b><p style="color:#4A525B">Проверка площадки закупок, простои и перерасход топлива, напоминания о ТО — без участия человека.</p></div></li>
+          </ul>
+        </div>
+      </div>
+      <p class="foot-note mono">Это отдельная работа, в стоимость сайта не входит. Сроки и цену считаем после разговора о том, какие участки закрывать первыми.</p>
     </div>
   </section>
 

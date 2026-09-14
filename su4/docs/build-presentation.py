@@ -42,7 +42,8 @@ IMAGES = {
     'about':    'p-about.jpg',    'tablet':   'p-tablet.jpg',
     'figure':   'p-figure.jpg',   'trust':    'p-trust.jpg',
     'prod':     'p-prod.jpg',     'old_proj': 'p-old-proj.jpg',
-    'tourposter': 'tour-poster.jpg',
+    'tourposter': 'tour-poster.jpg', 'disp': 'p-disp.jpg',
+    'disp_phone': 'p-disp-phone.jpg',
 }
 
 def fonts_css():
