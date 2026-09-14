@@ -305,7 +305,7 @@
 .slide[data-title="Автоматизация"] .shot img{height:100%;object-fit:cover;object-position:top left}
 .slide[data-title="Автоматизация"] .list li{padding:9px 0}
 .slide[data-title="Автоматизация"] .list p{font-size:.88rem}
-.slide[data-title="Автоматизация"] .inner,.slide[data-title="Решение за вами"] .inner{gap:clamp(8px,1.1vw,14px)}
+.slide[data-title="Другие работы"] .inner,.slide[data-title="Автоматизация"] .inner{gap:clamp(8px,1.1vw,16px)}
 .slide[data-title="Другие работы"] .shot-sm figure{max-height:23vh}
 .slide[data-title="Другие работы"] .works-list>div{padding:9px 0}
 .slide[data-title="Другие работы"] .works-list span{font-size:.85rem}
@@ -317,48 +317,6 @@
 .works-list b{font-family:var(--display);font-weight:500;text-transform:uppercase;font-size:clamp(1rem,1.3vw,1.2rem)}
 .works-list span{font-size:.9rem;color:var(--tx-3)}
 .slide.light .works-list,.slide.light .works-list>div{border-color:#C9CFD5}
-
-/* ---------- финальный слайд ---------- */
-.close-grid{display:grid;gap:clamp(16px,2.2vw,36px);align-items:start}
-@media(min-width:960px){.close-grid{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}}
-.close-offer{display:grid;gap:clamp(12px,1.5vw,18px)}
-.close-ladder{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;border-top:1px solid var(--rule);
-  border-bottom:1px solid var(--rule);padding:14px 0;color:var(--tx-2);font-size:.74rem}
-.close-ladder i{font-style:normal;color:var(--azure-2)}
-.close-card{border:1px solid var(--rule-2);padding:clamp(16px,1.8vw,22px);display:grid;gap:14px;align-content:start;background:var(--ink-2)}
-.close-card .author-lines{grid-template-columns:1fr!important;gap:11px!important}
-.close-card .qr{justify-items:start}
-.close-card .qr img{width:clamp(76px,7vw,96px)}
-.close-cta{display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 22px;background:var(--blue);color:#fff;
-  text-decoration:none;font-family:var(--display);font-weight:500;text-transform:uppercase;letter-spacing:.06em;font-size:.92rem;
-  justify-content:center;transition:background .2s var(--ease)}
-.close-cta:hover{background:var(--azure)}
-.slide[data-title="Решение за вами"] h2{font-size:clamp(1.5rem,2.9vw,2.5rem)}
-.slide[data-title="Решение за вами"] .price-main b{font-size:clamp(1.6rem,2.8vw,2.6rem)}
-.slide[data-title="Решение за вами"] .price-main{padding-top:14px;gap:8px}
-.slide[data-title="Решение за вами"] .price-note{font-size:.86rem}
-@media(max-height:900px){
-  .slide[data-title="Решение за вами"] h2{font-size:clamp(1.3rem,2.2vw,1.9rem)}
-  .slide[data-title="Решение за вами"] .price-main b{font-size:clamp(1.4rem,2.2vw,2rem)}
-  .close-card{gap:9px;padding:13px}
-  .close-card .qr img{width:72px}
-  .close-ladder{padding:9px 0;font-size:.7rem}
-  .close-cta{min-height:46px}
-  .close-bye{font-size:.92rem;padding-top:10px}
-  .slide[data-title="Решение за вами"] .author-lines{gap:9px!important}
-  .slide[data-title="Решение за вами"] .price-main{padding-top:10px;gap:6px}
-}
-.slide[data-title="Решение за вами"] .author-role{font-size:.84rem}
-.close-bye{font-family:var(--display);text-transform:uppercase;font-weight:500;font-size:clamp(.95rem,1.35vw,1.2rem);
-  line-height:1.25;border-top:2px solid var(--azure);padding-top:14px;color:var(--tx-2)}
-@media(min-width:960px){.close-card .qr{justify-items:center}}
-@media print{
-  .close-card{border-color:#C0C6CC!important;background:#fff!important}
-  .close-cta{display:none}
-  .close-bye{color:#0B0D10!important;border-color:#025394!important}
-  .close-steps>div,.close-steps{border-color:#C0C6CC!important}
-  .close-steps .mono{color:#025394!important}
-}
 </style>
 <style>
 :root{
@@ -583,6 +541,7 @@ ul{list-style:none;margin:0;padding:0}
 
 <div class="deck" id="deck">
 
+  <!-- 01 ОБЛОЖКА -->
   <section class="slide" data-title="Обложка">
     <div class="inner">
       <div class="title-eyebrow mono"><span>ЗАО «Строительное управление №4»</span><span>Кара-Балта · с 1952 года</span></div>
@@ -595,6 +554,7 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 02 С ЧЕГО НАЧАЛИ -->
   <section class="slide" data-title="Что уже есть">
     <div class="inner">
       <span class="kicker">01 / С чего мы начали</span>
@@ -613,6 +573,7 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 03 ТЕКУЩИЙ САЙТ -->
   <section class="slide light" data-title="Текущий сайт">
     <div class="inner">
       <span class="kicker" style="color:#0A6FBE">02 / Текущий сайт</span>
@@ -627,6 +588,7 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 04 ПРОБЛЕМА -->
   <section class="slide" data-title="Основная проблема">
     <div class="inner">
       <span class="kicker">03 / Основная проблема</span>
@@ -654,6 +616,7 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 05 БЫЛО: ПУТЬ -->
   <section class="slide" data-title="Путь: было">
     <div class="inner">
       <span class="kicker">04 / Как пользователь проходит текущий сайт</span>
@@ -671,6 +634,7 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 06 СТАЛО: ЛОГИКА -->
   <section class="slide" data-title="Путь: стало">
     <div class="inner">
       <span class="kicker">05 / Новая логика</span>
@@ -687,6 +651,7 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 07 НОВАЯ КОНЦЕПЦИЯ -->
   <section class="slide" data-title="Новая концепция">
     <div class="inner wide">
       <span class="kicker">06 / Новая концепция</span>
@@ -695,6 +660,7 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 08 ПЕРВЫЙ ЭКРАН -->
   <section class="slide light" data-title="Первый экран">
     <div class="inner">
       <span class="kicker" style="color:#0A6FBE">07 / Первый экран</span>
@@ -715,6 +681,7 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 09 БЫЛО → СТАЛО -->
   <section class="slide" data-title="Было → Стало">
     <div class="inner tight">
       <span class="kicker">08 / Было → Стало</span>
@@ -733,41 +700,10 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
-  <section class="slide" data-title="Цифры">
-    <div class="inner tight">
-      <span class="kicker">09 / Что изменилось в цифрах</span>
-      <h2>Главная страница: замерено браузером.</h2>
-      <div class="tables">
-        <table class="ft">
-          <thead><tr><th>Скорость и вес главной</th><th>Было</th><th>Стало</th></tr></thead>
-          <tbody>
-            <tr><td>Ответ сервера</td><td class="was">2 с</td><td class="now">—</td></tr>
-            <tr><td>Загрузка при связи 1 Мбит/с</td><td class="was">1,5 мин</td><td class="now">20 с</td></tr>
-            <tr><td>Скачивает телефон</td><td class="was">11,5 МБ</td><td class="now">2,5 МБ</td></tr>
-            <tr><td>Обращений к серверу</td><td class="was">178</td><td class="now">29</td></tr>
-            <tr><td>Файлов оформления и скриптов</td><td class="was">100</td><td class="now">2</td></tr>
-            <tr><td>Элементов на странице</td><td class="was">2040</td><td class="now">692</td></tr>
-          </tbody>
-        </table>
-        <table class="ft">
-          <thead><tr><th>Как сделано и читается</th><th>Было</th><th>Стало</th></tr></thead>
-          <tbody>
-            <tr><td>Текстов ниже нормы контраста</td><td class="was">20 из 79</td><td class="now">0 из 123</td></tr>
-            <tr><td>Знаков в самой длинной строке</td><td class="was">180</td><td class="now">92</td></tr>
-            <tr><td>Разных левых краёв у блоков</td><td class="was">23</td><td class="now">12</td></tr>
-            <tr><td>Цветов фона</td><td class="was">14</td><td class="now">6</td></tr>
-            <tr><td>Кнопок мельче пальца</td><td class="was">48</td><td class="now">1</td></tr>
-            <tr><td>Рабочих размеров на главной</td><td class="was">0</td><td class="now">17</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="foot-note mono">Замеры сделаны браузером на одинаковых экранах в один день. Проверить можно самим: F12 → вкладка «Сеть». Прочерк — новый сайт ещё не на хостинге.</p>
-    </div>
-  </section>
-
+  <!-- 10 УСЛУГИ -->
   <section class="slide light" data-title="Услуги">
     <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">10 / Направления</span>
+      <span class="kicker" style="color:#0A6FBE">09 / Направления</span>
       <h2>От списка услуг — к задаче клиента.</h2>
       <div class="viz two" style="align-items:center">
         <div class="shot"><figure><img src="{{new_serv}}" alt="Каталог направлений с параметрами и фотографиями"></figure></div>
@@ -783,9 +719,10 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 11 ПРОЕКТЫ -->
   <section class="slide" data-title="Проекты">
     <div class="inner tight">
-      <span class="kicker">11 / Проекты</span>
+      <span class="kicker">10 / Проекты</span>
       <h2>Проекты — это не просто фотографии.</h2>
       <div class="viz two">
         <div class="shot"><figure><img src="{{new_proj}}" alt="Раздел объектов с фильтром по отраслям"></figure></div>
@@ -799,9 +736,10 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 12 ДОВЕРИЕ -->
   <section class="slide light" data-title="Доверие">
     <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">12 / Доверие</span>
+      <span class="kicker" style="color:#0A6FBE">11 / Доверие</span>
       <h2>Слова создают обещание. Факты создают доверие.</h2>
       <div class="viz two">
         <div>
@@ -827,9 +765,10 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 13 ВИЗУАЛЬНЫЙ ЯЗЫК -->
   <section class="slide" data-title="Визуальный язык">
     <div class="inner tight">
-      <span class="kicker">13 / Визуальный язык</span>
+      <span class="kicker">12 / Визуальный язык</span>
       <h2>Визуально компания должна соответствовать своему масштабу.</h2>
       <div class="spec">
         <div class="spec-col">
@@ -871,9 +810,10 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 14 MOBILE -->
   <section class="slide light" data-title="Экраны">
     <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">14 / Экраны</span>
+      <span class="kicker" style="color:#0A6FBE">13 / Экраны</span>
       <h2>Один сайт — разные сценарии.</h2>
       <div class="devices">
         <div class="dev dev-desktop"><figure><img src="{{new_hero}}" alt="Версия для компьютера"></figure><span class="mono">Компьютер · 1440</span></div>
@@ -884,9 +824,10 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 15 ИНТЕРАКТИВ -->
   <section class="slide" data-title="Интерфейс в движении">
     <div class="inner wide">
-      <span class="kicker">15 / Интерфейс в движении</span>
+      <span class="kicker">14 / Интерфейс в движении</span>
       <h2>Современный интерфейс — это не эффект ради эффекта.</h2>
       <figure class="tour">
         <video poster="{{tourposter}}" controls muted playsinline preload="metadata"><source src="{{tourwebm}}" type="video/webm"><source src="{{tour}}" type="video/mp4"></video>
@@ -895,9 +836,10 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 16 USER JOURNEY -->
   <section class="slide" data-title="Путь клиента">
     <div class="inner">
-      <span class="kicker">16 / Как новый сайт ведёт клиента</span>
+      <span class="kicker">15 / Как новый сайт ведёт клиента</span>
       <h2>Пять шагов от интереса до обращения.</h2>
       <div class="chain chain-now chain-5">
         <div class="node"><i class="n">01</i><b>Увидел</b><span>понимает масштаб</span></div>
@@ -910,9 +852,10 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 17 ЧТО СДЕЛАНО -->
   <section class="slide light" data-title="Что сделано">
     <div class="inner">
-      <span class="kicker" style="color:#0A6FBE">17 / Что было сделано</span>
+      <span class="kicker" style="color:#0A6FBE">16 / Что было сделано</span>
       <h2>За визуальной частью — переработка структуры.</h2>
       <div class="checks">
         <div>
@@ -932,9 +875,52 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 17-б ДРУГИЕ РАБОТЫ -->
+  <section class="slide" data-title="Другие работы">
+    <div class="inner tight">
+      <span class="kicker">17 / Другие работы</span>
+      <h2>Не только сайты — работающие системы.</h2>
+      <div class="viz two">
+        <div class="shot shot-sm">
+          <span class="tag now">СУ №4 · сайт</span>
+          <figure><img src="{{new_hero}}" alt="Новый сайт СУ №4"></figure>
+          <p class="cap">Девять страниц, каталог направлений с параметрами, объекты, формы заявки.</p>
+        </div>
+        <div class="shot shot-sm">
+          <span class="tag now">СУ-4 · AI-диспетчер</span>
+          <figure><img src="{{disp}}" alt="Прототип AI-диспетчера для СУ-4: телефон директора и мини-кабинет"></figure>
+          <p class="cap">Прототип для этой же компании: управление объектами из WhatsApp.</p>
+        </div>
+      </div>
+      <div class="works-list">
+        <div><b>KYOTO</b><span>сайт доставки, корзина, приём заказов и админка для кухни</span></div>
+        <div><b>SAKURA</b><span>доставка суши по Ташкенту: витрина и заказ без посредников</span></div>
+        <div><b>Аудиты и разборы</b><span>что мешает заказывать, где теряются заявки, как чинить</span></div>
+      </div>
+      <p class="foot-note mono">Полный список работ — по ссылке на портфолио на последнем слайде.</p>
+    </div>
+  </section>
+
+  <!-- 18 ЧТО ПОЛУЧАЕТ КОМПАНИЯ -->
+  <section class="slide" data-title="Что получает компания">
+    <div class="inner">
+      <span class="kicker">17 / Что получает СУ №4</span>
+      <h2>Обновление того, как компания представляет себя.</h2>
+      <div class="gains">
+        <div><b>Понятное позиционирование</b><span>с первого экрана видно специализацию и масштаб</span></div>
+        <div><b>Удобная навигация</b><span>два уровня, возврат туда, откуда пришли</span></div>
+        <div><b>Реальный масштаб</b><span>цифры, производство, объекты вместо деклараций</span></div>
+        <div><b>Сильная подача проектов</b><span>фильтр по отраслям и разбор объекта</span></div>
+        <div><b>Современное представительство</b><span>единая визуальная система и работа на всех экранах</span></div>
+        <div><b>Понятный путь к обращению</b><span>форма и связь на каждой странице</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 18-б АВТОМАТИЗАЦИЯ -->
   <section class="slide light" data-title="Автоматизация">
     <div class="inner tight">
-      <span class="kicker" style="color:#0A6FBE">18 / Что можно сделать после сайта</span>
+      <span class="kicker" style="color:#0A6FBE">19 / Что можно сделать после сайта</span>
       <h2>Директор управляет объектами из WhatsApp.</h2>
       <div class="viz two" style="align-items:start">
         <div class="shot"><figure><img src="{{disp}}" alt="AI-диспетчер СУ-4: чат директора и мини-кабинет"></figure>
@@ -953,6 +939,7 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
+  <!-- 19 ГЛАВНЫЙ СЛАЙД -->
   <section class="slide slide-black" data-title="Главная мысль">
     <div class="inner">
       <p class="big-statement">Компания уже имеет историю, опыт и масштаб.</p>
@@ -960,32 +947,92 @@ ul{list-style:none;margin:0;padding:0}
     </div>
   </section>
 
-  <section class="slide" data-title="Решение за вами">
-    <div class="inner tight">
-      <span class="kicker">Решение за вами</span>
-      <h2>Скажите «да» — и начнём с данных по объектам.</h2>
-      <div class="close-grid">
-        <div class="close-offer">
-          <div class="price-main">
-            <span class="mono" style="color:var(--tx-3)">Стоимость проекта</span>
-            <b>100 000 сом</b>
-            <span class="price-note">Девять страниц, тексты, 105 фотографий, перенос на su4.kg и передача исходников. Платы за платформу нет. Сроки и оплата — <span class="tbd" data-fill="условия">по договорённости</span>.</span>
-          </div>
-          <div class="close-ladder mono">
-            <span>Шаг 01 · Данные по объектам</span><i>→</i><span>Шаг 02 · Наполнение</span><i>→</i><span>Шаг 03 · Запуск на su4.kg</span>
+  <!-- 20 СЛЕДУЮЩИЙ ЭТАП -->
+  <section class="slide light" data-title="Следующий этап">
+    <div class="inner">
+      <span class="kicker" style="color:#0A6FBE">18 / Следующий этап</span>
+      <h2>От концепции — к запуску.</h2>
+      <div class="viz two">
+        <div>
+          <div class="chain chain-now chain-v">
+            <div class="node"><b>Финализация дизайна</b><span>правки по замечаниям</span></div>
+            <div class="node"><b>Наполнение</b><span>данные объектов, реквизиты, фотографии</span></div>
+            <div class="node"><b>Перенос на su4.kg</b><span>хостинг, домен, почта для заявок</span></div>
+            <div class="node"><b>Тестирование</b><span>экраны, формы, скорость</span></div>
+            <div class="node"><b>Запуск</b><span>передача исходников и обучение</span></div>
           </div>
         </div>
-        <div class="close-card">
-          <div class="author-lines">
-            <div><span class="mono">Предложение подготовил</span><b>{{author_name}}</b><span class="author-role">{{author_role}}</span></div>
-            <div><span class="mono">Портфолио и другие работы</span><a class="author-link" href="{{author_url}}" target="_blank" rel="noopener">{{author_url_label}}</a></div>
-            <div><span class="mono">Связь</span><a class="author-link" href="tel:{{author_phone_href}}">{{author_phone}}</a><a class="author-link" href="mailto:{{author_email}}">{{author_email}}</a></div>
+        <div>
+          <div class="price-main">
+            <span class="mono" style="color:#79828C">Стоимость проекта</span>
+            <b>100 000 сом</b>
+            <span class="price-note">Девять страниц, тексты, работа со 105 фотографиями, перенос на su4.kg и передача исходников.</span>
           </div>
-          <figure class="qr"><img src="{{author_qr}}" alt="QR-код со ссылкой на портфолио"><figcaption class="mono">Портфолио — наведите камеру</figcaption></figure>
-          <a class="close-cta" href="https://claude.ai/code/artifact/a15e7496-238b-4761-aece-f6f1f6069709" target="_blank" rel="noopener">Открыть сайт с телефона →</a>
+          <table class="ft" style="margin-top:18px">
+            <tbody>
+              <tr><td>Дизайн и вёрстка главной</td><td class="now">35 000</td></tr>
+              <tr><td>Шесть страниц направлений</td><td class="now">28 000</td></tr>
+              <tr><td>Объект и «О компании»</td><td class="now">15 000</td></tr>
+              <tr><td>Тексты, структура, фотографии</td><td class="now">12 000</td></tr>
+              <tr><td>Перенос, формы, обучение</td><td class="now">10 000</td></tr>
+              <tr class="total"><td>Итого</td><td class="now">100 000 сом</td></tr>
+            </tbody>
+          </table>
+          <p class="foot-note mono">Сроки и порядок оплаты — <span class="tbd" data-fill="условия">по договорённости</span>. Отдельной платы за платформу нет: сайт остаётся файлами компании.</p>
         </div>
       </div>
-      <p class="close-bye">Сайт открыт по ссылке — можно проверить прямо сейчас, до того как мы попрощаемся.</p>
+    </div>
+  </section>
+
+  <!-- 21 ФИНАЛ -->
+  <section class="slide slide-black" data-title="Финал">
+    <div class="inner">
+      <p class="big-statement">СУ №4 уже доказала свой уровень в реальных проектах.</p>
+      <p class="big-statement dim">Теперь этот уровень должен быть виден и в цифровом пространстве.</p>
+      <div class="ladder">
+        <span>От информации</span><i>→</i><span>к структуре</span><i>→</i><span>к доверию</span><i>→</i><span>к действию</span>
+      </div>
+      <div class="author">
+        <div class="author-lines">
+          <div><span class="mono">Предложение подготовил</span><b>{{author_name}}</b><span class="author-role">{{author_role}}</span></div>
+          <div><span class="mono">Портфолио</span><a class="author-link" href="{{author_url}}" target="_blank" rel="noopener">{{author_url_label}}</a></div>
+          <div><span class="mono">Связь</span><a class="author-link" href="tel:{{author_phone_href}}">{{author_phone}}</a><a class="author-link" href="mailto:{{author_email}}">{{author_email}}</a></div>
+        </div>
+        <figure class="qr"><img src="{{author_qr}}" alt="QR-код со ссылкой на портфолио"><figcaption class="mono">Портфолио — наведите камеру</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- 22 ПРИЛОЖЕНИЕ -->
+  <section class="slide" data-title="Приложение: замеры">
+    <div class="inner tight">
+      <span class="kicker">Приложение / Замеры браузером</span>
+      <h2>Если понадобятся цифры.</h2>
+      <div class="tables">
+        <table class="ft">
+          <thead><tr><th>Скорость и вес главной</th><th>Было</th><th>Стало</th></tr></thead>
+          <tbody>
+            <tr><td>Ответ сервера</td><td class="was">2 с</td><td class="now">—</td></tr>
+            <tr><td>Загрузка при связи 1 Мбит/с</td><td class="was">1,5 мин</td><td class="now">20 с</td></tr>
+            <tr><td>Скачивает телефон</td><td class="was">11,5 МБ</td><td class="now">2,5 МБ</td></tr>
+            <tr><td>Обращений к серверу</td><td class="was">178</td><td class="now">29</td></tr>
+            <tr><td>Файлов оформления и скриптов</td><td class="was">100</td><td class="now">2</td></tr>
+            <tr><td>Элементов на странице</td><td class="was">2040</td><td class="now">692</td></tr>
+          </tbody>
+        </table>
+        <table class="ft">
+          <thead><tr><th>Как сделано и читается</th><th>Было</th><th>Стало</th></tr></thead>
+          <tbody>
+            <tr><td>Текстов ниже нормы контраста</td><td class="was">20 из 79</td><td class="now">0 из 123</td></tr>
+            <tr><td>Знаков в самой длинной строке</td><td class="was">180</td><td class="now">92</td></tr>
+            <tr><td>Разных левых краёв у блоков</td><td class="was">23</td><td class="now">12</td></tr>
+            <tr><td>Цветов фона</td><td class="was">14</td><td class="now">6</td></tr>
+            <tr><td>Кнопок мельче пальца</td><td class="was">48</td><td class="now">1</td></tr>
+            <tr><td>Рабочих размеров на главной</td><td class="was">0</td><td class="now">17</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="foot-note mono">Замеры сделаны браузером на одинаковых экранах в один день. Проверить можно самим: F12 → вкладка «Сеть». Прочерк — новый сайт ещё не на хостинге.</p>
     </div>
   </section>
 
