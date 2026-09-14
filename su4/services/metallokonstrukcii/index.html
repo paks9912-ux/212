@@ -288,6 +288,51 @@
   </div>
 </footer>
 
+<!-- ================= ПОМОЩНИК: ВОПРОС И ОБРАТНАЯ СВЯЗЬ ================= -->
+<button class="ask-fab" id="askFab" type="button" aria-expanded="false" aria-controls="askPanel">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 1-13.4 7.8L3 21l1.2-4.6A9 9 0 1 1 21 12z"/></svg>
+  <span>Задать вопрос</span>
+</button>
+
+<section class="ask-panel" id="askPanel" hidden data-up="../../" aria-label="Вопрос по проекту">
+  <header class="ask-head">
+    <div>
+      <b>Помощник СУ №4</b>
+      <span class="mono" id="askStatus">отвечает по направлениям и параметрам</span>
+    </div>
+    <button class="ask-close" id="askClose" type="button" aria-label="Закрыть">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </header>
+
+  <div class="ask-tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="bot" type="button">Вопрос</button>
+    <button role="tab" aria-selected="false" data-tab="call" type="button">Обратная связь</button>
+  </div>
+
+  <div class="ask-pane on" id="askPaneBot">
+    <div class="ask-thread" id="askThread" role="log" aria-live="polite"></div>
+    <div class="ask-sugg" id="askSugg"></div>
+    <form class="ask-input" id="askForm">
+      <input id="askText" type="text" autocomplete="off" placeholder="Например: пролёт 24 м, площадь 1500 м²">
+      <button type="submit" aria-label="Отправить">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </button>
+    </form>
+  </div>
+
+  <form class="ask-pane ask-call" id="askPaneCall" novalidate>
+    <p class="ask-note">Оставьте номер — перезвоним в рабочее время и ответим по вашей задаче.</p>
+    <div class="field"><label for="cb-name">Имя</label><input id="cb-name" name="name" type="text" autocomplete="name" required placeholder="Как к вам обращаться"></div>
+    <div class="field"><label for="cb-phone">Телефон</label><input id="cb-phone" name="phone" type="tel" autocomplete="tel-national" inputmode="numeric" required placeholder="700 123 456"></div>
+    <div class="field"><label for="cb-task">Задача</label><textarea id="cb-task" name="task" rows="2" placeholder="Ангар 1500 м², пролёт 24 м, Чуйская область"></textarea></div>
+    <button class="btn btn-primary" type="submit">Жду звонка
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <a class="ask-wa" id="askWa" href="https://wa.me/996704141522" target="_blank" rel="noopener">Или написать в WhatsApp →</a>
+    <p class="ask-done" id="askDone" hidden>Заявка записана. Перезвоним в рабочее время — отдел продаж, +996 704 141 522.</p>
+  </form>
+</section>
+
 <div class="callbar" id="callbar" aria-label="Быстрая связь">
   <a href="tel:+996704141522"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L8 9.7a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.7a2 2 0 0 1 1.7 2z"/></svg>Позвонить</a>
   <a class="wa" href="https://wa.me/996704141522"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 1-13.4 7.8L3 21l1.2-4.6A9 9 0 1 1 21 12z"/></svg>WhatsApp</a>

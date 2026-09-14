@@ -184,7 +184,11 @@ ul,ol{list-style:none}
 }
 .hero-copy{position:relative;z-index:2}
 .hero-media{position:relative;overflow:hidden;background:var(--ink-800);aspect-ratio:16/9}
-@media(min-width:1000px){.hero-media{aspect-ratio:4/5;max-height:min(72svh,740px)}}
+@media(min-width:1000px){
+  .hero-inner{align-items:stretch}
+  .hero-copy{display:flex;flex-direction:column;justify-content:center}
+  .hero-media{aspect-ratio:auto;width:100%;height:100%;min-height:min(64svh,660px)}
+}
 .hero-video{width:100%;height:100%;object-fit:cover;display:block;background:var(--ink-800)}
 .hero-media .ph-frame{position:absolute;inset:0;background:var(--ink-800)}
 /* лёгкая виньетка только по краям — сам кадр остаётся открытым */
@@ -195,15 +199,29 @@ ul,ol{list-style:none}
 .hero-cap{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;flex-wrap:wrap;gap:6px 16px;padding:14px 16px;
   font-family:var(--font-mono);font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:rgba(247,248,249,.72)}
 .hero-grid{display:none}
-.hero-eyebrow{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--tx-2);margin-bottom:22px}
+.hero-eyebrow{display:flex;flex-wrap:wrap;gap:8px 18px;color:var(--tx-3);margin-bottom:26px}
 .hero-eyebrow span{padding-right:18px;border-right:1px solid rgba(255,255,255,.2)}
 @media(max-width:720px){.hero-eyebrow span{border-right:0;padding-right:0}.hero-eyebrow{gap:4px 16px}}
 .hero-eyebrow span:last-child{border-right:0;padding-right:0}
-.hero .h1{font-size:clamp(2.6rem,6.4vw,5.6rem);max-width:12em;margin-bottom:22px}
+.hero .h1{font-size:clamp(2.6rem,5.9vw,5.2rem);max-width:10em;margin-bottom:26px}
 .hero .h1 em{font-style:normal;color:var(--azure)}
-.hero .lead{max-width:32em}
-.hero-actions{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;margin-top:26px}
+.hero .lead{max-width:26em}
+.hero-spec{display:flex;flex-wrap:wrap;gap:10px 12px;margin:0;padding:0;list-style:none}
+.hero-spec li{border:1px solid var(--rule);padding:8px 12px;color:var(--tx-2);font-size:.74rem;letter-spacing:.08em}
+@media(max-width:560px){.hero-spec li{font-size:.68rem;padding:7px 10px}}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;margin-top:30px}
 .hero-facts{position:relative;background:var(--ink);padding-bottom:clamp(30px,4vw,56px)}
+
+/* на телефоне первый экран должен успевать показать и текст, и кадр */
+@media(max-width:720px){
+  .hero-inner{padding-top:98px;gap:20px}
+  .hero .h1{font-size:clamp(2.05rem,9.2vw,2.9rem);margin-bottom:18px}
+  .hero-eyebrow{margin-bottom:16px}
+  .hero .lead{font-size:1rem;max-width:34em}
+  .hero-actions{margin-top:20px;gap:10px 20px}
+  .hero-media{aspect-ratio:3/2}
+}
+
 .titleblock{position:relative;border-top:1px solid var(--rule-strong);display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
 @media(min-width:720px){.titleblock{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .titleblock>div{padding:22px 20px 24px 0;border-bottom:1px solid var(--rule);position:relative}
@@ -213,6 +231,43 @@ ul,ol{list-style:none}
 .titleblock .val{font-family:var(--font-display);font-weight:600;font-size:clamp(2.2rem,3.8vw,3.4rem);line-height:1;margin-bottom:8px}
 .titleblock .val sup{font-size:.5em;vertical-align:top;top:.1em;position:relative;color:var(--azure)}
 .titleblock .lbl{color:var(--tx-3)}
+
+
+/* ---------- широкие мониторы: масштаб вместе с экраном ---------- */
+@media(min-width:1800px){
+  :root{--maxw:1680px}
+  html{font-size:17.2px}
+}
+@media(min-width:2200px){
+  :root{--maxw:1840px}
+  html{font-size:18.6px}
+}
+@media(min-width:2800px){
+  :root{--maxw:2000px}
+  html{font-size:20px}
+}
+
+/* ---------- первый экран целиком на любом мониторе ---------- */
+@media(min-width:1000px) and (max-height:1150px){
+  .hero-inner{padding-top:130px;padding-bottom:26px;min-height:0}
+  .hero-media{min-height:min(58svh,600px)}
+  .hero-facts{padding-bottom:26px}
+}
+
+@media(min-width:1000px) and (max-height:900px){
+  .hero-inner{padding-top:112px;padding-bottom:22px;min-height:0;gap:clamp(28px,3.4vw,52px)}
+  .hero-media{min-height:min(52svh,520px)}
+  .hero .h1{margin-bottom:18px}
+  .hero-eyebrow{margin-bottom:16px}
+  .hero-actions{margin-top:22px}
+  .hero-facts{padding-bottom:18px}
+  .titleblock>div{padding-top:16px;padding-bottom:18px}
+}
+@media(min-width:1000px) and (max-height:780px){
+  .hero-inner{padding-top:100px;gap:26px}
+  .hero-media{min-height:min(46svh,430px)}
+  .titleblock .val{font-size:clamp(1.8rem,2.6vw,2.4rem)}
+}
 
 /* ---------- направления: оглавление каталога ---------- */
 .dirs-wrap{display:block}
@@ -248,13 +303,17 @@ ul,ol{list-style:none}
 .plates{transition:opacity .22s var(--ease);display:grid;gap:clamp(30px,3.5vw,52px) clamp(16px,2vw,28px);grid-template-columns:repeat(12,minmax(0,1fr))}
 .plate{grid-column:span 12;margin:0;display:flex;flex-direction:column;transition:opacity .3s var(--ease)}
 @media(min-width:720px){.plate{grid-column:span 6}.plate--wide{grid-column:span 12}}
-@media(min-width:1060px){.plate{grid-column:span 4}.plate--wide{grid-column:span 8}.plate--tall{grid-column:span 4}.plate--half{grid-column:span 6}}
+@media(min-width:1060px){.plate{grid-column:span 4}.plate--wide{grid-column:span 8}.plate--tall{grid-column:span 4}.plate--half{grid-column:span 6}
+  .plates.filtered .plate{grid-column:span 4}
+  .plates.filtered .plate .ph-frame{aspect-ratio:4 / 3}
+}
+@media(min-width:720px) and (max-width:1059px){.plates.filtered .plate{grid-column:span 6}.plates.filtered .plate .ph-frame{aspect-ratio:4 / 3}}
 .plate .ph-frame{aspect-ratio:var(--ratio,4 / 3);width:100%}
 @media(max-width:719px){.plate .ph-frame{aspect-ratio:4 / 3}}
 .plate figcaption{padding-top:14px;margin-top:14px;border-top:1px solid var(--rule-strong);display:grid;gap:8px}
 .plate .mono{color:var(--tx-3);letter-spacing:.07em}
 .plate .h3{font-size:clamp(1.15rem,1.6vw,1.5rem)}
-.plate--wide .h3,.plate--half .h3{font-size:clamp(1.6rem,2.6vw,2.4rem)}
+.plate--wide .h3,.plate--half .h3{font-size:clamp(1.3rem,1.9vw,1.75rem)}
 .plate p{color:var(--tx-2);font-size:.95rem;max-width:46em}
 .plate[hidden],.plate.hidden{display:none}
 .proj{display:none}
@@ -523,6 +582,58 @@ section[id],main[id]{scroll-margin-top:84px}
 .clients-list ul{display:grid;gap:8px}
 .clients-list li{font-size:.92rem;color:var(--tx-2);line-height:1.4}
 .appendix{display:none}
+
+
+/* ---------- помощник: вопрос и обратная связь ---------- */
+.ask-fab{position:fixed;right:clamp(16px,2vw,28px);bottom:clamp(16px,2vw,28px);z-index:46;
+  display:inline-flex;align-items:center;gap:10px;min-height:52px;padding:0 20px;background:var(--cta);color:#fff;
+  font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;font-size:.9rem;
+  box-shadow:0 12px 30px -12px rgba(2,83,148,.8);transition:background .25s var(--ease),transform .25s var(--ease)}
+.ask-fab svg{width:19px;height:19px}
+.ask-fab:hover{background:var(--azure);transform:translateY(-1px)}
+.ask-fab[aria-expanded="true"]{display:none}
+@media(max-width:899px){.ask-fab{bottom:calc(56px + 14px);right:14px;padding:0 16px;font-size:.82rem;min-height:46px}}
+
+.ask-panel{position:fixed;right:clamp(16px,2vw,28px);bottom:clamp(16px,2vw,28px);z-index:47;width:min(390px,calc(100vw - 32px));
+  max-height:min(640px,calc(100vh - 40px));display:flex;flex-direction:column;overflow:hidden;
+  background:var(--ink);border:1px solid var(--rule-strong);color:#F2F4F6;box-shadow:0 24px 60px -20px rgba(0,0,0,.7)}
+.ask-panel[hidden]{display:none}
+@media(max-width:899px){.ask-panel{right:8px;left:8px;width:auto;bottom:calc(56px + 8px);max-height:calc(100vh - 120px)}}
+.ask-head{display:flex;align-items:center;gap:12px;padding:14px 14px 12px;border-bottom:1px solid var(--rule)}
+.ask-head b{display:block;font-family:var(--font-display);font-weight:500;text-transform:uppercase;font-size:1rem;line-height:1.2}
+.ask-head .mono{color:var(--tx-3);font-size:.64rem;letter-spacing:.06em}
+.ask-close{margin-left:auto;width:36px;height:36px;display:grid;place-items:center;border:1px solid var(--rule-strong);color:#fff}
+.ask-close svg{width:17px;height:17px}
+.ask-close:hover{background:rgba(255,255,255,.08)}
+.ask-tabs{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--rule)}
+.ask-tabs button{min-height:44px;font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;font-size:.82rem;
+  color:var(--tx-3);border-bottom:2px solid transparent;margin-bottom:-1px}
+.ask-tabs button[aria-selected="true"]{color:#fff;border-bottom-color:var(--azure)}
+.ask-pane{display:none;flex-direction:column;min-height:0}
+.ask-pane.on{display:flex}
+.ask-thread{flex:1;min-height:0;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;scrollbar-width:thin}
+.ask-msg{max-width:88%;padding:10px 12px;font-size:.92rem;line-height:1.45;border:1px solid var(--rule)}
+.ask-msg.bot{align-self:flex-start;background:var(--ink-2)}
+.ask-msg.me{align-self:flex-end;background:var(--cta);border-color:var(--cta);color:#fff}
+.ask-msg b{font-weight:600}
+.ask-msg a{color:var(--azure-2, #4FB2E8);box-shadow:inset 0 -1px 0 currentColor}
+.ask-sugg{display:flex;gap:6px;overflow-x:auto;padding:0 14px 10px;scrollbar-width:none}
+.ask-sugg::-webkit-scrollbar{display:none}
+.ask-sugg button{flex:none;border:1px solid var(--rule-strong);color:var(--tx-2);padding:7px 11px;font-size:.76rem;white-space:nowrap}
+.ask-sugg button:hover{border-color:var(--azure);color:#fff}
+.ask-input{display:flex;gap:8px;padding:10px 12px 12px;border-top:1px solid var(--rule)}
+.ask-input input{flex:1;min-height:46px;padding:10px 12px;background:var(--ink-2);border:1px solid var(--rule-strong);color:#fff;font:inherit;font-size:.95rem}
+.ask-input input:focus{outline:none;border-color:var(--azure)}
+.ask-input button{width:46px;height:46px;display:grid;place-items:center;background:var(--cta);color:#fff;flex:none}
+.ask-input button:hover{background:var(--azure)}
+.ask-call{gap:12px;padding:14px;overflow-y:auto}
+.ask-call .field label{color:var(--tx-3)}
+.ask-call .field input,.ask-call .field textarea{min-height:46px;background:var(--ink-2);border-color:var(--rule-strong)}
+.ask-note{font-size:.88rem;color:var(--tx-2)}
+.ask-wa{font-family:var(--font-mono);font-size:.76rem;letter-spacing:.06em;color:var(--azure);text-align:center}
+.ask-done{font-size:.9rem;color:#8FD3A6;border:1px solid rgba(143,211,166,.4);padding:10px 12px}
+.ask-call.sent .field,.ask-call.sent .btn,.ask-call.sent .ask-note{display:none}
+@media(prefers-reduced-motion:reduce){.ask-fab{transition:none}}
 
 /* ---------- движение ---------- */
 .js .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s var(--ease),transform .8s var(--ease)}
@@ -861,6 +972,51 @@ section[id],main[id]{scroll-margin-top:84px}
   </div>
 </footer>
 
+<!-- ================= ПОМОЩНИК: ВОПРОС И ОБРАТНАЯ СВЯЗЬ ================= -->
+<button class="ask-fab" id="askFab" type="button" aria-expanded="false" aria-controls="askPanel">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12a9 9 0 0 1-13.4 7.8L3 21l1.2-4.6A9 9 0 1 1 21 12z"/></svg>
+  <span>Задать вопрос</span>
+</button>
+
+<section class="ask-panel" id="askPanel" hidden data-up="../../" aria-label="Вопрос по проекту">
+  <header class="ask-head">
+    <div>
+      <b>Помощник СУ №4</b>
+      <span class="mono" id="askStatus">отвечает по направлениям и параметрам</span>
+    </div>
+    <button class="ask-close" id="askClose" type="button" aria-label="Закрыть">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </header>
+
+  <div class="ask-tabs" role="tablist">
+    <button role="tab" aria-selected="true" data-tab="bot" type="button">Вопрос</button>
+    <button role="tab" aria-selected="false" data-tab="call" type="button">Обратная связь</button>
+  </div>
+
+  <div class="ask-pane on" id="askPaneBot">
+    <div class="ask-thread" id="askThread" role="log" aria-live="polite"></div>
+    <div class="ask-sugg" id="askSugg"></div>
+    <form class="ask-input" id="askForm">
+      <input id="askText" type="text" autocomplete="off" placeholder="Например: пролёт 24 м, площадь 1500 м²">
+      <button type="submit" aria-label="Отправить">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </button>
+    </form>
+  </div>
+
+  <form class="ask-pane ask-call" id="askPaneCall" novalidate>
+    <p class="ask-note">Оставьте номер — перезвоним в рабочее время и ответим по вашей задаче.</p>
+    <div class="field"><label for="cb-name">Имя</label><input id="cb-name" name="name" type="text" autocomplete="name" required placeholder="Как к вам обращаться"></div>
+    <div class="field"><label for="cb-phone">Телефон</label><input id="cb-phone" name="phone" type="tel" autocomplete="tel-national" inputmode="numeric" required placeholder="700 123 456"></div>
+    <div class="field"><label for="cb-task">Задача</label><textarea id="cb-task" name="task" rows="2" placeholder="Ангар 1500 м², пролёт 24 м, Чуйская область"></textarea></div>
+    <button class="btn btn-primary" type="submit">Жду звонка
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    <a class="ask-wa" id="askWa" href="https://wa.me/996704141522" target="_blank" rel="noopener">Или написать в WhatsApp →</a>
+    <p class="ask-done" id="askDone" hidden>Заявка записана. Перезвоним в рабочее время — отдел продаж, +996 704 141 522.</p>
+  </form>
+</section>
+
 <div class="callbar" id="callbar" aria-label="Быстрая связь">
   <a href="tel:+996704141522"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.6a2 2 0 0 1-.5 2.1L8 9.7a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.7a2 2 0 0 1 1.7 2z"/></svg>Позвонить</a>
   <a class="wa" href="https://wa.me/996704141522"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 1-13.4 7.8L3 21l1.2-4.6A9 9 0 1 1 21 12z"/></svg>WhatsApp</a>
@@ -1112,6 +1268,7 @@ section[id],main[id]{scroll-margin-top:84px}
         c.classList.toggle('hidden',!ok); if(ok)n++;
       });
       if(fnote) fnote.textContent=(f==='all'?'Показаны все объекты — ':'Показано ')+n+' '+word(n);
+      if(grid0) grid0.classList.toggle('filtered', f!=='all');   /* выбранный раздел — одинаковые карточки */
       /* если сетка ушла вверх за шапку — подтягиваем её обратно в кадр */
       var grid=d.getElementById('projectGrid');
       if(grid){var t=grid.getBoundingClientRect().top; if(t<64||t>w.innerHeight*.6) w.scrollTo({top:grid.getBoundingClientRect().top+w.scrollY-96,behavior:'smooth'});}
@@ -1360,6 +1517,146 @@ section[id],main[id]{scroll-margin-top:84px}
       inp.addEventListener('paste',function(){setTimeout(sync,0)});
       sync();
     });
+  })();
+
+
+  /* помощник: отвечает на частые вопросы по данным сайта и принимает заявку на звонок.
+     Работает без сервера: знания взяты со страниц, чего не знает — переводит на людей. */
+  (function(){
+    var fab=d.getElementById('askFab'), panel=d.getElementById('askPanel');
+    if(!fab||!panel) return;
+    var thread=d.getElementById('askThread'), sugg=d.getElementById('askSugg'),
+        form=d.getElementById('askForm'), input=d.getElementById('askText'),
+        call=d.getElementById('askPaneCall'), done=d.getElementById('askDone'),
+        wa=d.getElementById('askWa');
+
+    var PHONE='+996 704 141 522';
+    var KB=[
+      {k:['пролёт','пролет','ширина','ангар','склад','каркас','здание','цех'],
+       a:'Каркасные здания и склады: <b>пролёт 12–30 м</b>, колонны из сборного железобетона до 12 м, покрытие — металлические фермы. Бескаркасные ангары: пролёт 12–30 м, высота 3–15 м.',
+       go:['services/karkasnoe-stroitelstvo/index.html','Склады и промышленные здания']},
+      {k:['резервуар','ргс','рвс','ёмкост','емкост','нефтепродукт','топлив'],
+       a:'Резервуары: <b>РГС 1–500 м³</b> и <b>РВС 100–10 000 м³</b>. Изготовление и монтаж своими бригадами, плюс оборудование для горнодобычи — корпуса ЗИФ, сгустители, чаны выщелачивания.',
+       go:['services/metallokonstrukcii/index.html','Металлоконструкции и резервуары']},
+      {k:['металлоконструк','тонн','м/к','мк ','сварк','ферм','балк','зиф','сгустител','выщелачив','бункер'],
+       a:'Собственное производство металлоконструкций: <b>до 300 т в месяц</b>, цеха 3000 м². С 1991 года изготовлено около 45 000 т.',
+       go:['services/metallokonstrukcii/index.html','Металлоконструкции и резервуары']},
+      {k:['бескаркас','арочн','зернохран','овощехран'],
+       a:'Бескаркасные сооружения: <b>1000–1500 м² за месяц</b>, пролёт 12–30 м, высота 3–15 м. Зернохранилища, овощехранилища, склады холодного и тёплого исполнения.',
+       go:['services/beskarkasnye-sooruzheniya/index.html','Ангары и хранилища']},
+      {k:['дорог','асфальт','абз','щма','бордюр','площадк','карьер'],
+       a:'Дорожное направление: свой карьер ПГС, асфальтобетонный завод <b>1000 т в смену</b>, битумная база с ж/д путями, 70+ единиц техники. Уложено более 1 000 000 м² полотна.',
+       go:['services/dorozhnoe-stroitelstvo/index.html','Дороги и городская инфраструктура']},
+      {k:['бетон','жби','фундамент','колонн','плит','раствор'],
+       a:'Бетон и ЖБИ: собственный бетонный завод и линии ЖБИ, <b>до 30 м³ изделий в смену</b>, бордюр до 1000 м в смену. Продукция сертифицирована Госстроем КР.',
+       go:['services/beton-i-zhbi/index.html','Бетон и железобетонные изделия']},
+      {k:['проект','бим','bim','экспертиз','согласован','ввод','апу','иту','документ'],
+       a:'Проектирование и ввод: земельный отвод, геология, согласование ИТУ и АПУ, проект в BIM, экспертиза, ввод в эксплуатацию. Одна ответственная сторона на весь цикл.',
+       go:['services/proektirovanie/index.html','Проект и ввод в эксплуатацию']},
+      {k:['цена','стоимост','смет','сколько стоит','прайс','бюджет','расчёт','расчет'],
+       a:'Цену считаем по вашему заданию: от объёма, пролёта, высоты и места. Пришлите параметры или чертёж — отдел продаж вернётся со сметой и сроками. Готовых прайсов по объектам нет.',
+       go:['#contacts','Отправить задачу']},
+      {k:['срок','когда','быстро','график','успе'],
+       a:'Сроки зависят от объекта. Ориентир по бескаркасным: <b>1000–1500 м² монтажа в месяц</b>. По остальным направлениям срок считаем вместе со сметой, после параметров объекта.',
+       go:['#contacts','Обсудить сроки']},
+      {k:['опыт','объект','портфол','кейс','построил','джамгыр','референс','примеры'],
+       a:'С 1952 года построено более 4500 объектов: рудники и ЗИФ, заводы, склады, резервуары, дороги. В разделе «Объекты» — 12 примеров с фильтром по отраслям, отдельно разобран рудник «Джамгыр».',
+       go:['#projects','Смотреть объекты']},
+      {k:['гаранти','качеств','сертификат','лиценз','госстрой','снип','гост'],
+       a:'Работы ведём по СНиП и ГОСТ, продукция сертифицирована Госстроем КР, сертификаты материалов выложены на сайте. Лицензии и полный список документов уточняются — пришлём по запросу.',
+       go:['about/index.html','О компании и документы']},
+      {k:['где','город','регион','адрес','кара-балта','бишкек','област','выезд','ош','джалал','нарын','талас','иссык','баткен','по стране','другом городе','работаете'],
+       a:'База в Кара-Балте, работаем по Кыргызстану. Среди объектов — рудники в горах, дороги в Чуйской области, промплощадки и городская инфраструктура.',
+       go:['#contacts','Контакты']},
+      {k:['контакт','телефон','позвон','whatsapp','ватсап','почта','связ'],
+       a:'Отдел продаж: <b>'+PHONE+'</b>, снабжение: +996 550 114 459. Есть WhatsApp и Telegram, почта info@su4.kg. Можно оставить номер на вкладке «Обратная связь» — перезвоним.',
+       go:['#contacts','Все контакты']},
+      {k:['как работа','этап','договор','предоплат','оплат','порядок','монтаж','реконструк','ремонт','кровл','демонтаж'],
+       a:'Порядок такой: коммерческое предложение со сметой и сроками → договор → реализация и сдача с исполнительной документацией. Условия оплаты обсуждаем по объекту.',
+       go:['#contacts','Запросить предложение']}
+    ];
+    var SUGG=['Пролёт и высота','Резервуары РГС и РВС','Сколько стоит','Сроки','Дороги и асфальт','Контакты'];
+
+    function el(cls,html){var e=d.createElement('div');e.className=cls;e.innerHTML=html;return e;}
+    function push(cls,html){
+      var m=el('ask-msg '+cls,html); thread.appendChild(m);
+      thread.scrollTop=thread.scrollHeight; return m;
+    }
+    function answer(q){
+      var t=q.toLowerCase().replace('ё','е'), best=null, score=0;
+      KB.forEach(function(item){
+        var n=0;
+        item.k.forEach(function(k){ if(t.indexOf(k.replace('ё','е'))>-1) n++; });
+        if(n>score){score=n;best=item;}
+      });
+      if(!best){
+        return 'Такого у меня нет под рукой. Напишите вопрос в форме «Обратная связь» или в WhatsApp — ответит инженер отдела продаж, <b>'+PHONE+'</b>.';
+      }
+      var up=panel.getAttribute('data-up')||'';
+      var href=best.go[0].charAt(0)==='#' ? (up?up+'index.html'+best.go[0]:best.go[0]) : up+best.go[0];
+      var link=(best.go[0].charAt(0)==='#'&&!up)
+        ? '<a href="'+href+'" data-ask-close>'+best.go[1]+' →</a>'
+        : '<a href="'+href+'">'+best.go[1]+' →</a>';
+      return best.a+'<br><br>'+link;
+    }
+    function ask(q){
+      push('me', q.replace(/</g,'&lt;'));
+      var wait=push('bot','…');
+      setTimeout(function(){ wait.innerHTML=answer(q); thread.scrollTop=thread.scrollHeight; }, 260);
+    }
+
+    SUGG.forEach(function(s){
+      var btn=d.createElement('button'); btn.type='button'; btn.textContent=s;
+      btn.addEventListener('click',function(){ ask(s); });
+      sugg.appendChild(btn);
+    });
+    push('bot','Здравствуйте. Отвечу по направлениям, параметрам и срокам — или передам вопрос инженеру. Что строите?');
+
+    form.addEventListener('submit',function(e){
+      e.preventDefault();
+      var v=input.value.trim(); if(!v) return;
+      input.value=''; ask(v);
+    });
+    thread.addEventListener('click',function(e){
+      var a=e.target.closest('a[data-ask-close]'); if(a) close();
+    });
+
+    /* вкладки */
+    var tabs=panel.querySelectorAll('.ask-tabs button'),
+        panes={bot:d.getElementById('askPaneBot'), call:call};
+    tabs.forEach(function(b){b.addEventListener('click',function(){
+      tabs.forEach(function(x){x.setAttribute('aria-selected', x===b);});
+      Object.keys(panes).forEach(function(k){ panes[k].classList.toggle('on', k===b.getAttribute('data-tab')); });
+      if(b.getAttribute('data-tab')==='bot') input.focus(); else call.querySelector('input').focus();
+    })});
+
+    /* обратная связь */
+    call.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(!call.checkValidity()){ call.reportValidity(); return; }
+      var name=d.getElementById('cb-name').value.trim(),
+          phone=d.getElementById('cb-phone').value.trim(),
+          task=d.getElementById('cb-task').value.trim();
+      if(wa){
+        wa.href='https://wa.me/996704141522?text='+encodeURIComponent(
+          'Заявка с сайта su4.kg\nИмя: '+name+'\nТелефон: +996 '+phone+(task?'\nЗадача: '+task:''));
+        wa.textContent='Продублировать в WhatsApp →';
+      }
+      call.classList.add('sent');
+      if(done) done.hidden=false;
+    });
+
+    /* открытие и закрытие */
+    function open(){
+      panel.hidden=false; fab.setAttribute('aria-expanded','true');
+      setTimeout(function(){ input.focus(); },50);
+    }
+    function close(){
+      panel.hidden=true; fab.setAttribute('aria-expanded','false'); fab.focus();
+    }
+    fab.addEventListener('click',open);
+    d.getElementById('askClose').addEventListener('click',close);
+    d.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!panel.hidden) close(); });
   })();
 
   /* форма — демонстрация */

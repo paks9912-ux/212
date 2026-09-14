@@ -494,6 +494,146 @@
     });
   })();
 
+
+  /* помощник: отвечает на частые вопросы по данным сайта и принимает заявку на звонок.
+     Работает без сервера: знания взяты со страниц, чего не знает — переводит на людей. */
+  (function(){
+    var fab=d.getElementById('askFab'), panel=d.getElementById('askPanel');
+    if(!fab||!panel) return;
+    var thread=d.getElementById('askThread'), sugg=d.getElementById('askSugg'),
+        form=d.getElementById('askForm'), input=d.getElementById('askText'),
+        call=d.getElementById('askPaneCall'), done=d.getElementById('askDone'),
+        wa=d.getElementById('askWa');
+
+    var PHONE='+996 704 141 522';
+    var KB=[
+      {k:['пролёт','пролет','ширина','ангар','склад','каркас','здание','цех'],
+       a:'Каркасные здания и склады: <b>пролёт 12–30 м</b>, колонны из сборного железобетона до 12 м, покрытие — металлические фермы. Бескаркасные ангары: пролёт 12–30 м, высота 3–15 м.',
+       go:['services/karkasnoe-stroitelstvo/index.html','Склады и промышленные здания']},
+      {k:['резервуар','ргс','рвс','ёмкост','емкост','нефтепродукт','топлив'],
+       a:'Резервуары: <b>РГС 1–500 м³</b> и <b>РВС 100–10 000 м³</b>. Изготовление и монтаж своими бригадами, плюс оборудование для горнодобычи — корпуса ЗИФ, сгустители, чаны выщелачивания.',
+       go:['services/metallokonstrukcii/index.html','Металлоконструкции и резервуары']},
+      {k:['металлоконструк','тонн','м/к','мк ','сварк','ферм','балк','зиф','сгустител','выщелачив','бункер'],
+       a:'Собственное производство металлоконструкций: <b>до 300 т в месяц</b>, цеха 3000 м². С 1991 года изготовлено около 45 000 т.',
+       go:['services/metallokonstrukcii/index.html','Металлоконструкции и резервуары']},
+      {k:['бескаркас','арочн','зернохран','овощехран'],
+       a:'Бескаркасные сооружения: <b>1000–1500 м² за месяц</b>, пролёт 12–30 м, высота 3–15 м. Зернохранилища, овощехранилища, склады холодного и тёплого исполнения.',
+       go:['services/beskarkasnye-sooruzheniya/index.html','Ангары и хранилища']},
+      {k:['дорог','асфальт','абз','щма','бордюр','площадк','карьер'],
+       a:'Дорожное направление: свой карьер ПГС, асфальтобетонный завод <b>1000 т в смену</b>, битумная база с ж/д путями, 70+ единиц техники. Уложено более 1 000 000 м² полотна.',
+       go:['services/dorozhnoe-stroitelstvo/index.html','Дороги и городская инфраструктура']},
+      {k:['бетон','жби','фундамент','колонн','плит','раствор'],
+       a:'Бетон и ЖБИ: собственный бетонный завод и линии ЖБИ, <b>до 30 м³ изделий в смену</b>, бордюр до 1000 м в смену. Продукция сертифицирована Госстроем КР.',
+       go:['services/beton-i-zhbi/index.html','Бетон и железобетонные изделия']},
+      {k:['проект','бим','bim','экспертиз','согласован','ввод','апу','иту','документ'],
+       a:'Проектирование и ввод: земельный отвод, геология, согласование ИТУ и АПУ, проект в BIM, экспертиза, ввод в эксплуатацию. Одна ответственная сторона на весь цикл.',
+       go:['services/proektirovanie/index.html','Проект и ввод в эксплуатацию']},
+      {k:['цена','стоимост','смет','сколько стоит','прайс','бюджет','расчёт','расчет'],
+       a:'Цену считаем по вашему заданию: от объёма, пролёта, высоты и места. Пришлите параметры или чертёж — отдел продаж вернётся со сметой и сроками. Готовых прайсов по объектам нет.',
+       go:['#contacts','Отправить задачу']},
+      {k:['срок','когда','быстро','график','успе'],
+       a:'Сроки зависят от объекта. Ориентир по бескаркасным: <b>1000–1500 м² монтажа в месяц</b>. По остальным направлениям срок считаем вместе со сметой, после параметров объекта.',
+       go:['#contacts','Обсудить сроки']},
+      {k:['опыт','объект','портфол','кейс','построил','джамгыр','референс','примеры'],
+       a:'С 1952 года построено более 4500 объектов: рудники и ЗИФ, заводы, склады, резервуары, дороги. В разделе «Объекты» — 12 примеров с фильтром по отраслям, отдельно разобран рудник «Джамгыр».',
+       go:['#projects','Смотреть объекты']},
+      {k:['гаранти','качеств','сертификат','лиценз','госстрой','снип','гост'],
+       a:'Работы ведём по СНиП и ГОСТ, продукция сертифицирована Госстроем КР, сертификаты материалов выложены на сайте. Лицензии и полный список документов уточняются — пришлём по запросу.',
+       go:['about/index.html','О компании и документы']},
+      {k:['где','город','регион','адрес','кара-балта','бишкек','област','выезд','ош','джалал','нарын','талас','иссык','баткен','по стране','другом городе','работаете'],
+       a:'База в Кара-Балте, работаем по Кыргызстану. Среди объектов — рудники в горах, дороги в Чуйской области, промплощадки и городская инфраструктура.',
+       go:['#contacts','Контакты']},
+      {k:['контакт','телефон','позвон','whatsapp','ватсап','почта','связ'],
+       a:'Отдел продаж: <b>'+PHONE+'</b>, снабжение: +996 550 114 459. Есть WhatsApp и Telegram, почта info@su4.kg. Можно оставить номер на вкладке «Обратная связь» — перезвоним.',
+       go:['#contacts','Все контакты']},
+      {k:['как работа','этап','договор','предоплат','оплат','порядок','монтаж','реконструк','ремонт','кровл','демонтаж'],
+       a:'Порядок такой: коммерческое предложение со сметой и сроками → договор → реализация и сдача с исполнительной документацией. Условия оплаты обсуждаем по объекту.',
+       go:['#contacts','Запросить предложение']}
+    ];
+    var SUGG=['Пролёт и высота','Резервуары РГС и РВС','Сколько стоит','Сроки','Дороги и асфальт','Контакты'];
+
+    function el(cls,html){var e=d.createElement('div');e.className=cls;e.innerHTML=html;return e;}
+    function push(cls,html){
+      var m=el('ask-msg '+cls,html); thread.appendChild(m);
+      thread.scrollTop=thread.scrollHeight; return m;
+    }
+    function answer(q){
+      var t=q.toLowerCase().replace('ё','е'), best=null, score=0;
+      KB.forEach(function(item){
+        var n=0;
+        item.k.forEach(function(k){ if(t.indexOf(k.replace('ё','е'))>-1) n++; });
+        if(n>score){score=n;best=item;}
+      });
+      if(!best){
+        return 'Такого у меня нет под рукой. Напишите вопрос в форме «Обратная связь» или в WhatsApp — ответит инженер отдела продаж, <b>'+PHONE+'</b>.';
+      }
+      var up=panel.getAttribute('data-up')||'';
+      var href=best.go[0].charAt(0)==='#' ? (up?up+'index.html'+best.go[0]:best.go[0]) : up+best.go[0];
+      var link=(best.go[0].charAt(0)==='#'&&!up)
+        ? '<a href="'+href+'" data-ask-close>'+best.go[1]+' →</a>'
+        : '<a href="'+href+'">'+best.go[1]+' →</a>';
+      return best.a+'<br><br>'+link;
+    }
+    function ask(q){
+      push('me', q.replace(/</g,'&lt;'));
+      var wait=push('bot','…');
+      setTimeout(function(){ wait.innerHTML=answer(q); thread.scrollTop=thread.scrollHeight; }, 260);
+    }
+
+    SUGG.forEach(function(s){
+      var btn=d.createElement('button'); btn.type='button'; btn.textContent=s;
+      btn.addEventListener('click',function(){ ask(s); });
+      sugg.appendChild(btn);
+    });
+    push('bot','Здравствуйте. Отвечу по направлениям, параметрам и срокам — или передам вопрос инженеру. Что строите?');
+
+    form.addEventListener('submit',function(e){
+      e.preventDefault();
+      var v=input.value.trim(); if(!v) return;
+      input.value=''; ask(v);
+    });
+    thread.addEventListener('click',function(e){
+      var a=e.target.closest('a[data-ask-close]'); if(a) close();
+    });
+
+    /* вкладки */
+    var tabs=panel.querySelectorAll('.ask-tabs button'),
+        panes={bot:d.getElementById('askPaneBot'), call:call};
+    tabs.forEach(function(b){b.addEventListener('click',function(){
+      tabs.forEach(function(x){x.setAttribute('aria-selected', x===b);});
+      Object.keys(panes).forEach(function(k){ panes[k].classList.toggle('on', k===b.getAttribute('data-tab')); });
+      if(b.getAttribute('data-tab')==='bot') input.focus(); else call.querySelector('input').focus();
+    })});
+
+    /* обратная связь */
+    call.addEventListener('submit',function(e){
+      e.preventDefault();
+      if(!call.checkValidity()){ call.reportValidity(); return; }
+      var name=d.getElementById('cb-name').value.trim(),
+          phone=d.getElementById('cb-phone').value.trim(),
+          task=d.getElementById('cb-task').value.trim();
+      if(wa){
+        wa.href='https://wa.me/996704141522?text='+encodeURIComponent(
+          'Заявка с сайта su4.kg\nИмя: '+name+'\nТелефон: +996 '+phone+(task?'\nЗадача: '+task:''));
+        wa.textContent='Продублировать в WhatsApp →';
+      }
+      call.classList.add('sent');
+      if(done) done.hidden=false;
+    });
+
+    /* открытие и закрытие */
+    function open(){
+      panel.hidden=false; fab.setAttribute('aria-expanded','true');
+      setTimeout(function(){ input.focus(); },50);
+    }
+    function close(){
+      panel.hidden=true; fab.setAttribute('aria-expanded','false'); fab.focus();
+    }
+    fab.addEventListener('click',open);
+    d.getElementById('askClose').addEventListener('click',close);
+    d.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!panel.hidden) close(); });
+  })();
+
   /* форма — демонстрация */
   var form=d.getElementById('leadForm');
   if(form)form.addEventListener('submit',function(e){
