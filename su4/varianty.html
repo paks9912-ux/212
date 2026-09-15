@@ -228,6 +228,83 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
 .duo .dev-laptop .base,.inner-grid .dev-laptop .base,.vs .dev-laptop .base{margin:0 -4%}
 
 .count{max-width:min(60vw,420px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ===== появление содержимого слайда ===== */
+[data-anim]{opacity:0;transform:translateY(14px);transition:opacity .6s cubic-bezier(.22,.61,.36,1),transform .6s cubic-bezier(.22,.61,.36,1)}
+.is-in [data-anim]{opacity:1;transform:none;transition-delay:calc(var(--i,0) * var(--step,80ms))}
+
+/* этапы: линия прочерчивается по одному */
+.steps div{position:relative}
+.steps div::before{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:var(--azure);transform:scaleX(0);transform-origin:left;transition:transform .55s cubic-bezier(.22,.61,.36,1)}
+.is-in .steps div::before{transform:scaleX(1);transition-delay:calc(var(--i,0) * 90ms + 140ms)}
+
+/* экраны устройств «включаются» */
+.dev .screen img{opacity:0;transform:scale(1.035);transition:opacity .75s ease,transform 1s cubic-bezier(.22,.61,.36,1)}
+.is-in .dev .screen img{opacity:1;transform:none;transition-delay:.18s}
+
+/* строки таблицы появляются быстрее, как заполняемый чек-лист */
+.matrix{--step:55ms}
+.list{--step:60ms}
+
+/* ===== рельс слайдов ===== */
+.rail{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:60;display:flex;flex-direction:column;gap:9px}
+.rail button{
+  position:relative;width:16px;height:3px;border:0;padding:0;cursor:pointer;border-radius:2px;
+  background:rgba(14,27,42,.22);transition:background .25s,width .25s,transform .25s;
+}
+.rail button:hover{background:var(--brand);width:24px}
+.rail button.done{background:rgba(14,27,42,.4)}
+.rail button.on{background:var(--brand);width:28px}
+.rail button span{
+  position:absolute;right:calc(100% + 12px);top:50%;transform:translateY(-50%) translateX(6px);
+  white-space:nowrap;font:600 .68rem var(--mono);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--tx-2);background:rgba(251,250,247,.94);border:1px solid var(--line);border-radius:4px;padding:5px 9px;
+  opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;
+}
+.rail button:hover span,.rail button:focus-visible span{opacity:1;transform:translateY(-50%)}
+.rail.on-dark button{background:rgba(245,247,250,.26)}
+.rail.on-dark button.done{background:rgba(245,247,250,.45)}
+.rail.on-dark button.on,.rail.on-dark button:hover{background:#7FCBFA}
+.rail.on-dark button span{color:var(--on-dark);background:rgba(11,21,32,.9);border-color:var(--on-dark-line)}
+@media (max-width:1180px){.rail{display:none}}
+
+/* ===== подсказка «далее» ===== */
+.nexthint{
+  position:fixed;left:clamp(14px,2vw,26px);bottom:clamp(14px,2vh,24px);z-index:60;
+  display:flex;align-items:center;gap:10px;cursor:pointer;
+  padding:9px 14px 9px 12px;border-radius:6px;border:1px solid var(--line);
+  background:rgba(251,250,247,.9);backdrop-filter:blur(8px);
+  font:600 .74rem var(--mono);letter-spacing:.05em;color:var(--tx);
+  transition:background .2s,border-color .2s,transform .2s,opacity .3s;
+}
+.nexthint:hover{border-color:var(--brand);transform:translateY(-2px)}
+.nexthint .l{color:var(--tx-3);font-weight:500;text-transform:uppercase;letter-spacing:.09em}
+.nexthint b{font-weight:600}
+.nexthint i{display:block;width:12px;height:12px;border-right:1.6px solid var(--brand);border-bottom:1.6px solid var(--brand);transform:rotate(45deg) translate(-2px,-2px);animation:hintdown 2s ease-in-out infinite}
+@keyframes hintdown{0%,100%{transform:rotate(45deg) translate(-2px,-2px)}50%{transform:rotate(45deg) translate(1px,1px)}}
+.nexthint.on-dark{background:rgba(11,21,32,.82);border-color:var(--on-dark-line);color:#fff}
+.nexthint.on-dark .l{color:var(--on-dark-2)}
+.nexthint.on-dark i{border-color:#7FCBFA}
+@media (max-width:760px){
+  .nexthint{left:50%;transform:translateX(-50%);bottom:12px;padding:8px 12px;font-size:.68rem}
+  .nexthint:hover{transform:translateX(-50%)}
+  .nexthint .l{display:none}
+}
+
+@media (prefers-reduced-motion:reduce){
+  [data-anim]{opacity:1!important;transform:none!important;transition:none!important}
+  .dev .screen img{opacity:1!important;transform:none!important}
+  .steps div::before{transform:scaleX(1)!important;transition:none!important}
+  .nexthint i{animation:none}
+}
+
+.deckmeta{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:clamp(22px,3vh,34px);
+  font:500 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--on-dark-2)}
+.deckmeta span{position:relative}
+.deckmeta span+span::before{content:"·";position:absolute;left:-15px;opacity:.55}
+
+/* на мобильном контент не должен уходить под плавающую подсказку */
+@media (max-width:760px){.slide{padding-bottom:84px}}
 </style>
 </head>
 <body>
@@ -238,6 +315,11 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   <a href="v2/index.html" target="_blank" rel="noopener">Сайт · В2</a>
 </div>
 <div class="count" id="count">01</div>
+<nav class="rail" id="rail" aria-label="Навигация по слайдам"></nav>
+<button class="nexthint" id="nextHint" type="button" hidden>
+  <span class="l">Далее</span><b id="nextTitle"></b>
+  <i aria-hidden="true"></i>
+</button>
 
 <!-- 01 ОБЛОЖКА + ССЫЛКИ НА САЙТЫ -->
 <section class="slide dark cover" data-title="Обложка">
@@ -261,8 +343,8 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
         <span class="u">paks9912-ux.github.io/212/su4/v2/</span>
       </a>
     </div>
+    <p class="deckmeta"><span>19 слайдов</span><span>около 5 минут</span><span>прокрутка или стрелки ↑ ↓</span></p>
   </div>
-  <div class="hint"><i></i> Листайте вниз или стрелками</div>
 </section>
 
 <section class="slide blue" data-title="Компания">
@@ -271,12 +353,12 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     <h2 class="t">Компания, о которой рассказывает сайт</h2>
     <p class="sub">ЗАО «Строительное управление №4» — промышленное строительство полного цикла: проектирование, собственное производство металлоконструкций и железобетона, монтаж и ввод объектов в эксплуатацию. Кара-Балта, работа по всему Кыргызстану.</p>
     <div class="nums">
-      <div><b>1952</b><span>год основания</span></div>
-      <div><b>4 500+</b><span>объектов сдано</span></div>
-      <div><b>45 000 т</b><span>металлоконструкций</span></div>
+      <div><b><span data-count="1952" data-plain="1">1952</span></b><span>год основания</span></div>
+      <div><b><span data-count="4500">0</span>+</b><span>объектов сдано</span></div>
+      <div><b><span data-count="45000">0</span> т</b><span>металлоконструкций</span></div>
       <div><b>1 млн+ м²</b><span>дорожного полотна</span></div>
-      <div><b>2 000+</b><span>сооружений связи</span></div>
-      <div><b>58</b><span>заказчиков и партнёров</span></div>
+      <div><b><span data-count="2000">0</span>+</b><span>сооружений связи</span></div>
+      <div><b><span data-count="58">0</span></b><span>заказчиков и партнёров</span></div>
     </div>
   </div>
 </section>
@@ -633,38 +715,126 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
 
 <script>
 (function () {
-  var slides = [].slice.call(document.querySelectorAll('.slide'));
-  var bar = document.getElementById('bar');
-  var count = document.getElementById('count');
+  var d = document, w = window;
+  var slides = [].slice.call(d.querySelectorAll('.slide'));
+  var bar = d.getElementById('bar');
+  var count = d.getElementById('count');
+  var rail = d.getElementById('rail');
+  var hint = d.getElementById('nextHint');
+  var hintTitle = d.getElementById('nextTitle');
+  var reduce = w.matchMedia && w.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var pad = function (n) { return n < 10 ? '0' + n : String(n); };
   var current = 0;
 
+  /* ---------- сценарное появление содержимого ---------- */
+  var GROUPS = '.logo-row,.kicker,h1.t,h2.t,.sub,.links > a,.contacts,.nums > div,' +
+               '.cols > *,.steps > div,.matrix .row,.duo > *,.lineup > *,.inner-grid > *,' +
+               '.vs > *,.split > *,.list > li,.btns';
+  slides.forEach(function (slide) {
+    var nodes = [].slice.call(slide.querySelectorAll(GROUPS)).filter(function (el) {
+      return !el.parentElement.closest(GROUPS.split(',').map(function (sel) { return sel.trim(); }).join(','));
+    });
+    nodes.forEach(function (el, i) {
+      el.setAttribute('data-anim', '');
+      el.style.setProperty('--i', i);
+    });
+  });
+
+  /* ---------- счётчики ---------- */
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '\u00A0'); }
+  function runCount(el) {
+    var target = parseInt(el.getAttribute('data-count'), 10);
+    if (isNaN(target) || el.dataset.done) return;
+    el.dataset.done = '1';
+    if (el.hasAttribute('data-plain')) { el.textContent = String(target); return; }
+    if (reduce) { el.textContent = fmt(target); return; }
+    var dur = 1400, start = null;
+    (function step(ts) {
+      if (start === null) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      el.textContent = fmt(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) w.requestAnimationFrame(step);
+    })(performance.now());
+  }
+
+  /* ---------- слайд в кадре ---------- */
+  if ('IntersectionObserver' in w) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        /* слайд считается открытым, когда видна заметная его часть:
+           для длинных слайдов доля площади мала, поэтому меряем по высоте экрана */
+        var need = Math.min(en.boundingClientRect.height, w.innerHeight) * 0.35;
+        var inView = en.isIntersecting && en.intersectionRect.height >= need;
+        en.target.classList.toggle('is-in', inView);
+        if (inView) {
+          [].slice.call(en.target.querySelectorAll('[data-count]')).forEach(runCount);
+        }
+      });
+    }, { threshold: [0, .1, .25, .4, .6, .85] });
+    slides.forEach(function (s) { io.observe(s); });
+  } else {
+    slides.forEach(function (s) { s.classList.add('is-in'); });
+    [].slice.call(d.querySelectorAll('[data-count]')).forEach(runCount);
+  }
+
+  /* ---------- рельс слайдов ---------- */
+  slides.forEach(function (slide, i) {
+    var b = d.createElement('button');
+    var title = slide.getAttribute('data-title') || ('Слайд ' + (i + 1));
+    b.type = 'button';
+    b.setAttribute('aria-label', 'Слайд ' + (i + 1) + ': ' + title);
+    b.innerHTML = '<span>' + pad(i + 1) + ' · ' + title + '</span>';
+    b.addEventListener('click', function () { slide.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); });
+    rail.appendChild(b);
+  });
+  var dots = [].slice.call(rail.children);
+
+  /* ---------- состояние ---------- */
   function update() {
-    var y = window.scrollY + window.innerHeight * 0.5, idx = 0;
+    var y = w.scrollY + w.innerHeight * 0.5, idx = 0;
     for (var i = 0; i < slides.length; i++) if (slides[i].offsetTop <= y) idx = i;
     current = idx;
-    var title = slides[idx].getAttribute('data-title') || '';
-    count.textContent = pad(idx + 1) + ' / ' + pad(slides.length) + (title ? ' · ' + title : '');
     var s = slides[idx];
-    count.classList.toggle('on-dark', s.classList.contains('dark') || s.classList.contains('blue'));
-    var max = document.body.scrollHeight - window.innerHeight;
-    bar.style.width = (max > 0 ? (window.scrollY / max) * 100 : 0) + '%';
+    var onDark = s.classList.contains('dark') || s.classList.contains('blue');
+    var title = s.getAttribute('data-title') || '';
+
+    count.textContent = pad(idx + 1) + ' / ' + pad(slides.length) + (title ? ' · ' + title : '');
+    count.classList.toggle('on-dark', onDark);
+    rail.classList.toggle('on-dark', onDark);
+    dots.forEach(function (b, i) {
+      b.classList.toggle('on', i === idx);
+      b.classList.toggle('done', i < idx);
+    });
+
+    var next = slides[idx + 1];
+    if (next) {
+      hint.hidden = false;
+      hintTitle.textContent = next.getAttribute('data-title') || '';
+      hint.classList.toggle('on-dark', onDark);
+    } else {
+      hint.hidden = true;
+    }
+
+    var max = d.body.scrollHeight - w.innerHeight;
+    bar.style.width = (max > 0 ? (w.scrollY / max) * 100 : 0) + '%';
   }
 
   var ticking = false;
-  window.addEventListener('scroll', function () {
+  w.addEventListener('scroll', function () {
     if (ticking) return;
     ticking = true;
-    requestAnimationFrame(function () { update(); ticking = false; });
+    w.requestAnimationFrame(function () { update(); ticking = false; });
   }, { passive: true });
-  window.addEventListener('resize', update);
+  w.addEventListener('resize', update);
   update();
 
+  /* ---------- навигация ---------- */
   function go(step) {
     var next = Math.min(Math.max(current + step, 0), slides.length - 1);
-    slides[next].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    slides[next].scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
   }
-  document.addEventListener('keydown', function (e) {
+  hint.addEventListener('click', function () { go(1); });
+  d.addEventListener('keydown', function (e) {
     if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(1); }
     else if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); go(-1); }
     else if (e.key === 'Home') { e.preventDefault(); slides[0].scrollIntoView({ behavior: 'smooth' }); }
