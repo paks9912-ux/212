@@ -1,0 +1,103 @@
+/* ============================================================
+   Макеты устройств для презентаций: ноутбук, монитор, планшет, телефон.
+   Чистый CSS, без картинок рамок.
+   ============================================================ */
+
+.dev{--f1:#3A4551;--f2:#171E26;--m1:#E2E8EE;--m2:#A9B5C1;--m3:#7D8A97;display:block;width:100%}
+.dev *{box-sizing:border-box}
+.dev .screen{position:relative;overflow:hidden;background:#000}
+.dev .screen img{display:block;width:100%;height:100%;object-fit:cover;object-position:top center}
+
+/* ---------------- НОУТБУК ---------------- */
+.dev-laptop .lid{
+  position:relative;
+  background:linear-gradient(168deg,var(--f1) 0%,var(--f2) 100%);
+  border-radius:13px 13px 5px 5px;
+  padding:12px 12px 15px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14), 0 28px 54px -28px rgba(0,0,0,.75);
+}
+.dev-laptop .lid::before{ /* камера */
+  content:"";position:absolute;top:5px;left:50%;transform:translateX(-50%);
+  width:5px;height:5px;border-radius:50%;background:#5B6773;box-shadow:inset 0 0 0 1px rgba(0,0,0,.45);
+}
+.dev-laptop .screen{aspect-ratio:16/10;border-radius:3px}
+.dev-laptop .base{
+  position:relative;height:19px;margin:0 -9%;
+  background:linear-gradient(180deg,#EDF1F5 0%,var(--m1) 18%,var(--m2) 70%,var(--m3) 100%);
+  clip-path:polygon(0 0,100% 0,97.5% 100%,2.5% 100%);
+  box-shadow:0 18px 26px -16px rgba(0,0,0,.6);
+}
+.dev-laptop .base::before{ /* петля */
+  content:"";position:absolute;left:8%;right:8%;top:0;height:3px;
+  background:linear-gradient(90deg,rgba(23,30,38,.05),rgba(23,30,38,.35),rgba(23,30,38,.05));
+}
+.dev-laptop .base::after{ /* выемка для пальца */
+  content:"";position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);
+  width:14%;height:8px;border-radius:0 0 9px 9px;
+  background:linear-gradient(180deg,var(--m3),var(--m2));
+  box-shadow:inset 0 2px 3px rgba(0,0,0,.28);
+}
+
+/* ---------------- МОНИТОР ---------------- */
+.dev-monitor .lid{
+  position:relative;
+  background:linear-gradient(168deg,var(--f1) 0%,var(--f2) 100%);
+  border-radius:11px;padding:11px 11px 30px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.14), 0 30px 56px -30px rgba(0,0,0,.75);
+}
+.dev-monitor .screen{aspect-ratio:16/9;border-radius:3px}
+.dev-monitor .lid::after{ /* знак на подбородке */
+  content:"";position:absolute;bottom:11px;left:50%;transform:translateX(-50%);
+  width:30px;height:4px;border-radius:2px;background:rgba(255,255,255,.22);
+}
+.dev-monitor .neck{
+  width:11%;height:30px;margin:0 auto;
+  background:linear-gradient(90deg,var(--m3) 0%,var(--m1) 45%,var(--m2) 100%);
+}
+.dev-monitor .foot{
+  width:32%;height:10px;margin:0 auto;border-radius:3px 3px 9px 9px;
+  background:linear-gradient(180deg,var(--m1) 0%,var(--m2) 55%,var(--m3) 100%);
+  box-shadow:0 14px 22px -14px rgba(0,0,0,.6);
+}
+
+/* ---------------- ПЛАНШЕТ ---------------- */
+.dev-tablet .body{
+  position:relative;
+  background:linear-gradient(168deg,var(--f1) 0%,var(--f2) 100%);
+  border-radius:22px;padding:13px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.15), 0 26px 50px -26px rgba(0,0,0,.72);
+}
+.dev-tablet .body::before{ /* камера */
+  content:"";position:absolute;top:5.5px;left:50%;transform:translateX(-50%);
+  width:5px;height:5px;border-radius:50%;background:#5B6773;box-shadow:inset 0 0 0 1px rgba(0,0,0,.45);
+}
+.dev-tablet .screen{aspect-ratio:3/4;border-radius:11px}
+.dev-tablet.land .screen{aspect-ratio:4/3}
+
+/* ---------------- ТЕЛЕФОН ---------------- */
+.dev-phone .body{
+  position:relative;
+  background:linear-gradient(168deg,var(--f1) 0%,var(--f2) 100%);
+  border-radius:30px;padding:8px;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16), 0 26px 48px -26px rgba(0,0,0,.75);
+}
+.dev-phone .screen{aspect-ratio:9/19.5;border-radius:23px}
+.dev-phone .body::before{ /* островок */
+  content:"";position:absolute;z-index:2;top:15px;left:50%;transform:translateX(-50%);
+  width:30%;height:10px;border-radius:6px;background:#0C1116;
+}
+.dev-phone .body::after{ /* боковая кнопка */
+  content:"";position:absolute;right:-2px;top:22%;width:2px;height:9%;border-radius:2px;
+  background:linear-gradient(180deg,var(--m2),var(--m3));
+}
+
+/* экран показывает верх страницы: высоту режем по месту на слайде */
+.dev .screen.crop{aspect-ratio:auto}
+.dev .screen.crop img{height:100%}
+
+/* подпись под устройством */
+.dev-cap{margin-top:12px;font:500 .76rem var(--mono,"JetBrains Mono",monospace);color:var(--tx-3,#68768A);text-align:center}
+.dark .dev-cap,.blue .dev-cap{color:var(--on-dark-2,#A9B7C7)}
+
+/* на узких экранах основание ноутбука не должно вылезать за поля слайда */
+@media (max-width:760px){.dev-laptop .base{margin:0 -4%;height:15px}}

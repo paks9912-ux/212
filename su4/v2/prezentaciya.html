@@ -8,6 +8,7 @@
 <title>СУ №4 — вариант дизайна 2</title>
 <link rel="icon" href="../assets/favicon-32.png" sizes="32x32">
 <link rel="stylesheet" href="../assets/fonts/fonts.css">
+<link rel="stylesheet" href="../assets/devices.css">
 <style>
 *,*::before,*::after{box-sizing:border-box}
 :root{
@@ -81,16 +82,6 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
 .dark .list li b{color:#fff}
 
 .figs{display:grid;gap:12px}
-.shot{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 22px 48px -26px rgba(2,58,102,.5)}
-.dark .shot{border-color:var(--on-dark-line)}
-.shot img{width:100%}
-.cap{margin-top:10px;font:500 .78rem var(--mono);color:var(--ink-3)}
-.dark .cap{color:var(--on-dark-2)}
-.phones{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,2vw,26px);margin-top:clamp(22px,3vh,38px)}
-.phones .shot{border-radius:10px;position:relative}
-.phones .shot::after{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:linear-gradient(to bottom,rgba(255,255,255,0),rgba(255,255,255,.95));pointer-events:none}
-.phones .shot img{height:clamp(240px,38vh,430px);object-fit:cover;object-position:top center}
-@media (max-width:720px){.phones{grid-template-columns:repeat(3,1fr);gap:8px}}
 
 /* ---------- цифры и палитра ---------- */
 .nums{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(16px,2.4vw,30px);margin-top:clamp(24px,3.5vh,42px)}
@@ -172,20 +163,17 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
 }
 
 /* ---------- макеты устройств ---------- */
-.shot{position:relative;padding:32px 9px 9px;background:linear-gradient(180deg,#25333F 0%,#1A2631 100%);border:1px solid rgba(255,255,255,.14);border-radius:12px;box-shadow:0 30px 60px -28px rgba(5,14,24,.75);overflow:visible}
-.shot::before{content:"";position:absolute;left:16px;top:13px;width:8px;height:8px;border-radius:50%;background:#FF5F57;box-shadow:14px 0 0 #FEBC2E,28px 0 0 #28C840}
-.shot::after{content:attr(data-url);position:absolute;left:0;right:0;top:9px;margin:0 auto;width:fit-content;max-width:56%;padding:3px 14px;border-radius:5px;
-  background:rgba(255,255,255,.09);color:#9DB1C6;font:500 10px/1.4 var(--mono);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.shot img{border-radius:5px;width:100%}
-.dark .shot,.blue .shot{border-color:rgba(255,255,255,.2)}
-@media (max-width:620px){.shot{padding:26px 6px 6px}.shot::after{font-size:9px;max-width:62%}.shot::before{left:12px;top:11px;width:7px;height:7px;box-shadow:12px 0 0 #FEBC2E,24px 0 0 #28C840}}
 
 /* телефон */
-.phones .shot{padding:12px 7px 13px;border-radius:26px;background:linear-gradient(180deg,#222E3A 0%,#131C25 100%);border:1px solid rgba(255,255,255,.18);box-shadow:0 26px 52px -26px rgba(5,14,24,.8)}
-.phones .shot::before{content:"";left:50%;top:5px;transform:translateX(-50%);width:44px;height:5px;border-radius:4px;background:rgba(255,255,255,.28);box-shadow:none}
-.phones .shot::after{display:none}
 
-.phones .shot img{border-radius:16px}
+
+.trio{display:grid;grid-template-columns:repeat(3,minmax(0,.6fr)) 1.5fr;gap:clamp(14px,2vw,26px);align-items:end;margin-top:clamp(18px,2.6vh,32px)}
+.trio .list{align-self:center}
+@media (max-width:980px){.trio{grid-template-columns:repeat(3,1fr)}.trio .list{grid-column:1/-1}}
+@media (max-width:620px){.trio{grid-template-columns:1fr 1fr}}
+.dev-cap{text-align:center}
+.split .dev-cap,.vs .dev-cap{text-align:left}
+.vs .dev{margin-bottom:12px}
 </style>
 </head>
 <body>
@@ -261,7 +249,7 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     <div class="vs">
       <div>
         <h3>Вариант 1 <span class="tag">тёмный, индустриальный</span></h3>
-        <div class="shot" data-url="paks9912-ux.github.io/212/su4/"><img src="assets/prez/v1-desk-hero.jpg" alt="Первый вариант дизайна — тёмный индустриальный" loading="lazy"></div>
+        <div class="dev dev-laptop"><div class="lid"><div class="screen"><img src="../assets/prez-dev/v1-laptop.jpg" alt="Первый вариант дизайна — тёмный индустриальный" loading="lazy"></div></div><div class="base"></div></div>
         <ul class="list">
           <li>Тёмный фон, ощущение цеха и металла</li>
           <li>Узкие акцидентные заголовки, типографика ведёт композицию</li>
@@ -270,7 +258,7 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
       </div>
       <div>
         <h3>Вариант 2 <span class="tag">светлый, корпоративный</span></h3>
-        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/"><img src="assets/prez/v2-desk-hero.jpg" alt="Второй вариант дизайна — светлый корпоративный" loading="lazy"></div>
+        <div class="dev dev-laptop"><div class="lid"><div class="screen"><img src="../assets/prez-dev/v2-laptop.jpg" alt="Второй вариант дизайна — светлый корпоративный" loading="lazy"></div></div><div class="base"></div></div>
         <ul class="list">
           <li>Светлый фон, воздух, ощущение большой стабильной организации</li>
           <li>Спокойная гарнитура, композицию ведут факты и карточки</li>
@@ -307,16 +295,16 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     <span class="kicker">05 · Первый экран</span>
     <h2 class="t">Что посетитель понимает за первые секунды</h2>
     <div class="split rev">
-      <div class="figs">
-        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/"><img src="assets/prez/v2-desk-hero.jpg" alt="Первый экран второго варианта" loading="lazy"></div>
-        <p class="cap">Главная · десктоп 1440 px</p>
+      <div>
+        <div class="dev dev-laptop"><div class="lid"><div class="screen"><img src="../assets/prez-dev/v2-laptop.jpg" alt="Первый экран второго варианта" loading="lazy"></div></div><div class="base"></div></div>
+        <p class="dev-cap">Ноутбук · главная</p>
       </div>
       <ul class="list">
         <li><b>Кто это.</b> Логотип, «Строительное управление · 1952», город и страна.</li>
         <li><b>Что делает.</b> Заголовок про 74 года и объекты, которые работают десятилетиями.</li>
         <li><b>Чем подтверждено.</b> Четыре плашки: объекты, тонны металлоконструкций, заказчики, сертификаты.</li>
         <li><b>Что делать дальше.</b> «Получить расчёт» и «Смотреть объекты» — сразу, без прокрутки.</li>
-        <li><b>Живое видео</b> со сваркой в цехе вместо стоковой картинки: на слабом соединении и при экономии трафика остаётся фотография.</li>
+        <li><b>Живое видео</b> со сваркой в цехе вместо стоковой картинки.</li>
       </ul>
     </div>
   </div>
@@ -334,8 +322,8 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
         <li><b>Каждая карточка</b> ведёт на свою страницу направления со своей заявкой.</li>
       </ul>
       <div class="figs">
-        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/"><img src="assets/prez/v2-desk-services.jpg" alt="Блок направлений на главной" loading="lazy"></div>
-        <p class="cap">Главная · блок «Направления»</p>
+        <div class="dev dev-laptop"><div class="lid"><div class="screen"><img src="assets/prez/v2-desk-services.jpg" alt="Блок направлений на главной" loading="lazy"></div></div><div class="base"></div></div>
+        <p class="dev-cap">Главная · блок «Направления»</p>
       </div>
     </div>
   </div>
@@ -348,8 +336,8 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     <h2 class="t">Слова обещают. Факты — убеждают</h2>
     <div class="split rev">
       <div class="figs">
-        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/"><img src="assets/prez/v2-desk-process.jpg" alt="Блок «полный цикл работ»" loading="lazy"></div>
-        <p class="cap">Главная · полный цикл работ</p>
+        <div class="dev dev-laptop"><div class="lid"><div class="screen"><img src="assets/prez/v2-desk-process.jpg" alt="Блок «полный цикл работ»" loading="lazy"></div></div><div class="base"></div></div>
+        <p class="dev-cap">Главная · полный цикл работ</p>
       </div>
       <ul class="list">
         <li><b>Лента заказчиков</b> — Кыргызнефтегаз, Atalyk Group, Beeline, O!, Asman Oil и другие — сразу под первым экраном.</li>
@@ -374,8 +362,8 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
         <li><b>У каждого объекта</b> отрасль и локация — заказчик узнаёт задачу, похожую на свою.</li>
       </ul>
       <div class="figs">
-        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/"><img src="assets/prez/v2-desk-projects.jpg" alt="Галерея объектов" loading="lazy"></div>
-        <p class="cap">Главная · объекты с фильтром</p>
+        <div class="dev dev-laptop"><div class="lid"><div class="screen"><img src="assets/prez/v2-desk-projects.jpg" alt="Галерея объектов" loading="lazy"></div></div><div class="base"></div></div>
+        <p class="dev-cap">Главная · объекты с фильтром</p>
       </div>
     </div>
   </div>
@@ -387,20 +375,16 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     <span class="kicker">09 · Внутренние страницы</span>
     <h2 class="t">Шесть страниц направлений в одном каркасе</h2>
     <p class="sub">Металлоконструкции и резервуары, склады и промышленные здания, ангары и хранилища, дороги, бетон и ЖБИ, проектирование.</p>
-    <div class="cols c2">
-      <div class="figs">
-        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/services/metallokonstrukcii/"><img src="assets/prez/v2-desk-service.jpg" alt="Страница направления — шапка" loading="lazy"></div>
-        <p class="cap">Шапка направления: параметры сразу под заголовком</p>
+    <div class="split">
+      <div>
+        <div class="dev dev-laptop"><div class="lid"><div class="screen"><img src="../assets/prez-dev/v2-laptop-service.jpg" alt="Страница направления на ноутбуке" loading="lazy"></div></div><div class="base"></div></div>
+        <p class="dev-cap">Ноутбук · страница направления</p>
       </div>
-      <div class="figs">
-        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/services/metallokonstrukcii/"><img src="assets/prez/v2-desk-service2.jpg" alt="Страница направления — состав направления" loading="lazy"></div>
-        <p class="cap">Состав направления: что именно изготавливается</p>
+      <div style="max-width:320px;margin-left:auto">
+        <div class="dev dev-tablet"><div class="body"><div class="screen"><img src="../assets/prez-dev/v2-tablet-service.jpg" alt="Страница направления на планшете" loading="lazy"></div></div></div>
+        <p class="dev-cap">Планшет · та же страница</p>
       </div>
     </div>
-    <ul class="list" style="margin-top:22px">
-      <li><b>Один сценарий на всех страницах:</b> параметры → состав направления → оборудование и этапы → галерея производства → объекты → заявка → переход к соседнему направлению.</li>
-      <li><b>В форме есть поле для чертежа</b> или техзадания — основной способ обращения в этом бизнесе.</li>
-    </ul>
   </div>
 </section>
 
@@ -410,16 +394,16 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     <span class="kicker">10 · Мобильная версия</span>
     <h2 class="t">Телефон — основной экран заказчика</h2>
     <p class="sub">Проверено на ширинах от 360 px. Первый экран умещается целиком вместе с кнопкой действия, связь доступна с любого места страницы.</p>
-    <div class="phones">
-      <div><div class="shot"><img src="assets/prez/v2-mob-hero.jpg" alt="Мобильная версия — первый экран" loading="lazy"></div><p class="cap">Первый экран</p></div>
-      <div><div class="shot"><img src="assets/prez/v2-mob-menu.jpg" alt="Мобильное меню" loading="lazy"></div><p class="cap">Меню с кнопками связи</p></div>
-      <div><div class="shot"><img src="assets/prez/v2-mob-service.jpg" alt="Страница направления на телефоне" loading="lazy"></div><p class="cap">Страница направления</p></div>
+    <div class="trio">
+      <div><div class="dev dev-phone"><div class="body"><div class="screen"><img src="../assets/prez-dev/v2-phone.jpg" alt="Мобильная версия — первый экран" loading="lazy"></div></div></div><p class="dev-cap">Первый экран</p></div>
+      <div><div class="dev dev-phone"><div class="body"><div class="screen"><img src="../assets/prez-dev/v2-phone-menu.jpg" alt="Мобильное меню" loading="lazy"></div></div></div><p class="dev-cap">Меню с кнопками связи</p></div>
+      <div><div class="dev dev-phone"><div class="body"><div class="screen"><img src="../assets/prez-dev/v2-phone-service.jpg" alt="Страница направления на телефоне" loading="lazy"></div></div></div><p class="dev-cap">Страница направления</p></div>
+      <ul class="list">
+        <li><b>Липкая панель «Позвонить / WhatsApp»</b> — под большим пальцем на любой странице.</li>
+        <li><b>Шапка прячется при прокрутке вниз</b> и возвращается при движении вверх.</li>
+        <li><b>Кнопки во всю ширину,</b> крупные поля формы, телефон и WhatsApp — в меню.</li>
+      </ul>
     </div>
-    <ul class="list" style="margin-top:24px">
-      <li><b>Липкая панель «Позвонить / WhatsApp»</b> появляется после первого экрана и остаётся под большим пальцем.</li>
-      <li><b>Шапка прячется при прокрутке вниз</b> и возвращается при движении вверх — контенту отдан весь экран.</li>
-      <li><b>Кнопки во всю ширину,</b> крупные поля формы, номер телефона и WhatsApp — в меню.</li>
-    </ul>
   </div>
 </section>
 
