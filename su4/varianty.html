@@ -188,6 +188,46 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
 @media (max-width:900px){.lineup{grid-template-columns:1fr .6fr;row-gap:24px}.lineup>div:last-child{grid-column:2}}
 @media (max-width:620px){.lineup{grid-template-columns:1fr}.lineup>div:last-child{grid-column:1;max-width:210px}}
 .duo .dev-cap,.split .dev-cap{text-align:left}
+
+/* внутренние страницы: два ноутбука + планшет и телефон */
+.inner-grid{display:grid;grid-template-columns:1fr 1fr .36fr .21fr;gap:clamp(14px,2vw,28px);align-items:end;margin-top:clamp(18px,2.6vh,32px)}
+.inner-grid .head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;min-height:32px}
+.inner-grid .head b{font:600 1rem var(--head)}
+.inner-grid .dev-cap{text-align:left}
+.inner-grid .small-dev .dev-cap{text-align:center}
+@media (max-width:1000px){.inner-grid{grid-template-columns:1fr 1fr}.inner-grid .small-dev{max-width:220px}}
+@media (max-width:640px){
+  .inner-grid{grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+  .inner-grid>div:nth-child(1),.inner-grid>div:nth-child(2){grid-column:1/-1}
+  .inner-grid .small-dev{max-width:170px;justify-self:center}
+}
+
+/* таблица сравнения — легче считывать */
+.matrix .row{align-items:center}
+.matrix .row.head div:nth-child(2),.matrix .row.head div:nth-child(3){color:var(--brand)}
+.dark .matrix .row.head div:nth-child(2),.dark .matrix .row.head div:nth-child(3){color:#7FCBFA}
+.matrix .k{font:600 .72rem var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--tx-3)}
+.dark .matrix .k{color:var(--on-dark-2)}
+.matrix .v{font-size:.95rem;color:var(--tx);padding:6px 14px;border-radius:4px}
+.dark .matrix .v{color:#fff}
+.matrix .row:not(.head)>div:nth-child(2){background:rgba(14,27,42,.04)}
+.matrix .row:not(.head)>div:nth-child(3){background:rgba(2,83,148,.06)}
+.dark .matrix .row:not(.head)>div:nth-child(2){background:rgba(255,255,255,.04)}
+.dark .matrix .row:not(.head)>div:nth-child(3){background:rgba(127,203,250,.09)}
+.matrix .row.risk{border-top:1px solid var(--line-2)}
+.dark .matrix .row.risk{border-top-color:rgba(127,203,250,.35)}
+.matrix .row.risk .v{font-size:.9rem;opacity:.85}
+@media (max-width:760px){.matrix .v{padding:8px 12px;margin-top:2px}}
+
+/* списки внутри карточек не рисуют лишнюю линию снизу */
+.card .list li:last-child{border-bottom:0;padding-bottom:0}
+.card .head{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.card .head b{font:600 1.02rem var(--head)}
+
+/* в парных сетках основания ноутбуков не должны сливаться в одну полосу */
+.duo .dev-laptop .base,.inner-grid .dev-laptop .base,.vs .dev-laptop .base{margin:0 -4%}
+
+.count{max-width:min(60vw,420px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body>
@@ -208,7 +248,7 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     </div>
     <span class="kicker">Презентация для заказчика</span>
     <h1 class="t">Два варианта дизайна <span class="em">одного сайта</span></h1>
-    <p class="sub">Один и тот же контент компании собран в двух разных оформлениях. Открывайте оба прямо отсюда — ссылки работают с компьютера и с телефона.</p>
+    <p class="sub">Один и тот же контент компании собран в двух разных оформлениях. По ссылкам ниже открываются живые версии; дальше в презентации — задача сайта, путь посетителя, сравнение вариантов и следующий шаг.</p>
     <div class="links">
       <a class="link-card" href="index.html" target="_blank" rel="noopener">
         <span class="lbl">Вариант 1 · тёмный индустриальный</span>
@@ -225,7 +265,6 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   <div class="hint"><i></i> Листайте вниз или стрелками</div>
 </section>
 
-<!-- 02 КОМПАНИЯ -->
 <section class="slide blue" data-title="Компания">
   <div class="inner">
     <span class="kicker">01 · Исходные данные</span>
@@ -242,10 +281,33 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   </div>
 </section>
 
-<!-- 03 ЧТО ОБЩЕГО -->
+<section class="slide paper" data-title="Задача">
+  <div class="inner">
+    <span class="kicker">02 · Задача</span>
+    <h2 class="t">Что должен решать новый сайт</h2>
+    <div class="cols c3">
+      <div class="card">
+        <span class="n">Сейчас</span>
+        <h3>Данные разрозненны</h3>
+        <p>Потенциальному заказчику сложно быстро собрать в одном месте направления работ, параметры производства, опыт по похожим объектам, документы и способ связи.</p>
+      </div>
+      <div class="card">
+        <span class="n">Новый сайт</span>
+        <h3>Доказательства в одной системе</h3>
+        <p>Направления, параметры, объекты, документы и контакты связаны между собой: от задачи заказчика — к подтверждениям и к обращению.</p>
+      </div>
+      <div class="card">
+        <span class="n">Назначение</span>
+        <h3>Предметное обращение</h3>
+        <p>Сайт помогает перейти к разговору по существу — с параметрами объекта и чертежом, а не только создаёт впечатление.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="slide" data-title="Что общего">
   <div class="inner">
-    <span class="kicker">02 · База</span>
+    <span class="kicker">03 · Общая основа</span>
     <h2 class="t">У вариантов общая основа — разная только подача</h2>
     <div class="cols c3">
       <div class="card">
@@ -268,10 +330,24 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   </div>
 </section>
 
-<!-- 04 ВАРИАНТ 1 — ХАРАКТЕР -->
+<section class="slide tint" data-title="Путь посетителя">
+  <div class="inner">
+    <span class="kicker">04 · Сценарий</span>
+    <h2 class="t">Путь посетителя по сайту</h2>
+    <div class="steps">
+      <div><span class="n">01</span><b>Видит свою задачу</b><p>На первом экране понятно, что компания строит и для кого</p></div>
+      <div><span class="n">02</span><b>Выбирает направление</b><p>Склады, металлоконструкции и резервуары, ангары, дороги, ЖБИ, проектирование</p></div>
+      <div><span class="n">03</span><b>Изучает основания</b><p>Параметры, собственное производство, опыт и документы</p></div>
+      <div><span class="n">04</span><b>Находит близкий объект</b><p>Похожий по типу и отрасли — в портфолио с фильтром</p></div>
+      <div><span class="n">05</span><b>Передаёт вводные</b><p>Форма с параметрами и чертежом, WhatsApp, звонок или почта</p></div>
+    </div>
+    <p class="sub" style="margin-top:24px">Этот путь одинаков в обоих вариантах: различается оформление, а не последовательность шагов.</p>
+  </div>
+</section>
+
 <section class="slide dark" data-title="Вариант 1">
   <div class="inner">
-    <span class="kicker">03 · Вариант 1</span>
+    <span class="kicker">05 · Вариант 1</span>
     <h2 class="t">Тёмный индустриальный: характер и производство</h2>
     <div class="split">
       <div>
@@ -288,10 +364,9 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   </div>
 </section>
 
-<!-- 05 ВАРИАНТ 1 — ЭКРАНЫ -->
 <section class="slide dark" data-title="Вариант 1 — экраны">
   <div class="inner">
-    <span class="kicker">04 · Вариант 1</span>
+    <span class="kicker">06 · Вариант 1</span>
     <h2 class="t">Первый вариант на всех экранах</h2>
     <div class="lineup">
       <div><div class="dev dev-monitor"><div class="lid"><div class="screen"><img src="assets/prez-dev/v1-monitor.jpg" alt="Вариант 1 на мониторе" loading="lazy"></div></div><div class="neck"></div><div class="foot"></div></div><p class="dev-cap">Монитор · 1920 px</p></div>
@@ -301,10 +376,9 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   </div>
 </section>
 
-<!-- 06 ВАРИАНТ 2 — ХАРАКТЕР -->
 <section class="slide tint" data-title="Вариант 2">
   <div class="inner">
-    <span class="kicker">05 · Вариант 2</span>
+    <span class="kicker">07 · Вариант 2</span>
     <h2 class="t">Светлый корпоративный: доверие и масштаб</h2>
     <div class="split rev">
       <ul class="list">
@@ -321,10 +395,9 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   </div>
 </section>
 
-<!-- 07 ВАРИАНТ 2 — ЭКРАНЫ -->
 <section class="slide" data-title="Вариант 2 — экраны">
   <div class="inner">
-    <span class="kicker">06 · Вариант 2</span>
+    <span class="kicker">08 · Вариант 2</span>
     <h2 class="t">Второй вариант на всех экранах</h2>
     <div class="lineup">
       <div><div class="dev dev-monitor"><div class="lid"><div class="screen"><img src="assets/prez-dev/v2-monitor.jpg" alt="Вариант 2 на мониторе" loading="lazy"></div></div><div class="neck"></div><div class="foot"></div></div><p class="dev-cap">Монитор · 1920 px</p></div>
@@ -334,10 +407,9 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   </div>
 </section>
 
-<!-- 08 ЛИЦОМ К ЛИЦУ -->
 <section class="slide paper" data-title="Лицом к лицу">
   <div class="inner">
-    <span class="kicker">07 · Сравнение</span>
+    <span class="kicker">09 · Сравнение</span>
     <h2 class="t">Первый экран рядом</h2>
     <div class="duo">
       <div>
@@ -354,49 +426,54 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   </div>
 </section>
 
-<!-- 09 ТАБЛИЦА -->
 <section class="slide dark" data-title="Таблица сравнения">
   <div class="inner">
-    <span class="kicker">08 · Сравнение</span>
+    <span class="kicker">10 · Сравнение</span>
     <h2 class="t">Семь отличий по существу</h2>
     <div class="matrix">
-      <div class="row head"><div>Параметр</div><div>Вариант 1</div><div>Вариант 2</div></div>
-      <div class="row"><div class="k">Фон и настроение</div><div class="v" data-l="Вариант 1">Тёмный, «цеховой», драматичный</div><div class="v" data-l="Вариант 2">Светлый, просторный, деловой</div></div>
-      <div class="row"><div class="k">Заголовки</div><div class="v" data-l="Вариант 1">Узкие акцидентные прописными</div><div class="v" data-l="Вариант 2">Спокойная гарнитура, строчные</div></div>
-      <div class="row"><div class="k">Что ведёт композицию</div><div class="v" data-l="Вариант 1">Типографика и крупные изображения</div><div class="v" data-l="Вариант 2">Факты, карточки, цифры</div></div>
-      <div class="row"><div class="k">Геометрия</div><div class="v" data-l="Вариант 1">Прямые углы, плотная сетка</div><div class="v" data-l="Вариант 2">Сдержанные скругления 6–8 px, карточки</div></div>
-      <div class="row"><div class="k">Первое впечатление</div><div class="v" data-l="Вариант 1">«Сильная, необычная компания»</div><div class="v" data-l="Вариант 2">«Большая, надёжная, давно на рынке»</div></div>
-      <div class="row"><div class="k">Путь к заявке</div><div class="v" data-l="Вариант 1">Через впечатление и портфолио</div><div class="v" data-l="Вариант 2">Через доказательства: цифры, заказчики, документы</div></div>
-      <div class="row"><div class="k">Риск</div><div class="v" data-l="Вариант 1">Консервативному заказчику может показаться слишком смелым</div><div class="v" data-l="Вариант 2">Меньше «вау», больше похоже на крупные отраслевые сайты</div></div>
+      <div class="row head"><div>Параметр</div><div>Вариант 1 · тёмный</div><div>Вариант 2 · светлый</div></div>
+      <div class="row"><div class="k">Фон и настроение</div><div class="v" data-l="Вариант 1">Тёмный, цеховой</div><div class="v" data-l="Вариант 2">Светлый, деловой</div></div>
+      <div class="row"><div class="k">Заголовки</div><div class="v" data-l="Вариант 1">Узкие акцидентные, прописными</div><div class="v" data-l="Вариант 2">Спокойные, строчными</div></div>
+      <div class="row"><div class="k">Композицию ведут</div><div class="v" data-l="Вариант 1">Типографика и изображения</div><div class="v" data-l="Вариант 2">Факты, цифры, карточки</div></div>
+      <div class="row"><div class="k">Геометрия</div><div class="v" data-l="Вариант 1">Прямые углы, плотная сетка</div><div class="v" data-l="Вариант 2">Скругления 6–8 px, карточки</div></div>
+      <div class="row"><div class="k">Первое впечатление</div><div class="v" data-l="Вариант 1">Компания с характером</div><div class="v" data-l="Вариант 2">Компания давно на рынке</div></div>
+      <div class="row"><div class="k">Путь к заявке</div><div class="v" data-l="Вариант 1">Через впечатление и портфолио</div><div class="v" data-l="Вариант 2">Через доказательства и параметры</div></div>
+      <div class="row risk"><div class="k">Компромисс</div><div class="v" data-l="Вариант 1">Консервативному заказчику может показаться слишком смелым</div><div class="v" data-l="Вариант 2">Меньше эффекта новизны, ближе к отраслевым сайтам</div></div>
     </div>
   </div>
 </section>
 
-<!-- 10 ВНУТРЕННИЕ СТРАНИЦЫ -->
 <section class="slide tint" data-title="Внутренние страницы">
   <div class="inner">
-    <span class="kicker">09 · Внутренние страницы</span>
-    <h2 class="t">Страницы направлений в обоих вариантах</h2>
-    <div class="duo">
+    <span class="kicker">11 · Внутренние страницы</span>
+    <h2 class="t">Страницы направлений и адаптив</h2>
+    <div class="inner-grid">
       <div>
-        <div class="head"><b>Вариант 1</b></div>
+        <div class="head"><b>Вариант 1</b><span class="vtag one">тёмный</span></div>
         <div class="dev dev-laptop"><div class="lid"><div class="screen"><img src="assets/prez-dev/v1-laptop-service.jpg" alt="Страница направления в первом варианте" loading="lazy"></div></div><div class="base"></div></div>
         <p class="dev-cap">Металлоконструкции и резервуары</p>
       </div>
       <div>
-        <div class="head"><b>Вариант 2</b></div>
+        <div class="head"><b>Вариант 2</b><span class="vtag two">светлый</span></div>
         <div class="dev dev-laptop"><div class="lid"><div class="screen"><img src="assets/prez-dev/v2-laptop-service.jpg" alt="Страница направления во втором варианте" loading="lazy"></div></div><div class="base"></div></div>
         <p class="dev-cap">Металлоконструкции и резервуары</p>
       </div>
+      <div class="small-dev">
+        <div class="dev dev-tablet"><div class="body"><div class="screen"><img src="assets/prez-dev/v2-tablet-service.jpg" alt="Страница направления на планшете" loading="lazy"></div></div></div>
+        <p class="dev-cap">Планшет</p>
+      </div>
+      <div class="small-dev">
+        <div class="dev dev-phone"><div class="body"><div class="screen"><img src="assets/prez-dev/v2-phone-service.jpg" alt="Страница направления на телефоне" loading="lazy"></div></div></div>
+        <p class="dev-cap">Телефон</p>
+      </div>
     </div>
-    <p class="sub" style="margin-top:20px">Набор информации одинаковый: параметры, состав направления, оборудование и этапы, галерея, объекты, форма заявки. Отличается только оформление.</p>
+    <p class="sub" style="margin-top:18px">Набор информации одинаковый: параметры, состав направления, оборудование и этапы, галерея, объекты, форма заявки. Та же страница перестраивается под планшет и телефон.</p>
   </div>
 </section>
 
-<!-- 11 ОДИНАКОВО ХОРОШО -->
 <section class="slide" data-title="Общая техника">
   <div class="inner">
-    <span class="kicker">10 · Одинаково в обоих</span>
+    <span class="kicker">12 · Одинаково в обоих</span>
     <h2 class="t">Что работает в любом из вариантов</h2>
     <div class="cols c4">
       <div class="card"><span class="n">Экраны</span><h3>От 360 до 2560 px</h3><p>Телефон, планшет, ноутбук, большой монитор — сетка и типографика тянутся плавно.</p></div>
@@ -411,40 +488,63 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   </div>
 </section>
 
-<!-- 12 ОБЪЁМ -->
-<section class="slide paper" data-title="Что готово">
+<section class="slide paper" data-title="Что меняется">
   <div class="inner">
-    <span class="kicker">11 · Объём</span>
-    <h2 class="t">Что уже собрано в каждом варианте</h2>
+    <span class="kicker">13 · Что меняется</span>
+    <h2 class="t">Что даёт новый сайт обеим сторонам</h2>
     <div class="duo">
       <div class="card">
-        <div class="head"><b>Вариант 1</b><span class="vtag one">тёмный</span></div>
+        <div class="head"><b>Для потенциального заказчика</b></div>
         <ul class="list">
-          <li>Главная со всеми блоками</li>
-          <li>Шесть страниц направлений</li>
-          <li>Страница «О компании» с историей и заказчиками</li>
-          <li>Разбор объекта «Джамгыр»</li>
-          <li>Отдельная презентация проекта</li>
+          <li>Быстрее понять, релевантна ли компания его задаче</li>
+          <li>Увидеть основания доверия: объекты, производство, документы, отзывы</li>
+          <li>Передать параметры объекта и чертёж одним обращением</li>
         </ul>
       </div>
       <div class="card">
-        <div class="head"><b>Вариант 2</b><span class="vtag two">светлый</span></div>
+        <div class="head"><b>Для компании</b></div>
         <ul class="list">
-          <li>Главная со всеми блоками</li>
-          <li>Шесть страниц направлений</li>
-          <li>Своя презентация варианта</li>
-          <li>«О компании» и разбор объекта — пока открываются в оформлении первого варианта</li>
-          <li>Переносятся сразу после выбора варианта</li>
+          <li>Единая точка деловой коммуникации вместо разрозненных материалов</li>
+          <li>Структурированный материал для встреч и переписки</li>
+          <li>Возможность добавлять новые объекты и направления без переверстки</li>
         </ul>
       </div>
     </div>
   </div>
 </section>
 
-<!-- 13 КАК ВЫБРАТЬ -->
+<section class="slide" data-title="Объём работ">
+  <div class="inner">
+    <span class="kicker">14 · Объём</span>
+    <h2 class="t">Что уже готово и что достраивается</h2>
+    <div class="duo">
+      <div class="card">
+        <div class="head"><b>Уже готово</b></div>
+        <ul class="list">
+          <li>Главная страница в обоих вариантах</li>
+          <li>Шесть страниц направлений в каждом варианте</li>
+          <li>Мобильная и планшетная версии всех страниц</li>
+          <li>«О компании» и разбор объекта «Джамгыр» — в первом варианте</li>
+          <li>Презентации проекта и вариантов</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="head"><b>Достраивается после выбора варианта</b></div>
+        <ul class="list">
+          <li>«О компании» и разбор объекта в выбранном оформлении</li>
+          <li>Тексты, фотографии, годы и параметры объектов</li>
+          <li>Отправка форм на почту и в WhatsApp вместо демо-режима</li>
+          <li>Аналитика, карта, реквизиты и лицензии</li>
+          <li>Перенос на домен su4.kg</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="slide blue" data-title="Как выбрать">
   <div class="inner">
-    <span class="kicker">12 · Решение</span>
+    <span class="kicker">15 · Решение</span>
     <h2 class="t">Три вопроса, которые помогают выбрать</h2>
     <div class="cols c3">
       <div class="card"><span class="n">Вопрос 01</span><h3>Кто чаще открывает сайт?</h3><p>Снабженец или инженер, который ищет параметры и подрядчика, — им ближе второй вариант. Первое лицо компании-заказчика, которому важно впечатление, — первый.</p></div>
@@ -455,23 +555,49 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   </div>
 </section>
 
-<!-- 14 ЧТО ДАЛЬШЕ -->
 <section class="slide" data-title="Что дальше">
   <div class="inner">
-    <span class="kicker">13 · Следующий шаг</span>
+    <span class="kicker">16 · Следующий шаг</span>
     <h2 class="t">От выбора — к запуску</h2>
     <div class="steps">
-      <div><span class="n">01</span><b>Выбор</b><p>Заказчик выбирает вариант оформления</p></div>
-      <div><span class="n">02</span><b>Правки</b><p>Тексты, фотографии, годы объектов, недостающие цифры</p></div>
+      <div><span class="n">01</span><b>Выбор</b><p>Компания выбирает вариант оформления</p></div>
+      <div><span class="n">02</span><b>Материалы и правки</b><p>Тексты, фотографии, годы и параметры объектов, документы</p></div>
       <div><span class="n">03</span><b>Достройка</b><p>Оставшиеся страницы, реквизиты, лицензии</p></div>
       <div><span class="n">04</span><b>Подключение</b><p>Формы на почту и в WhatsApp, аналитика, карта</p></div>
       <div><span class="n">05</span><b>Запуск</b><p>Перенос на домен su4.kg</p></div>
     </div>
-    <p class="sub" style="margin-top:26px">Содержание у вариантов общее, поэтому смена решения на любом этапе не потребует собирать сайт заново.</p>
+    <p class="sub" style="margin-top:24px">Содержание у вариантов общее, поэтому смена решения на любом этапе не потребует собирать сайт заново.</p>
   </div>
 </section>
 
-<!-- 15 ФИНАЛ -->
+<section class="slide paper" data-title="Предложение">
+  <div class="inner">
+    <span class="kicker">17 · Предложение</span>
+    <h2 class="t">Предложение к согласованию</h2>
+    <div class="duo">
+      <div class="card">
+        <div class="head"><b>Что входит в следующий этап</b></div>
+        <ul class="list">
+          <li>Достройка оставшихся страниц выбранного варианта</li>
+          <li>Правки по текстам и фотографиям, заполнение параметров объектов</li>
+          <li>Подключение форм на почту и в WhatsApp, аналитики и карты</li>
+          <li>Перенос на домен su4.kg</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="head"><b>Что подтверждает компания</b></div>
+        <ul class="list">
+          <li>Выбранный вариант оформления</li>
+          <li>Перечень страниц и направлений</li>
+          <li>Материалы: тексты, фотографии, годы и параметры объектов, документы</li>
+          <li>Реквизиты и контакты, на которые уходят заявки</li>
+        </ul>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:22px">Стоимость и сроки фиксируются после согласования объёма работ и состава материалов.</p>
+  </div>
+</section>
+
 <section class="slide dark cover" data-title="Ссылки">
   <div class="inner">
     <span class="kicker">Посмотреть вживую</span>
@@ -517,7 +643,8 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     var y = window.scrollY + window.innerHeight * 0.5, idx = 0;
     for (var i = 0; i < slides.length; i++) if (slides[i].offsetTop <= y) idx = i;
     current = idx;
-    count.textContent = pad(idx + 1) + ' / ' + pad(slides.length);
+    var title = slides[idx].getAttribute('data-title') || '';
+    count.textContent = pad(idx + 1) + ' / ' + pad(slides.length) + (title ? ' · ' + title : '');
     var s = slides[idx];
     count.classList.toggle('on-dark', s.classList.contains('dark') || s.classList.contains('blue'));
     var max = document.body.scrollHeight - window.innerHeight;
