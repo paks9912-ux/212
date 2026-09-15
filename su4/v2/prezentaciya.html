@@ -170,6 +170,22 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
   .slide{min-height:auto;page-break-after:always;border:0}
   .bar,.count,.hint{display:none}
 }
+
+/* ---------- макеты устройств ---------- */
+.shot{position:relative;padding:32px 9px 9px;background:linear-gradient(180deg,#25333F 0%,#1A2631 100%);border:1px solid rgba(255,255,255,.14);border-radius:12px;box-shadow:0 30px 60px -28px rgba(5,14,24,.75);overflow:visible}
+.shot::before{content:"";position:absolute;left:16px;top:13px;width:8px;height:8px;border-radius:50%;background:#FF5F57;box-shadow:14px 0 0 #FEBC2E,28px 0 0 #28C840}
+.shot::after{content:attr(data-url);position:absolute;left:0;right:0;top:9px;margin:0 auto;width:fit-content;max-width:56%;padding:3px 14px;border-radius:5px;
+  background:rgba(255,255,255,.09);color:#9DB1C6;font:500 10px/1.4 var(--mono);letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shot img{border-radius:5px;width:100%}
+.dark .shot,.blue .shot{border-color:rgba(255,255,255,.2)}
+@media (max-width:620px){.shot{padding:26px 6px 6px}.shot::after{font-size:9px;max-width:62%}.shot::before{left:12px;top:11px;width:7px;height:7px;box-shadow:12px 0 0 #FEBC2E,24px 0 0 #28C840}}
+
+/* телефон */
+.phones .shot{padding:12px 7px 13px;border-radius:26px;background:linear-gradient(180deg,#222E3A 0%,#131C25 100%);border:1px solid rgba(255,255,255,.18);box-shadow:0 26px 52px -26px rgba(5,14,24,.8)}
+.phones .shot::before{content:"";left:50%;top:5px;transform:translateX(-50%);width:44px;height:5px;border-radius:4px;background:rgba(255,255,255,.28);box-shadow:none}
+.phones .shot::after{display:none}
+
+.phones .shot img{border-radius:16px}
 </style>
 </head>
 <body>
@@ -245,7 +261,7 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     <div class="vs">
       <div>
         <h3>Вариант 1 <span class="tag">тёмный, индустриальный</span></h3>
-        <div class="shot"><img src="assets/prez/v1-desk-hero.jpg" alt="Первый вариант дизайна — тёмный индустриальный" loading="lazy"></div>
+        <div class="shot" data-url="paks9912-ux.github.io/212/su4/"><img src="assets/prez/v1-desk-hero.jpg" alt="Первый вариант дизайна — тёмный индустриальный" loading="lazy"></div>
         <ul class="list">
           <li>Тёмный фон, ощущение цеха и металла</li>
           <li>Узкие акцидентные заголовки, типографика ведёт композицию</li>
@@ -254,7 +270,7 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
       </div>
       <div>
         <h3>Вариант 2 <span class="tag">светлый, корпоративный</span></h3>
-        <div class="shot"><img src="assets/prez/v2-desk-hero.jpg" alt="Второй вариант дизайна — светлый корпоративный" loading="lazy"></div>
+        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/"><img src="assets/prez/v2-desk-hero.jpg" alt="Второй вариант дизайна — светлый корпоративный" loading="lazy"></div>
         <ul class="list">
           <li>Светлый фон, воздух, ощущение большой стабильной организации</li>
           <li>Спокойная гарнитура, композицию ведут факты и карточки</li>
@@ -292,7 +308,7 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     <h2 class="t">Что посетитель понимает за первые секунды</h2>
     <div class="split rev">
       <div class="figs">
-        <div class="shot"><img src="assets/prez/v2-desk-hero.jpg" alt="Первый экран второго варианта" loading="lazy"></div>
+        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/"><img src="assets/prez/v2-desk-hero.jpg" alt="Первый экран второго варианта" loading="lazy"></div>
         <p class="cap">Главная · десктоп 1440 px</p>
       </div>
       <ul class="list">
@@ -318,7 +334,7 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
         <li><b>Каждая карточка</b> ведёт на свою страницу направления со своей заявкой.</li>
       </ul>
       <div class="figs">
-        <div class="shot"><img src="assets/prez/v2-desk-services.jpg" alt="Блок направлений на главной" loading="lazy"></div>
+        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/"><img src="assets/prez/v2-desk-services.jpg" alt="Блок направлений на главной" loading="lazy"></div>
         <p class="cap">Главная · блок «Направления»</p>
       </div>
     </div>
@@ -332,7 +348,7 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     <h2 class="t">Слова обещают. Факты — убеждают</h2>
     <div class="split rev">
       <div class="figs">
-        <div class="shot"><img src="assets/prez/v2-desk-process.jpg" alt="Блок «полный цикл работ»" loading="lazy"></div>
+        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/"><img src="assets/prez/v2-desk-process.jpg" alt="Блок «полный цикл работ»" loading="lazy"></div>
         <p class="cap">Главная · полный цикл работ</p>
       </div>
       <ul class="list">
@@ -358,7 +374,7 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
         <li><b>У каждого объекта</b> отрасль и локация — заказчик узнаёт задачу, похожую на свою.</li>
       </ul>
       <div class="figs">
-        <div class="shot"><img src="assets/prez/v2-desk-projects.jpg" alt="Галерея объектов" loading="lazy"></div>
+        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/"><img src="assets/prez/v2-desk-projects.jpg" alt="Галерея объектов" loading="lazy"></div>
         <p class="cap">Главная · объекты с фильтром</p>
       </div>
     </div>
@@ -373,11 +389,11 @@ h2.t{font:600 clamp(1.5rem,2vw + .7rem,2.6rem)/1.15 var(--head);letter-spacing:-
     <p class="sub">Металлоконструкции и резервуары, склады и промышленные здания, ангары и хранилища, дороги, бетон и ЖБИ, проектирование.</p>
     <div class="cols c2">
       <div class="figs">
-        <div class="shot"><img src="assets/prez/v2-desk-service.jpg" alt="Страница направления — шапка" loading="lazy"></div>
+        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/services/metallokonstrukcii/"><img src="assets/prez/v2-desk-service.jpg" alt="Страница направления — шапка" loading="lazy"></div>
         <p class="cap">Шапка направления: параметры сразу под заголовком</p>
       </div>
       <div class="figs">
-        <div class="shot"><img src="assets/prez/v2-desk-service2.jpg" alt="Страница направления — состав направления" loading="lazy"></div>
+        <div class="shot" data-url="paks9912-ux.github.io/212/su4/v2/services/metallokonstrukcii/"><img src="assets/prez/v2-desk-service2.jpg" alt="Страница направления — состав направления" loading="lazy"></div>
         <p class="cap">Состав направления: что именно изготавливается</p>
       </div>
     </div>
