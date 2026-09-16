@@ -330,7 +330,15 @@
           return { action: 'ask', reason: 'нет данных о брони',
             reply: 'Отменю. Напишите, пожалуйста, даты брони и на чьё имя она оформлена — посчитаю возврат по условиям.' };
         }
-        var r = PO.refund(b.from, b.prepay);
+        var r = PO.refund(b.from, b.paid || (b.status === 'оплачено' ? b.prepay : 0));
+        if (!r.sum) {
+          return { action: 'confirm', reason: 'отмена без внесённых денег',
+            reply: R.lines([
+              'Бронь ' + U.range(b.from, b.to) + ' снял, возвращать нечего — предоплата не вносилась.',
+              'Если соберётесь снова, напишите: подберу по наличию на тот момент.'
+            ]),
+            internal: 'Отмена удержания без оплаты, деньги не двигаем.' };
+        }
         return { action: 'confirm', reason: 'отмена по правилам',
           reply: R.lines([
             'Бронь ' + U.range(b.from, b.to) + ' отменяю.',
@@ -611,27 +619,18 @@
 
     /* ===== 6. Основной путь брони ===== */
     {
-      id: 'booking-payment', title: 'Гость прислал контакты по удержанной брони', group: 'бронь',
-      when: function (a) { return a.ctx.booking && a.ctx.booking.status === 'удержание' && (a.contacts.phone || a.signals.book || a.signals.payment); },
-      build: function (a) {
-        var b = a.ctx.booking, o = KB.byId(b.objectId);
-        return { action: 'confirm', reason: 'бронь оформляется',
-          reply: R.lines([
-            'Записал' + (a.contacts.name ? ': ' + a.contacts.name : '') + (a.contacts.phone ? ', ' + a.contacts.phone : '') + '.',
-            'Бронь: ' + o.title + ', ' + U.range(b.from, b.to) + ', ' + U.guests(b.guests) + '.',
-            '',
-            'Предоплата ' + U.money(b.prepay) + ' — ' + Set.companyCard + '. Реквизиты отправлю следующим сообщением.',
-            'Как только увижу оплату: пришлю точный адрес, код от подъезда и контакт встречающего.',
-            'Остаток ' + U.money(b.total - b.prepay) + ' — при заезде, наличными или переводом.'
-          ]),
-          internal: 'Ждём предоплату ' + U.money(b.prepay) + ' по брони ' + b.objectId + '. Через ' + Set.holdMinutes + ' минут без оплаты — снять удержание.' };
-      }
-    },
-    {
       id: 'payment-claimed', title: 'Гость говорит, что оплатил', group: 'бронь',
       when: function (a) { return a.signals.paid; },
       build: function (a) {
         var b = a.ctx.booking;
+        if (b && b.paymentClaimedAt) {
+          return { action: 'escalate', reason: 'оплата заявлена повторно', priority: 'важно',
+            reply: R.lines([
+              'Вижу, что вы уже писали об оплате — повторно переводить не нужно, иначе придётся возвращать второй платёж.',
+              'Проверяю поступление вручную, менеджер подключён. Если перевод был больше часа назад — пришлите чек или последние 4 цифры карты, найдём по ним.'
+            ]),
+            internal: 'Повторное заявление об оплате по брони ' + b.objectId + ' — риск двойного платежа, проверить срочно.' };
+        }
         if (b) {
           var o = KB.byId(b.objectId);
           return { action: 'escalate', reason: 'заявлена оплата, нужна сверка', priority: 'важно',
@@ -649,6 +648,57 @@
             'Адрес отправляю только после того, как вижу деньги на счёте, — так безопаснее для обеих сторон.'
           ]),
           internal: 'Гость заявил оплату, но брони в диалоге нет. Проверить поступление вручную.' };
+      }
+    },
+    {
+      id: 'hold-expired', title: 'Час удержания истёк', group: 'бронь',
+      when: function (a) {
+        var b = a.ctx.booking;
+        return !!(b && b.status === 'удержание' && b.heldAt &&
+                  Date.now() - b.heldAt > Set.holdMinutes * 60000);
+      },
+      build: function (a) {
+        var b = a.ctx.booking, o = KB.byId(b.objectId);
+        var free = PO.isFree(o, b.from, b.to).free;
+        a.ctx.booking = null;                                  // удержание снято
+        return { action: free ? 'offer' : 'ask', reason: 'истёк срок удержания без предоплаты',
+          reply: R.lines([
+            'Час удержания прошёл, и без предоплаты я снял даты — так честнее по отношению к другим гостям.',
+            free
+              ? o.title + ' на ' + U.range(b.from, b.to) + ' всё ещё свободна: ' + U.money(b.total) +
+                ', предоплата ' + U.money(b.prepay) + '. Держу снова час, если подтвердите.'
+              : 'Эту квартиру уже забронировали. Напишите даты — подберу из того, что есть сейчас.'
+          ]),
+          internal: 'Удержание снято по таймауту. ' + (free ? 'Квартира ещё свободна.' : 'Квартира ушла.') };
+      }
+    },
+    {
+      id: 'installment', title: 'Оплата частями или в рассрочку', group: 'вопросы',
+      when: function (a) { return a.signals.installment; },
+      build: function () {
+        return { action: 'info', reason: 'вопрос про оплату частями',
+          reply: R.lines([
+            'Так и работаем: ' + Math.round(Set.prepay * 100) + '% предоплаты, остальное при заезде наличными или переводом.',
+            'Рассрочки на несколько месяцев нет — мы не банк. В праздничные даты предоплата полная, там вариантов нет.',
+            'Для юрлиц можно по счёту с оплатой после заезда, но тогда нужен договор.'
+          ]) };
+      }
+    },
+    {
+      id: 'booking-payment', title: 'Гость прислал контакты по удержанной брони', group: 'бронь',
+      when: function (a) { return a.ctx.booking && a.ctx.booking.status === 'удержание' && (a.contacts.phone || a.signals.book || a.signals.payment); },
+      build: function (a) {
+        var b = a.ctx.booking, o = KB.byId(b.objectId);
+        return { action: 'confirm', reason: 'бронь оформляется',
+          reply: R.lines([
+            'Записал' + (a.contacts.name ? ': ' + a.contacts.name : '') + (a.contacts.phone ? ', ' + a.contacts.phone : '') + '.',
+            'Бронь: ' + o.title + ', ' + U.range(b.from, b.to) + ', ' + U.guests(b.guests) + '.',
+            '',
+            'Предоплата ' + U.money(b.prepay) + ' — ' + Set.companyCard + '. Реквизиты отправлю следующим сообщением.',
+            'Как только увижу оплату: пришлю точный адрес, код от подъезда и контакт встречающего.',
+            'Остаток ' + U.money(b.total - b.prepay) + ' — при заезде, наличными или переводом.'
+          ]),
+          internal: 'Ждём предоплату ' + U.money(b.prepay) + ' по брони ' + b.objectId + '. Через ' + Set.holdMinutes + ' минут без оплаты — снять удержание.' };
       }
     },
     {
@@ -683,7 +733,7 @@
         var over = a.budget.amount && a.match.offers[0].quote.perNight > a.budget.amount && a.budget.per === 'night';
         var reply = offersReply(a, head);
         if (over) {
-          reply = R.lines([reply, '', 'В ваш бюджет ' + U.money(a.budget.amount) + '/ночь на эти даты попадает только эконом у вокзала — если интересно, пришлю.']);
+          reply = R.lines([reply, '', 'В ваш бюджет ' + R.budget(a) + '/ночь на эти даты попадает только эконом у вокзала — если интересно, пришлю.']);
         }
         return { action: 'offer', reason: 'заявка разобрана полностью', reply: reply,
           internal: 'Готово к брони. Осталось получить выбор варианта и контакты.' };
@@ -700,7 +750,7 @@
         if (a.prefs.rooms !== null && a.prefs.rooms !== undefined) {
           known.push(a.prefs.rooms ? a.prefs.rooms + '-комнатная' : 'студия');
         }
-        if (a.budget.amount) known.push('бюджет: ' + U.money(a.budget.amount) + (a.budget.per === 'night' ? '/ночь' : ' всего'));
+        if (a.budget.amount) known.push('бюджет: ' + R.budget(a) + (a.budget.per === 'night' ? '/ночь' : ' всего'));
         if (a.prefs.district) known.push('район: ' + a.prefs.district);
         var head = known.length ? 'Записал: ' + known.join(', ') + '.' : 'Помогу подобрать квартиру.';
         var teaser = null;

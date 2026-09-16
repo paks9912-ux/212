@@ -252,6 +252,7 @@
   /* ---------- возвраты ---------- */
 
   PO.refund = function (checkIn, paid) {
+    paid = Math.max(0, U.clamp(+paid || 0, 0, 1e12));
     var days = U.diffDays(U.today(), checkIn);
     var rules = KB.settings.cancel;
     for (var i = 0; i < rules.length; i++) {

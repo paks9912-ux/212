@@ -122,6 +122,43 @@ var r5 = run('Меня зовут Азиз, телефон +998901234567', ctx);
 T.eq('после контактов — реквизиты и предоплата', r5.scenario, 'booking-payment');
 T.eq('бронь записана в контекст', ctx.booking !== null, true);
 
+T.head('Деньги и оплата:');
+(function () {
+  var pay = AGENT.newContext();
+  ['с 10 по 13 марта, нас двое', 'беру первый', 'Азиз +998901112233'].forEach(function (m) { run(m, pay); });
+  T.eq('после контактов бронь в удержании', pay.booking.status, 'удержание');
+
+  var claimed = run('оплатил, скинул на карту', pay);
+  T.eq('«скинул на карту» — это оплата, а не агрессия', claimed.scenario, 'payment-claimed');
+  T.is('и сверку делает человек', claimed.escalate, true);
+
+  var again = run('оплатил ещё раз', pay);
+  T.is('повторную оплату отговариваем', /повторно переводить не нужно/.test(again.reply), again.reply.slice(0, 80));
+
+  var hold = AGENT.newContext();
+  ['с 10 по 13 марта, нас двое', 'беру первый'].forEach(function (m) { run(m, hold); });
+  hold.booking.heldAt = Date.now() - 90 * 60000;
+  var expired = run('готов оплатить', hold);
+  T.eq('через полтора часа удержание снимается', expired.scenario, 'hold-expired');
+  T.eq('и бронь больше не висит', hold.booking, null);
+
+  var noPay = AGENT.newContext();
+  ['с 10 по 13 марта, нас двое', 'беру первый'].forEach(function (m) { run(m, noPay); });
+  var cancelled = run('отмените бронь', noPay);
+  T.is('отмена без оплаты не обещает возврат нуля', /возвращать нечего/.test(cancelled.reply), cancelled.reply.slice(0, 80));
+
+  T.eq('рассрочка — свой ответ', run('можно в рассрочку?').scenario, 'installment');
+  T.eq('«половину сейчас, половину при заезде» — туда же', run('заплачу половину сейчас, половину при заезде').scenario, 'installment');
+})();
+
+T.head('Бюджет в чужой валюте:');
+var usd = run('бюджет до 50$ за ночь, с 10 по 12 марта, нас двое');
+T.eq('доллары переводятся в сумы', usd.analysis.req.budget, 50 * KB.settings.rates.USD);
+T.is('и квартира за 280 000 больше не «дороже бюджета»',
+  !/дороже бюджета/.test(usd.reply), usd.reply.slice(0, 120));
+var usdAsk = run('бюджет до 40$ за ночь, нас двое');
+T.is('в ответе виден пересчёт по курсу', /≈40 \$ по курсу/.test(usdAsk.reply), usdAsk.reply.slice(0, 120));
+
 T.head('Комплексный запрос разбирается целиком:');
 var big = run('Здравствуйте! Приедем 10 марта на 4 ночи, двое взрослых и ребенок 3 года, с кошкой, ' +
               'прилет в 2 ночи, нужна квартира с лифтом и парковкой, бюджет до 800 тысяч за ночь, нужны документы для компании');

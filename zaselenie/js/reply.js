@@ -119,6 +119,14 @@
     }).join('\n');
   };
 
+  /* Бюджет гостя словами: если он назвал валюту, показываем и её */
+  R.budget = function (a) {
+    var r = a.req || {};
+    if (!r.budget) return null;
+    var cur = { USD: '$', RUB: '₽', KGS: 'сом' }[r.budgetCurrency];
+    return U.money(r.budget) + (cur ? ' (≈' + r.budgetOriginal + ' ' + cur + ' по курсу)' : '');
+  };
+
   R.priceFrom = function () {
     var p = PO.priceRange();
     return 'Цены от ' + U.money(p.min) + ' за ночь (эконом у вокзала) до ' + U.money(p.max) + ' (премиум в Мирабаде).';

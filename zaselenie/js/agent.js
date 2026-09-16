@@ -43,7 +43,15 @@
 
     if (p.guests.total) { r.guests = p.guests.total; r.adults = p.guests.adults; r.children = p.guests.children; }
     if (p.guests.childAges.length) r.childAges = p.guests.childAges;
-    if (p.budget.amount) { r.budget = p.budget.amount; r.budgetPer = p.budget.per; }
+    if (p.budget.amount) {
+      /* Бюджет в валюте переводим в сумы — иначе «до 50$» сравнивается с
+         сотнями тысяч и агент пишет, что квартира дороже на 279 950 */
+      var rate = (KB.settings.rates || {})[p.budget.currency];
+      r.budget = rate ? Math.round(p.budget.amount * rate) : p.budget.amount;
+      r.budgetPer = p.budget.per;
+      r.budgetCurrency = rate ? p.budget.currency : null;
+      r.budgetOriginal = rate ? p.budget.amount : null;
+    }
     if (p.prefs.district) r.district = p.prefs.district;
     if (p.prefs.rooms !== null) r.rooms = p.prefs.rooms;
     if (p.prefs.features.length) r.features = U.uniq(r.features.concat(p.prefs.features));
@@ -233,9 +241,11 @@
       ctx.booking = {
         objectId: a.selected.object.id, from: a.selected.quote.from, to: a.selected.quote.to,
         guests: a.selected.quote.guests, total: a.selected.quote.total, prepay: a.selected.quote.prepay,
-        status: 'удержание'
+        status: 'удержание', heldAt: Date.now(), paid: 0
       };
     }
+    if (chosen.id === 'payment-claimed' && ctx.booking) ctx.booking.paymentClaimedAt = Date.now();
+    if (chosen.id === 'booking-payment' && ctx.booking) ctx.booking.heldAt = Date.now();   // реквизиты отправлены — держим заново
     if (out.action === 'ask') ctx.unresolved++; else ctx.unresolved = 0;
     if (ctx.unresolved >= 3) {
       /* Третий раз спрашиваем одно и то же — это уже не диалог, зовём человека */

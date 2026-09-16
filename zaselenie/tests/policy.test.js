@@ -162,6 +162,32 @@ T.head('Битый календарь не молчит:');
   T.eq('на исправном календаре жалоб нет', KB.validate().length, 0);
 })();
 
+T.head('Инвариант денег:');
+(function () {
+  var broken = [];
+  KB.objects.forEach(function (o) {
+    [1, 3, 7, 14, 30].forEach(function (n) {
+      [1, 2, 4, 6].forEach(function (g) {
+        [false, true].forEach(function (pets) {
+          var from = U.addDays(U.today(), 20), to = U.addDays(from, n);
+          var q = PO.quote(o, { from: from, to: to, guests: g, pets: pets, earlyCheckIn: pets, lateArrival: g > 2 });
+          if (q.prepay + q.rest !== q.total || q.prepay < 0 || q.rest < 0 || q.prepay > q.total) {
+            broken.push(o.id + '/' + n + '/' + g);
+          }
+        });
+      });
+    });
+  });
+  T.eq('предоплата плюс остаток равны итогу на всех бронях', broken.length, 0);
+})();
+
+T.head('Возвраты в крайних случаях:');
+T.eq('отрицательная предоплата не даёт отрицательный возврат', PO.refund(U.addDays(U.today(), 10), -5000).sum, 0);
+T.eq('мусор вместо суммы — ноль', PO.refund(U.addDays(U.today(), 10), 'много').sum, 0);
+T.eq('заезд в прошлом — без возврата', PO.refund(U.addDays(U.today(), -3), 1000000).sum, 0);
+T.is('возврат никогда не больше внесённого',
+  PO.refund(U.addDays(U.today(), 30), 1000000).sum <= 1000000, true);
+
 T.head('Группа и возврат:');
 var combo = PO.combo({ from: '2026-03-03', to: '2026-03-05', guests: 9 });
 T.eq('группе собирается комплект квартир', combo && combo.capacity >= 9, true);
