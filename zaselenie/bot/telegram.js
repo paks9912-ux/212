@@ -8,10 +8,11 @@ var cfg = require('./config.js');
 var Store = require('./sessions.js');
 
 /* Модули агента кладутся в глобальную область — так же, как в браузере */
-['util', 'knowledge', 'nlu', 'policy', 'reply', 'risk', 'scenarios', 'agent', 'facts']
+['util', 'knowledge', 'holds', 'nlu', 'policy', 'reply', 'risk', 'scenarios', 'agent', 'facts']
   .forEach(function (m) { require('../js/' + m + '.js'); });
 
 var claude = require('./claude.js');
+var HOLDS = global.HOLDS;
 
 var LIMIT = 4000;                                   // телеграм режет на 4096
 var PICK = ['первый', 'второй', 'третий'];
@@ -249,7 +250,7 @@ function createBot(io) {
         if (String(chatId) !== String(cfg.managerChat)) return reply(chatId, 'Эта команда для менеджера.');
         var s = sessions.stats();
         return reply(chatId, 'Диалогов: ' + s.всего + '\nАктивных за час: ' + s.активных_за_час +
-                             '\nС бронью: ' + s.с_бронью);
+                             '\nС бронью: ' + s.с_бронью + '\nУдержаний сейчас: ' + HOLDS.count());
       default:
         return reply(chatId, 'Такой команды нет. Напишите даты и число гостей — подберу квартиру.');
     }
@@ -374,7 +375,7 @@ function start() {
     problems.forEach(function (x) { log('  ! ' + x); });
   }
 
-  var sessions = new Store(cfg.sessionsFile, cfg.sessionTtlHours).attach(KB, AGENT).autosave(15000);
+  var sessions = new Store(cfg.sessionsFile, cfg.sessionTtlHours).holds(HOLDS).attach(KB, AGENT).autosave(15000);
   var bot = createBot({ sessions: sessions, log: log });
 
   call('getMe').then(function (me) {

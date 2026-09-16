@@ -3,7 +3,7 @@
    node zaselenie/tools/demo.js "текст"    — одно сообщение
    Полезно, чтобы посмотреть, как меняются ответы после правок базы знаний. */
 var dir = __dirname + '/../js/';
-['util', 'knowledge', 'nlu', 'policy', 'reply', 'risk', 'scenarios', 'agent'].forEach(function (m) {
+['util', 'knowledge', 'holds', 'nlu', 'policy', 'reply', 'risk', 'scenarios', 'agent'].forEach(function (m) {
   require(dir + m + '.js');
 });
 

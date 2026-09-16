@@ -14,6 +14,7 @@
     city: 'Ташкент',
     cityIn: 'Ташкенте',
     cityEn: 'Tashkent',
+    tzOffset: 5,                     // часовой пояс города, UTC+5 для Ташкента
     currency: 'сум',
     /* Сколько сум за единицу валюты. Обновляется руками или выгрузкой из
        вашей системы — агент пересчитывает бюджет гостя по этим числам. */
@@ -31,6 +32,7 @@
     registrationFee: 0,
     prepay: 0.3,                     // доля предоплаты от суммы проживания
     holdMinutes: 60,                 // сколько держим даты без предоплаты
+    bookingHorizonDays: 365,         // дальше этого календарь ещё не открыт
     peakPrepay: 1,                   // пиковые ночи оплачиваются полностью
     discountInPeak: false,           // скидка за длительность не действует в праздники
     lateCheckInFrom: '23:00',
@@ -234,6 +236,12 @@
     'любой случай, где гость уже написал третий раз и вопрос не решён'
   ];
 
+  /* Дата и время в городе гостя — сервер может стоять в любом поясе */
+  KB.applyTimezone = function () {
+    if (typeof KB.settings.tzOffset !== 'number') return;
+    U.tzOffset = KB.settings.tzOffset;
+  };
+
   KB.byId = function (id) {
     for (var i = 0; i < KB.objects.length; i++) if (KB.objects[i].id === id) return KB.objects[i];
     return null;
@@ -265,6 +273,8 @@
   KB.capacityMax = function () {
     return KB.objects.reduce(function (m, o) { return Math.max(m, o.capacity + o.extraBeds); }, 0);
   };
+
+  KB.applyTimezone();
 
   if (typeof module !== 'undefined' && module.exports) module.exports = KB;
   w.KB = KB;

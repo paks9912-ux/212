@@ -157,6 +157,26 @@ var b = newBot();
     })
 
     .then(function () {
+      T.head('Удержания переживают перезапуск:');
+      var hfile = path.join(os.tmpdir(), 'zaselenie-test-holds.json');
+      if (fs.existsSync(hfile)) fs.unlinkSync(hfile);
+      HOLDS.reset();
+      var st = new Store(hfile, 48).holds(HOLDS).attach(KB, AGENT);
+      var bot2 = TG.createBot({ call: fakeCall, sessions: st, claude: noLlm, log: function () {} });
+      sent = [];
+      return bot2.handleUpdate(msg(80, 'с 10 по 13 марта, нас двое'))
+        .then(function () { return bot2.handleUpdate(msg(80, 'беру первый')); })
+        .then(function () {
+          T.eq('чат владеет удержанием', HOLDS.all()[0] && HOLDS.all()[0].holder, '80');
+          st.save();
+          HOLDS.reset();
+          new Store(hfile, 48).holds(HOLDS).attach(KB, AGENT);
+          T.eq('после перезапуска удержание на месте', HOLDS.count(), 1);
+          T.eq('и остаётся за тем же чатом', HOLDS.all()[0].holder, '80');
+          HOLDS.reset();
+        })
+
+    .then(function () {
       T.head('Падение модели не рушит ответ:');
       sent = [];
       var broken = { ready: function () { return true; }, ask: function () { return Promise.reject(new Error('таймаут')); } };
@@ -167,6 +187,7 @@ var b = newBot();
       });
     })
 
+      })
     .then(T.done)
     .catch(function (e) { console.error(e); process.exitCode = 1; });
 })();

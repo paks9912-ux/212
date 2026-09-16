@@ -10,12 +10,14 @@
   var PO   = w.PO   || (typeof require !== 'undefined' ? require('./policy.js') : null);
   var RISK = w.RISK || (typeof require !== 'undefined' ? require('./risk.js') : null);
   var SCEN = w.SCEN || (typeof require !== 'undefined' ? require('./scenarios.js') : null);
+  var HOLDS = w.HOLDS || (typeof require !== 'undefined' ? require('./holds.js') : null);
   var R    = w.R    || (typeof require !== 'undefined' ? require('./reply.js') : null);
 
   var AGENT = {};
 
   AGENT.newContext = function (init) {
     var c = {
+      id: (init && init.id) || ('гость-' + Math.random().toString(36).slice(2, 8)),
       channel: (init && init.channel) || 'чат',
       turns: 0,
       guest: { name: null, phone: null, repeat: false, lang: 'ru' },
@@ -184,7 +186,8 @@
         needCrib: req.needCrib, needWorkspace: req.needWorkspace, quiet: req.quiet,
         selfCheckIn: req.selfCheckIn, budget: req.budget, budgetPer: req.budgetPer,
         earlyCheckIn: req.earlyCheckIn, lateCheckOut: req.lateCheckOut, lateArrival: req.lateArrival,
-        repeatGuest: req.repeatGuest
+        repeatGuest: req.repeatGuest,
+        holder: ctx.id                       // свои удержания себе не мешают
       };
       a.match = PO.match(a.matchReq);
       a.quoteTotal = a.match.offers.length ? a.match.offers[0].quote.total : null;
@@ -238,14 +241,27 @@
     ctx.history.push({ in: text, out: out.reply, scenario: chosen.id, action: out.action });
     if (a.match && a.match.offers.length && /offer|hold/.test(out.action)) ctx.offers = a.match.offers.slice(0, 3);
     if (a.selected && out.action === 'hold') {
+      /* Удержание видно всем диалогам: пока этот гость думает,
+         другой не должен получить подтверждение на те же даты */
+      if (HOLDS) HOLDS.add(a.selected.object.id, a.selected.quote.from, a.selected.quote.to,
+                           ctx.id, KB.settings.holdMinutes);
       ctx.booking = {
         objectId: a.selected.object.id, from: a.selected.quote.from, to: a.selected.quote.to,
         guests: a.selected.quote.guests, total: a.selected.quote.total, prepay: a.selected.quote.prepay,
         status: 'удержание', heldAt: Date.now(), paid: 0
       };
     }
-    if (chosen.id === 'payment-claimed' && ctx.booking) ctx.booking.paymentClaimedAt = Date.now();
-    if (chosen.id === 'booking-payment' && ctx.booking) ctx.booking.heldAt = Date.now();   // реквизиты отправлены — держим заново
+    if (chosen.id === 'payment-claimed' && ctx.booking) {
+      ctx.booking.paymentClaimedAt = Date.now();
+      if (HOLDS) HOLDS.markPaid(ctx.id, 24);              // сверка платежа — сутки на удержание
+    }
+    if (chosen.id === 'booking-payment' && ctx.booking) {
+      ctx.booking.heldAt = Date.now();                    // реквизиты отправлены — держим заново
+      if (HOLDS) HOLDS.add(ctx.booking.objectId, ctx.booking.from, ctx.booking.to, ctx.id, KB.settings.holdMinutes);
+    }
+    if (chosen.id === 'hold-expired' || (chosen.id === 'cancel' && out.action === 'confirm')) {
+      if (HOLDS) HOLDS.release(ctx.id);
+    }
     if (out.action === 'ask') ctx.unresolved++; else ctx.unresolved = 0;
     if (ctx.unresolved >= 3) {
       /* Третий раз спрашиваем одно и то же — это уже не диалог, зовём человека */

@@ -5,6 +5,7 @@
 
   var U = w.U || (typeof require !== 'undefined' ? require('./util.js') : null);
   var KB = w.KB || (typeof require !== 'undefined' ? require('./knowledge.js') : null);
+  var HOLDS = w.HOLDS || (typeof require !== 'undefined' ? require('./holds.js') : null);
 
   var PO = {};
 
@@ -48,13 +49,17 @@
 
   /* ---------- занятость ---------- */
 
-  PO.isFree = function (obj, from, to) {
-    var conflicts = (obj.busy || []).filter(function (b) { return U.overlap(from, to, b.from, b.to); });
+  /* holder — кто спрашивает: свои удержания не мешают самому себе */
+  PO.isFree = function (obj, from, to, holder) {
+    var ranges = (obj.busy || []).concat(HOLDS ? HOLDS.busyFor(obj.id, holder) : []);
+    var conflicts = ranges.filter(function (b) {
+      return b && b.from && b.to && U.overlap(from, to, b.from, b.to);
+    });
     return { free: conflicts.length === 0, conflicts: conflicts };
   };
 
   /* Ближайшие свободные окна той же длины: сдвиг вперёд и назад до 14 дней */
-  PO.nearestWindows = function (obj, from, nights, limit) {
+  PO.nearestWindows = function (obj, from, nights, limit, holder) {
     var out = [];
     for (var shift = 1; shift <= 14 && out.length < (limit || 2); shift++) {
       [shift, -shift].forEach(function (d) {
@@ -62,15 +67,15 @@
         var f = U.addDays(from, d);
         if (U.diffDays(U.today(), f) < 0) return;
         var t = U.addDays(f, nights);
-        if (PO.isFree(obj, f, t).free) out.push({ from: f, to: t, shift: d });
+        if (PO.isFree(obj, f, t, holder).free) out.push({ from: f, to: t, shift: d });
       });
     }
     return out;
   };
 
   /* Свободные объекты на даты, независимо от прочих требований */
-  PO.freeOn = function (from, to) {
-    return KB.objects.filter(function (o) { return PO.isFree(o, from, to).free; });
+  PO.freeOn = function (from, to, holder) {
+    return KB.objects.filter(function (o) { return PO.isFree(o, from, to, holder).free; });
   };
 
   /* ---------- расчёт ---------- */
@@ -171,14 +176,18 @@
       if (req.needElevator && !o.elevator) why.push('нет лифта, ' + o.floor + '-й этаж');
       if (req.rooms !== null && req.rooms !== undefined && o.rooms < req.rooms) why.push(o.rooms ? o.rooms + '-комнатная' : 'студия');
 
-      var free = PO.isFree(o, from, to);
+      var free = PO.isFree(o, from, to, req.holder);
       if (!free.free) why.push('занята ' + free.conflicts.map(function (c) { return U.range(c.from, c.to); }).join(', '));
 
       var min = PO.minNights(o, from, to), nights = U.diffDays(from, to);
       if (nights < min) why.push('минимум ' + U.nights(min) + ' на эти даты');
 
       if (why.length) {
-        out.rejected.push({ object: o, reasons: why, freeWindows: free.free ? [] : PO.nearestWindows(o, from, nights, 2) });
+        out.rejected.push({
+          object: o, reasons: why,
+          held: free.conflicts.some(function (c) { return /удержание/.test(c.guest || ''); }),
+          freeWindows: free.free ? [] : PO.nearestWindows(o, from, nights, 2, req.holder)
+        });
         return;
       }
 
@@ -228,7 +237,7 @@
 
   /* Несколько квартир на большую компанию */
   PO.combo = function (req) {
-    var free = PO.freeOn(req.from, req.to).filter(function (o) {
+    var free = PO.freeOn(req.from, req.to, req.holder).filter(function (o) {
       return U.diffDays(req.from, req.to) >= PO.minNights(o, req.from, req.to) && (!req.pets || o.pets);
     });
     free.sort(function (a, b) { return (b.capacity + b.extraBeds) - (a.capacity + a.extraBeds); });

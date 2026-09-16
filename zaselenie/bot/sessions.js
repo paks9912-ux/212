@@ -21,7 +21,7 @@ Store.prototype.pack = function (entry) {
     at: entry.at,
     user: entry.user || null,
     ctx: {
-      channel: ctx.channel, turns: ctx.turns, guest: ctx.guest, request: ctx.request,
+      id: ctx.id, channel: ctx.channel, turns: ctx.turns, guest: ctx.guest, request: ctx.request,
       booking: ctx.booking, unresolved: ctx.unresolved,
       history: ctx.history.slice(-10),
       offers: ctx.offers.map(function (o) {
@@ -32,7 +32,7 @@ Store.prototype.pack = function (entry) {
 };
 
 Store.prototype.unpack = function (raw, KB, AGENT) {
-  var ctx = AGENT.newContext({ channel: raw.ctx.channel });
+  var ctx = AGENT.newContext({ channel: raw.ctx.channel, id: raw.ctx.id });
   ['turns', 'guest', 'request', 'booking', 'unresolved', 'history'].forEach(function (k) {
     if (raw.ctx[k] !== undefined && raw.ctx[k] !== null) ctx[k] = raw.ctx[k];
   });
@@ -43,10 +43,14 @@ Store.prototype.unpack = function (raw, KB, AGENT) {
   return { at: raw.at, user: raw.user, ctx: ctx };
 };
 
+Store.prototype.holds = function (HOLDS) { this.HOLDS = HOLDS; return this; };
+
 Store.prototype.load = function () {
   try {
     if (!fs.existsSync(this.file)) return;
     var raw = JSON.parse(fs.readFileSync(this.file, 'utf8'));
+    this.savedHolds = raw && raw.__holds ? raw.__holds : [];
+    if (raw) delete raw.__holds;
     this.raw = raw;
   } catch (e) {
     this.raw = {};
@@ -64,6 +68,7 @@ Store.prototype.attach = function (KB, AGENT) {
     try { self.map.set(chatId, self.unpack(e, KB, AGENT)); } catch (err) {}
   });
   this.raw = null;
+  if (this.HOLDS && this.savedHolds) this.HOLDS.import(this.savedHolds);   // чужие удержания тоже переживают перезапуск
   return this;
 };
 
@@ -72,7 +77,7 @@ Store.prototype.get = function (chatId, user) {
   var e = this.map.get(key);
   if (e && Date.now() - e.at > this.ttl) { this.map.delete(key); e = null; }
   if (!e) {
-    e = { at: Date.now(), user: user || null, ctx: this.AGENT.newContext({ channel: 'telegram' }) };
+    e = { at: Date.now(), user: user || null, ctx: this.AGENT.newContext({ channel: 'telegram', id: key }) };
     this.map.set(key, e);
   }
   if (user) e.user = user;
@@ -102,6 +107,7 @@ Store.prototype.save = function () {
     if (now - e.at > self.ttl) return;
     out[chatId] = self.pack(e);
   });
+  if (this.HOLDS) out.__holds = this.HOLDS.export();
   try {
     fs.writeFileSync(this.file + '.tmp', JSON.stringify(out));
     fs.renameSync(this.file + '.tmp', this.file);

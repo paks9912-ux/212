@@ -10,12 +10,28 @@
 
   U.pad = function (n) { return (n < 10 ? '0' : '') + n; };
 
-  /* Сегодня — можно подменить для тестов и демо: U.NOW = '2026-03-01' */
+  /* Сегодня — можно подменить для тестов и демо: U.NOW = '2026-03-01'.
+     tzOffset — часы от UTC в городе гостя: сервер во Франкфурте не должен
+     считать «сегодня» по своему времени, иначе ночные заезды уедут на сутки. */
   U.NOW = null;
+  U.tzOffset = null;
+
+  U.localDate = function () {
+    var d = new Date();
+    if (typeof U.tzOffset === 'number') d = new Date(d.getTime() + (U.tzOffset * 60 + d.getTimezoneOffset()) * 60000);
+    return d;
+  };
+
   U.today = function () {
     if (U.NOW) return U.NOW;
-    var d = new Date();
+    var d = U.localDate();
     return d.getFullYear() + '-' + U.pad(d.getMonth() + 1) + '-' + U.pad(d.getDate());
+  };
+
+  /* Время в городе гостя, 'ЧЧ:ММ' — для ночного заселения и часов работы */
+  U.clock = function () {
+    var d = U.localDate();
+    return U.pad(d.getHours()) + ':' + U.pad(d.getMinutes());
   };
 
   U.date = function (iso) {

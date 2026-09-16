@@ -5,6 +5,7 @@
   'use strict';
 
   var U = w.U || (typeof require !== 'undefined' ? require('./util.js') : null);
+  var KB = w.KB || (typeof require !== 'undefined' ? require('./knowledge.js') : null);
 
   var NLU = {};
 
@@ -204,6 +205,10 @@
     else if (dur) d.nights = dur.nights;
 
     if (d.from && U.diffDays(U.today(), d.from) < 0) d.issues.push('дата заезда уже прошла');
+    if (d.from && KB && KB.settings.bookingHorizonDays &&
+        U.diffDays(U.today(), d.from) > KB.settings.bookingHorizonDays) {
+      d.issues.push('до этой даты календарь ещё не открыт');
+    }
     if (d.nights !== null && d.nights <= 0) d.issues.push('выезд не позже заезда');
     if (d.nights > 180) d.issues.push('срок больше полугода — это уже долгосрочная аренда');
     if (/гибк|любые даты|плюс-минус|примерно|ориентировочно|пока не точно/.test(t)) d.flexible = true;

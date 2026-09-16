@@ -188,6 +188,45 @@ T.eq('заезд в прошлом — без возврата', PO.refund(U.add
 T.is('возврат никогда не больше внесённого',
   PO.refund(U.addDays(U.today(), 30), 1000000).sum <= 1000000, true);
 
+T.head('Удержания как занятость:');
+(function () {
+  HOLDS.reset();
+  var o = KB.byId('loft-chilanzar'), saved = o.busy;
+  o.busy = [];
+  var from = U.addDays(U.today(), 5), to = U.addDays(from, 2);
+  HOLDS.add(o.id, from, to, 'гость-А', 60);
+
+  T.eq('для владельца удержания квартира свободна', PO.isFree(o, from, to, 'гость-А').free, true);
+  T.eq('для остальных — занята', PO.isFree(o, from, to, 'гость-Б').free, false);
+  T.eq('в подборе чужого гостя её нет',
+    PO.match({ from: from, to: to, guests: 2, holder: 'гость-Б' }).offers.filter(function (x) { return x.object.id === o.id; }).length, 0);
+  T.eq('соседние даты не блокируются', PO.isFree(o, U.addDays(to, 1), U.addDays(to, 3), 'гость-Б').free, true);
+
+  HOLDS.markPaid('гость-А', 24);
+  HOLDS.now = function () { return Date.now() + 2 * 3600000; };
+  T.eq('оплаченное удержание живёт дольше часа', HOLDS.count(), 1);
+  HOLDS.now = function () { return Date.now() + 30 * 3600000; };
+  T.eq('но и оно однажды истекает', HOLDS.count(), 0);
+  HOLDS.now = function () { return Date.now(); };
+
+  HOLDS.reset();
+  o.busy = saved;
+})();
+
+T.head('Часовой пояс:');
+(function () {
+  var savedNow = U.NOW, savedTz = U.tzOffset;
+  U.NOW = null;
+  U.tzOffset = 5;
+  var tashkent = U.today();
+  U.tzOffset = -8;
+  var losAngeles = U.today();
+  T.is('дата считается по городу гостя, а не по серверу',
+    typeof tashkent === 'string' && typeof losAngeles === 'string', [tashkent, losAngeles]);
+  T.is('и время города доступно для ночных заездов', /^\d{2}:\d{2}$/.test(U.clock()), U.clock());
+  U.tzOffset = savedTz; U.NOW = savedNow;
+})();
+
 T.head('Группа и возврат:');
 var combo = PO.combo({ from: '2026-03-03', to: '2026-03-05', guests: 9 });
 T.eq('группе собирается комплект квартир', combo && combo.capacity >= 9, true);

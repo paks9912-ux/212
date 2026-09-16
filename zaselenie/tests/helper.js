@@ -1,6 +1,7 @@
 /* Общая обвязка для тестов: загрузка модулей и простые проверки */
 require('../js/util.js');
 require('../js/knowledge.js');
+require('../js/holds.js');
 require('../js/nlu.js');
 require('../js/policy.js');
 require('../js/reply.js');
@@ -20,7 +21,12 @@ function is(name, cond, got) {
 
 function eq(name, a, b) { is(name, a === b, a); }
 
-function head(title) { console.log('\n' + title); }
+/* Каждый раздел начинается с чистого листа: удержания живут в общем реестре
+   и иначе протекают из предыдущих проверок */
+function head(title) {
+  if (global.HOLDS) HOLDS.reset();
+  console.log('\n' + title);
+}
 
 function done() {
   console.log('\nИтого: ' + state.ok + ' успешно, ' + state.bad + ' с ошибкой');
