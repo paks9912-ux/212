@@ -14,6 +14,46 @@
 
   /* ---------- общие куски ответа ---------- */
 
+  /* Какие темы окружения спрашивает гость: ключи совпадают с базой знаний */
+  var NEARBY = [
+    ['аптека', /аптек|лекарств|таблетк/],
+    ['продукты', /магазин|продукт|супермаркет|базар|рынок|молок|хлеб/],
+    ['банкомат', /банкомат|снять деньги|наличк|терминал/],
+    ['кафе', /кафе|ресторан|поесть|перекус|кофейн|пообедать|поужинать/],
+    ['трц', /трц|торгов[а-я]* центр|молл|шопинг|mega|хан шатыр|керуен/],
+    ['транспорт', /остановк|автобус|как добраться до центра|маршрут/],
+    ['врач', /больниц|поликлиник|врач|клиник|стоматолог|травмпункт|скорая/],
+    ['парк', /(?:^|[^а-я])парк(?:[^а-я]|$)|парке|сквер|погулять|набережн|велодорожк/],
+    ['детям', /детск[а-я]* площадк|площадк[а-я]* во двор|с детьми погулять|садик|школ|аттракцион/],
+    ['спорт', /спортзал|фитнес|бассейн|тренаж|каток|йог/]
+  ];
+
+  /* Какие темы каталога задел гость: отвечаем на все сразу, а не на последнюю */
+  function topicsFor(a) {
+    return (KB.topics || []).filter(function (t) {
+      try { return t.match.test(a.norm); } catch (e) { return false; }
+    });
+  }
+
+  function nearbyTopics(text) {
+    return NEARBY.filter(function (p) { return p[1].test(text); }).map(function (p) { return p[0]; });
+  }
+
+  /* О каких квартирах идёт речь: о забронированной, о показанных или обо всех */
+  function shownObjects(a) {
+    if (a.ctx.booking) {
+      var o = KB.byId(a.ctx.booking.objectId);
+      if (o) return [o];
+    }
+    if (a.ctx.offers && a.ctx.offers.length) {
+      return a.ctx.offers.slice(0, 2).map(function (x) { return x.object; });
+    }
+    if (a.match && a.match.offers.length) {
+      return a.match.offers.slice(0, 2).map(function (x) { return x.object; });
+    }
+    return [];
+  }
+
   /* Всё, что гость упомянул дополнительно: питомец, ранний заезд, документы… */
   function addons(a, obj) {
     var s = a.signals, out = [];
@@ -249,7 +289,11 @@
     },
     {
       id: 'aggression', title: 'Конфликт и угрозы', group: 'стоп',
-      when: function (a) { return a.signals.aggression; },
+      when: function (a) {
+        /* «вдруг вы мошенники» — это сомнение перед оплатой, а не скандал */
+        if (/вдруг|а если|боюсь|как убедиться|гаранти|почему предоплат/.test(a.norm)) return false;
+        return a.signals.aggression;
+      },
       build: function () {
         return { action: 'escalate', reason: 'конфликтный разговор',
           reply: R.lines([
@@ -325,7 +369,7 @@
     /* ===== 3. Изменения брони ===== */
     {
       id: 'cancel', title: 'Отмена брони', group: 'изменения',
-      when: function (a) { return a.signals.cancel; },
+      when: function (a) { return a.signals.cancel && !/рейс|поезд|самол[её]т|вылет|прилет/.test(a.norm); },
       build: function (a) {
         var b = a.ctx.booking;
         if (!b) {
@@ -624,6 +668,72 @@
       }
     },
 
+    {
+      id: 'nearby', title: 'Что рядом с домом', group: 'вопросы',
+      when: function (a) { return !(a.freshChanged && a.dates.from) && !!(a.signals.nearby || nearbyTopics(a.norm).length); },
+      build: function (a) {
+        var topics = nearbyTopics(a.norm);
+        var objects = shownObjects(a);
+
+        /* Ещё не выбирали квартиру — отвечаем по всем районам сразу */
+        if (!objects.length) objects = KB.objects.slice(0, 3);
+        if (!topics.length) topics = ['аптека', 'продукты', 'кафе', 'транспорт'];
+
+        var lines = objects.map(function (o) {
+          var facts = topics.map(function (t) {
+            return o.nearby && o.nearby[t] ? '   · ' + t + ': ' + o.nearby[t] : null;
+          }).filter(Boolean);
+          return facts.length ? o.title + ':\n' + facts.join('\n') : null;
+        }).filter(Boolean);
+
+        if (!lines.length) {
+          return { action: 'escalate', reason: 'нет данных по этой теме', priority: 'обычный',
+            reply: R.lines([
+              'Точно не скажу, чтобы не соврать — уточню у менеджера и вернусь с ответом.',
+              R.human('знает район лучше меня')
+            ]) };
+        }
+
+        return { action: 'info', reason: 'вопрос про окружение дома',
+          reply: R.lines([
+            lines.join('\n\n'),
+            '',
+            a.ctx.booking || a.ctx.offers.length
+              ? 'Что-то ещё уточнить по району?'
+              : 'Напишите даты и число гостей — подберу квартиру и расскажу про её двор подробнее.'
+          ]) };
+      }
+    },
+    {
+      id: 'city-info', title: 'Вопрос про город', group: 'вопросы',
+      when: function (a) { return a.signals.cityInfo && !(a.freshChanged && a.dates.from); },
+      build: function (a) {
+        var t = a.norm, out = [];
+        var map = [
+          [/аэропорт|прилет|прилечу|самолет/, 'аэропорт'],
+          [/вокзал|поезд/, 'вокзал'],
+          [/такси/, 'такси'],
+          [/автобус|транспорт|как передвигаться|метро/, 'транспорт'],
+          [/доставк|поесть|еду заказ/, 'еда'],
+          [/обмен|валют|поменять деньги/, 'обмен'],
+          [/оплат[а-я]* картой|наличн[а-я]*|kaspi|каспи/, 'деньги'],
+          [/посмотреть|достопримечат|экскурс|куда сходить/, 'достопримечательности'],
+          [/скорая|полиц|112|103|экстренн/, 'экстренно'],
+          [/погод|холодно|мороз|жарко ли/, 'погода'],
+          [/ветклиник|ветеринар/, 'ветклиника']
+        ];
+        map.forEach(function (pair) {
+          if (pair[0].test(t) && KB.city[pair[1]]) out.push(KB.city[pair[1]]);
+        });
+        if (!out.length) out.push(KB.city.транспорт);
+
+        return { action: 'info', reason: 'справка по городу',
+          reply: R.lines(out.concat([
+            a.ctx.booking ? 'Если нужна встреча — организуем, напишите номер рейса.'
+                          : 'Если ещё выбираете квартиру — напишите даты, подберу поближе к нужному месту.'
+          ])) };
+      }
+    },
     /* ===== 6. Основной путь брони ===== */
     {
       id: 'payment-claimed', title: 'Гость говорит, что оплатил', group: 'бронь',
@@ -777,36 +887,6 @@
 
     /* ===== 7. Вопросы без заявки ===== */
     {
-      id: 'faq', title: 'Быт: Wi-Fi, кухня, стирка, парковка', group: 'вопросы',
-      when: function (a) {
-        /* Коляска и ограниченная подвижность — не бытовой вопрос, там свой сценарий */
-        if (a.prefs.accessible) return false;
-        return /wi-?fi|вайфай|интернет|кухн|готовить|стиральн|постирать|полотенц|бель[еёя]|убор|парковк|трансфер|фото|лифт|этаж/.test(a.norm);
-      },
-      build: function (a) {
-        var t = a.norm, out = [];
-        var shown = a.ctx.offers.map(function (o) { return o.object; });
-        if (/парковк/.test(t) && shown.length) {
-          out.push(shown.map(function (o) { return o.title + ' — парковка: ' + o.parking + '.'; }).join('\n'));
-        }
-        if (/лифт|этаж/.test(t) && shown.length) {
-          out.push(shown.map(function (o) {
-            return o.title + ' — ' + o.floor + '-й этаж, ' + (o.elevator ? 'лифт есть' : 'лифта нет') + '.';
-          }).join('\n'));
-        }
-        if (/wi-?fi|вайфай|интернет/.test(t)) out.push(KB.faq.wifi);
-        if (/кухн|готовить/.test(t)) out.push(KB.faq.kitchen);
-        if (/стиральн|постирать/.test(t)) out.push(KB.faq.laundry);
-        if (/полотенц|бель[еёя]/.test(t)) out.push(KB.faq.towels);
-        if (/убор/.test(t)) out.push(KB.faq.cleaning);
-        if (/парковк/.test(t) && !shown.length) out.push(KB.faq.parking);
-        if (/трансфер/.test(t)) out.push(KB.faq.transfer);
-        if (/фото/.test(t)) out.push('Фото и планировки пришлю следующим сообщением — скажите, какой район интересует.');
-        out.push(a.ctx.offers.length ? 'Ещё вопросы — или бронируем?' : 'Что-то ещё уточнить, или подбираем даты?');
-        return { action: 'info', reason: 'справочный вопрос', reply: R.lines(out) };
-      }
-    },
-    {
       id: 'discount', title: 'Просят скидку', group: 'вопросы',
       when: function (a) { return a.signals.discount; },
       build: function (a) {
@@ -840,7 +920,11 @@
     },
     {
       id: 'availability', title: 'Есть ли свободные — без дат', group: 'вопросы',
-      when: function (a) { return a.signals.availability || a.signals.book; },
+      when: function (a) {
+        /* «есть ли вайфай» — это вопрос про быт, а не про свободные квартиры */
+        if (topicsFor(a).length || nearbyTopics(a.norm).length) return false;
+        return a.signals.availability || a.signals.book;
+      },
       build: function () {
         return { action: 'ask', reason: 'нужны даты',
           reply: 'Свободные есть почти всегда — вопрос в датах. Напишите: с какого по какое и сколько гостей?' };
@@ -872,7 +956,7 @@
     },
     {
       id: 'pets', title: 'Вопрос про животных', group: 'вопросы',
-      when: function (a) { return a.signals.pets; },
+      when: function (a) { return a.signals.pets && topicsFor(a).length <= 1; },
       build: function () {
         var ok = KB.objects.filter(function (o) { return o.pets; }).map(function (o) { return o.title; });
         return { action: 'info', reason: 'pet policy',
@@ -933,6 +1017,33 @@
       }
     },
     {
+      id: 'faq', title: 'Вопрос из каталога тем', group: 'вопросы',
+      when: function (a) {
+        if (a.prefs.accessible || (a.freshChanged && a.dates.from)) return false;
+        return topicsFor(a).length > 0;
+      },
+      build: function (a) {
+        var hits = topicsFor(a).slice(0, 4);
+        var out = hits.map(function (t) {
+          return typeof t.a === 'function' ? t.a(a) : t.a;
+        });
+        /* Если гость заодно спросил про район — добавим и это */
+        var near = nearbyTopics(a.norm);
+        if (near.length) {
+          shownObjects(a).slice(0, 2).forEach(function (o) {
+            near.forEach(function (n) {
+              if (o.nearby && o.nearby[n]) out.push(o.title + ' — ' + n + ': ' + o.nearby[n]);
+            });
+          });
+        }
+        out.push(a.ctx.offers.length || a.ctx.booking
+          ? 'Ещё вопросы — или бронируем?'
+          : 'Напишите даты и число гостей — подберу и посчитаю.');
+        return { action: 'info', reason: 'ответ по темам: ' + hits.map(function (t) { return t.id; }).join(', '),
+          reply: R.lines(out) };
+      }
+    },
+    {
       id: 'greeting', title: 'Просто поздоровались', group: 'служебные',
       when: function (a) { return a.signals.greeting; },
       build: function () {
@@ -947,11 +1058,22 @@
       id: 'fallback', title: 'Не понял запрос', group: 'служебные',
       when: function () { return true; },
       build: function (a) {
+        /* Вопрос, на который у меня нет данных, — это работа для человека,
+           а не повод в третий раз просить даты */
+        var looksLikeQuestion = /\?|^(а |и )?(как|что|где|когда|можно|есть|сколько|почему|зачем|кто|куда|какой|кака|какие)/.test(a.norm);
+        if (looksLikeQuestion) {
+          return { action: 'escalate', reason: 'вопрос вне известных тем',
+            reply: R.lines([
+              'Честно — такого в моей памяти нет, а выдумывать не буду.',
+              R.human('ответит точно'),
+              'Если вопрос про бронь, напишите даты и число гостей — это посчитаю сам.'
+            ]),
+            internal: 'Вопрос вне каталога тем: «' + a.raw.slice(0, 160) + '». Стоит добавить тему в KB.topics.' };
+        }
         return { action: 'ask', reason: 'запрос не распознан',
           reply: R.lines([
-            'Хочу ответить точно, поэтому уточню.',
-            'Напишите, пожалуйста: даты заезда и выезда, сколько гостей и в каком районе искать.',
-            'Если вопрос не про бронь — опишите одной фразой, что нужно, и я подключу менеджера.'
+            'Не уверен, что понял. Напишите, пожалуйста, одной фразой, что нужно.',
+            'Для подбора хватит даты заезда и выезда и числа гостей.'
           ]),
           internal: 'Нераспознанный запрос: «' + a.raw.slice(0, 120) + '». Стоит посмотреть, не пропущен ли сценарий.' };
       }
