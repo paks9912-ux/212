@@ -4,14 +4,14 @@
 (function (w) {
   'use strict';
 
-  var U  = w.U, KB = w.KB;
+  var FACTS = w.FACTS;
   var API = {};
   var KEY = 'zaselenie.api';
 
   API.MODELS = [
-    { id: 'claude-sonnet-5', title: 'Sonnet 5 — быстрый' },
-    { id: 'claude-opus-5', title: 'Opus 5 — самый сильный' },
-    { id: 'claude-haiku-4-5-20251001', title: 'Haiku 4.5 — дешёвый' }
+    { id: 'claude-opus-5', title: 'Opus 5 — по умолчанию' },
+    { id: 'claude-sonnet-5', title: 'Sonnet 5 — дешевле' },
+    { id: 'claude-haiku-4-5', title: 'Haiku 4.5 — самый дешёвый' }
   ];
 
   API.load = function () {
@@ -30,54 +30,8 @@
     if (systemCache) return Promise.resolve(systemCache);
     return fetch('prompts/system.md')
       .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
-      .catch(function () { return API.SHORT; })
+      .catch(function () { return FACTS.SHORT; })
       .then(function (t) { systemCache = t; return t; });
-  };
-
-  API.SHORT = [
-    'Ты менеджер по заселению «Ключи 24», посуточные квартиры в Ташкенте.',
-    'Все цены, свободные даты и правила берёшь строго из блока <факты> — ничего не выдумываешь.',
-    'Пишешь коротко, по-человечески, без канцелярита, одна мысль — одна строка.',
-    'Отвечаешь на все темы сообщения, заканчиваешь понятным следующим шагом,',
-    'задаёшь не больше трёх вопросов. Отказ оформляешь как: правило, причина, альтернатива.',
-    'Формат ответа: блок <ответ> для гостя и блок <заметка> для менеджера.'
-  ].join(' ');
-
-  /* Факты для модели: решение движка, слоты, варианты с ценами, риск */
-  API.facts = function (res) {
-    var a = res.analysis;
-    return {
-      сегодня: U.today(),
-      компания: { бренд: KB.settings.brand, город: KB.settings.city,
-                  заезд: KB.settings.checkIn, выезд: KB.settings.checkOut,
-                  предоплата: KB.settings.prepay, удержание_минут: KB.settings.holdMinutes,
-                  менеджер: KB.settings.manager },
-      сценарий: { id: res.scenario, название: res.scenarioTitle, решение: res.action, причина: res.reason },
-      слоты: a.crm ? a.crm.stay : null,
-      заявка: res.crm,
-      варианты: a.match ? a.match.offers.slice(0, 3).map(function (o) {
-        return {
-          квартира: o.object.title, район: o.object.district, метро: o.object.metro,
-          вмещает: o.object.capacity + ' + ' + o.object.extraBeds,
-          за_ночь: o.quote.perNight, итого: o.quote.total,
-          предоплата: o.quote.prepay, депозит: o.quote.deposit,
-          можно_с_животными: o.object.pets, лифт: o.object.elevator, парковка: o.object.parking,
-          удобства: o.object.features
-        };
-      }) : [],
-      занято: a.match ? a.match.rejected.map(function (r) {
-        return { квартира: r.object.title, причины: r.reasons };
-      }) : [],
-      альтернативные_даты: a.match ? (a.match.alternatives || []).map(function (x) {
-        return { квартира: x.object.title, с: x.from, по: x.to };
-      }) : [],
-      риск: { балл: a.risk.score, уровень: a.risk.level,
-              флаги: a.risk.flags.map(function (f) { return f.id + ': ' + f.why; }) },
-      не_хватает: a.missing,
-      допущения: a.dates.assumed.concat(a.guests.assumed || []).concat(a.budget.assumed || []),
-      противоречия: a.dates.issues,
-      подсказка_движка: res.reply
-    };
   };
 
   API.ask = function (text, res, history) {
@@ -89,7 +43,7 @@
     });
     msgs.push({
       role: 'user',
-      content: '<факты>\n' + JSON.stringify(API.facts(res), null, 1) + '\n</факты>\n' +
+      content: '<факты>\n' + JSON.stringify(FACTS.build(res), null, 1) + '\n</факты>\n' +
                '<сообщение>\n' + text + '\n</сообщение>'
     });
 
@@ -103,9 +57,12 @@
           'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-          model: cfg.model || 'claude-sonnet-5',
-          max_tokens: 1200,
-          system: sys,
+          model: cfg.model || 'claude-opus-5',
+          max_tokens: 1200,                       // ответ в мессенджере короткий
+          /* Факты уже посчитаны движком, модели остаётся сформулировать —
+             низкое усилие держит ответ быстрым и дешёвым */
+          output_config: { effort: 'low' },
+          system: [{ type: 'text', text: sys, cache_control: { type: 'ephemeral' } }],
           messages: msgs
         })
       });
@@ -115,6 +72,8 @@
         return data;
       });
     }).then(function (data) {
+      /* Модель может отказаться отвечать — тогда работает текст движка */
+      if (data.stop_reason === 'refusal') throw new Error('модель отказалась отвечать');
       var text = (data.content || []).map(function (c) { return c.text || ''; }).join('\n');
       var answer = /<ответ>([\s\S]*?)<\/ответ>/.exec(text);
       var note = /<заметка>([\s\S]*?)<\/заметка>/.exec(text);

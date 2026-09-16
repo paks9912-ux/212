@@ -1,6 +1,6 @@
 /* Все проверки разом: node zaselenie/tests/run.js */
 var path = require('path');
-var files = ['nlu.test.js', 'policy.test.js', 'scenarios.test.js'];
+var files = ['nlu.test.js', 'policy.test.js', 'scenarios.test.js', 'bot.test.js'];
 var failed = 0;
 
 files.forEach(function (f) {

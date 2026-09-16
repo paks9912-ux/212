@@ -211,7 +211,7 @@
 
     /* Память диалога */
     ctx.turns++;
-    ctx.history.push({ in: text, scenario: chosen.id, action: out.action });
+    ctx.history.push({ in: text, out: out.reply, scenario: chosen.id, action: out.action });
     if (a.match && a.match.offers.length && /offer|hold/.test(out.action)) ctx.offers = a.match.offers.slice(0, 3);
     if (a.selected && out.action === 'hold') {
       ctx.booking = {

@@ -20,7 +20,8 @@ AI-агент, который принимает заявки на заселе�
 | Риск | вечеринка, субаренда, мошенничество, документы | `js/risk.js` |
 | Сценарии | что это за обращение и что с ним делать | `js/scenarios.js` |
 | Оркестратор | память диалога, решение, заявка для CRM | `js/agent.js` |
-| Модель | формулировка ответа живым языком | `js/api.js` + `prompts/` |
+| Модель | формулировка ответа живым языком | `js/facts.js`, `js/api.js`, `prompts/` |
+| Телеграм | чат, кнопки, сессии, эскалации | `bot/` |
 
 Модель получает уже посчитанные факты и **не может выдумать цену или свободную
 дату** — их просто нет в её входных данных, кроме как из расчёта.
@@ -110,9 +111,24 @@ localStorage браузера и уходит напрямую в Anthropic.
 страницу. В продакшене `js/api.js` заменяется на вызов вашего сервера, который
 уже ходит в Anthropic со своим ключом.
 
-## Подключение к мессенджеру
+## Телеграм-бот
 
-Движок не зависит от браузера — это обычные модули. Скелет бота:
+Готовый бот на том же движке — в [`bot/`](bot/), зависимостей нет, нужен Node 18+:
+
+```bash
+cp zaselenie/bot/.env.example zaselenie/bot/.env   # вписать токен от @BotFather
+node zaselenie/bot/telegram.js
+```
+
+Умеет: кнопки выбора варианта под предложением, кнопку «отправить мой номер» на
+шаге брони, память диалога с сохранением на диск, команды `/start`, `/help`,
+`/reset`, `/stats`, отбой спама и флуда, эскалацию менеджеру отдельным сообщением
+и работу через polling или webhook. Подробности и деплой — в
+[bot/README.md](bot/README.md).
+
+## Подключение к другому мессенджеру
+
+Движок не зависит от транспорта — это обычные модули:
 
 ```js
 ['util','knowledge','nlu','policy','reply','risk','scenarios','agent']
@@ -121,7 +137,7 @@ localStorage браузера и уходит напрямую в Anthropic.
 const sessions = new Map();                       // чат → контекст диалога
 
 async function onMessage(chatId, text) {
-  if (!sessions.has(chatId)) sessions.set(chatId, AGENT.newContext({ channel: 'telegram' }));
+  if (!sessions.has(chatId)) sessions.set(chatId, AGENT.newContext({ channel: 'whatsapp' }));
   const res = AGENT.respond(text, sessions.get(chatId));
 
   await send(chatId, res.reply);                  // ответ гостю
@@ -140,6 +156,7 @@ node zaselenie/tests/run.js          # все наборы разом
 node zaselenie/tests/nlu.test.js     # разбор дат, гостей, бюджета, сигналов
 node zaselenie/tests/policy.test.js  # цены, занятость, подбор, возвраты
 node zaselenie/tests/scenarios.test.js
+node zaselenie/tests/bot.test.js     # телеграм-слой на подставном транспорте
 ```
 
 Сценарные тесты проверяют, что на каждое типовое обращение выбирается нужная
