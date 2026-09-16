@@ -531,8 +531,19 @@
         var alt = R.alternatives(a.match);
         var tooShort = a.match.rejected.every(function (r) { return r.reasons.some(function (x) { return /минимум/.test(x); }); });
         if (tooShort) {
+          /* Берём самый мягкий минимум: гостю важно, с какого срока хоть что-то
+             доступно, а не сколько просит квартира под длительную аренду */
+          var min = a.match.rejected.reduce(function (m, r) {
+            return Math.min(m, PO.minNights(r.object, a.dates.from, a.dates.to));
+          }, Infinity);
+          var add = min - a.dates.nights;
+          var season = PO.seasonsOf(a.dates.from, a.dates.to).map(function (x) { return x.name; }).join(', ');
           return { action: 'ask', reason: 'меньше минимального срока',
-            reply: 'На эти даты минимальный срок больше: ' + a.match.rejected[0].reasons.filter(function (x) { return /минимум/.test(x); })[0] + '. Возьмёте на ночь дольше?' };
+            reply: R.lines([
+              'На эти даты минимум ' + U.nights(min) + (season ? ' — это ' + season : '') + ', а у вас ' + U.nights(a.dates.nights) + '.',
+              'Добавьте ' + U.nights(add) + ' — например, ' + U.range(a.dates.from, U.addDays(a.dates.from, min)) +
+                ' — или сдвиньте даты за пределы праздников, там минимума нет.'
+            ]) };
         }
         return { action: 'offer', reason: 'нет свободных на запрошенные даты',
           reply: R.lines([

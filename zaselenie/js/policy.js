@@ -79,9 +79,15 @@
     var S = KB.settings;
     var from = req.from, to = req.to;
     var nights = U.diffDays(from, to);
-    var lines = [], stay = 0;
+    var lines = [], stay = 0, peakSum = 0, peakNights = 0, nightMin = Infinity, nightMax = 0;
 
-    U.nightsList(from, to).forEach(function (n) { stay += PO.nightPrice(obj, n); });
+    U.nightsList(from, to).forEach(function (n) {
+      var price = PO.nightPrice(obj, n), s = PO.season(n);
+      stay += price;
+      if (s && s.peak) { peakSum += price; peakNights++; }
+      if (price < nightMin) nightMin = price;
+      if (price > nightMax) nightMax = price;
+    });
     lines.push({ title: 'Проживание, ' + U.nights(nights), sum: stay });
 
     var guests = req.guests || 1;
@@ -99,7 +105,9 @@
     if (req.repeatGuest) { discount += S.repeatGuestDiscount; discountTitle = (discountTitle ? discountTitle + ' + постоянный гость' : 'Скидка постоянному гостю'); }
     discount = Math.min(discount, 0.3);
 
-    var discountSum = Math.round(stay * discount);
+    /* Скидка за длительность не должна съедать праздничный тариф */
+    var discountBase = S.discountInPeak ? stay : stay - peakSum;
+    var discountSum = Math.round(discountBase * discount);
     if (discountSum) lines.push({ title: discountTitle, sum: -discountSum });
 
     var total = stay - discountSum + (lines.extra || 0);
@@ -119,8 +127,11 @@
     }
     if (req.lateArrival) { lines.push({ title: 'Ночное заселение', sum: S.lateCheckInFee }); total += S.lateCheckInFee; }
 
-    var peak = PO.isPeak(from, to);
-    var prepayPart = peak ? S.peakPrepay : S.prepay;
+    /* Праздничные ночи вносятся полностью, остальное — обычной долей.
+       Одна ночь Навруза не должна делать стопроцентной всю двухнедельную бронь. */
+    var peak = peakNights > 0;
+    var prepay = Math.min(total, Math.round(peakSum * S.peakPrepay + Math.max(0, total - peakSum) * S.prepay));
+    var prepayPart = total ? prepay / total : S.prepay;
     var deposit = obj.deposit + (req.pets ? S.petDeposit : 0);
 
     return {
@@ -134,8 +145,12 @@
       peak: peak,
       seasons: PO.seasonsOf(from, to).map(function (s) { return s.name; }),
       prepayPart: prepayPart,
-      prepay: Math.round(total * prepayPart),
-      rest: total - Math.round(total * prepayPart),
+      prepay: prepay,
+      rest: total - prepay,
+      peakNights: peakNights,
+      peakSum: peakSum,
+      nightMin: nightMin === Infinity ? 0 : nightMin,
+      nightMax: nightMax,
       deposit: deposit
     };
   };

@@ -54,6 +54,71 @@ var mShort = PO.match({ from: '2026-03-03', to: '2026-03-04', guests: 2, rooms: 
 T.eq('минимальный срок объекта соблюдается',
   mShort.offers.every(function (o) { return o.object.minNights <= 1; }), true);
 
+T.head('Сезоны и стыки:');
+(function () {
+  var overlaps = [];
+  for (var d = U.make(2026, 1, 1); d < U.make(2027, 1, 1); d = U.addDays(d, 1)) {
+    var md = d.slice(5);
+    var hits = KB.seasons.filter(function (x) {
+      return x.from <= x.to ? (md >= x.from && md <= x.to) : (md >= x.from || md <= x.to);
+    });
+    if (hits.length > 1) overlaps.push(d);
+  }
+  T.eq('сезоны не перекрывают друг друга', overlaps.length, 0);
+})();
+T.eq('ночь до начала сезона — по базе', PO.nightPrice(obj, '2026-12-27'), 420000);
+T.eq('первая ночь сезона — с коэффициентом', PO.nightPrice(obj, '2026-12-28'), Math.round(420000 * 1.6 / 1000) * 1000);
+T.eq('последняя ночь сезона ещё дорогая', PO.nightPrice(obj, '2027-01-05'), Math.round(420000 * 1.6 / 1000) * 1000);
+T.eq('следующая ночь — снова база', PO.nightPrice(obj, '2027-01-06'), 420000);
+T.eq('праздник и выходной умножаются вместе',
+  PO.nightPrice(obj, '2027-01-01'), Math.round(420000 * 1.15 * 1.6 / 1000) * 1000);
+T.eq('ночь воскресенья — не выходной тариф', PO.nightPrice(obj, '2026-10-18'), 420000);
+
+(function () {
+  var cases = [['2026-12-29', '2027-01-03'], ['2027-01-08', '2027-01-13'],
+               ['2027-03-18', '2027-03-24'], ['2027-04-18', '2027-04-23']];
+  var bad = cases.filter(function (c) {
+    var q = PO.quote(obj, { from: c[0], to: c[1], guests: 2 });
+    var nights = U.nightsList(c[0], c[1]).reduce(function (sum, n) { return sum + PO.nightPrice(obj, n); }, 0);
+    var peak = U.nightsList(c[0], c[1]).reduce(function (sum, n) {
+      var se = PO.season(n); return sum + (se && se.peak ? PO.nightPrice(obj, n) : 0);
+    }, 0);
+    return q.total !== nights - Math.round((nights - peak) * q.discountPart);
+  });
+  T.eq('бронь через границу сезона считается по ночам', bad.length, 0);
+})();
+
+T.head('Предоплата в праздники:');
+var mixed = PO.quote(obj, { from: '2027-03-18', to: '2027-03-20', guests: 2 });   // 1 ночь Навруза из 2
+T.eq('в смешанной броне пиковых ночей ровно одна', mixed.peakNights, 1);
+T.eq('праздничная ночь оплачивается полностью, остальное по 30%',
+  mixed.prepay, Math.round(PO.nightPrice(obj, '2027-03-19') + PO.nightPrice(obj, '2027-03-18') * 0.3));
+T.is('одна праздничная ночь не делает всю бронь стопроцентной', mixed.prepayPart < 1, mixed.prepayPart);
+
+var allPeak = PO.quote(obj, { from: '2026-12-29', to: '2027-01-01', guests: 2 });
+T.eq('когда все ночи праздничные — предоплата полная', allPeak.prepay, allPeak.total);
+
+var plain = PO.quote(obj, { from: '2026-10-12', to: '2026-10-15', guests: 2 });
+T.eq('вне сезона предоплата обычная', plain.prepay, Math.round(plain.total * 0.3));
+
+T.head('Скидка за длительность и праздники:');
+var longNy = PO.quote(obj, { from: '2026-12-30', to: '2027-01-09', guests: 2 });
+var nightsNy = U.nightsList('2026-12-30', '2027-01-09').reduce(function (s2, n) { return s2 + PO.nightPrice(obj, n); }, 0);
+var peakNy = U.nightsList('2026-12-30', '2027-01-09').reduce(function (s2, n) {
+  var se = PO.season(n); return s2 + (se && se.peak ? PO.nightPrice(obj, n) : 0);
+}, 0);
+T.eq('скидка за срок не трогает праздничные ночи', longNy.total, nightsNy - Math.round((nightsNy - peakNy) * 0.1));
+T.is('но обычные ночи в той же броне со скидкой', longNy.total < nightsNy, true);
+
+T.head('Минимальный срок по сезону:');
+T.eq('в новогодние даты минимум три ночи', PO.minNights(obj, '2026-12-29', '2026-12-30'), 3);
+T.eq('в Навруз — две', PO.minNights(obj, '2027-03-19', '2027-03-20'), 2);
+T.eq('вне сезона — одна', PO.minNights(obj, '2026-10-12', '2026-10-13'), 1);
+
+T.head('Разброс цен виден гостю:');
+T.is('в праздники показываем «от и до»', !!R.spread(PO.quote(obj, { from: '2027-03-18', to: '2027-03-20', guests: 2 })), true);
+T.eq('в ровные даты лишнего не пишем', R.spread(PO.quote(obj, { from: '2026-10-12', to: '2026-10-15', guests: 2 })), null);
+
 T.head('Группа и возврат:');
 var combo = PO.combo({ from: '2026-03-03', to: '2026-03-05', guests: 9 });
 T.eq('группе собирается комплект квартир', combo && combo.capacity >= 9, true);

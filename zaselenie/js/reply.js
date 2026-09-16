@@ -26,12 +26,33 @@
     var head = (i ? i + ') ' : '') + o.title;
     var price = U.money(q.perNightStay) + '/ночь · за ' + U.nights(q.nights) + ' — ' + U.money(q.total) +
                 (q.total !== q.perNightStay * q.nights ? ' с доплатами' : '');
+    var spread = R.spread(q);
     var note = item.notes && item.notes.length ? '   ' + item.notes.join(', ') : null;
-    return R.lines(['' + head, '   ' + R.objLine(o), '   ' + price, note]);
+    return R.lines(['' + head, '   ' + R.objLine(o), '   ' + price, spread ? '   ' + spread : null, note]);
   };
 
   R.offers = function (list, max) {
     return list.slice(0, max || 2).map(function (it, i) { return R.offer(it, i + 1); }).join('\n\n');
+  };
+
+  /* Формулировка предоплаты: в праздники она смешанная, и это надо объяснить */
+  R.prepayLine = function (q) {
+    var S = KB.settings;
+    if (q.peakNights && q.peakNights < q.nights) {
+      return 'Предоплата ' + U.money(q.prepay) + ' — праздничные ночи вносятся полностью, ' +
+             'остальные ' + Math.round(S.prepay * 100) + '%' +
+             (q.rest > 0 ? ', остаток ' + U.money(q.rest) + ' при заезде' : '');
+    }
+    if (q.peakNights) return 'Предоплата 100% — ' + U.money(q.prepay) + ': это праздничные даты, их держим только по полной оплате.';
+    return 'Предоплата ' + Math.round(q.prepayPart * 100) + '% — ' + U.money(q.prepay) +
+           (q.rest > 0 ? ', остаток ' + U.money(q.rest) + ' при заезде' : '');
+  };
+
+  /* Если ночи стоят по-разному, гость должен увидеть это до брони */
+  R.spread = function (q) {
+    if (!q.nightMax || q.nightMax <= q.nightMin * 1.12) return null;
+    return 'по ночам от ' + U.money(q.nightMin, '') + ' до ' + U.money(q.nightMax) +
+           ' — праздничные и выходные дороже';
   };
 
   R.breakdown = function (q) {
@@ -39,8 +60,7 @@
       return '· ' + l.title + ' — ' + (l.sum < 0 ? '−' + U.money(-l.sum) : U.money(l.sum));
     });
     rows.push('Итого: ' + U.money(q.total));
-    rows.push('Предоплата ' + Math.round(q.prepayPart * 100) + '% — ' + U.money(q.prepay) +
-              (q.rest > 0 ? ', остаток ' + U.money(q.rest) + ' при заезде' : ''));
+    rows.push(R.prepayLine(q));
     rows.push('Депозит ' + U.money(q.deposit) + ' — возвращаем при выезде');
     return rows.join('\n');
   };
@@ -50,8 +70,7 @@
     return R.lines([
       'В цене: уборка, постель, полотенца, Wi-Fi.',
       'Заезд с ' + S.checkIn + ', выезд до ' + S.checkOut + '.',
-      q ? 'Предоплата ' + Math.round(q.prepayPart * 100) + '% — ' + U.money(q.prepay) +
-          ', депозит ' + U.money(q.deposit) + ' возвращается при выезде.' : null
+      q ? R.prepayLine(q) + '. Депозит ' + U.money(q.deposit) + ' возвращается при выезде.' : null
     ]);
   };
 
@@ -64,7 +83,8 @@
     return R.lines([
       'В цене: уборка, постель, полотенца, Wi-Fi.',
       'Заезд с ' + S.checkIn + ', выезд до ' + S.checkOut + '.',
-      'Предоплата ' + Math.round((peak ? S.peakPrepay : S.prepay) * 100) + '%, депозит ' +
+      (peak ? 'В праздничные ночи предоплата полная, в остальные ' + Math.round(S.prepay * 100) + '%'
+            : 'Предоплата ' + Math.round(S.prepay * 100) + '%') + ', депозит ' +
         (min === max ? U.money(min) : U.money(min, '') + '–' + U.money(max)) + ' — возвращаем при выезде.'
     ]);
   };

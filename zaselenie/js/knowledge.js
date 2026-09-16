@@ -28,7 +28,8 @@
     registrationFee: 0,
     prepay: 0.3,                     // доля предоплаты от суммы проживания
     holdMinutes: 60,                 // сколько держим даты без предоплаты
-    peakPrepay: 1,                   // в пиковые даты — 100%
+    peakPrepay: 1,                   // пиковые ночи оплачиваются полностью
+    discountInPeak: false,           // скидка за длительность не действует в праздники
     lateCheckInFrom: '23:00',
     lateCheckInFee: 100000,
     earlyCheckInPart: 0.5,           // доля суток за ранний заезд
