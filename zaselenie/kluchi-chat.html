@@ -24,6 +24,7 @@
 
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;}
+body{min-height:100vh;}
 
 body{
     background:var(--bg);
@@ -41,7 +42,7 @@ a{color:inherit;}
     width:100%;
     display:flex;
     flex-direction:column;
-    height:100dvh;
+    height:100vh;height:100dvh;
     max-width:1280px;
     margin:0 auto;
 }
@@ -208,7 +209,16 @@ body.guest .chat{padding-top:28px;}
     .msg{max-width:94%;}
 }
 
-</style></head>
+</style><script>
+window.onerror = function (msg, src, line) {
+  var d = document.createElement("div");
+  d.setAttribute("style", "position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#3a1512;color:#ffd9d4;font:13px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap");
+  d.textContent = "Страница не запустилась: " + msg + " (строка " + line + ")." +
+    " Покажите этот текст тому, кто прислал файл.";
+  (document.body || document.documentElement).appendChild(d);
+};
+<\/script>
+</head>
 <body>
 
 <div class="app">

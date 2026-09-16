@@ -2,6 +2,21 @@
 (function (w, d) {
   'use strict';
 
+  /* Молчащая страница — худший вид поломки: пусть говорит, что случилось */
+  function fail(where, e) {
+    var msg = where + ': ' + ((e && e.message) || e);
+    try {
+      var box = d.createElement('div');
+      box.setAttribute('style', 'position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#3a1512;' +
+        'color:#ffd9d4;font:13px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap');
+      box.textContent = 'Страница запустилась с ошибкой — ' + msg + '. Покажите этот текст разработчику.';
+      (d.body || d.documentElement).appendChild(box);
+    } catch (ignore) {}
+    if (w.console && console.error) console.error(where, e);
+  }
+
+  w.addEventListener('error', function (e) { fail('ошибка скрипта', e.error || e.message); });
+
   var chat = d.getElementById('chat');
   var insight = d.getElementById('insight');
   var input = d.getElementById('input');
@@ -165,11 +180,15 @@
   /* ---------- обработка сообщения ---------- */
 
   function handle(text) {
+    try { handleInner(text); } catch (e) { fail('обработка сообщения', e); }
+  }
+
+  function handleInner(text) {
     bubble('guest', text);
     history.push({ role: 'user', text: text });
 
     var res = AGENT.respond(text, ctx);
-    render(res);
+    try { render(res); } catch (e) { fail('панель разбора', e); }
 
     if (mode === 'claude' && API.ready()) {
       var t = typing();
@@ -201,6 +220,8 @@
 
   /* ---------- события ---------- */
 
+  if (!send || !input) fail('разметка', 'не найдено поле ввода или кнопка отправки');
+
   send.onclick = function () {
     var v = input.value.trim();
     if (!v) return;
@@ -225,44 +246,49 @@
     });
   }
 
-  d.getElementById('view').onclick = function (e) {
+  function on(id, handler) {
+    var el = d.getElementById(id);
+    if (el) el.onclick = handler;
+  }
+
+  on('view', function (e) {
     var btn = e.target.closest('button');
     if (!btn) return;
     guestView = btn.dataset.view === 'guest';
     applyView();
-  };
+  });
 
-  d.getElementById('mode').onclick = function (e) {
+  on('mode', function (e) {
     var btn = e.target.closest('button');
     if (!btn) return;
     mode = btn.dataset.mode;
-    [].forEach.call(this.children, function (b) { b.classList.toggle('on', b === btn); });
+    [].forEach.call(btn.parentNode.children, function (b) { b.classList.toggle('on', b === btn); });
     if (mode === 'claude' && !API.ready()) modal.classList.add('on');
-  };
+  });
 
-  d.getElementById('tabs').onclick = function (e) {
+  on('tabs', function (e) {
     var btn = e.target.closest('button');
     if (!btn) return;
-    [].forEach.call(this.children, function (b) { b.classList.toggle('on', b === btn); });
+    [].forEach.call(btn.parentNode.children, function (b) { b.classList.toggle('on', b === btn); });
     d.getElementById('pane-chat').classList.toggle('off', btn.dataset.tab !== 'chat');
     d.getElementById('pane-insight').classList.toggle('off', btn.dataset.tab !== 'insight');
-  };
+  });
 
-  d.getElementById('reset').onclick = function () {
+  on('reset', function () {
     ctx = AGENT.newContext({ channel: 'демо' });
     history = [];
     chat.innerHTML = '';
-    insight.innerHTML = '<div class="block"><h3>Разбор запроса</h3><div class="empty">Новый диалог. Слоты и бронь очищены.</div></div>';
+    if (insight) insight.innerHTML = '<div class="block"><h3>Разбор запроса</h3><div class="empty">Новый диалог. Слоты и бронь очищены.</div></div>';
     hello();
-  };
+  });
 
-  d.getElementById('settings').onclick = function () { modal.classList.add('on'); };
-  d.getElementById('cancel').onclick = function () { modal.classList.remove('on'); };
-  d.getElementById('save').onclick = function () {
+  on('settings', function () { modal.classList.add('on'); });
+  on('cancel', function () { modal.classList.remove('on'); });
+  on('save', function () {
     API.save({ key: d.getElementById('key').value.trim(), model: d.getElementById('model').value });
     modal.classList.remove('on');
     bubble('sys', API.ready() ? 'Ключ сохранён. Режим «Движок + Claude» готов.' : 'Ключ очищен.');
-  };
+  });
 
   /* ---------- старт ---------- */
 
@@ -282,6 +308,10 @@
   }
 
   (function init() {
+    try { start(); } catch (e) { fail('запуск', e); }
+  })();
+
+  function start() {
     var chips = d.getElementById('chips');
     SAMPLES.forEach(function (s) {
       var b = d.createElement('button');
@@ -304,6 +334,6 @@
     applyView();
     hello();
     if (!guestView) checkCalendar();
-  })();
+  }
 
 })(window, document);
