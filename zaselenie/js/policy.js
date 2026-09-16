@@ -166,7 +166,7 @@
       var why = [], score = 100, notes = [];
       var guests = req.guests || 1;
 
-      if (guests > o.capacity + o.extraBeds) why.push('вмещает до ' + U.guests(o.capacity + o.extraBeds));
+      if (guests > o.capacity + o.extraBeds) why.push('вмещает до ' + U.guestsUpTo(o.capacity + o.extraBeds));
       if (req.pets && !o.pets) why.push('нельзя с животными');
       if (req.needElevator && !o.elevator) why.push('нет лифта, ' + o.floor + '-й этаж');
       if (req.rooms !== null && req.rooms !== undefined && o.rooms < req.rooms) why.push(o.rooms ? o.rooms + '-комнатная' : 'студия');
@@ -261,6 +261,43 @@
     }
     var last = rules[rules.length - 1];
     return { days: days, part: last.refund, sum: 0, note: last.note };
+  };
+
+  /* Копия запроса с другими датами — чтобы не мутировать исходный */
+  function withDates(req, from, to) {
+    var out = {};
+    for (var k in req) if (Object.prototype.hasOwnProperty.call(req, k)) out[k] = req[k];
+    out.from = from; out.to = to;
+    return out;
+  }
+
+  /* Первая дата на горизонте, когда есть подходящая квартира.
+     Нужна, когда соседние окна пусты: «всё занято» без опоры — плохой ответ. */
+  PO.nextAvailable = function (req, horizon) {
+    horizon = horizon || 90;
+    var nights = Math.max(1, req.from && req.to ? U.diffDays(req.from, req.to) : (req.nights || 1));
+    var start = req.from && U.diffDays(U.today(), req.from) > 0 ? req.from : U.today();
+    for (var i = 1; i <= horizon; i++) {
+      var f = U.addDays(start, i), t = U.addDays(f, nights);
+      var m = PO.match(withDates(req, f, t));
+      if (m.offers.length) return { from: f, to: t, offer: m.offers[0], shift: i };
+    }
+    return null;
+  };
+
+  /* Что именно мешает: занято или свободно, но не подходит под требования */
+  PO.whyBlocked = function (req) {
+    var m = PO.match(req);
+    var busy = [], unfit = [];
+    m.rejected.forEach(function (r) {
+      var occupied = r.reasons.some(function (x) { return /занята/.test(x); });
+      (occupied ? busy : unfit).push({ object: r.object, reasons: r.reasons });
+    });
+    return {
+      busy: busy, unfit: unfit,
+      freeButUnfit: unfit.length > 0,
+      allBusy: unfit.length === 0 && busy.length > 0
+    };
   };
 
   /* Цена «от» для ответов без дат */

@@ -245,6 +245,14 @@
 
   /* ---------- старт ---------- */
 
+  /* Свой фонд обычно подставляют выгрузкой — сразу показываем, если она битая */
+  function checkCalendar() {
+    var problems = KB.validate();
+    if (!problems.length) return;
+    bubble('sys', 'В календаре ' + problems.length + ' проблем(ы) — такие квартиры могут продаться дважды:\n' +
+      problems.slice(0, 5).join('\n'));
+  }
+
   function hello() {
     bubble('sys', 'Демо: слева вы пишете как гость, справа видно, что агент понял и почему так ответил.');
     bubble('agent', 'Здравствуйте! ' + KB.settings.brand + ' — ' + KB.settings.business + ' в ' + KB.settings.cityIn + '.\nНапишите даты и сколько гостей — подберу варианты с ценами.', 'сценарий: greeting');
@@ -271,6 +279,7 @@
     if (cfg.model) sel.value = cfg.model;
 
     hello();
+    checkCalendar();
   })();
 
 })(window, document);

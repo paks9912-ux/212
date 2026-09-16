@@ -168,7 +168,7 @@
 
     /* Подбор считаем, только когда есть даты и срок */
     if (req.from && req.to && req.nights > 0 && !p.dates.hourly) {
-      a.match = PO.match({
+      a.matchReq = {
         from: req.from, to: req.to,
         guests: req.guests || 1,
         pets: req.pets, rooms: req.rooms, district: req.district,
@@ -177,7 +177,8 @@
         selfCheckIn: req.selfCheckIn, budget: req.budget, budgetPer: req.budgetPer,
         earlyCheckIn: req.earlyCheckIn, lateCheckOut: req.lateCheckOut, lateArrival: req.lateArrival,
         repeatGuest: req.repeatGuest
-      });
+      };
+      a.match = PO.match(a.matchReq);
       a.quoteTotal = a.match.offers.length ? a.match.offers[0].quote.total : null;
     } else {
       a.match = null;

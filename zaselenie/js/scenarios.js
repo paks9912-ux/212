@@ -525,7 +525,28 @@
       }
     },
     {
-      id: 'no-availability', title: 'На эти даты всё занято', group: 'заявка',
+      id: 'next-free', title: 'Когда ближайшее свободное', group: 'заявка',
+      when: function (a) { return a.signals.otherDates && a.matchReq; },
+      build: function (a) {
+        var next = PO.nextAvailable(a.matchReq, 90);
+        if (!next) {
+          return { action: 'escalate', reason: 'на горизонте трёх месяцев свободного нет',
+            reply: R.lines([
+              'Честно: на ближайшие три месяца под ваш запрос свободного нет.',
+              R.human('подскажет, что освобождается раньше, и предложит партнёрские квартиры')
+            ]) };
+        }
+        var q = next.offer.quote;
+        return { action: 'offer', reason: 'ближайшая доступная дата',
+          reply: R.lines([
+            'Ближайшее, что подходит под ваш запрос: ' + U.range(next.from, next.to) + '.',
+            next.offer.object.title + ' — ' + U.money(q.perNightStay) + '/ночь, за ' + U.nights(q.nights) + ' ' + U.money(q.total) + '.',
+            'Если эти даты не подходят, напишите свои — проверю по всему фонду.'
+          ]) };
+      }
+    },
+    {
+      id: 'no-availability', title: 'На эти даты нет подходящего', group: 'заявка',
       when: function (a) { return a.match && a.match.status === 'none'; },
       build: function (a) {
         var alt = R.alternatives(a.match);
@@ -545,15 +566,45 @@
                 ' — или сдвиньте даты за пределы праздников, там минимума нет.'
             ]) };
         }
+
+        var why = PO.whyBlocked(a.matchReq);
+        var next = PO.nextAvailable(a.matchReq, 90);
+        var nextLine = next
+          ? 'Ближайшее подходящее — ' + U.range(next.from, next.to) + ': ' + next.offer.object.title +
+            ', ' + U.money(next.offer.quote.perNightStay) + '/ночь.'
+          : null;
+
+        /* Свободные квартиры есть, просто не подходят — говорить «всё занято» нечестно */
+        if (why.freeButUnfit) {
+          var u = why.unfit[0];
+          var group = a.guests.total && a.guests.total > u.object.capacity + u.object.extraBeds;
+          var combo = group ? PO.combo({ from: a.dates.from, to: a.dates.to, guests: a.guests.total, pets: a.req.pets }) : null;
+          return { action: 'offer', reason: 'свободное есть, но не под запрос',
+            reply: R.lines([
+              'Свободное на ' + U.range(a.dates.from, a.dates.to) + ' есть, но под ваш запрос не подходит:',
+              why.unfit.slice(0, 3).map(function (x) {
+                return '· ' + x.object.title + ' — ' + x.reasons.join(', ');
+              }).join('\n'),
+              '',
+              combo ? 'Могу разместить вас в двух квартирах на эти же даты — вместе выйдет ' + U.money(combo.total) + '.' : null,
+              nextLine,
+              'Скажите, что удобнее: другие даты, несколько квартир или лист ожидания.'
+            ]),
+            internal: 'Свободные есть, но не подходят: ' + why.unfit.map(function (x) { return x.object.id; }).join(', ') + '.' };
+        }
+
         return { action: 'offer', reason: 'нет свободных на запрошенные даты',
           reply: R.lines([
             'На ' + U.range(a.dates.from, a.dates.to) + ' всё занято — не буду обещать того, чего нет.',
             alt ? '' : null,
             alt ? 'Ближайшее свободное:' : null,
             alt,
+            !alt && nextLine ? nextLine : null,
+            !alt && !nextLine ? 'Свободного под ваш запрос нет и в ближайшие три месяца — это редкость, передам менеджеру, он посмотрит партнёрские квартиры.' : null,
             '',
             'Могу поставить вас первым в лист ожидания: если освободится, напишу сразу. Или подберу на другие даты — скажите, насколько они гибкие.'
           ]),
+          escalate: !alt && !nextLine,
           internal: 'Лист ожидания на ' + U.range(a.dates.from, a.dates.to) + '.' };
       }
     },

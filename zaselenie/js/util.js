@@ -90,6 +90,7 @@
 
   U.nights = function (n) { return n + ' ' + U.plural(n, 'ночь', 'ночи', 'ночей'); };
   U.guests = function (n) { return n + ' ' + U.plural(n, 'гость', 'гостя', 'гостей'); };
+  U.guestsUpTo = function (n) { return n + ' ' + U.plural(n, 'гостя', 'гостей', 'гостей'); };   // «вмещает до N гостей»
 
   U.money = function (n, cur) {
     var s = Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');

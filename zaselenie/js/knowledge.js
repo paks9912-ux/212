@@ -236,6 +236,29 @@
     return null;
   };
 
+  /* Проверка календаря: битые брони раньше просто игнорировались,
+     а это значит «квартира считается свободной» — худший вид тихой ошибки */
+  KB.validate = function () {
+    var problems = [];
+    KB.objects.forEach(function (o) {
+      (o.busy || []).forEach(function (b, i) {
+        var where = o.id + ' · бронь №' + (i + 1) + ': ';
+        if (!b || !b.from || !b.to) return problems.push(where + 'нет дат');
+        if (!U.valid(b.from) || !U.valid(b.to)) return problems.push(where + 'даты не в формате ГГГГ-ММ-ДД (' + b.from + ' → ' + b.to + ')');
+        if (b.to <= b.from) return problems.push(where + 'выезд не позже заезда (' + b.from + ' → ' + b.to + ')');
+      });
+      var sorted = (o.busy || []).filter(function (b) { return b && U.valid(b.from) && U.valid(b.to) && b.to > b.from; })
+        .sort(function (a, b) { return a.from < b.from ? -1 : 1; });
+      for (var i = 1; i < sorted.length; i++) {
+        if (sorted[i].from < sorted[i - 1].to) {
+          problems.push(o.id + ': брони наложились — ' + U.range(sorted[i - 1].from, sorted[i - 1].to) +
+                        ' и ' + U.range(sorted[i].from, sorted[i].to));
+        }
+      }
+    });
+    return problems;
+  };
+
   KB.capacityMax = function () {
     return KB.objects.reduce(function (m, o) { return Math.max(m, o.capacity + o.extraBeds); }, 0);
   };

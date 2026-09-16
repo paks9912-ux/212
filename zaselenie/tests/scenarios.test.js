@@ -138,6 +138,31 @@ T.is('в ответе есть условие по питомцу', /питом�
 T.is('предложены только квартиры с животными',
   big.analysis.match.offers.every(function (o) { return o.object.pets; }), true);
 
+T.head('Всё занято — ответы остаются полезными:');
+(function () {
+  var saved = KB.objects.map(function (o) { return o.busy; });
+  KB.objects.forEach(function (o) { o.busy = [{ from: U.today(), to: U.addDays(U.today(), 60), guest: 'тест' }]; });
+
+  var full = run('нужна квартира с завтра на 2 ночи, нас двое');
+  T.eq('это сценарий «нет свободных»', full.scenario, 'no-availability');
+  T.is('но гостю называют конкретную ближайшую дату', /Ближайшее подходящее/.test(full.reply), full.reply.slice(0, 120));
+  T.is('и предлагают лист ожидания', /лист ожидания/.test(full.reply), true);
+
+  var ctx2 = AGENT.newContext();
+  run('с 5 по 8 апреля, нас двое', ctx2);
+  var other = run('а на другие даты?', ctx2);
+  T.eq('«на другие даты» — отдельный сценарий, а не повтор', other.scenario, 'next-free');
+  T.is('с конкретным окном', /Ближайшее, что подходит/.test(other.reply), other.reply.slice(0, 80));
+
+  KB.byId('econom-vokzal').busy = [];
+  var unfit = run('нужна квартира на 6 человек с 1 по 3 апреля');
+  T.is('когда свободное есть, но мало мест — не врём про «всё занято»',
+    /не подходит/.test(unfit.reply) && !/всё занято/.test(unfit.reply), unfit.reply.slice(0, 100));
+  T.is('и объясняем причину', /вмещает до/.test(unfit.reply), true);
+
+  KB.objects.forEach(function (o, i) { o.busy = saved[i]; });
+})();
+
 T.head('CRM-заявка:');
 T.eq('статус совпадает с действием', big.crm.status, big.action);
 T.eq('в заявке есть даты', big.crm.stay.from, '2026-03-10');

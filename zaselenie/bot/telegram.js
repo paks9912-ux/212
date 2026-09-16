@@ -366,6 +366,14 @@ function start() {
   var errs = cfg.check();
   if (errs.length) { errs.forEach(function (e) { console.error('✗ ' + e); }); process.exit(1); }
 
+  /* Календарь чаще всего приезжает выгрузкой из чужой системы — проверяем его,
+     иначе битая бронь молча означает «квартира свободна» */
+  var problems = KB.validate();
+  if (problems.length) {
+    log('в календаре ' + problems.length + ' проблем(ы), эти квартиры могут продаться дважды:');
+    problems.forEach(function (x) { log('  ! ' + x); });
+  }
+
   var sessions = new Store(cfg.sessionsFile, cfg.sessionTtlHours).attach(KB, AGENT).autosave(15000);
   var bot = createBot({ sessions: sessions, log: log });
 

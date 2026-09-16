@@ -119,6 +119,49 @@ T.head('Разброс цен виден гостю:');
 T.is('в праздники показываем «от и до»', !!R.spread(PO.quote(obj, { from: '2027-03-18', to: '2027-03-20', guests: 2 })), true);
 T.eq('в ровные даты лишнего не пишем', R.spread(PO.quote(obj, { from: '2026-10-12', to: '2026-10-15', guests: 2 })), null);
 
+T.head('Когда всё занято:');
+(function () {
+  var saved = KB.objects.map(function (o) { return o.busy; });
+  KB.objects.forEach(function (o) { o.busy = [{ from: U.today(), to: U.addDays(U.today(), 60), guest: 'тест' }]; });
+
+  var req = { from: U.addDays(U.today(), 3), to: U.addDays(U.today(), 5), guests: 2 };
+  T.eq('подбор честно возвращает пустоту', PO.match(req).offers.length, 0);
+
+  var next = PO.nextAvailable(req, 90);
+  T.is('но ближайшая свободная дата находится', !!next, next);
+  T.is('и она за границей занятости', next && U.diffDays(U.today(), next.from) >= 60, next && next.from);
+  T.eq('окно той же длины, что просил гость', next && U.diffDays(next.from, next.to), 2);
+
+  /* Свободна одна маленькая квартира: это не «всё занято» */
+  KB.byId('econom-vokzal').busy = [];
+  var why = PO.whyBlocked({ from: req.from, to: req.to, guests: 6 });
+  T.eq('видно, что свободное есть, просто не подходит', why.freeButUnfit, true);
+  T.is('и названа причина', /вмещает до/.test(why.unfit[0].reasons.join(' ')), why.unfit[0].reasons);
+  T.eq('с питомцем причина другая',
+    PO.whyBlocked({ from: req.from, to: req.to, guests: 2, pets: true }).unfit[0].reasons[0], 'нельзя с животными');
+
+  KB.objects.forEach(function (o, i) { o.busy = saved[i]; });
+})();
+
+T.head('Битый календарь не молчит:');
+(function () {
+  var saved = KB.byId('studio-amir').busy;
+  KB.byId('studio-amir').busy = [
+    { from: '2026-10-10', to: '2026-10-05' },
+    { from: 'кривая', to: '2026-10-20' },
+    {},
+    { from: '2026-11-01', to: '2026-11-05' },
+    { from: '2026-11-03', to: '2026-11-08' }
+  ];
+  var problems = KB.validate();
+  T.is('выезд раньше заезда замечен', problems.some(function (x) { return /выезд не позже/.test(x); }), problems);
+  T.is('кривой формат замечен', problems.some(function (x) { return /не в формате/.test(x); }), true);
+  T.is('пустая запись замечена', problems.some(function (x) { return /нет дат/.test(x); }), true);
+  T.is('наложение броней замечено', problems.some(function (x) { return /наложились/.test(x); }), true);
+  KB.byId('studio-amir').busy = saved;
+  T.eq('на исправном календаре жалоб нет', KB.validate().length, 0);
+})();
+
 T.head('Группа и возврат:');
 var combo = PO.combo({ from: '2026-03-03', to: '2026-03-05', guests: 9 });
 T.eq('группе собирается комплект квартир', combo && combo.capacity >= 9, true);
