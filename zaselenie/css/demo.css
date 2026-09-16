@@ -97,8 +97,13 @@ select{background:var(--card);border:1px solid var(--line);border-radius:7px;pad
 
 @media (max-width:1000px){
     .stage{grid-template-columns:1fr;}
-    .guest{max-height:60vh;}
+    .guest{padding:10px;min-height:66vh;}
+    .phone{border-radius:14px;}
     .panel-body{grid-template-columns:1fr;}
-    .queue{max-height:180px;}
+    .queue{max-height:200px;}
+    .work{padding:12px;}
     .hint{display:none;}
+    .top{padding:11px 14px;}
+    .side-head{padding:10px 12px;}
+    .stats{gap:12px;padding:9px 12px;}
 }

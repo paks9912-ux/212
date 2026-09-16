@@ -1,0 +1,3666 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Как это работает — агент заселения</title>
+<meta name="description" content="Гость пишет слева, менеджер видит заявку справа: подбор, брони, удержания и перехват диалога — всё вживую.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23111419'/%3E%3Cpath d='M9 22V10h3v5l5-5h4l-6 6 6 6h-4l-5-5v5z' fill='%23c9a227'/%3E%3C/svg%3E">
+<style>
+:root{
+    --bg:#08090b; --bg2:#0d0f12; --card:#111419; --line:rgba(236,238,243,.10);
+    --text:#eceef3; --muted:rgba(236,238,243,.45); --dim:rgba(236,238,243,.62);
+    --accent:#c9a227; --ok:#3f9d6b; --warn:#c98a27; --bad:#c7564b; --radius:13px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font:14.5px/1.55 -apple-system,BlinkMacSystemFont,sans-serif;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;}
+button,input,textarea{font-family:inherit;font-size:inherit;color:inherit;}
+
+.top{display:flex;align-items:center;gap:16px;padding:13px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+.brand{display:flex;flex-direction:column;}
+.brand b{font-weight:600;}
+.brand span{color:var(--muted);font-size:12.5px;}
+.hint{margin-left:auto;color:var(--muted);font-size:12.5px;max-width:460px;text-align:right;}
+.ghost{background:none;border:1px solid var(--line);border-radius:999px;padding:7px 14px;color:var(--dim);cursor:pointer;font-size:13px;}
+.ghost:hover{color:var(--text);border-color:rgba(236,238,243,.3);}
+
+.stage{flex:1;display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:1px;background:var(--line);min-height:0;}
+.side{background:var(--bg);display:flex;flex-direction:column;min-height:0;min-width:0;}
+
+.side-head{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--line);}
+.side-head b{font-weight:500;font-size:13.5px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted);}
+.dot.live{background:var(--ok);box-shadow:0 0 0 3px rgba(63,157,107,.15);}
+.seg{display:flex;margin-left:auto;border:1px solid var(--line);border-radius:999px;overflow:hidden;}
+.seg button{background:none;border:0;padding:5px 11px;color:var(--muted);cursor:pointer;font-size:12px;}
+.seg button.on{background:rgba(201,162,39,.14);color:var(--accent);}
+
+/* ---------- гость ---------- */
+.guest{padding:16px;}
+.phone{flex:1;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--bg2);min-height:0;}
+.phone-head{padding:11px 14px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted);}
+.thread{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:9px;}
+.msg{max-width:88%;padding:9px 12px;border-radius:var(--radius);white-space:pre-wrap;overflow-wrap:anywhere;font-size:13.5px;}
+.msg.me{align-self:flex-end;background:#1b2027;border:1px solid var(--line);}
+.msg.bot{align-self:flex-start;background:var(--card);border:1px solid var(--line);}
+.msg.manager{align-self:flex-start;background:#2a2417;border:1px solid rgba(201,162,39,.35);}
+.msg .who{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px;}
+.composer{border-top:1px solid var(--line);padding:10px 12px 12px;}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none;}
+.chips::-webkit-scrollbar{display:none;}
+.chips button{white-space:nowrap;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 10px;color:var(--dim);font-size:12px;cursor:pointer;}
+.chips button:hover{color:var(--text);border-color:rgba(201,162,39,.45);}
+.row{display:flex;gap:8px;align-items:flex-end;}
+.row textarea{flex:1;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:10px 12px;resize:none;min-height:42px;max-height:120px;outline:none;}
+.row textarea:focus{border-color:rgba(201,162,39,.5);}
+.send{background:var(--accent);border:0;border-radius:11px;padding:10px 15px;color:#15130a;font-weight:600;cursor:pointer;}
+
+/* ---------- пульт ---------- */
+.stats{display:flex;gap:16px;padding:10px 16px;border-bottom:1px solid var(--line);font-size:12.5px;color:var(--muted);flex-wrap:wrap;}
+.stats b{color:var(--text);font-weight:500;}
+.panel-body{flex:1;display:grid;grid-template-columns:minmax(0,260px) minmax(0,1fr);gap:1px;background:var(--line);min-height:0;}
+.queue,.work{background:var(--bg);overflow-y:auto;min-height:0;}
+.queue{padding:8px;}
+.work{padding:16px;}
+
+.item{padding:10px 12px;border:1px solid transparent;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;gap:3px;}
+.item:hover{background:var(--bg2);}
+.item.on{background:var(--card);border-color:rgba(201,162,39,.35);}
+.item .line{display:flex;justify-content:space-between;gap:8px;font-size:13px;}
+.item .line b{font-weight:500;}
+.item .line span{color:var(--muted);font-size:11px;}
+.item .last{color:var(--dim);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.marks{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px;}
+.tag{font-size:10.5px;border:1px solid var(--line);border-radius:5px;padding:1px 6px;color:var(--muted);}
+.tag.bad{color:var(--bad);border-color:rgba(199,86,75,.4);}
+.tag.warn{color:var(--warn);border-color:rgba(201,138,39,.4);}
+.tag.ok{color:var(--ok);border-color:rgba(63,157,107,.4);}
+
+.block{border:1px solid var(--line);border-radius:var(--radius);background:var(--bg2);padding:13px 15px;margin-bottom:12px;}
+.block h3{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:9px;display:flex;align-items:center;gap:8px;}
+.kv{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid rgba(236,238,243,.05);font-size:13px;}
+.kv:last-child{border-bottom:0;}
+.kv span:first-child{color:var(--muted);}
+.kv span:last-child{text-align:right;}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.acts button{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 11px;color:var(--dim);cursor:pointer;font-size:12.5px;}
+.acts button:hover{color:var(--text);border-color:rgba(201,162,39,.45);}
+.acts button.primary{color:var(--accent);border-color:rgba(201,162,39,.5);}
+
+.talk{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto;margin-bottom:12px;}
+.talk .msg{max-width:92%;font-size:13px;}
+.talk .msg.guest{align-self:flex-start;background:var(--card);border:1px solid var(--line);}
+.talk .msg.agent{align-self:flex-end;background:#16202a;border:1px solid var(--line);}
+.talk .msg.manager{align-self:flex-end;background:#2a2417;border:1px solid rgba(201,162,39,.35);}
+
+.reply-row{display:flex;gap:8px;}
+.reply-row input{flex:1;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;outline:none;}
+.reply-row button{background:var(--accent);border:0;border-radius:10px;padding:9px 14px;color:#15130a;font-weight:600;cursor:pointer;}
+
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{text-align:left;font-weight:500;color:var(--muted);font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;padding:8px 10px;border-bottom:1px solid var(--line);}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+select{background:var(--card);border:1px solid var(--line);border-radius:7px;padding:4px 8px;}
+.empty{color:var(--muted);font-size:13px;}
+
+@media (max-width:1000px){
+    .stage{grid-template-columns:1fr;}
+    .guest{padding:10px;min-height:66vh;}
+    .phone{border-radius:14px;}
+    .panel-body{grid-template-columns:1fr;}
+    .queue{max-height:200px;}
+    .work{padding:12px;}
+    .hint{display:none;}
+    .top{padding:11px 14px;}
+    .side-head{padding:10px 12px;}
+    .stats{gap:12px;padding:9px 12px;}
+}
+
+</style></head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <b>Ключи 24 — как это работает</b>
+    <span>слева пишет гость, справа менеджер видит всё вживую</span>
+  </div>
+  <div class="hint" id="hint">Начните с подсказки под чатом — например «нужна квартира с 10 по 13 марта, нас трое»</div>
+  <button class="ghost" id="reset">Начать сначала</button>
+</header>
+
+<main class="stage">
+
+  <section class="side guest">
+    <div class="side-head">
+      <span class="dot"></span>
+      <b>Гость</b>
+      <div class="seg" id="who">
+        <button data-guest="g1" class="on">Айгерим</button>
+        <button data-guest="g2">Ержан</button>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-head">Ключи 24 · чат на сайте</div>
+      <div class="thread" id="thread"></div>
+      <div class="composer">
+        <div class="chips" id="chips"></div>
+        <div class="row">
+          <textarea id="input" rows="1" placeholder="Напишите как гость…"></textarea>
+          <button class="send" id="send">→</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="side panel">
+    <div class="side-head">
+      <span class="dot live"></span>
+      <b>Пульт менеджера</b>
+      <div class="seg" id="tabs">
+        <button data-tab="dialogs" class="on">Диалоги</button>
+        <button data-tab="bookings">Брони</button>
+        <button data-tab="holds">Удержания</button>
+      </div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="panel-body">
+      <div class="queue" id="queue"></div>
+      <div class="work" id="work"></div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* js/util.js */
+/* Утилиты: даты, числа, текст. Даты везде — строки 'ГГГГ-ММ-ДД' */
+(function (w) {
+  'use strict';
+
+  var U = {};
+
+  U.MONTHS = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
+              'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+  U.WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
+
+  U.pad = function (n) { return (n < 10 ? '0' : '') + n; };
+
+  /* Сегодня — можно подменить для тестов и демо: U.NOW = '2026-03-01'.
+     tzOffset — часы от UTC в городе гостя: сервер во Франкфурте не должен
+     считать «сегодня» по своему времени, иначе ночные заезды уедут на сутки. */
+  U.NOW = null;
+  U.tzOffset = null;
+
+  U.localDate = function () {
+    var d = new Date();
+    if (typeof U.tzOffset === 'number') d = new Date(d.getTime() + (U.tzOffset * 60 + d.getTimezoneOffset()) * 60000);
+    return d;
+  };
+
+  U.today = function () {
+    if (U.NOW) return U.NOW;
+    var d = U.localDate();
+    return d.getFullYear() + '-' + U.pad(d.getMonth() + 1) + '-' + U.pad(d.getDate());
+  };
+
+  /* Время в городе гостя, 'ЧЧ:ММ' — для ночного заселения и часов работы */
+  U.clock = function () {
+    var d = U.localDate();
+    return U.pad(d.getHours()) + ':' + U.pad(d.getMinutes());
+  };
+
+  U.date = function (iso) {
+    var p = String(iso).split('-');
+    return new Date(+p[0], +p[1] - 1, +p[2]);
+  };
+
+  U.iso = function (d) {
+    return d.getFullYear() + '-' + U.pad(d.getMonth() + 1) + '-' + U.pad(d.getDate());
+  };
+
+  U.make = function (y, m, day) { return U.iso(new Date(y, m - 1, day)); };
+
+  U.valid = function (iso) {
+    return typeof iso === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(iso) && U.iso(U.date(iso)) === iso;
+  };
+
+  U.addDays = function (iso, n) {
+    var d = U.date(iso);
+    d.setDate(d.getDate() + n);
+    return U.iso(d);
+  };
+
+  U.addMonths = function (iso, n) {
+    var d = U.date(iso), day = d.getDate();
+    d.setDate(1);
+    d.setMonth(d.getMonth() + n);
+    var last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+    d.setDate(Math.min(day, last));
+    return U.iso(d);
+  };
+
+  U.diffDays = function (a, b) {
+    return Math.round((U.date(b) - U.date(a)) / 86400000);
+  };
+
+  U.dow = function (iso) { return U.date(iso).getDay(); };          // 0 — воскресенье
+  U.isWeekend = function (iso) { var d = U.dow(iso); return d === 5 || d === 6; };  // ночи пт и сб
+
+  U.fmt = function (iso) {
+    if (!U.valid(iso)) return '—';
+    var d = U.date(iso);
+    return d.getDate() + ' ' + U.MONTHS[d.getMonth()];
+  };
+
+  U.fmtFull = function (iso) {
+    if (!U.valid(iso)) return '—';
+    var d = U.date(iso);
+    return U.WEEKDAYS[d.getDay()] + ', ' + d.getDate() + ' ' + U.MONTHS[d.getMonth()] +
+           (d.getFullYear() !== U.date(U.today()).getFullYear() ? ' ' + d.getFullYear() : '');
+  };
+
+  U.range = function (from, to) { return U.fmt(from) + ' — ' + U.fmt(to); };
+
+  /* Пересекаются ли интервалы [a1;a2) и [b1;b2) */
+  U.overlap = function (a1, a2, b1, b2) { return a1 < b2 && b1 < a2; };
+
+  /* Каждая ночь отрезка [from; to) — это дата ночёвки */
+  U.nightsList = function (from, to) {
+    var out = [], cur = from;
+    while (cur < to) { out.push(cur); cur = U.addDays(cur, 1); }
+    return out;
+  };
+
+  U.plural = function (n, one, few, many) {
+    var a = Math.abs(n) % 100, b = a % 10;
+    if (a > 10 && a < 20) return many;
+    if (b > 1 && b < 5) return few;
+    if (b === 1) return one;
+    return many;
+  };
+
+  U.nights = function (n) { return n + ' ' + U.plural(n, 'ночь', 'ночи', 'ночей'); };
+  U.guests = function (n) { return n + ' ' + U.plural(n, 'гость', 'гостя', 'гостей'); };
+  U.guestsUpTo = function (n) { return n + ' ' + U.plural(n, 'гостя', 'гостей', 'гостей'); };   // «вмещает до N гостей»
+
+  /* Валюта берётся из базы знаний: смена города — это одна настройка */
+  U.CURRENCY = 'тг';
+  U.money = function (n, cur) {
+    var s = Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return s + (cur === undefined ? ' ' + U.CURRENCY : (cur ? ' ' + cur : ''));
+  };
+
+  /* Нормализация сообщения: регистр, ё, лишние пробелы, латинские двойники */
+  U.norm = function (s) {
+    return String(s || '')
+      .toLowerCase()
+      .replace(/ё/g, 'е')
+      .replace(/[   ]/g, ' ')
+      .replace(/[«»"'`]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  U.has = function (text, words) {
+    for (var i = 0; i < words.length; i++) if (text.indexOf(words[i]) >= 0) return true;
+    return false;
+  };
+
+  U.hits = function (text, words) {
+    var out = [];
+    for (var i = 0; i < words.length; i++) if (text.indexOf(words[i]) >= 0) out.push(words[i]);
+    return out;
+  };
+
+  U.uniq = function (arr) {
+    var seen = {}, out = [];
+    arr.forEach(function (x) { var k = JSON.stringify(x); if (!seen[k]) { seen[k] = 1; out.push(x); } });
+    return out;
+  };
+
+  U.clamp = function (n, a, b) { return Math.max(a, Math.min(b, n)); };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = U;
+  w.U = U;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+;
+/* js/knowledge.js */
+/* База знаний: правила компании, тарифы, квартиры, занятость, FAQ.
+   Это единственное место, где меняются цены и политика — движок и промпт
+   берут факты отсюда и ничего не выдумывают. */
+(function (w) {
+  'use strict';
+
+  var U = w.U || (typeof require !== 'undefined' ? require('./util.js') : null);
+
+  var KB = {};
+
+  KB.settings = {
+    brand: 'Ключи 24',
+    business: 'квартиры посуточно',
+    city: 'Астана',
+    cityIn: 'Астане',
+    cityEn: 'Astana',
+    tzOffset: 5,                     // Казахстан живёт по UTC+5
+    currency: 'тг',
+    /* Сколько сум за единицу валюты. Обновляется руками или выгрузкой из
+       вашей системы — агент пересчитывает бюджет гостя по этим числам. */
+    rates: { USD: 540, RUB: 5.8, KGS: 6.1, UZS: 0.042 },
+    checkIn: '14:00',
+    checkOut: '12:00',
+    officeFrom: '09:00',
+    officeTo: '21:00',
+    quietFrom: '23:00',
+    quietTo: '08:00',
+    minAge: 18,
+    docs: 'удостоверение личности или паспорт на каждого взрослого гостя',
+    registration: true,              // регистрируем иностранцев через eQonaq
+    registrationDays: 3,             // в течение скольких суток оформляем
+    registrationFee: 0,
+    prepay: 0.3,                     // доля предоплаты от суммы проживания
+    holdMinutes: 60,                 // сколько держим даты без предоплаты
+    bookingHorizonDays: 365,         // дальше этого календарь ещё не открыт
+    peakPrepay: 1,                   // пиковые ночи оплачиваются полностью
+    discountInPeak: false,           // скидка за длительность не действует в праздники
+    lateCheckInFrom: '23:00',
+    lateCheckInFee: 5000,
+    earlyCheckInPart: 0.5,           // доля суток за ранний заезд
+    lateCheckOutPart: 0.5,
+    extraGuestFee: 3000,             // за гостя сверх базовой вместимости за ночь
+    petFee: 4000,                    // за питомца за ночь
+    petDeposit: 15000,
+    smokingFine: 30000,
+    lockFee: 12000,                  // вскрытие замка
+    keysFee: 7000,                   // новый комплект ключей
+    partyFine: 70000,
+    weekDiscountFrom: 7,             // от скольких ночей скидка
+    weekDiscount: 0.10,
+    longStayFrom: 28,
+    longStayDiscount: 0.20,
+    repeatGuestDiscount: 0.05,
+    maxNegotiable: 0.10,             // на сколько агент может подвинуться по цене сам
+    cancel: [                        // возврат предоплаты
+      { beforeDays: 7, refund: 1.0, note: 'вернём всю предоплату' },
+      { beforeDays: 3, refund: 0.5, note: 'вернём половину предоплаты' },
+      { beforeDays: 0, refund: 0.0, note: 'предоплата не возвращается' }
+    ],
+    addressPolicy: 'точный адрес и код от подъезда отправляем после предоплаты',
+    payments: ['Kaspi-перевод на счёт компании', 'наличные при заселении', 'безналичный расчёт для юрлиц'],
+    companyCard: 'Kaspi-счёт компании, реквизиты приходят из этого же чата',
+    manager: { name: 'Арман', phone: '+7 701 123-45-67', hours: '09:00–21:00' },
+    escalationPhone: '+7 701 123-45-67'
+  };
+
+  /* Сезонные коэффициенты к базовой цене. from/to — 'ММ-ДД' включительно */
+  KB.seasons = [
+    { id: 'ny', name: 'новогодние даты', from: '12-28', to: '01-05', k: 1.6, minNights: 3, peak: true },
+    { id: 'nauryz', name: 'Наурыз', from: '03-20', to: '03-25', k: 1.35, minNights: 2, peak: true },
+    { id: 'capital', name: 'День столицы и форумы', from: '07-04', to: '07-08', k: 1.5, minNights: 2, peak: true },
+    { id: 'high-1', name: 'высокий сезон', from: '06-01', to: '07-03', k: 1.15, minNights: 1, peak: false },
+    { id: 'high-2', name: 'высокий сезон', from: '07-09', to: '08-31', k: 1.15, minNights: 1, peak: false },
+    { id: 'low', name: 'морозы, низкий сезон', from: '01-10', to: '02-20', k: 0.8, minNights: 1, peak: false }
+  ];
+
+  /* Занятость задаётся сдвигом от сегодня, чтобы демо жило без ручных правок */
+  function busy(fromOffset, nights, who) {
+    var from = U.addDays(U.today(), fromOffset);
+    return { from: from, to: U.addDays(from, nights), guest: who || 'бронь' };
+  }
+
+  KB.objects = [
+    {
+      id: 'studio-baiterek',
+      title: 'Студия у Байтерека',
+      rooms: 0, beds: 'двуспальная кровать',
+      capacity: 2, extraBeds: 1,
+      district: 'Есиль, ул. Достык',
+      metro: 'Байтерек и Хан Шатыр в пешей доступности',
+      floor: 9, floors: 16, elevator: true,
+      base: 18000, weekendK: 1.15,
+      minNights: 1,
+      deposit: 30000,
+      cleaning: 0,
+      pets: false,
+      smoking: false,
+      parking: 'бесплатная во дворе',
+      selfCheckIn: true,
+      features: ['wi-fi 100 мбит', 'кондиционер', 'стиральная машина', 'тёплые полы', 'вид на Байтерек'],
+      accessible: true,
+      nearby: {
+        аптека: 'Europharma на первом этаже дома, круглосуточная; Zerde — 4 минуты пешком',
+        продукты: 'Small в доме, работает до 23:00; Magnum в ТРЦ Хан Шатыр — 12 минут пешком',
+        банкомат: 'Kaspi и Halyk в холле бизнес-центра напротив, круглосуточно',
+        кафе: 'Coffee BOOM и Del Papa во дворе, ресторан Sandyq — 7 минут',
+        трц: 'Хан Шатыр — 12 минут пешком, там кинотеатр, фудкорт и аквапарк',
+        транспорт: 'остановка «Байтерек» в 3 минутах, автобусы 10, 12, 18 до вокзала',
+        врач: 'медцентр «Она» — 6 минут, городская больница №1 — 12 минут на такси',
+        парк: 'набережная Ишима и Президентский парк — 10 минут пешком',
+        детям: 'детская площадка во дворе, парк аттракционов в Хан Шатыре',
+        спорт: 'фитнес World Class в соседнем доме, бассейн в Хан Шатыре'
+      },
+      note: 'тихий дом на левом берегу, много деловых гостей',
+      busy: [busy(2, 3), busy(9, 2), busy(21, 5)]
+    },
+    {
+      id: 'two-highvill',
+      title: '2-комнатная в Highvill',
+      rooms: 2, beds: 'двуспальная + два раздельных места',
+      capacity: 4, extraBeds: 2,
+      district: 'Есиль, ЖК Highvill',
+      metro: 'рядом Назарбаев Университет и ТРЦ MEGA Silk Way',
+      floor: 5, floors: 12, elevator: true,
+      base: 26000, weekendK: 1.1,
+      minNights: 1,
+      deposit: 40000,
+      cleaning: 0,
+      pets: true,
+      smoking: false,
+      parking: 'закрытый двор, бесплатно',
+      selfCheckIn: true,
+      features: ['wi-fi 100 мбит', 'два кондиционера', 'стиральная машина', 'детская кроватка по запросу', 'большая кухня'],
+      accessible: true,
+      nearby: {
+        аптека: 'Садыхан в соседнем блоке, до 22:00; круглосуточная Europharma — 6 минут',
+        продукты: 'Magnum в MEGA Silk Way — 8 минут пешком, Small во дворе',
+        банкомат: 'Kaspi и Jusan в MEGA Silk Way, круглосуточно',
+        кафе: 'фудкорт MEGA Silk Way, кофейня Bahandi во дворе',
+        трц: 'MEGA Silk Way — 8 минут пешком: кино, фудкорт, супермаркет',
+        транспорт: 'остановка «Назарбаев Университет», автобусы 18, 40 до центра',
+        врач: 'клиника «Медикер» — 5 минут, детская поликлиника — 10 минут',
+        парк: 'Ботанический сад — 10 минут на машине, сквер у Университета рядом',
+        детям: 'две площадки во дворе, детский клуб в MEGA',
+        спорт: 'спортзал в доме для жильцов, бассейн в MEGA Silk Way'
+      },
+      note: 'семейный вариант, можно с питомцем',
+      busy: [busy(0, 2), busy(5, 4), busy(30, 7)]
+    },
+    {
+      id: 'three-triumf',
+      title: '3-комнатная премиум в Триумфе Астаны',
+      rooms: 3, beds: 'две двуспальные + диван',
+      capacity: 6, extraBeds: 2,
+      district: 'Алматинский район, Триумф Астаны',
+      metro: 'набережная Ишима, 5 минут пешком',
+      floor: 14, floors: 22, elevator: true,
+      base: 48000, weekendK: 1.2,
+      minNights: 2,
+      deposit: 80000,
+      cleaning: 6000,
+      pets: false,
+      smoking: false,
+      parking: 'подземная, 2 000 тг в сутки',
+      selfCheckIn: false,
+      features: ['wi-fi 200 мбит', 'панорамные окна', 'посудомойка', 'две ванные', 'рабочее место'],
+      accessible: true,
+      nearby: {
+        аптека: 'Europharma в стилобате дома, круглосуточная',
+        продукты: 'Galmart в доме, работает круглосуточно',
+        банкомат: 'Halyk и Kaspi в холле, обмен валют в соседнем офисе',
+        кафе: 'рестораны Line Brew и Del Papa в доме, кофейня Urban Coffee рядом',
+        трц: 'Керуен — 10 минут пешком, Хан Шатыр — 10 минут на машине',
+        транспорт: 'остановка «Триумф», автобусы 10, 32; такси до аэропорта 20 минут',
+        врач: 'Национальный научный центр — 8 минут, стоматология в доме',
+        парк: 'набережная Ишима прямо у дома, велодорожка вдоль реки',
+        детям: 'площадка во дворе, детская комната в Керуене',
+        спорт: 'фитнес и бассейн в самом комплексе, для гостей 3 000 тг разовое посещение'
+      },
+      note: 'подходит под командировки и переговоры, есть закрывающие документы',
+      busy: [busy(1, 6), busy(14, 3)]
+    },
+    {
+      id: 'econom-vokzal',
+      title: '1-комнатная эконом у вокзала',
+      rooms: 1, beds: 'двуспальная кровать',
+      capacity: 3, extraBeds: 1,
+      district: 'Сарыарка, у вокзала Астана-1',
+      metro: 'вокзал и автовокзал Сапаржай — 7 минут',
+      floor: 3, floors: 5, elevator: false,
+      base: 12000, weekendK: 1.05,
+      minNights: 1,
+      deposit: 20000,
+      cleaning: 0,
+      pets: false,
+      smoking: false,
+      parking: 'на улице',
+      selfCheckIn: true,
+      features: ['wi-fi 50 мбит', 'кондиционер', 'простой ремонт'],
+      accessible: false,
+      nearby: {
+        аптека: 'Садыхан у вокзала, круглосуточная',
+        продукты: 'Magnum и базар «Артём» — 7 минут пешком',
+        банкомат: 'Kaspi в здании вокзала, круглосуточно',
+        кафе: 'столовые и кафе у вокзала, KFC в здании Сапаржай',
+        трц: 'Astana Mall — 15 минут на автобусе',
+        транспорт: 'вокзал Астана-1 и автовокзал Сапаржай — 7 минут пешком',
+        врач: 'поликлиника №4 — 10 минут, аптека круглосуточно рядом',
+        парк: 'сквер у вокзала, парк Жеруйык — 10 минут на автобусе',
+        детям: 'площадка в соседнем дворе',
+        спорт: 'спортзал «Батыр» — 8 минут пешком'
+      },
+      note: 'самый доступный вариант, хорошо для транзита',
+      busy: [busy(3, 1), busy(7, 2), busy(11, 3)]
+    },
+    {
+      id: 'loft-expo',
+      title: 'Лофт у EXPO',
+      rooms: 1, beds: 'двуспальная + два раздельных места',
+      capacity: 4, extraBeds: 1,
+      district: 'Есиль, район EXPO',
+      metro: 'до конгресс-центра 10 минут пешком',
+      floor: 7, floors: 14, elevator: true,
+      base: 22000, weekendK: 1.15,
+      minNights: 1,
+      deposit: 35000,
+      cleaning: 0,
+      pets: true,
+      smoking: false,
+      parking: 'бесплатная',
+      selfCheckIn: true,
+      features: ['wi-fi 100 мбит', 'высокие потолки', 'стиральная машина', 'проектор'],
+      accessible: true,
+      nearby: {
+        аптека: 'Europharma в соседнем доме, до 23:00',
+        продукты: 'Small в доме, Magnum в Хан Шатыре — 15 минут на машине',
+        банкомат: 'Kaspi в бизнес-центре Expo рядом',
+        кафе: 'кофейни и рестораны в Expo-городке, доставка работает круглосуточно',
+        трц: 'Talan Towers и Expo Mall — 10 минут пешком',
+        транспорт: 'остановка «Expo», автобусы 12, 40; до центра 15 минут',
+        врач: 'медцентр Expo — 5 минут, аптека рядом',
+        парк: 'Президентский парк — 12 минут пешком',
+        детям: 'площадка во дворе, научный музей в Expo',
+        спорт: 'фитнес в Talan Towers, ледовый каток зимой у Expo'
+      },
+      note: 'можно с животными, удобно на время форумов',
+      busy: [busy(4, 2), busy(16, 4)]
+    },
+    {
+      id: 'long-saryarka',
+      title: '2-комнатная на Сарыарке для долгих сроков',
+      rooms: 2, beds: 'двуспальная + односпальная',
+      capacity: 4, extraBeds: 0,
+      district: 'Сарыарка, новостройка',
+      metro: 'остановка Сарыарка, 6 минут',
+      floor: 8, floors: 12, elevator: true,
+      base: 15000, weekendK: 1.0,
+      minNights: 7,
+      deposit: 30000,
+      cleaning: 0,
+      pets: true,
+      smoking: false,
+      parking: 'закрытая территория',
+      selfCheckIn: false,
+      features: ['wi-fi 100 мбит', 'вся техника', 'договор на месяц и больше'],
+      accessible: true,
+      nearby: {
+        аптека: 'Zerde в доме, до 22:00',
+        продукты: 'Magnum в 5 минутах, рынок — 12 минут',
+        банкомат: 'Kaspi в Magnum, круглосуточно',
+        кафе: 'кафе «Дастархан» и пекарня во дворе',
+        трц: 'Astana Mall — 10 минут на автобусе',
+        транспорт: 'остановка «Сарыарка», автобусы 25, 37 до центра',
+        врач: 'поликлиника №2 — 7 минут пешком',
+        парк: 'парк Жеруйык — 8 минут пешком',
+        детям: 'школа и детский сад во дворе, площадка у подъезда',
+        спорт: 'спортзал в соседнем доме, 2 000 тг разовое'
+      },
+      note: 'берут на месяц и дольше, дешевле всего в пересчёте на сутки',
+      busy: [busy(20, 30)]
+    }
+  ];
+
+  /* Город: то, что спрашивает каждый второй гость. Здесь только проверяемые
+     факты — агенту запрещено додумывать то, чего тут нет. */
+  KB.city = {
+    аэропорт: 'Аэропорт Нурсултан Назарбаев (NQZ) — 20–30 минут на машине от левого берега. ' +
+              'Такси через Яндекс Go или inDrive 2 500–4 000 тг, автобус 10 и 12 — 200 тг. Встреча с табличкой — 6 000 тг.',
+    вокзал: 'Вокзалов два: Астана-1 (старый, ближе к Сарыарке) и Нурлы жол (новый, у Expo). ' +
+            'Между ними 20 минут на машине, такси 1 500–2 500 тг.',
+    такси: 'Работают Яндекс Go, inDrive и Uber. По городу обычно 1 000–2 500 тг, в час пик дороже.',
+    транспорт: 'Автобусы ходят с 6:30 до 23:00, проезд 200 тг картой Otbasy или наличными. Метро в Астане нет.',
+    еда: 'Доставка Glovo, Wolt и Chocofood работает по всем нашим адресам, в среднем 30–40 минут.',
+    обмен: 'Обменники в ТРЦ Хан Шатыр, Керуен и MEGA Silk Way работают до 22:00, курс лучше, чем в аэропорту.',
+    деньги: 'Почти везде принимают Kaspi QR и карты. Наличные пригодятся на базаре и в маршрутках.',
+    достопримечательности: 'Байтерек, Хан Шатыр, набережная Ишима, Астана Опера, мечеть Хазрет Султан, ' +
+                           'Экспо и «Нур Алем». Всё на левом берегу, между собой 10–20 минут на машине.',
+    экстренно: 'Единый номер 112, скорая 103, полиция 102. Дежурный по нашим квартирам — ' +
+               'по телефону из инструкции по заселению.',
+    погода: 'Зимой в Астане до −30, летом до +35. Во всех квартирах есть отопление и кондиционер.',
+    ветклиника: 'Ближайшие круглосуточные ветклиники — «Айболит» на левом берегу и «Зоовет» на Сарыарке.'
+  };
+
+  /* Короткие ответы на частые вопросы. Ключ — тема, которую ловит разбор */
+  KB.faq = {
+    wifi: 'Wi-Fi есть во всех квартирах, 50–200 мбит, пароль на холодильнике.',
+    kitchen: 'Кухня полностью оборудована: плита, холодильник, чайник, посуда, в премиум-вариантах есть посудомойка.',
+    laundry: 'Стиральная машина есть во всех квартирах, кроме эконома у вокзала.',
+    towels: 'Полотенца, постельное бельё, шампунь и гель — включены, меняем раз в 3 дня при долгом проживании.',
+    cleaning: 'Уборка перед заездом включена в цену. Уборка во время проживания — по запросу, 5 000 тг.',
+    kids: 'С детьми можно, детская кроватка и стульчик бесплатно в Highvill и Триумфе, нужно предупредить заранее.',
+    transfer: 'Встреча в аэропорту Нурсултан Назарбаев или на вокзале — 6 000 тг, заказывать минимум за 6 часов.',
+    parking: 'Парковка есть у всех объектов, в Триумфе подземная за 2 000 тг в сутки.',
+    smoking: 'Курить в квартирах нельзя, на балконе тоже. Есть места для курения во дворе.',
+    docs: 'Для заселения нужно удостоверение личности или паспорт на каждого взрослого гостя, гостям 18+.',
+    registration: 'Иностранных гостей регистрируем сами через eQonaq в течение 3 суток после заезда, бесплатно. Нужны фото паспортов.',
+    payment: 'Оплата: Kaspi-перевод на счёт компании, наличные при заселении или безнал для юрлиц. Предоплата 30%, остальное при заезде.',
+    invoice: 'Для юрлиц работаем по договору, даём счёт, акт и ЭСФ. Оплата по безналу, обычно 1–2 рабочих дня.',
+    address: 'Точный адрес и код от подъезда отправляем после предоплаты, до этого говорим район и ориентиры.',
+    checkin: 'Заезд с 14:00, выезд до 12:00. Ранний заезд и поздний выезд — по наличию, 50% суток.',
+    selfCheckIn: 'В большинстве квартир самозаселение: код от сейф-бокса приходит в этот чат в день заезда.'
+  };
+
+
+  /* Каталог тем: всё, что спрашивают гости, кроме дат и денег.
+     Добавить новый вопрос — добавить строку сюда, код трогать не нужно.
+     Ответ — строка или функция, которой доступны настройки и квартиры. */
+  KB.topics = [
+    /* ---------- быт квартиры ---------- */
+    { id: 'wifi', match: /wi-?fi|вайфай|интернет|роутер|скорость сети/, a: function () {
+      return 'Wi-Fi есть везде, 50–200 мбит, пароль на холодильнике и в инструкции по заселению.'; } },
+    { id: 'kitchen', match: /кухн|готовить|плита|духовк|микроволнов|чайник|посуд|холодильник/,
+      a: 'Кухня полностью оборудована: плита, холодильник, микроволновка, чайник, посуда и приборы на всех гостей. Готовить можно.' },
+    { id: 'dishwasher', match: /посудомой/, a: function () {
+      var list = KB.objects.filter(function (o) { return o.features.some(function (f) { return /посудомой/.test(f); }); });
+      return list.length ? 'Посудомойка есть в: ' + list.map(function (o) { return o.title; }).join(', ') + '.'
+                         : 'Посудомойки нет ни в одной квартире, но есть всё для мытья вручную.'; } },
+    { id: 'laundry', match: /стиральн|постирать|стирк|порошок|сушилк/,
+      a: 'Стиральная машина есть во всех квартирах, кроме эконома у вокзала. Порошок и сушилка для белья — в комплекте.' },
+    { id: 'iron', match: /утюг|погладить|гладильн|отпариватель/,
+      a: 'Утюг и гладильная доска есть в каждой квартире, лежат в шкафу в прихожей.' },
+    { id: 'hairdryer', match: /(?:^|[^а-я])фен(?:[^а-я]|$)|феном|сушк[а-я]* волос/, a: 'Фен есть в ванной во всех квартирах.' },
+    { id: 'towels', match: /полотенц|бель[еёя]|подушк|одеял|матрас|раскладн/,
+      a: 'Постельное бельё, полотенца, шампунь, гель и мыло включены. Меняем раз в три дня при долгом проживании.' },
+    { id: 'water', match: /вод[ыуа] (?:можно )?пить|пить воду|питьев|из-под крана|кулер|фильтр для воды/,
+      a: 'Из-под крана воду лучше не пить. В каждой квартире оставляем бутыль 5 литров, дальше вода из магазина рядом или доставкой.' },
+    { id: 'tv', match: /телевизор|тв\b|netflix|нетфликс|приставк|кинотеатр дома|youtube/,
+      a: 'Телевизор со Smart TV есть везде: YouTube и онлайн-кинотеатры работают, свой аккаунт можно ввести. Игровой приставки нет.' },
+    { id: 'heating', match: /отоплен|холодно в квартир|батаре|кондиционер|жарко в квартир|温/,
+      a: 'Зимой отопление городское плюс тёплые полы в части квартир, летом — кондиционер в каждой комнате. Если что-то не греет или не холодит — сразу пишите, приедет мастер.' },
+    { id: 'noise', match: /шумоизоляц|тихо ли|слышно соседей|шумн[а-я]* ли/,
+      a: 'Дома монолитные, соседей почти не слышно. Режим тишины в городе с 23:00 до 8:00 — его соблюдаем и просим соблюдать.' },
+    { id: 'view', match: /вид из окна|панорам|какой вид|окна куда/, a: function () {
+      var list = KB.objects.filter(function (o) { return o.features.some(function (f) { return /вид|панорам/.test(f); }); });
+      return list.length ? 'С видом: ' + list.map(function (o) { return o.title + ' — ' + o.features.filter(function (f) { return /вид|панорам/.test(f); })[0]; }).join('; ') + '.'
+                         : 'Виды обычные городские, фото пришлю.'; } },
+    { id: 'balcony', match: /балкон|лодж/, a: 'Балкон есть в большинстве квартир. Курить на нём нельзя — дым идёт к соседям.' },
+    { id: 'floor', match: /этаж|лифт|подъем на|лестниц/, a: function () {
+      return KB.objects.map(function (o) { return o.title + ' — ' + o.floor + '-й этаж, ' + (o.elevator ? 'лифт есть' : 'лифта нет'); }).join('; ') + '.'; } },
+
+    /* ---------- заезд, ключи, выезд ---------- */
+    { id: 'checkin', match: /во сколько заезд|время заезда|когда заселение|во сколько выезд|до скольки выезд/,
+      a: function () { return 'Заезд с ' + KB.settings.checkIn + ', выезд до ' + KB.settings.checkOut +
+        '. Ранний заезд и поздний выезд — по наличию, 50% суток.'; } },
+    { id: 'keys', match: /получ[а-я]* ключ|где ключ|как попасть в квартиру|кто встрет|встреча|код от двер|сейф-бокс|самозаселен/,
+      a: 'В большинстве квартир самозаселение: в день заезда присылаем код от подъезда и сейф-бокса с ключами. Где нужна встреча — заранее договоримся о времени, встречающий ждёт у подъезда.' },
+    { id: 'luggage', match: /вещи оставить|багаж|камера хранен|чемодан|после выезда оставить/,
+      a: 'Вещи можно оставить в квартире до вечера дня выезда, если следующий заезд позволяет — скажите заранее, подтвержу. Иначе камера хранения на вокзале.' },
+    { id: 'late-arrival', match: /поздно приеду|ночью заселен|рейс ночью|поезд ночью/,
+      a: function () { return 'Заселяем круглосуточно. После ' + KB.settings.lateCheckInFrom + ' ночное заселение — ' +
+        U.money(KB.settings.lateCheckInFee) + ', в квартирах с сейф-боксом доплаты нет.'; } },
+    { id: 'address-policy', match: /точный адрес|где находится|скиньте адрес|геолокац|куда ехать/,
+      a: function () { return KB.settings.addressPolicy.charAt(0).toUpperCase() + KB.settings.addressPolicy.slice(1) +
+        '. До этого называем район и ориентиры — этого хватает, чтобы понять дорогу.'; } },
+    { id: 'view-before', match: /посмотреть перед|приехать посмотреть|показ квартиры|осмотр/,
+      a: 'Показываем квартиру перед оплатой, если она свободна и вы в городе: договариваемся на время, менеджер открывает. В день заезда так не получится — квартиру готовят к вашему приезду.' },
+
+    /* ---------- правила ---------- */
+    { id: 'guests-rules', match: /гост[а-я]* привест|друз[а-я]* прид|с друзьями|компани[а-я]* посидеть|можно пригласить|кто-то приед[а-я]* в гости|позвать друз/,
+      a: 'Гости на пару часов — можно, если это не шумная компания и они уходят до 23:00. Ночевать могут только те, кто вписан в бронь: их считаем как доп. гостей.' },
+    { id: 'smoking', match: /курить|курящ|сигарет|вейп|кальян|дым/, a: function () {
+      return 'Курить в квартирах и на балконах нельзя, штраф ' + U.money(KB.settings.smokingFine) +
+        ' — уборка от запаха стоит дороже. Кальян тоже нельзя. Места для курения есть во дворе.'; } },
+    { id: 'kids', match: /с детьми|ребен|кроватк|стульчик для кормлен|детск[а-я]* кроват/,
+      a: 'С детьми можно, за малышей до 3 лет не доплачиваете. Кроватку и стульчик привозим бесплатно, предупредите заранее.' },
+    { id: 'work', match: /поработать|созвон|зум|zoom|удаленн|рабочее место|конференц-связ/,
+      a: 'Интернета хватает для видеозвонков. Рабочий стол есть в премиум-варианте, в остальных — обеденный стол и стул.' },
+    { id: 'shooting', match: /сним[а-я]* видео|фотосесс|блог|съемк/, a: 'Съёмка для себя — пожалуйста. Коммерческие съёмки с группой и светом не разрешаем: это отдельная услуга, и её мы не оказываем.' },
+    { id: 'ev', match: /электромобил|зарядк[а-я]* авто|tesla|электрокар/, a: 'Зарядки для электромобиля во дворах нет. Ближайшие — на заправках и у крупных ТРЦ.' },
+    { id: 'bike', match: /велосипед|самокат|коляск[а-я]* оставить/, a: 'Велосипед и коляску можно занести в квартиру или оставить в колясочной, где она есть. На улице лучше не оставлять.' },
+
+    { id: 'pets', match: /с животн|питомц|собак|кошк|(?:^|[^а-я])кот[аыуо]?м?(?:[^а-я]|$)|щенк|котенк|попуга/, a: function () {
+      var ok = KB.objects.filter(function (o) { return o.pets; });
+      return 'С питомцем можно в: ' + ok.map(function (o) { return o.title; }).join(', ') +
+             '. Доплата ' + U.money(KB.settings.petFee) + '/ночь, депозит +' + U.money(KB.settings.petDeposit) +
+             '. Одного в квартире оставлять нельзя.'; } },
+
+    /* ---------- сервис ---------- */
+    { id: 'cleaning', match: /убор|уберете|клинер|чистот/, a: function () {
+      return 'Уборка перед заездом включена. Во время проживания — по запросу, ' + U.money(5000) +
+        '; при проживании дольше недели раз в неделю бесплатно.'; } },
+    { id: 'transfer', match: /трансфер|встретить в аэропорт|подать машину|заберите/,
+      a: function () { return KB.city.аэропорт; } },
+    { id: 'parking', match: /парковк|где машину|стоянк|гараж/, a: function () {
+      return KB.objects.map(function (o) { return o.title + ' — ' + o.parking; }).join('; ') + '.'; } },
+    { id: 'breakfast', match: /завтрак|питание|кормите/, a: 'Завтраков нет — это квартиры, а не отель. Зато есть кухня, магазины рядом и доставка еды.' },
+    { id: 'photos', match: /фото|фотк|как выглядит|планировк|видео квартир/,
+      a: 'Пришлю фото и планировку следующим сообщением — скажите, какой вариант интересует.' },
+
+    /* ---------- документы и деньги ---------- */
+    { id: 'docs', match: /паспорт|документ|удостоверен|прописк[а-я]* нет|без документ/,
+      a: function () { return 'Для заселения нужно ' + KB.settings.docs + ', гостям от ' + KB.settings.minAge +
+        ' лет. Данные используем только для регистрации и никуда не передаём.'; } },
+    { id: 'registration', match: /регистрац|миграционн|eqonaq|учет иностранц|виза/,
+      a: function () { return KB.faq.registration; } },
+    { id: 'invoice', match: /счет|акт|эсф|договор|командиров|юрлиц|безнал|закрывающ|отчетн/,
+      a: function () { return KB.faq.invoice; } },
+    { id: 'receipt', match: /чек|квитанц|фискальн/, a: 'Чек выдаём на любую оплату: при переводе — электронный, при наличных — бумажный. Для компании — полный пакет документов.' },
+    { id: 'deposit', match: /депозит|залог|страхов/, a: function () {
+      var min = Math.min.apply(null, KB.objects.map(function (o) { return o.deposit; }));
+      var max = Math.max.apply(null, KB.objects.map(function (o) { return o.deposit; }));
+      return 'Депозит ' + U.money(min, '') + '–' + U.money(max) + ' в зависимости от квартиры. Возвращаем в день выезда после осмотра, обычно в течение часа.'; } },
+    { id: 'why-prepay', match: /почему предоплат|зачем предоплат|не хочу платить вперед|а если вы обман/,
+      a: function () { return 'Предоплата ' + Math.round(KB.settings.prepay * 100) + '% — это бронь: после неё квартира снимается с продажи. ' +
+        'Мы работаем официально, даём договор и чек, реквизиты — на компанию, а не на личную карту. ' +
+        'Если что-то пойдёт не так по нашей вине, возвращаем всё.'; } },
+    { id: 'expensive', match: /дорого|дешевле|в отеле дешевле|снизьте|а почему так дорого/,
+      a: function () { return 'Понимаю. Дешевле всего эконом у вокзала — ' + U.money(12000) + '/ночь. ' +
+        'Скидки: от 7 ночей 10%, от 28 ночей 20%. В цену уже входят уборка, бельё и Wi-Fi, а кухня экономит на еде.'; } },
+    { id: 'reviews', match: /отзыв|рейтинг|2gis|гис|как вам довер|давно работаете/,
+      a: 'Отзывы есть на 2ГИС и в наших соцсетях. Работаем с 2019 года, договор и чек даём на каждую бронь.' },
+
+    /* ---------- форс-мажор ---------- */
+    { id: 'utilities', match: /отключ[а-я]* вод|отключ[а-я]* свет|нет горячей|авар|не работает лифт в доме/,
+      a: 'Если в доме плановое отключение — предупреждаем заранее и предлагаем переезд. Если авария во время проживания: сообщите, приедет мастер, при долгом ремонте переселим без доплаты.' },
+    { id: 'flight-cancel', match: /рейс[а-я]* отмен|отмен[а-я]* рейс|рейс[а-я]* задерж|задерж[а-я]* рейс|не прилет|опозда[а-я]* на рейс|застрял в аэропорт/,
+      a: 'Если рейс отменили или задержали — напишите сразу: сдвинем заезд на тот же срок без потери предоплаты, если квартира свободна. Штрафа за опоздание нет.' },
+    { id: 'neighbors', match: /соседи шум|сверл|ремонт у соседей|громко у соседей/,
+      a: 'Если соседи шумят после 23:00 — пишите, звоним в КСК и вызываем участкового, при повторе предлагаем переезд.' }
+  ];
+
+  /* Сценарии, где агент обязан позвать человека */
+  KB.escalation = [
+    'ущерб, залив, пожар, полиция, скорая',
+    'возврат денег сверх стандартной политики',
+    'подозрение на мошенничество с оплатой',
+    'угрозы, агрессия, требование жалобной книги или суда',
+    'запрос на скидку больше 10%',
+    'бронь дороже 700 000 тг или дольше 28 ночей',
+    'любой случай, где гость уже написал третий раз и вопрос не решён'
+  ];
+
+  /* Дата и время в городе гостя — сервер может стоять в любом поясе */
+  KB.applyTimezone = function () {
+    if (typeof KB.settings.tzOffset === 'number') U.tzOffset = KB.settings.tzOffset;
+    if (KB.settings.currency) U.CURRENCY = KB.settings.currency;
+  };
+
+  KB.byId = function (id) {
+    for (var i = 0; i < KB.objects.length; i++) if (KB.objects[i].id === id) return KB.objects[i];
+    return null;
+  };
+
+  /* Проверка календаря: битые брони раньше просто игнорировались,
+     а это значит «квартира считается свободной» — худший вид тихой ошибки */
+  KB.validate = function () {
+    var problems = [];
+    KB.objects.forEach(function (o) {
+      (o.busy || []).forEach(function (b, i) {
+        var where = o.id + ' · бронь №' + (i + 1) + ': ';
+        if (!b || !b.from || !b.to) return problems.push(where + 'нет дат');
+        if (!U.valid(b.from) || !U.valid(b.to)) return problems.push(where + 'даты не в формате ГГГГ-ММ-ДД (' + b.from + ' → ' + b.to + ')');
+        if (b.to <= b.from) return problems.push(where + 'выезд не позже заезда (' + b.from + ' → ' + b.to + ')');
+      });
+      var sorted = (o.busy || []).filter(function (b) { return b && U.valid(b.from) && U.valid(b.to) && b.to > b.from; })
+        .sort(function (a, b) { return a.from < b.from ? -1 : 1; });
+      for (var i = 1; i < sorted.length; i++) {
+        if (sorted[i].from < sorted[i - 1].to) {
+          problems.push(o.id + ': брони наложились — ' + U.range(sorted[i - 1].from, sorted[i - 1].to) +
+                        ' и ' + U.range(sorted[i].from, sorted[i].to));
+        }
+      }
+    });
+    return problems;
+  };
+
+  KB.capacityMax = function () {
+    return KB.objects.reduce(function (m, o) { return Math.max(m, o.capacity + o.extraBeds); }, 0);
+  };
+
+  KB.applyTimezone();
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = KB;
+  w.KB = KB;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+;
+/* js/holds.js */
+/* Реестр удержаний: общий на всех гостей.
+   Пока один гость думает час, его даты не должны продаваться второму —
+   календарь занятости о таких «мягких» бронях ничего не знает. */
+(function (w) {
+  'use strict';
+
+  var U = w.U || (typeof require !== 'undefined' ? require('./util.js') : null);
+
+  var HOLDS = {};
+  var list = [];
+  var seq = 1;
+
+  HOLDS.now = function () { return Date.now(); };          // подменяется в тестах
+
+  HOLDS.clean = function () {
+    var now = HOLDS.now();
+    list = list.filter(function (h) { return h.until > now; });
+    return list;
+  };
+
+  /* Ставим удержание. Одно удержание на гостя и объект — повторный вызов продлевает */
+  HOLDS.add = function (objectId, from, to, holder, minutes) {
+    HOLDS.clean();
+    var same = list.filter(function (h) {
+      return h.objectId === objectId && h.holder === holder && h.from === from && h.to === to;
+    })[0];
+    if (same) {
+      same.until = HOLDS.now() + (minutes || 60) * 60000;
+      return same;
+    }
+    var hold = {
+      id: 'h' + (seq++),
+      objectId: objectId, from: from, to: to,
+      holder: holder || 'аноним',
+      created: HOLDS.now(),
+      until: HOLDS.now() + (minutes || 60) * 60000,
+      paid: false
+    };
+    list.push(hold);
+    return hold;
+  };
+
+  /* Чужие удержания на этот объект — для подбора они как занятость */
+  HOLDS.busyFor = function (objectId, holder) {
+    return HOLDS.clean().filter(function (h) {
+      return h.objectId === objectId && h.holder !== holder;
+    }).map(function (h) {
+      return { from: h.from, to: h.to, guest: 'удержание до ' + new Date(h.until).toISOString().slice(11, 16) };
+    });
+  };
+
+  /* Оплату подтвердили — держим сутки, пока менеджер сверяет и заводит бронь */
+  HOLDS.markPaid = function (holder, hours) {
+    var found = null;
+    HOLDS.clean().forEach(function (h) {
+      if (h.holder === holder) {
+        h.paid = true;
+        h.until = HOLDS.now() + (hours || 24) * 3600000;
+        found = h;
+      }
+    });
+    return found;
+  };
+
+  HOLDS.release = function (holder) {
+    var before = HOLDS.clean().length;
+    list = list.filter(function (h) { return h.holder !== holder; });
+    return before - list.length;
+  };
+
+  HOLDS.of = function (holder) {
+    return HOLDS.clean().filter(function (h) { return h.holder === holder; });
+  };
+
+  HOLDS.all = function () { return HOLDS.clean().slice(); };
+  HOLDS.count = function () { return HOLDS.clean().length; };
+  HOLDS.reset = function () { list = []; seq = 1; };
+
+  /* Для бота: пережить перезапуск вместе с сессиями */
+  HOLDS.export = function () { return HOLDS.clean().map(function (h) { return h; }); };
+  HOLDS.import = function (arr) {
+    if (!arr || !arr.length) return 0;
+    list = arr.filter(function (h) { return h && h.until > HOLDS.now(); });
+    list.forEach(function (h) { seq = Math.max(seq, (+String(h.id).slice(1) || 0) + 1); });
+    return list.length;
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = HOLDS;
+  w.HOLDS = HOLDS;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+;
+/* js/nlu.js */
+/* Разбор сообщения гостя: даты, гости, бюджет, требования, сигналы.
+   Всё, что удалось понять, попадает в слоты; всё, что не удалось —
+   в missing, и агент задаёт вопрос вместо того, чтобы придумывать. */
+(function (w) {
+  'use strict';
+
+  var U = w.U || (typeof require !== 'undefined' ? require('./util.js') : null);
+  var KB = w.KB || (typeof require !== 'undefined' ? require('./knowledge.js') : null);
+
+  var NLU = {};
+
+  /* Основы короткие: гости пишут «12-14 нояб» не реже, чем «14 ноября» */
+  var MONTHS = ['янв', 'фев', 'мар', 'апр', 'ма[йя]', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
+  var MONTHS_EN = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+  var MONTH_RE = '(' + MONTHS.concat(MONTHS_EN).join('|') + ')';
+
+  var WORD_NUM = {
+    'один': 1, 'одна': 1, 'одного': 1, 'одну': 1, 'пара': 2, 'пары': 2, 'пару': 2, 'два': 2, 'две': 2, 'двое': 2, 'двоем': 2, 'вдвоем': 2,
+    'три': 3, 'трое': 3, 'троем': 3, 'втроем': 3, 'четыре': 4, 'четверо': 4, 'вчетвером': 4, 'пять': 5, 'пятеро': 5, 'впятером': 5,
+    'шесть': 6, 'шестеро': 6, 'вшестером': 6, 'семь': 7, 'семеро': 7, 'восемь': 8, 'девять': 9, 'десять': 10
+  };
+
+  var WEEKDAYS = { 'воскресен': 0, 'понедельник': 1, 'вторник': 2, 'сред': 3, 'четверг': 4, 'пятниц': 5, 'суббот': 6 };
+
+  function num(token) {
+    if (token === undefined || token === null) return null;
+    token = String(token).trim();
+    if (/^\d+$/.test(token)) return parseInt(token, 10);
+    for (var k in WORD_NUM) if (token.indexOf(k) === 0) return WORD_NUM[k];
+    return null;
+  }
+
+  var NUM_RE = '(\\d{1,2}|' + Object.keys(WORD_NUM).join('|') + ')';
+
+  /* ---------- даты ---------- */
+
+  function monthIndex(stem) {
+    var i;
+    for (i = 0; i < MONTHS.length; i++) if (new RegExp('^' + MONTHS[i]).test(stem)) return i + 1;
+    for (i = 0; i < MONTHS_EN.length; i++) if (stem.indexOf(MONTHS_EN[i]) === 0) return i + 1;
+    return null;
+  }
+
+  /* Ставит год так, чтобы дата не оказалась в прошлом */
+  function resolve(day, month, year) {
+    var today = U.today(), y = year;
+    if (y && y < 100) y += 2000;
+    if (!y) {
+      y = +today.slice(0, 4);
+      var iso = U.make(y, month, day);
+      if (U.diffDays(today, iso) < -2) y++;
+    }
+    var out = U.make(y, month, day);
+    return U.valid(out) ? out : null;
+  }
+
+  /* Все точки-даты в тексте: 12.03, 3 марта, «5 числа» */
+  function points(t) {
+    var out = [], m, re;
+
+    re = /(\d{1,2})[.\/](\d{1,2})(?:[.\/](\d{2,4}))?/g;
+    while ((m = re.exec(t))) {
+      var iso = resolve(+m[1], +m[2], m[3] ? +m[3] : null);
+      if (iso) out.push({ iso: iso, idx: m.index, exact: true });
+    }
+
+    re = new RegExp('(\\d{1,2})\\s*(?:-?(?:го|е|ое|ым)\\s*)?' + MONTH_RE + '[а-я]*(?:\\s*(\\d{4}))?', 'g');
+    while ((m = re.exec(t))) {
+      var mi = monthIndex(m[2]);
+      var iso2 = mi ? resolve(+m[1], mi, m[3] ? +m[3] : null) : null;
+      if (iso2) out.push({ iso: iso2, idx: m.index, exact: true, withMonth: true });
+    }
+
+    /* «с 5 числа», «по 9 число» — месяц берём текущий или следующий */
+    re = /(\d{1,2})\s*(?:-?(?:го)?\s*)?числ/g;
+    while ((m = re.exec(t))) {
+      var today = U.today(), d = +m[1];
+      var cand = U.make(+today.slice(0, 4), +today.slice(5, 7), Math.min(d, 28));
+      if (U.diffDays(today, cand) < 0) cand = U.addMonths(cand, 1);
+      out.push({ iso: cand, idx: m.index, exact: false, approx: true });
+    }
+
+    out.sort(function (a, b) { return a.idx - b.idx; });
+    return U.uniq(out);
+  }
+
+  /* «с 3 по 7 марта» — у левой границы месяца нет, берём у правой */
+  function pairedRange(t) {
+    var re = new RegExp('(?:^|[^\\d])(?:с|со)?\\s*(\\d{1,2})\\s*(?:' + MONTH_RE + '[а-я]*)?\\s*(?:по|до|-|–|—)\\s*(\\d{1,2})\\s*' + MONTH_RE + '?[а-я]*\\s*(?:(\\d{4})\\s*(?:год|г)?)?', 'i');
+    var m = re.exec(t);
+    if (!m) return null;
+    var d1 = +m[1], m1 = m[2] ? monthIndex(m[2]) : null;
+    var d2 = +m[3], m2 = m[4] ? monthIndex(m[4]) : null;
+    if (!m1 && !m2) {
+      /* «с 10 по 12», «на 10-12» — месяц не назван, берём ближайший подходящий */
+      if (d1 < 1 || d1 > 31 || d2 < 1 || d2 > 31) return null;
+      if (/[.\/]/.test(m[0])) return null;                      // «12.03 - 15.03» разберут points()
+      if (/(?:человек|гост|чел|ноч|сут|дн|лет|год|тыс|000)/.test(t.slice(m.index, m.index + 40))) return null;
+      var today = U.today(), ym = +today.slice(0, 4), mm0 = +today.slice(5, 7);
+      var f = U.make(ym, mm0, Math.min(d1, 28));
+      if (U.diffDays(today, f) < 0) { f = U.addMonths(f, 1); mm0 = +f.slice(5, 7); ym = +f.slice(0, 4); }
+      var t2 = U.make(ym, mm0, Math.min(d2, 28));
+      if (t2 <= f) t2 = U.addMonths(t2, 1);
+      return { from: f, to: t2, vague: true };
+    }
+    if (!m1) m1 = (d1 > d2 && m2 > 1) ? m2 - 1 : m2;   // «с 30 по 2 апреля» → март
+    if (!m2) m2 = (d2 < d1) ? (m1 % 12) + 1 : m1;
+    var year = m[5] ? +m[5] : null;
+    var from = resolve(d1, m1, year), to = resolve(d2, m2, year);
+    if (year && from && U.diffDays(U.today(), from) < 0) return { from: from, to: to, past: true };
+    if (!from || !to) return null;
+    if (to <= from) {
+      if (m[4]) return { from: from, to: to, invalid: true };   // месяц назван явно — это опечатка гостя
+      to = U.addMonths(to, 1);                                  // «с 30 по 2» — следующий месяц
+    }
+    return { from: from, to: to };
+  }
+
+  function duration(t) {
+    var m;
+    m = new RegExp('(?:на|ещ?е на|продлить на)\\s*' + NUM_RE + '?\\s*(?:календарн[а-яa-z]*\\s*)?(ноч|сут|дн[еяю]|день|дней)').exec(t);
+    if (m) return { nights: num(m[1]) || 1, unit: /ноч|сут/.test(m[2]) ? 'night' : 'day' };
+    m = new RegExp('(?:на|ещ?е на)\\s*' + NUM_RE + '?\\s*недел').exec(t);
+    if (m) return { nights: 7 * (num(m[1]) || 1), unit: 'week' };
+    m = new RegExp('(?:на|ещ?е на)\\s*' + NUM_RE + '?\\s*месяц').exec(t);
+    if (m) return { nights: 30 * (num(m[1]) || 1), unit: 'month' };
+    m = /(\d+)\s*(?:nights?|days?)/.exec(t);
+    if (m) return { nights: +m[1], unit: 'night' };
+    if (/на пару (дней|суток|ноч)/.test(t)) return { nights: 2, unit: 'night' };
+    if (/на выходн/.test(t)) return { nights: 2, unit: 'weekend' };
+    if (/переночевать|одну ночь|на ночь\b|на ночевку/.test(t)) return { nights: 1, unit: 'night' };
+    return null;
+  }
+
+  function relative(t) {
+    var today = U.today();
+    if (/(?:^|[^а-я])послезавтра(?:[^а-я]|$)/.test(t)) return { from: U.addDays(today, 2), why: 'послезавтра' };
+    if (/(?:^|[^а-я])завтра(?:[^а-я]|$)/.test(t)) return { from: U.addDays(today, 1), why: 'завтра' };
+    if (/сегодня|сейчас|прямо сейчас|срочно|через час|уже в городе|вечером|ночью/.test(t)) return { from: today, why: 'сегодня' };
+    for (var k in WEEKDAYS) {
+      if (new RegExp('(?:с|со|в|во|на)\\s*' + k).test(t)) {
+        var target = WEEKDAYS[k], cur = U.dow(today), add = (target - cur + 7) % 7;
+        if (add === 0) add = 7;
+        return { from: U.addDays(today, add), why: 'ближайш' + (target === 0 ? 'ее воскресенье' : 'ий день недели') };
+      }
+    }
+    if (/новы[йм] год|нг\b|31 декабр/.test(t)) {
+      var y = +today.slice(0, 4);
+      var ny = U.make(y, 12, 30);
+      if (U.diffDays(today, ny) < 0) ny = U.make(y + 1, 12, 30);
+      return { from: ny, to: U.addDays(ny, 4), why: 'новогодние даты', assumed: true };
+    }
+    if (/на выходн/.test(t)) {
+      var cur2 = U.dow(today), add2 = (5 - cur2 + 7) % 7;
+      if (add2 === 0) add2 = 7;
+      var fri = U.addDays(today, add2);
+      return { from: fri, to: U.addDays(fri, 2), why: 'ближайшие выходные', assumed: true };
+    }
+    var mm = new RegExp('(?:в|на)\\s*(начал|серед|конц)[а-яa-z]*\\s*' + MONTH_RE).exec(t);
+    if (mm) {
+      var mi = monthIndex(mm[2]);
+      var day = mm[1] === 'начал' ? 5 : (mm[1] === 'серед' ? 15 : 25);
+      return { from: resolve(day, mi, null), why: 'примерно ' + mm[1] + 'о месяца', vague: true };
+    }
+    var m3 = new RegExp('(?:^|\\s)(?:в|на)\\s*' + MONTH_RE + '[а-я]*').exec(t);
+    if (m3) {
+      var mi3 = monthIndex(m3[1]);
+      return { from: resolve(1, mi3, null), why: 'месяц назван без чисел', vague: true };
+    }
+    return null;
+  }
+
+  function parseDates(t) {
+    var d = { from: null, to: null, nights: null, flexible: false, assumed: [], issues: [], source: null };
+    var dur = duration(t);
+    var pr = pairedRange(t);
+    var pts = points(t);
+    var rel = relative(t);
+
+    if (pr) {
+      d.from = pr.from; d.to = pr.to; d.source = 'диапазон с датами';
+      if (pr.invalid) { d.issues.push('выезд не позже заезда'); d.to = null; }
+      if (pr.past) d.issues.push('дата заезда уже прошла');
+      if (pr.vague) d.assumed.push('месяц не назван — взяли ближайший, подтвердите');
+    } else if (pts.length >= 2 && /\b(с|со)\b|по|до|-|–/.test(t)) {
+      d.from = pts[0].iso; d.to = pts[1].iso; d.source = 'две даты в тексте';
+      if (d.to <= d.from) { d.to = null; d.issues.push('вторая дата не позже первой'); }
+    } else if (pts.length === 1) {
+      d.from = pts[0].iso; d.source = 'одна дата в тексте';
+      if (pts[0].approx) d.assumed.push('число без месяца — взяли ближайшее');
+    } else if (rel) {
+      d.from = rel.from; d.to = rel.to || null;
+      d.source = rel.why;
+      if (rel.assumed) d.assumed.push('даты «' + rel.why + '» — нужно подтвердить');
+      if (rel.vague) { d.flexible = true; d.from = null; d.monthHint = rel.from; d.assumed.push(rel.why); }
+    }
+
+    if (dur && !d.to && d.from) {
+      d.to = U.addDays(d.from, dur.nights);
+      if (dur.unit === 'day') d.assumed.push('«дни» посчитали как ночи');
+      d.source = (d.source || '') + ' + срок';
+    }
+    if (dur && !d.from && !d.to) { d.nights = dur.nights; d.flexible = true; }
+    if (d.from && d.to) d.nights = U.diffDays(d.from, d.to);
+    else if (dur) d.nights = dur.nights;
+
+    if (d.from && U.diffDays(U.today(), d.from) < 0) d.issues.push('дата заезда уже прошла');
+    if (d.from && KB && KB.settings.bookingHorizonDays &&
+        U.diffDays(U.today(), d.from) > KB.settings.bookingHorizonDays) {
+      d.issues.push('до этой даты календарь ещё не открыт');
+    }
+    if (d.nights !== null && d.nights <= 0) d.issues.push('выезд не позже заезда');
+    if (d.nights > 180) d.issues.push('срок больше полугода — это уже долгосрочная аренда');
+    if (/гибк|любые даты|плюс-минус|примерно|ориентировочно|пока не точно/.test(t)) d.flexible = true;
+    return d;
+  }
+
+  /* ---------- гости ---------- */
+
+  function parseGuests(t) {
+    var g = { adults: null, children: null, childAges: [], total: null, stated: false, assumed: [] };
+    var m;
+
+    m = new RegExp(NUM_RE + '\\s*(?:взросл[а-яa-z]*)').exec(t);
+    if (m) { g.adults = num(m[1]); g.stated = true; }
+
+    m = new RegExp(NUM_RE + '\\s*(?:дет[а-яa-z]*|ребен[а-яa-z]*|реб\\b|малыш[а-яa-z]*)').exec(t);
+    if (m) { g.children = num(m[1]); g.stated = true; }
+    else if (/с ребенком|с малышом|с дочк|с сыном|с грудничком|с младенцем/.test(t)) { g.children = 1; g.stated = true; }
+    else if (/с детьми/.test(t)) { g.children = 2; g.stated = true; g.assumed.push('«с детьми» — считаем, что двое'); }
+
+    var age = /(?:ребен[а-яa-z]*|дочк[а-яa-z]*|сын[а-яa-z]*|малыш[а-яa-z]*|ем[уy])\D{0,12}?(\d{1,2})\s*(год|года|лет|месяц|мес)/.exec(t) ||
+              /(\d{1,2})\s*(год|года|лет|месяц|мес)\D{0,12}?(?:ребен|дочк|сын|малыш)/.exec(t);
+    if (age) g.childAges.push(/мес/.test(age[2]) ? 0 : +age[1]);
+    if (/грудничк|младенц|новорожден/.test(t)) g.childAges.push(0);
+
+    var notDate = '(?!\\s*(?:' + MONTHS.join('|') + '|числ|\\.|/|:|ноч|сут|дн|недел|месяц))';
+    m = new RegExp('(?:нас|приедем|будем|будет|заселя[а-яa-z]*|размест[а-яa-z]*)\\s*(?:всего\\s*)?' + NUM_RE + notDate).exec(t);
+    if (m) { g.total = num(m[1]); g.stated = true; }
+    if (g.total === null) {
+      m = new RegExp(NUM_RE + '\\s*(?:человек[а-яa-z]*|чел\\b|гост[а-яa-z]*|персон[а-яa-z]*|мужчин[а-яa-z]*|женщин[а-яa-z]*|студент[а-яa-z]*|парн[а-яa-z]*|девуш[а-яa-z]*|друз[а-яa-z]*|коллег[а-яa-z]*|сотрудник[а-яa-z]*)').exec(t);
+      if (m) { g.total = num(m[1]); g.stated = true; }
+    }
+    if (g.total === null) {
+      m = /(?:for|we are|party of)\s*(\d+)|(\d+)\s*(?:guests?|people|persons?|adults?|pax)/.exec(t);
+      if (m) { g.total = +(m[1] || m[2]); g.stated = true; }
+    }
+    if (g.total === null) {
+      m = /семь[яи] из (\d+)/.exec(t);
+      if (m) { g.total = +m[1]; g.stated = true; }
+    }
+    if (g.total === null) {
+      if (/вдвоем|с женой|с мужем|с девушкой|с парнем|с супруг|с подругой|с другом/.test(t)) { g.total = 2; g.stated = true; }
+      else if (/втроем/.test(t)) { g.total = 3; g.stated = true; }
+      else if (/вчетвером/.test(t)) { g.total = 4; g.stated = true; }
+      else if (/впятером/.test(t)) { g.total = 5; g.stated = true; }
+      else if (/(^|[^а-я])(один|одна|сам|соло)([^а-я]|$)|для себя|только я/.test(t)) { g.total = 1; g.stated = true; }
+    }
+
+    if (g.children === null && g.childAges.length) g.children = g.childAges.length;
+    if (/(?:^|[\s,]|и )ребен(?:ок|ка|очек)/.test(t) && !g.children) { g.children = 1; g.stated = true; }
+    if (g.adults !== null && g.children) {          // «двое взрослых и ребёнок» — сумма важнее «нас двое»
+      var sum = g.adults + g.children;
+      if (g.total === null || g.total < sum) g.total = sum;
+    }
+    if (g.total === null && (g.adults || g.children)) g.total = (g.adults || 0) + (g.children || 0);
+    if (g.total !== null && g.adults === null) g.adults = Math.max(0, g.total - (g.children || 0));
+    if (g.total !== null && g.children === null) g.children = 0;
+    if (g.total > 20) g.total = null;                  // явно не про гостей
+    return g;
+  }
+
+  /* ---------- бюджет ---------- */
+
+  function parseBudget(t) {
+    var b = { amount: null, per: null, currency: null, assumed: [] };
+    var m = new RegExp('(?:до|не (?:более|дороже|больше)|бюджет[а-яa-z]*|в пределах|максимум|макс(?![а-яa-z])|около|порядка|за)\\s*(\\d[\\d\\s]{0,11})\\s*(к(?![а-яa-z])|тыс[а-яa-z]*|млн|000)?\\s*(сум[а-яa-z]*|сом[а-яa-z]*|руб[а-яa-z]*|\\$|долл[а-яa-z]*|usd|у\\.?е\\.?)?').exec(t);
+    if (!m) m = /(\$\s?\d[\d\s]{0,6}|\d[\d\s]{0,6}\s?\$)/.exec(t);
+    if (!m) return b;
+
+    /* «до 3 января», «до 12 числа», «до 5 ночей» — это срок, а не деньги */
+    var tail = t.slice((m.index || 0) + m[0].length, (m.index || 0) + m[0].length + 12);
+    if (new RegExp('^\\s*(?:' + MONTHS.concat(MONTHS_EN).join('|') + '|числ|ноч|сут|дн|человек|гост|лет)').test(tail)) return b;
+
+    var raw = (m[1] || m[0]).replace(/[^\d]/g, '');
+    if (!raw) return b;
+    var amount = parseInt(raw, 10);
+    var mult = m[2] || '';
+    if (/^к|тыс/.test(mult)) amount *= 1000;
+    if (/млн/.test(mult)) amount *= 1000000;
+
+    var cur = (m[3] || m[0] || '').toString();
+    if (/\$|долл|usd|у\.?е/.test(cur)) { b.currency = 'USD'; b.assumed.push('бюджет в долларах, пересчитаем по курсу'); }
+    else if (/сом/.test(cur)) b.currency = 'KGS';
+    else if (/руб/.test(cur)) b.currency = 'RUB';
+    else if (/сум/.test(cur)) b.currency = 'UZS';
+    else b.currency = null;                     // валюта не названа — значит местная
+
+    /* Без валюты и без «тысяч/к/млн» маленькое число — это не бюджет, а что-то другое */
+    if (!m[3] && !mult && amount < 1000) return { amount: null, per: null, currency: null, assumed: [] };
+    if (!b.currency && amount < 1000) { amount *= 1000; b.assumed.push('сумму меньше тысячи прочитали как тысячи'); }
+    b.amount = amount;
+
+    if (/(за|в)\s*(ночь|сутк|день)|ночь|сутк/.test(t)) b.per = 'night';
+    else if (/за вс[её]|всего|на весь срок|итого/.test(t)) b.per = 'total';
+    else { b.per = 'night'; b.assumed.push('считаем, что бюджет за ночь'); }
+    return b;
+  }
+
+  /* ---------- требования и предпочтения ---------- */
+
+  function parsePrefs(t) {
+    var p = { rooms: null, district: null, features: [], needElevator: false, needParking: false, needCrib: false, needWorkspace: false, quiet: false };
+    var m = /(\d)\s*-?\s*комн/.exec(t);
+    if (m) p.rooms = +m[1];
+    else if (/студи/.test(t)) p.rooms = 0;
+    else if (/однушк|одноком/.test(t)) p.rooms = 1;
+    else if (/двушк|двухком/.test(t)) p.rooms = 2;
+    else if (/трешк|трехком/.test(t)) p.rooms = 3;
+
+    var districts = [
+      ['центр', /центр|амира темура|мустакиллик|сквер/],
+      ['юнусабад', /юнусабад/],
+      ['мирабад', /мирабад|ойбек|ташкент-сити|ташкент сити/],
+      ['чиланзар', /чиланзар|новза/],
+      ['сергели', /сергели/],
+      ['вокзал', /вокзал/]
+    ];
+    districts.forEach(function (d) { if (!p.district && d[1].test(t)) p.district = d[0]; });
+
+    if (/лифт/.test(t)) p.needElevator = true;
+    if (/коляск|инвалид|не могу по лестниц|ходунк|костыл/.test(t)) { p.needElevator = true; p.accessible = true; }
+    if (/парковк|машин|авто\b|на машине/.test(t)) p.needParking = true;
+    if (/кроватк|манеж|стульчик для кормлен/.test(t)) p.needCrib = true;
+    if (/рабоч[а-яa-z]* мест|поработать|ноутбук|созвон|зум|zoom/.test(t)) p.needWorkspace = true;
+    if (/тих|без шума|выспаться/.test(t)) p.quiet = true;
+
+    [['wi-fi', /wi-?fi|вайфай|интернет/], ['стиральная машина', /стиральн|постирать/],
+     ['посудомойка', /посудомой/], ['кондиционер', /кондиционер|сплит|жарко/],
+     ['две ванные', /две ванн|два санузл/], ['проектор', /проектор/],
+     ['балкон', /балкон/], ['вид', /вид из окна|панорам|вид на/]].forEach(function (f) {
+      if (f[1].test(t)) p.features.push(f[0]);
+    });
+    return p;
+  }
+
+  /* ---------- сигналы: что именно человек просит и о чём предупреждает ---------- */
+
+  var SIGNALS = {
+    greeting:       /^(здравств[а-яa-z]*|добрый (день|вечер|утро)|привет[а-яa-z]*|салам[а-яa-z]*|ассалом[а-яa-z]*|assalom[а-яa-z]*|hi|hello)[\s!,.)]*$/,
+    price:          /цен[аыу]|сколько стоит|стоимость|почем|тариф|прайс|за сутки сколько|сколько за ночь/,
+    otherDates:     /на другие даты|другие даты|а когда (?:свободно|есть|будет)|когда освобод|ближайш\w* свободн|любые даты подойдут/,
+    /* Что рядом с домом: у каждой темы свой ключ в базе знаний */
+    nearby:         /рядом|поблизости|недалеко|в шаговой|во дворе|около дома|близко ли|далеко ли|что вокруг|окрестност/,
+    cityInfo:       /как добраться|аэропорт|вокзал|такси|автобус|транспорт|что посмотреть|достопримечат|обмен[а-я]* валют|валюту|курс валют|поменять деньги|доставк[а-я]* еды|заказать еду|погод|скорая|полиц|метро/,
+    availability:   /свободн|есть ли|наличие|доступн|занят|остал(о|и)сь|можно ли заселиться|есть что-нибудь/,
+    book:           /заброн[а-яa-z]*|бронь|забронируй|беру|берем|оформ[а-яa-z]*|подтвержд[а-яa-z]*|давайте|согласен|согласна|хочу эту|подходит/,
+    photos:         /фото|фотк|снимк|видео|как выглядит|посмотреть квартиру/,
+    address:        /адрес|где находится|как добраться|геолокац|локац|куда ехать|точка на карте/,
+    checkinTime:    /во сколько (?:заезд|выезд|заселение)|время заезда|время выезда|когда можно заселиться|до скольки выезд/,
+    earlyCheckIn:   /можно (?:ли )?(?:заехать )?(?:по)?раньше|заезд пораньше|ранн[а-яa-z]* заезд|заехать раньше|заселиться в \d{1,2}[:.]?\d{0,2}\s*(утра)?|заезд в \d{1,2}\s*утра|приедем утром|прилет утром/,
+    lateCheckOut:   /попозже (?:выехать|съехать)|выехать попозже|поздн[а-яa-z]* выезд|выехать позже|выезд в \d{1,2}|попозже съехать|вылет вечером/,
+    lateArrival:    /приед[а-я]* (?:в|около) 2[0-3][:.]\d{2}|заезд в 2[0-3][:.]\d{2}|в 23[:.]\d{2}|в 00[:.]\d{2}|поздно вечером|поздно приедем|ночью приедем|заезд ночью|в 2 ночи|в 3 ночи|поезд ночью|рейс ночью|прилет в \d{1,2} ночи/,
+    extend:         /продлить|продлеваем|остаться ещ?е|еще на [\dа-я]+ ?(ноч|сут|дн)/,
+    changeDates:    /перенес|сдвин|на неделю (?:позже|раньше)|поменять даты|изменить даты|другие даты вместо/,
+    cancel:         /отмен[а-яa-z]*|не приедем|отказыва[а-яa-z]*|верните деньги|возврат/,
+    discount:       /скидк|дешевл|подешевле|уступ|торг|последняя цена|а меньше|сделайте|снизьте|акци/,
+    pets:           /(?:^|[^а-я])кот[аыуо]?м?(?:[^а-я]|$)|кошк|собак|животн|питомц|щенк|котенк|померан|хорьк|попуга/,
+    smoking:        /курить|курящ|сигарет|вейп|кальян/,
+    party:          /вечеринк|отметить|отмечать|днюх|день рожден|тусов|караоке|банкет|гулянк|шумн|компани[яей] друзей|мальчишник|девичник|выпить|алкогол|музык[а-яa-z]* погромче/,
+    hourly:         /на час\b|на пару часов|почасов|на \d{1,2} часа|на 2-3 часа|дневной отдых|на несколько часов/,
+    docsNo:         /без паспорт|без документ|без регистрац|не хочу светить|не даю паспорт|анонимн/,
+    registration:   /регистрац|прописк|миграционн|учет|виза|для мвд|справк[а-яa-z]* о прожив/,
+    fakeReg:        /только для прописк|жить не буду|фиктивн|прописаться без прожив|нужна прописка на год/,
+    invoice:        /документ[а-я]* (?:для|от) (?:компани|фирм|бухгалтер|организац)|для отчетност|счет|счет-фактур|безнал|договор|акт выполненных|командиров[а-яa-z]*|юрлиц|ооо|компани[яи] оплат|отчетн[а-яa-z]* документ|закрывающ/,
+    longStay:       /на месяц|на полгода|длительн|долгосрочн|на год|помесячн/,
+    group:          /групп|командой|делегац|нас много|несколько квартир|две квартиры|автобус|свадьб/,
+    transfer:       /встретить|трансфер|такси от аэропорт|заберите нас|подать машину/,
+    selfCheckIn:    /самозаселен|ключи без встречи|сейф-бокс|кодовый замок|бескон[а-яa-z]* заселен/,
+    complaint:      /конде[йи]|не морозит|не холодит|не греет|перестал работать|воня|накурено|курят соседи|духота|сверл|шумят|не дают спать|не работает|сломал|не включается|нет воды|нет света|холодно|жарко|грязн|не убрано|запах|шум[а-яa-z]* соседи|тараканы|клопы|не могу попасть|не открывается дверь|плохо пахнет/,
+    damage:         /разбил|сломал|залил|затопил|испортил|пятно|порвал/,
+    keys:           /не могу (?:открыть|зайти)|код не подход|стою (?:на улице|у двери|под дверью)|потерял ключ|захлопнул|ключи внутри|не могу открыть замок|забыл ключ/,
+    paid:           /оплатил|оплатила|перевел(?:а)?(?! лишн)|перечислил|отправил[а]? деньги|скинул[а]? (?:деньги|оплату|чек|скрин)|кинул[а]? на карт|оплата прошла|деньги ушли|чек скинул/,
+    thanks:         /спасибо|благодар|мерси|рахмат|thank/,
+    later:          /подума|посовет|обсужу|напишу позже|напишу потом|дам знать|определ[ию]мся|перезвоню|вернусь к вам/,
+    installment:    /рассрочк|частями|половину (?:сейчас|сразу)|по частям|двумя платежами|разбить оплату/,
+    payment:        /номер карты|реквизит|как оплатить|оплата|перевод|карта|наличк|наличными|click|payme|humo|uzcard|реквизит/,
+    prepayNo:       /без предоплат|оплачу на месте|предоплату не делаю|сначала посмотрю|не буду платить заранее/,
+    fraud:          /карт[уые] (?:вашего|вашей|директора|хозяина|владельца|сотрудник)|переведу туда|на личную карту|переведи на друг[а-яa-z]* карт|карта не моя|оплатит друг|я вышлю чек|скрин оплаты|верните излишек|ошибочно перевел|перевел лишн|лишн[а-яё]* (?:перевод|сумм|деньг)|верн(?:ите|уть) (?:на )?(?:друг|иную|мою) |на другую карту|на другой счет|отправьте на мою карту|пришлите фото вашего паспорта|дайте данные карты|3d-код|смс-код|код из смс/,
+    sublease:       /пересда(?:ть|вать|м|ю)|субаренд|буду селить|сдавать дальше|для своих гостей|под посуточную|оформлю на себя и сдам/,
+    illegal:        /интим|досуг|девочк[а-яa-z]* по вызову|эскорт|для встреч на час|18\+ съемк|порн|для съемок для взрослых|закладк|вещества/,
+    storage:        /склад|хранить товар|поставить коробки|сложить вещи на месяц/,
+    aggression:     /хамств|вы охренел|(?:вы|они) обманул|(?:^|[^а-я])кинул[аи]? (?:меня|нас|деньги)|вы мошенник|в суд подам|напишу жалобу|верните немедленно|бред|дурак|идиот|позор/,
+    human:          /позовите|соедините|свяжите (?:меня )?с (?:менеджер|человек)|оператор|с живым человеком|менеджер|вы бот|это бот|не бот/,
+    spam:           /реклам|продвижен|сотрудничеств|seo|накрутк|инвестиц|заработок|подпишись|перейди по ссылке|http/,
+    minor:          /мне 16|мне 17|нам по 16|нам по 17|школьник|несовершеннолетн/,
+    repeat:         /я у вас уже|в прошлый раз|прошлый раз жил|снова к вам|постоянн[а-яa-z]* клиент|как обычно/,
+    media:          /^(голосовое|войс|фото|картинка|\[фото\]|\[голосовое\])/,
+    purposeBusiness:/командиров|по работе|конференц|деловая поездка|переговор|тренинг|выставк/,
+    purposeMed:     /лечен|клиник|больниц|операц|обследован/,
+    purposeMove:    /переезд|ищу жилье надолго|пока ищу квартиру|релокац/
+  };
+
+  function parseSignals(t) {
+    var out = {}, matched = [];
+    for (var k in SIGNALS) {
+      if (SIGNALS[k].test(t)) { out[k] = true; matched.push(k); }
+      else out[k] = false;
+    }
+    out._matched = matched;
+    return out;
+  }
+
+  /* ---------- контакты и язык ---------- */
+
+  function parseContacts(t, raw) {
+    var c = { phone: null, name: null };
+    var m = /(\+?\d[\d\s\-()]{8,15}\d)/.exec(raw || t);
+    if (m) c.phone = m[1].replace(/[^\d+]/g, '');
+    var n = /(?:меня зовут|это|я)\s+([А-ЯЁ][а-яё]{2,15})/.exec(raw || '');
+    if (!n) n = /(?:^|\n)\s*([А-ЯЁ][а-яё]{2,15})\s*(?:,|\s+\+?\d)/.exec(raw || '');   // «Азиз, +998…»
+    if (n && !/^(Здравств|Привет|Добрый|Нужна|Хочу|Можно|Есть|Спасибо|Квартир)/.test(n[1])) c.name = n[1];
+    return c;
+  }
+
+  function detectLang(t, raw) {
+    var lat = (raw.match(/[a-z]/gi) || []).length, cyr = (raw.match(/[а-яё]/gi) || []).length;
+    if (/\b(kvartira|kerak|narx|nechchi|bormi|bor mi|salom|qancha|kun|kecha)\b/.test(t)) return 'uz';
+    if (lat > cyr && lat > 4) return 'en';
+    return 'ru';
+  }
+
+  /* ---------- сборка ---------- */
+
+  NLU.parse = function (raw) {
+    var t = U.norm(raw);
+    var s = parseSignals(t);
+    var dates = parseDates(t);
+    var guests = parseGuests(t);
+
+    /* «на 2 часа» — это не ночи, обнуляем срок, чтобы не считать цену */
+    if (s.hourly) { dates.nights = dates.nights || 0; dates.hourly = true; }
+
+    var purpose = 'unknown';
+    if (s.purposeBusiness || s.invoice) purpose = 'business';
+    else if (s.purposeMed) purpose = 'medical';
+    else if (s.purposeMove || s.longStay) purpose = 'relocation';
+    else if (s.party) purpose = 'event';
+    else if (dates.nights && dates.nights <= 4 && guests.total) purpose = 'tourism';
+
+    return {
+      raw: String(raw || ''),
+      norm: t,
+      lang: detectLang(t, String(raw || '')),
+      empty: t.length === 0,
+      dates: dates,
+      guests: guests,
+      budget: parseBudget(t),
+      prefs: parsePrefs(t),
+      signals: s,
+      contacts: parseContacts(t, String(raw || '')),
+      purpose: purpose,
+      length: t.length
+    };
+  };
+
+  NLU.SIGNALS = SIGNALS;
+  if (typeof module !== 'undefined' && module.exports) module.exports = NLU;
+  w.NLU = NLU;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+;
+/* js/policy.js */
+/* Правила и арифметика: цена, занятость, подбор, возвраты.
+   Всё, что агент говорит про деньги и свободные даты, считается здесь. */
+(function (w) {
+  'use strict';
+
+  var U = w.U || (typeof require !== 'undefined' ? require('./util.js') : null);
+  var KB = w.KB || (typeof require !== 'undefined' ? require('./knowledge.js') : null);
+  var HOLDS = w.HOLDS || (typeof require !== 'undefined' ? require('./holds.js') : null);
+
+  var PO = {};
+
+  /* ---------- сезон ---------- */
+
+  PO.season = function (iso) {
+    var md = iso.slice(5);
+    for (var i = 0; i < KB.seasons.length; i++) {
+      var s = KB.seasons[i];
+      var inside = s.from <= s.to ? (md >= s.from && md <= s.to) : (md >= s.from || md <= s.to);
+      if (inside) return s;
+    }
+    return null;
+  };
+
+  PO.nightPrice = function (obj, iso) {
+    var p = obj.base;
+    if (U.isWeekend(iso)) p *= obj.weekendK;
+    var s = PO.season(iso);
+    if (s) p *= s.k;
+    return Math.round(p / 1000) * 1000;
+  };
+
+  PO.seasonsOf = function (from, to) {
+    var out = {}, list = U.nightsList(from, to);
+    list.forEach(function (n) { var s = PO.season(n); if (s) out[s.id] = s; });
+    return Object.keys(out).map(function (k) { return out[k]; });
+  };
+
+  PO.minNights = function (obj, from, to) {
+    var min = obj.minNights;
+    PO.seasonsOf(from || U.today(), to || U.addDays(from || U.today(), 1)).forEach(function (s) {
+      if (s.minNights > min) min = s.minNights;
+    });
+    return min;
+  };
+
+  PO.isPeak = function (from, to) {
+    return PO.seasonsOf(from, to).some(function (s) { return s.peak; });
+  };
+
+  /* ---------- занятость ---------- */
+
+  /* holder — кто спрашивает: свои удержания не мешают самому себе */
+  PO.isFree = function (obj, from, to, holder) {
+    var ranges = (obj.busy || []).concat(HOLDS ? HOLDS.busyFor(obj.id, holder) : []);
+    var conflicts = ranges.filter(function (b) {
+      return b && b.from && b.to && U.overlap(from, to, b.from, b.to);
+    });
+    return { free: conflicts.length === 0, conflicts: conflicts };
+  };
+
+  /* Ближайшие свободные окна той же длины: сдвиг вперёд и назад до 14 дней */
+  PO.nearestWindows = function (obj, from, nights, limit, holder) {
+    var out = [];
+    for (var shift = 1; shift <= 14 && out.length < (limit || 2); shift++) {
+      [shift, -shift].forEach(function (d) {
+        if (out.length >= (limit || 2)) return;
+        var f = U.addDays(from, d);
+        if (U.diffDays(U.today(), f) < 0) return;
+        var t = U.addDays(f, nights);
+        if (PO.isFree(obj, f, t, holder).free) out.push({ from: f, to: t, shift: d });
+      });
+    }
+    return out;
+  };
+
+  /* Свободные объекты на даты, независимо от прочих требований */
+  PO.freeOn = function (from, to, holder) {
+    return KB.objects.filter(function (o) { return PO.isFree(o, from, to, holder).free; });
+  };
+
+  /* ---------- расчёт ---------- */
+
+  PO.quote = function (obj, req) {
+    var S = KB.settings;
+    var from = req.from, to = req.to;
+    var nights = U.diffDays(from, to);
+    var lines = [], stay = 0, peakSum = 0, peakNights = 0, nightMin = Infinity, nightMax = 0;
+
+    U.nightsList(from, to).forEach(function (n) {
+      var price = PO.nightPrice(obj, n), s = PO.season(n);
+      stay += price;
+      if (s && s.peak) { peakSum += price; peakNights++; }
+      if (price < nightMin) nightMin = price;
+      if (price > nightMax) nightMax = price;
+    });
+    lines.push({ title: 'Проживание, ' + U.nights(nights), sum: stay });
+
+    var guests = req.guests || 1;
+    var extra = Math.max(0, guests - obj.capacity);
+    if (extra > 0) {
+      var extraSum = extra * S.extraGuestFee * nights;
+      lines.push({ title: 'Доп. место × ' + extra, sum: extraSum });
+      stay += 0; // доп. места не участвуют в скидке за длительность
+      lines.extra = extraSum;
+    }
+
+    var discount = 0, discountTitle = null;
+    if (nights >= S.longStayFrom) { discount = S.longStayDiscount; discountTitle = 'Скидка за длительное проживание'; }
+    else if (nights >= S.weekDiscountFrom) { discount = S.weekDiscount; discountTitle = 'Скидка за ' + U.nights(nights); }
+    if (req.repeatGuest) { discount += S.repeatGuestDiscount; discountTitle = (discountTitle ? discountTitle + ' + постоянный гость' : 'Скидка постоянному гостю'); }
+    discount = Math.min(discount, 0.3);
+
+    /* Скидка за длительность не должна съедать праздничный тариф */
+    var discountBase = S.discountInPeak ? stay : stay - peakSum;
+    var discountSum = Math.round(discountBase * discount);
+    if (discountSum) lines.push({ title: discountTitle, sum: -discountSum });
+
+    var total = stay - discountSum + (lines.extra || 0);
+
+    if (obj.cleaning) { lines.push({ title: 'Уборка', sum: obj.cleaning }); total += obj.cleaning; }
+    if (req.pets) {
+      var petSum = S.petFee * nights;
+      lines.push({ title: 'Питомец', sum: petSum }); total += petSum;
+    }
+    if (req.earlyCheckIn) {
+      var e = Math.round(PO.nightPrice(obj, from) * S.earlyCheckInPart);
+      lines.push({ title: 'Ранний заезд', sum: e }); total += e;
+    }
+    if (req.lateCheckOut) {
+      var l = Math.round(PO.nightPrice(obj, U.addDays(to, -1)) * S.lateCheckOutPart);
+      lines.push({ title: 'Поздний выезд', sum: l }); total += l;
+    }
+    if (req.lateArrival) { lines.push({ title: 'Ночное заселение', sum: S.lateCheckInFee }); total += S.lateCheckInFee; }
+
+    /* Праздничные ночи вносятся полностью, остальное — обычной долей.
+       Одна ночь Навруза не должна делать стопроцентной всю двухнедельную бронь. */
+    var peak = peakNights > 0;
+    var prepay = Math.min(total, Math.round(peakSum * S.peakPrepay + Math.max(0, total - peakSum) * S.prepay));
+    var prepayPart = total ? prepay / total : S.prepay;
+    var deposit = obj.deposit + (req.pets ? S.petDeposit : 0);
+
+    return {
+      objectId: obj.id,
+      from: from, to: to, nights: nights, guests: guests,
+      lines: lines,
+      total: total,
+      perNight: Math.round(total / nights),
+      perNightStay: Math.round((stay - discountSum) / nights),   // только проживание, без разовых доплат
+      discountPart: discount,
+      peak: peak,
+      seasons: PO.seasonsOf(from, to).map(function (s) { return s.name; }),
+      prepayPart: prepayPart,
+      prepay: prepay,
+      rest: total - prepay,
+      peakNights: peakNights,
+      peakSum: peakSum,
+      nightMin: nightMin === Infinity ? 0 : nightMin,
+      nightMax: nightMax,
+      deposit: deposit
+    };
+  };
+
+  /* ---------- подбор ---------- */
+
+  PO.match = function (req) {
+    var out = { offers: [], rejected: [], alternatives: [], status: 'ok' };
+    var from = req.from, to = req.to;
+    if (!from || !to) { out.status = 'no-dates'; return out; }
+
+    KB.objects.forEach(function (o) {
+      var why = [], score = 100, notes = [];
+      var guests = req.guests || 1;
+
+      if (guests > o.capacity + o.extraBeds) why.push('вмещает до ' + U.guestsUpTo(o.capacity + o.extraBeds));
+      if (req.pets && !o.pets) why.push('нельзя с животными');
+      if (req.needElevator && !o.elevator) why.push('нет лифта, ' + o.floor + '-й этаж');
+      if (req.rooms !== null && req.rooms !== undefined && o.rooms < req.rooms) why.push(o.rooms ? o.rooms + '-комнатная' : 'студия');
+
+      var free = PO.isFree(o, from, to, req.holder);
+      if (!free.free) why.push('занята ' + free.conflicts.map(function (c) { return U.range(c.from, c.to); }).join(', '));
+
+      var min = PO.minNights(o, from, to), nights = U.diffDays(from, to);
+      if (nights < min) why.push('минимум ' + U.nights(min) + ' на эти даты');
+
+      if (why.length) {
+        out.rejected.push({
+          object: o, reasons: why,
+          held: free.conflicts.some(function (c) { return /удержание/.test(c.guest || ''); }),
+          freeWindows: free.free ? [] : PO.nearestWindows(o, from, nights, 2, req.holder)
+        });
+        return;
+      }
+
+      var q = PO.quote(o, req);
+
+      if (guests > o.capacity) { score -= 10; var ex = guests - o.capacity;
+        notes.push('нужно ' + ex + ' ' + U.plural(ex, 'доп. место', 'доп. места', 'доп. мест') + ' — раскладной диван'); }
+      if (req.district && o.district.indexOf(req.district) < 0 && (o.metro || '').indexOf(req.district) < 0) score -= 12;
+      if (req.rooms !== null && req.rooms !== undefined && o.rooms > req.rooms + 1) score -= 8;
+      if (req.needParking && /нет/.test(o.parking || '')) score -= 5;
+      if (req.needWorkspace && o.features.indexOf('рабочее место') < 0) score -= 3;
+      (req.features || []).forEach(function (f) {
+        var found = o.features.some(function (x) { return x.indexOf(f.split(' ')[0]) >= 0; });
+        if (!found) score -= 4; else score += 2;
+      });
+      if (req.budget && req.budgetPer === 'night') {
+        if (q.perNight <= req.budget) score += 15;
+        else { score -= Math.min(40, Math.round((q.perNight - req.budget) / req.budget * 60)); notes.push('дороже бюджета на ' + U.money(q.perNight - req.budget) + ' за ночь'); }
+      }
+      if (req.budget && req.budgetPer === 'total') {
+        if (q.total <= req.budget) score += 15;
+        else { score -= Math.min(40, Math.round((q.total - req.budget) / req.budget * 60)); notes.push('дороже бюджета на ' + U.money(q.total - req.budget)); }
+      }
+      if (req.needCrib && o.features.some(function (f) { return /кроват/.test(f); })) score += 6;
+      if (req.selfCheckIn && o.selfCheckIn) score += 5;
+      if (req.quiet && /тих/.test(o.note || '')) score += 5;
+
+      out.offers.push({ object: o, quote: q, score: score, notes: notes });
+    });
+
+    out.offers.sort(function (a, b) { return b.score - a.score || a.quote.total - b.quote.total; });
+
+    if (!out.offers.length) {
+      out.status = 'none';
+      var nights2 = U.diffDays(from, to);
+      out.rejected.forEach(function (r) {
+        r.freeWindows.forEach(function (win) {
+          out.alternatives.push({ object: r.object, from: win.from, to: win.to, shift: win.shift });
+        });
+      });
+      out.alternatives.sort(function (a, b) { return Math.abs(a.shift) - Math.abs(b.shift); });
+      out.alternatives = out.alternatives.slice(0, 3);
+      out.altNights = nights2;
+    }
+    return out;
+  };
+
+  /* Несколько квартир на большую компанию */
+  PO.combo = function (req) {
+    var free = PO.freeOn(req.from, req.to, req.holder).filter(function (o) {
+      return U.diffDays(req.from, req.to) >= PO.minNights(o, req.from, req.to) && (!req.pets || o.pets);
+    });
+    free.sort(function (a, b) { return (b.capacity + b.extraBeds) - (a.capacity + a.extraBeds); });
+    var need = req.guests || 1, picked = [], cap = 0;
+    for (var i = 0; i < free.length && cap < need; i++) {
+      picked.push(free[i]); cap += free[i].capacity + free[i].extraBeds;
+    }
+    if (cap < need) return null;
+
+    var left = need, total = 0;
+    var quotes = picked.map(function (o) {
+      var take = Math.min(o.capacity + o.extraBeds, left);
+      left -= take;
+      var q = PO.quote(o, { from: req.from, to: req.to, guests: take, pets: req.pets });
+      total += q.total;
+      return { object: o, guests: take, quote: q };
+    });
+    return { parts: quotes, total: total, capacity: cap, guests: need };
+  };
+
+  /* ---------- возвраты ---------- */
+
+  PO.refund = function (checkIn, paid) {
+    paid = Math.max(0, U.clamp(+paid || 0, 0, 1e12));
+    var days = U.diffDays(U.today(), checkIn);
+    var rules = KB.settings.cancel;
+    for (var i = 0; i < rules.length; i++) {
+      if (days >= rules[i].beforeDays) {
+        return { days: days, part: rules[i].refund, sum: Math.round((paid || 0) * rules[i].refund), note: rules[i].note };
+      }
+    }
+    var last = rules[rules.length - 1];
+    return { days: days, part: last.refund, sum: 0, note: last.note };
+  };
+
+  /* Копия запроса с другими датами — чтобы не мутировать исходный */
+  function withDates(req, from, to) {
+    var out = {};
+    for (var k in req) if (Object.prototype.hasOwnProperty.call(req, k)) out[k] = req[k];
+    out.from = from; out.to = to;
+    return out;
+  }
+
+  /* Первая дата на горизонте, когда есть подходящая квартира.
+     Нужна, когда соседние окна пусты: «всё занято» без опоры — плохой ответ. */
+  PO.nextAvailable = function (req, horizon) {
+    horizon = horizon || 90;
+    var nights = Math.max(1, req.from && req.to ? U.diffDays(req.from, req.to) : (req.nights || 1));
+    var start = req.from && U.diffDays(U.today(), req.from) > 0 ? req.from : U.today();
+    for (var i = 1; i <= horizon; i++) {
+      var f = U.addDays(start, i), t = U.addDays(f, nights);
+      var m = PO.match(withDates(req, f, t));
+      if (m.offers.length) return { from: f, to: t, offer: m.offers[0], shift: i };
+    }
+    return null;
+  };
+
+  /* Что именно мешает: занято или свободно, но не подходит под требования */
+  PO.whyBlocked = function (req) {
+    var m = PO.match(req);
+    var busy = [], unfit = [];
+    m.rejected.forEach(function (r) {
+      var occupied = r.reasons.some(function (x) { return /занята/.test(x); });
+      (occupied ? busy : unfit).push({ object: r.object, reasons: r.reasons });
+    });
+    return {
+      busy: busy, unfit: unfit,
+      freeButUnfit: unfit.length > 0,
+      allBusy: unfit.length === 0 && busy.length > 0
+    };
+  };
+
+  /* Цена «от» для ответов без дат */
+  PO.priceRange = function () {
+    var min = Infinity, max = 0;
+    KB.objects.forEach(function (o) {
+      if (o.base < min) min = o.base;
+      if (o.base * o.weekendK > max) max = o.base * o.weekendK;
+    });
+    return { min: min, max: Math.round(max / 1000) * 1000 };
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = PO;
+  w.PO = PO;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+;
+/* js/reply.js */
+/* Сборка текста ответа: карточки вариантов, расчёты, вопросы.
+   Тон: коротко, по делу, без канцелярита, одна мысль — одна строка. */
+(function (w) {
+  'use strict';
+
+  var U = w.U || (typeof require !== 'undefined' ? require('./util.js') : null);
+  var KB = w.KB || (typeof require !== 'undefined' ? require('./knowledge.js') : null);
+  var PO = w.PO || (typeof require !== 'undefined' ? require('./policy.js') : null);
+
+  var R = {};
+
+  R.lines = function (arr) {
+    return arr.filter(function (x) { return x !== null && x !== undefined && x !== ''; }).join('\n');
+  };
+
+  R.objLine = function (o) {
+    var bits = [o.district];
+    if (o.metro) bits.push(o.metro);
+    bits.push(U.guests(o.capacity) + (o.extraBeds ? ' + ' + o.extraBeds + ' ' + U.plural(o.extraBeds, 'доп. место', 'доп. места', 'доп. мест') : ''));
+    if (!o.elevator) bits.push(o.floor + '-й этаж без лифта');
+    return bits.join(' · ');
+  };
+
+  R.offer = function (item, i) {
+    var o = item.object, q = item.quote;
+    var head = (i ? i + ') ' : '') + o.title;
+    var price = U.money(q.perNightStay) + '/ночь · за ' + U.nights(q.nights) + ' — ' + U.money(q.total) +
+                (q.total !== q.perNightStay * q.nights ? ' с доплатами' : '');
+    var spread = R.spread(q);
+    var note = item.notes && item.notes.length ? '   ' + item.notes.join(', ') : null;
+    return R.lines(['' + head, '   ' + R.objLine(o), '   ' + price, spread ? '   ' + spread : null, note]);
+  };
+
+  R.offers = function (list, max) {
+    return list.slice(0, max || 2).map(function (it, i) { return R.offer(it, i + 1); }).join('\n\n');
+  };
+
+  /* Формулировка предоплаты: в праздники она смешанная, и это надо объяснить */
+  R.prepayLine = function (q) {
+    var S = KB.settings;
+    if (q.peakNights && q.peakNights < q.nights) {
+      return 'Предоплата ' + U.money(q.prepay) + ' — праздничные ночи вносятся полностью, ' +
+             'остальные ' + Math.round(S.prepay * 100) + '%' +
+             (q.rest > 0 ? ', остаток ' + U.money(q.rest) + ' при заезде' : '');
+    }
+    if (q.peakNights) return 'Предоплата 100% — ' + U.money(q.prepay) + ': это праздничные даты, их держим только по полной оплате.';
+    return 'Предоплата ' + Math.round(q.prepayPart * 100) + '% — ' + U.money(q.prepay) +
+           (q.rest > 0 ? ', остаток ' + U.money(q.rest) + ' при заезде' : '');
+  };
+
+  /* Если ночи стоят по-разному, гость должен увидеть это до брони */
+  R.spread = function (q) {
+    if (!q.nightMax || q.nightMax <= q.nightMin * 1.12) return null;
+    return 'по ночам от ' + U.money(q.nightMin, '') + ' до ' + U.money(q.nightMax) +
+           ' — праздничные и выходные дороже';
+  };
+
+  R.breakdown = function (q) {
+    var rows = q.lines.map(function (l) {
+      return '· ' + l.title + ' — ' + (l.sum < 0 ? '−' + U.money(-l.sum) : U.money(l.sum));
+    });
+    rows.push('Итого: ' + U.money(q.total));
+    rows.push(R.prepayLine(q));
+    rows.push('Депозит ' + U.money(q.deposit) + ' — возвращаем при выезде');
+    return rows.join('\n');
+  };
+
+  R.terms = function (q) {
+    var S = KB.settings;
+    return R.lines([
+      'В цене: уборка, постель, полотенца, Wi-Fi.',
+      'Заезд с ' + S.checkIn + ', выезд до ' + S.checkOut + '.',
+      q ? R.prepayLine(q) + '. Депозит ' + U.money(q.deposit) + ' возвращается при выезде.' : null
+    ]);
+  };
+
+  /* Условия, когда вариантов несколько и депозит у них разный */
+  R.termsMulti = function (offers) {
+    var S = KB.settings;
+    var deps = offers.map(function (o) { return o.quote.deposit; });
+    var min = Math.min.apply(null, deps), max = Math.max.apply(null, deps);
+    var peak = offers.some(function (o) { return o.quote.peak; });
+    return R.lines([
+      'В цене: уборка, постель, полотенца, Wi-Fi.',
+      'Заезд с ' + S.checkIn + ', выезд до ' + S.checkOut + '.',
+      (peak ? 'В праздничные ночи предоплата полная, в остальные ' + Math.round(S.prepay * 100) + '%'
+            : 'Предоплата ' + Math.round(S.prepay * 100) + '%') + ', депозит ' +
+        (min === max ? U.money(min) : U.money(min, '') + '–' + U.money(max)) + ' — возвращаем при выезде.'
+    ]);
+  };
+
+  R.hold = function () {
+    return 'Даты держу ' + KB.settings.holdMinutes + ' минут без предоплаты.';
+  };
+
+  R.ask = function (questions, max) {
+    var qs = questions.slice(0, max || 3);
+    if (!qs.length) return '';
+    if (qs.length === 1) return qs[0];
+    return qs.map(function (q) { return '— ' + q; }).join('\n');
+  };
+
+  R.human = function (reason) {
+    var m = KB.settings.manager;
+    return 'Подключаю ' + m.name + ' — ' + (reason || 'здесь нужно решение человека') +
+           '. Он на связи ' + m.hours + ', телефон ' + m.phone + '.';
+  };
+
+  R.dates = function (a) {
+    if (a.dates.from && a.dates.to) return U.fmtFull(a.dates.from) + ' — ' + U.fmtFull(a.dates.to) + ' (' + U.nights(a.dates.nights) + ')';
+    if (a.dates.from) return 'с ' + U.fmtFull(a.dates.from);
+    return 'даты не названы';
+  };
+
+  R.alternatives = function (match) {
+    if (!match.alternatives || !match.alternatives.length) return null;
+    return match.alternatives.map(function (alt) {
+      return '· ' + alt.object.title + ' — свободна ' + U.range(alt.from, alt.to);
+    }).join('\n');
+  };
+
+  /* Бюджет гостя словами: если он назвал валюту, показываем и её */
+  R.budget = function (a) {
+    var r = a.req || {};
+    if (!r.budget) return null;
+    var cur = { USD: '$', RUB: '₽', KGS: 'сом' }[r.budgetCurrency];
+    return U.money(r.budget) + (cur ? ' (≈' + r.budgetOriginal + ' ' + cur + ' по курсу)' : '');
+  };
+
+  R.priceFrom = function () {
+    var p = PO.priceRange();
+    var sorted = KB.objects.slice().sort(function (a, b) { return a.base - b.base; });
+    return 'Цены от ' + U.money(p.min) + ' за ночь — ' + sorted[0].title + ', до ' +
+           U.money(p.max) + ' — ' + sorted[sorted.length - 1].title + '.';
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = R;
+  w.R = R;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+;
+/* js/risk.js */
+/* Оценка риска заявки. Отдельный слой: он не решает, что ответить,
+   а собирает флаги с весами и объясняет каждый — чтобы менеджер видел,
+   почему агент отказал или позвал человека. */
+(function (w) {
+  'use strict';
+
+  var U = w.U || (typeof require !== 'undefined' ? require('./util.js') : null);
+  var KB = w.KB || (typeof require !== 'undefined' ? require('./knowledge.js') : null);
+
+  var RISK = {};
+
+  /* id, вес, объяснение для менеджера, что делать */
+  var RULES = [
+    { id: 'illegal', w: 100, when: function (a) { return a.signals.illegal; },
+      why: 'запрос на использование квартиры для незаконных услуг', act: 'отказ и стоп-лист' },
+    { id: 'fraud', w: 80, when: function (a) { return a.signals.fraud; },
+      why: 'схема с чужой картой, «лишним переводом» или кодом из СМС', act: 'ничего не переводить, позвать человека' },
+    { id: 'sublease', w: 70, when: function (a) { return a.signals.sublease; },
+      why: 'квартиру хотят пересдавать', act: 'отказ' },
+    { id: 'fake-registration', w: 70, when: function (a) { return a.signals.fakeReg; },
+      why: 'просят прописку без проживания', act: 'отказ' },
+    { id: 'minor', w: 70, when: function (a) { return a.signals.minor; },
+      why: 'гостю меньше ' + KB.settings.minAge, act: 'отказ, нужен совершеннолетний ответственный' },
+    { id: 'party', w: 55, when: function (a) { return a.signals.party; },
+      why: 'признаки вечеринки или шумного мероприятия', act: 'отказ либо письменное согласие на тишину и депозит ×2' },
+    { id: 'hourly', w: 45, when: function (a) { return a.signals.hourly; },
+      why: 'просят на несколько часов', act: 'минимум сутки' },
+    { id: 'no-docs', w: 45, when: function (a) { return a.signals.docsNo; },
+      why: 'отказ показывать документы', act: 'заселение без паспорта невозможно' },
+    { id: 'storage', w: 35, when: function (a) { return a.signals.storage; },
+      why: 'квартиру хотят под склад', act: 'отказ' },
+    { id: 'crowd', w: 30, when: function (a) {
+        return a.guests.total && a.guests.total > KB.capacityMax();
+      },
+      why: 'гостей больше, чем вмещает самая большая квартира', act: 'предложить несколько квартир' },
+    { id: 'aggression', w: 30, when: function (a) { return a.signals.aggression; },
+      why: 'конфликтный тон, угрозы жалобой или судом', act: 'не спорить, передать человеку' },
+    { id: 'no-prepay', w: 20, when: function (a) { return a.signals.prepayNo; },
+      why: 'отказ от предоплаты', act: 'даты держим час без оплаты, дальше снимаем' },
+    { id: 'rush', w: 10, when: function (a) {
+        return a.dates.from && U.diffDays(U.today(), a.dates.from) === 0 && !a.guests.stated;
+      },
+      why: 'заезд сегодня и почти нет данных о гостях', act: 'уточнить состав и документы до выезда ключей' },
+    { id: 'spam', w: 15, when: function (a) { return a.signals.spam && !a.dates.from; },
+      why: 'похоже на рассылку или рекламу', act: 'не отвечать развёрнуто' },
+    { id: 'big-money', w: 15, when: function (a) { return a.quoteTotal && a.quoteTotal > 10000000; },
+      why: 'сумма брони больше 10 млн', act: 'подтверждает человек' },
+    { id: 'long', w: 10, when: function (a) { return a.dates.nights && a.dates.nights > KB.settings.longStayFrom; },
+      why: 'долгий срок — нужен договор', act: 'передать в отдел длительной аренды' }
+  ];
+
+  RISK.assess = function (a) {
+    var flags = [], score = 0;
+    RULES.forEach(function (r) {
+      var hit = false;
+      try { hit = !!r.when(a); } catch (e) { hit = false; }
+      if (hit) { flags.push({ id: r.id, weight: r.w, why: r.why, action: r.act }); score += r.w; }
+    });
+    score = U.clamp(score, 0, 100);
+    var level = score >= 70 ? 'критический' : score >= 45 ? 'высокий' : score >= 20 ? 'средний' : 'низкий';
+    return {
+      score: score,
+      level: level,
+      flags: flags,
+      hard: flags.some(function (f) { return f.weight >= 70; }),
+      needsHuman: flags.some(function (f) { return /fraud|aggression|big-money|illegal/.test(f.id); })
+    };
+  };
+
+  RISK.RULES = RULES;
+  if (typeof module !== 'undefined' && module.exports) module.exports = RISK;
+  w.RISK = RISK;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+;
+/* js/scenarios.js */
+/* Библиотека сценариев. Порядок важен: выигрывает первое совпадение,
+   но агент сохраняет все сработавшие — чтобы видеть, что ещё было в запросе.
+   Каждый сценарий отвечает на три вопроса: что это, что делаем, что пишем. */
+(function (w) {
+  'use strict';
+
+  var U  = w.U  || (typeof require !== 'undefined' ? require('./util.js') : null);
+  var KB = w.KB || (typeof require !== 'undefined' ? require('./knowledge.js') : null);
+  var PO = w.PO || (typeof require !== 'undefined' ? require('./policy.js') : null);
+  var R  = w.R  || (typeof require !== 'undefined' ? require('./reply.js') : null);
+
+  var S = {};
+  var Set = KB.settings;
+
+  /* ---------- общие куски ответа ---------- */
+
+  /* Какие темы окружения спрашивает гость: ключи совпадают с базой знаний */
+  var NEARBY = [
+    ['аптека', /аптек|лекарств|таблетк/],
+    ['продукты', /магазин|продукт|супермаркет|базар|рынок|молок|хлеб/],
+    ['банкомат', /банкомат|снять деньги|наличк|терминал/],
+    ['кафе', /кафе|ресторан|поесть|перекус|кофейн|пообедать|поужинать/],
+    ['трц', /трц|торгов[а-я]* центр|молл|шопинг|mega|хан шатыр|керуен/],
+    ['транспорт', /остановк|автобус|как добраться до центра|маршрут/],
+    ['врач', /больниц|поликлиник|врач|клиник|стоматолог|травмпункт|скорая/],
+    ['парк', /(?:^|[^а-я])парк(?:[^а-я]|$)|парке|сквер|погулять|набережн|велодорожк/],
+    ['детям', /детск[а-я]* площадк|площадк[а-я]* во двор|с детьми погулять|садик|школ|аттракцион/],
+    ['спорт', /спортзал|фитнес|бассейн|тренаж|каток|йог/]
+  ];
+
+  /* Какие темы каталога задел гость: отвечаем на все сразу, а не на последнюю */
+  function topicsFor(a) {
+    return (KB.topics || []).filter(function (t) {
+      try { return t.match.test(a.norm); } catch (e) { return false; }
+    });
+  }
+
+  function nearbyTopics(text) {
+    return NEARBY.filter(function (p) { return p[1].test(text); }).map(function (p) { return p[0]; });
+  }
+
+  /* О каких квартирах идёт речь: о забронированной, о показанных или обо всех */
+  function shownObjects(a) {
+    if (a.ctx.booking) {
+      var o = KB.byId(a.ctx.booking.objectId);
+      if (o) return [o];
+    }
+    if (a.ctx.offers && a.ctx.offers.length) {
+      return a.ctx.offers.slice(0, 2).map(function (x) { return x.object; });
+    }
+    if (a.match && a.match.offers.length) {
+      return a.match.offers.slice(0, 2).map(function (x) { return x.object; });
+    }
+    return [];
+  }
+
+  /* Всё, что гость упомянул дополнительно: питомец, ранний заезд, документы… */
+  function addons(a, obj) {
+    var s = a.signals, out = [];
+    if (s.pets) {
+      out.push(obj && !obj.pets
+        ? 'С питомцем в эту квартиру нельзя, но можно в: ' +
+          KB.objects.filter(function (x) { return x.pets; }).map(function (x) { return x.title; }).join(', ') +
+          '. Доплата ' + U.money(Set.petFee) + '/ночь и депозит +' + U.money(Set.petDeposit) + '.'
+        : 'С питомцем можно: +' + U.money(Set.petFee) + '/ночь, депозит +' + U.money(Set.petDeposit) + '.');
+    }
+    if (s.earlyCheckIn) out.push('Ранний заезд — 50% суток, подтверждаю накануне вечером, если ночь до вас свободна.');
+    if (s.lateCheckOut) out.push('Поздний выезд — 50% суток, подтверждаю за сутки.');
+    if (s.lateArrival) out.push('Ночной заезд после ' + Set.lateCheckInFrom + ' — ' + U.money(Set.lateCheckInFee) + ', код от сейф-бокса придёт сюда же.');
+    if (s.registration && !s.fakeReg) out.push(KB.faq.registration);
+    if (s.invoice) out.push(KB.faq.invoice);
+    if (a.guests.children || a.prefs.needCrib) out.push(KB.faq.kids);
+    if (s.transfer) out.push(KB.faq.transfer);
+    if (s.photos) out.push('Фото и планировку пришлю следующим сообщением.');
+    if (s.address) out.push(KB.faq.address);
+    if (s.payment) out.push(KB.faq.payment);
+    if (s.prepayNo) out.push('Без предоплаты даты держу ' + Set.holdMinutes + ' минут — дальше квартира снова в продаже.');
+    if (s.smoking) out.push(KB.faq.smoking + ' Курение в квартире — штраф ' + U.money(Set.smokingFine) + '.');
+    if (s.selfCheckIn) out.push(KB.faq.selfCheckIn);
+    if (a.prefs.needParking && obj) out.push('Парковка: ' + obj.parking + '.');
+    if (s.docsNo === false && a.lang === 'ru' && a.foreigner) out.push(KB.faq.docs);
+    return out;
+  }
+
+  /* «беру ближайшие выходные», «месяц не назван» — гость должен это увидеть */
+  function assumptions(a) {
+    var list = (a.dates.assumed || []).concat(a.guests.assumed || []).concat(a.budget.assumed || [])
+      .filter(function (x) { return !/бюджет за ночь|по курсу/.test(x); });
+    return list.length ? 'Уточню, как понял: ' + list.join('; ') + '. Поправьте, если не так.' : null;
+  }
+
+  function offersReply(a, head) {
+    var m = a.match;
+    var best = m.offers[0];
+    var body = R.offers(m.offers, 2);
+    var extra = addons(a, best.object);
+    var discount = a.signals.discount && a.dates.nights < Set.weekDiscountFrom
+      ? 'Скидку могу дать 5%, если оплачиваете сразу все ночи.' : null;
+    if (a.req.repeatGuest) extra.unshift('Как постоянному гостю скидка ' + Math.round(Set.repeatGuestDiscount * 100) + '% уже в цене.');
+    return R.lines([
+      head,
+      assumptions(a),
+      '',
+      body,
+      '',
+      m.offers.length > 1 ? R.termsMulti(m.offers.slice(0, 2)) : R.terms(best.quote),
+      extra.length ? '' : null,
+      extra.length ? extra.join('\n') : null,
+      discount ? '' : null,
+      discount,
+      '',
+      m.offers.length > 1 ? 'Какой вариант берём? ' + R.hold() : R.hold()
+    ]);
+  }
+
+  function ask(a, head, questions) {
+    return R.lines([head, questions.length ? '' : null, R.ask(questions)]);
+  }
+
+  /* ---------- сценарии ---------- */
+
+  S.list = [
+
+    /* ===== 0. Мусор и границы разговора ===== */
+    {
+      id: 'empty', title: 'Пустое сообщение', group: 'служебные',
+      when: function (a) { return a.empty; },
+      build: function () {
+        return { action: 'ask', reason: 'нет текста',
+          reply: 'Кажется, сообщение пустое. Напишите даты и число гостей — подберу квартиру.' };
+      }
+    },
+    {
+      id: 'media-only', title: 'Голосовое или фото без текста', group: 'служебные',
+      when: function (a) { return a.signals.media && a.length < 40; },
+      build: function () {
+        return { action: 'ask', reason: 'вложение без текста',
+          reply: 'Я разбираю текст. Напишите, пожалуйста, коротко: даты, сколько гостей и район — отвечу сразу.' };
+      }
+    },
+    {
+      id: 'spam', title: 'Реклама и рассылки', group: 'служебные',
+      when: function (a) { return a.signals.spam && !a.dates.from && !a.signals.book; },
+      build: function () {
+        return { action: 'ignore', reason: 'рассылка, не заявка',
+          reply: 'Спасибо, предложение не по адресу. Этот чат — про бронирование квартир.',
+          internal: 'Помечено как спам, менеджеру не передаю.' };
+      }
+    },
+    {
+      id: 'lang-en', title: 'Гость пишет на английском', group: 'служебные',
+      when: function (a) { return a.lang === 'en' && !a.risk.hard; },
+      build: function (a) {
+        var S = Set;
+        if (a.match && a.match.offers.length) {
+          var list = a.match.offers.slice(0, 2).map(function (o, i) {
+            return (i + 1) + ') ' + o.object.title + ' — ' + o.object.district +
+                   ', up to ' + (o.object.capacity + o.object.extraBeds) + ' guests\n' +
+                   '   ' + U.money(o.quote.perNightStay, 'UZS') + ' per night · ' +
+                   U.money(o.quote.total, 'UZS') + ' total · deposit ' + U.money(o.quote.deposit, 'UZS');
+          }).join('\n');
+          return { action: 'offer', reason: 'заявка на английском разобрана',
+            reply: R.lines([
+              'Available for ' + a.dates.from + ' — ' + a.dates.to + ', ' + a.guests.total + ' guest(s):',
+              '', list, '',
+              'Cleaning, linen and Wi-Fi included. Check-in ' + S.checkIn + ', check-out ' + S.checkOut + '.',
+              'Prepayment ' + Math.round(S.prepay * 100) + '%, the rest on arrival. Passport needed at check-in.',
+              a.signals.pets ? 'Pets are allowed in these apartments for an extra fee.' : null,
+              'Which one works for you? I can hold the dates for ' + S.holdMinutes + ' minutes.'
+            ]) };
+        }
+        return { action: 'ask', reason: 'нужны даты, гость пишет по-английски',
+          reply: R.lines([
+            'Hi! Yes, we rent apartments in ' + (S.cityEn || S.city) + ' by the day.',
+            'Tell me the dates and the number of guests — I will send options with exact prices.',
+            'Example: "20-23 Nov for 2 people".',
+            'Check-in ' + S.checkIn + ', check-out ' + S.checkOut + '. Parking is free at most of our apartments.',
+            '',
+            '(Отвечаю и по-русски — как удобнее.)'
+          ]) };
+      }
+    },
+    {
+      id: 'lang-uz', title: 'Гость пишет по-узбекски', group: 'служебные',
+      when: function (a) { return a.lang === 'uz' && !a.risk.hard; },
+      build: function () {
+        return { action: 'ask', reason: 'узбекский язык',
+          reply: R.lines([
+            'Assalomu alaykum! ' + Set.brand + ' — ' + Set.cityEn + 'da kunlik kvartiralar.',
+            'Sanalarni va nechta mehmon ekanini yozing — narxlari bilan variantlarni yuboraman.',
+            'Masalan: «12-15 noyabr, 3 kishi».',
+            'Kirish ' + Set.checkIn + ', chiqish ' + Set.checkOut + '. Pasport kerak.',
+            '',
+            '(Rus tilida ham yozishingiz mumkin.)'
+          ]) };
+      }
+    },
+
+    /* ===== 1. Стоп-сценарии: отказ или человек ===== */
+    {
+      id: 'illegal', title: 'Незаконное использование', group: 'стоп',
+      when: function (a) { return a.signals.illegal; },
+      build: function () {
+        return { action: 'decline', reason: 'запрещённое использование квартиры', escalate: true,
+          reply: 'Такие запросы не обслуживаем. Квартиры сдаются только для проживания.',
+          internal: 'Стоп-лист. Контакт передан менеджеру, диалог закрыт.' };
+      }
+    },
+    {
+      id: 'fraud', title: 'Мошенническая схема с оплатой', group: 'стоп',
+      when: function (a) { return a.signals.fraud; },
+      build: function () {
+        return { action: 'escalate', reason: 'признаки мошенничества с платежом',
+          reply: R.lines([
+            'По оплате работаем только так: перевод на карту компании или наличные при заселении, реквизиты приходят из этого чата.',
+            'Мы не просим коды из СМС, не принимаем оплату с чужих карт и не возвращаем «ошибочные» переводы на другие реквизиты.',
+            R.human('нужно проверить платёж вручную')
+          ]),
+          internal: 'Возможная схема с возвратом «лишнего» платежа. Никаких переводов до проверки менеджером.' };
+      }
+    },
+    {
+      id: 'sublease', title: 'Пересдача и субаренда', group: 'стоп',
+      when: function (a) { return a.signals.sublease; },
+      build: function () {
+        return { action: 'decline', reason: 'субаренда запрещена',
+          reply: 'Пересдавать квартиру дальше нельзя — сдаём только тем, кто сам живёт. Если нужна квартира для себя, напишите даты, подберу.' };
+      }
+    },
+    {
+      id: 'fake-registration', title: 'Прописка без проживания', group: 'стоп',
+      when: function (a) { return a.signals.fakeReg; },
+      build: function () {
+        return { action: 'decline', reason: 'фиктивная регистрация',
+          reply: R.lines([
+            'Регистрацию без фактического проживания не оформляем.',
+            'Если вы реально живёте в квартире — временную регистрацию и миграционный учёт делаем сами, бесплатно, в течение ' + Set.registrationDays + ' суток после заезда.'
+          ]) };
+      }
+    },
+    {
+      id: 'minor', title: 'Несовершеннолетний гость', group: 'стоп',
+      when: function (a) { return a.signals.minor; },
+      build: function () {
+        return { action: 'decline', reason: 'возраст меньше ' + Set.minAge,
+          reply: 'Заселяем с ' + Set.minAge + ' лет: договор и депозит оформляются на совершеннолетнего. Если кто-то из взрослых готов заселиться и быть ответственным — оформим на него.' };
+      }
+    },
+    {
+      id: 'no-docs', title: 'Отказ показывать документы', group: 'стоп',
+      when: function (a) { return a.signals.docsNo; },
+      build: function () {
+        return { action: 'decline', reason: 'заселение без паспорта невозможно',
+          reply: R.lines([
+            'Без документов заселить не можем: ' + KB.faq.docs.toLowerCase() + ' — этого требует закон, мы подаём данные на учёт.',
+            'Копии храним только для регистрации и никуда не передаём.'
+          ]) };
+      }
+    },
+    {
+      id: 'storage', title: 'Квартира под склад', group: 'стоп',
+      when: function (a) { return a.signals.storage; },
+      build: function () {
+        return { action: 'decline', reason: 'нежилое использование',
+          reply: 'Под хранение товара квартиры не сдаём — только для проживания.' };
+      }
+    },
+    {
+      id: 'party', title: 'Вечеринка, день рождения, шумная компания', group: 'стоп',
+      when: function (a) { return a.signals.party; },
+      build: function (a) {
+        var many = a.guests.total && a.guests.total >= 6;
+        return { action: 'decline', reason: 'мероприятие в жилом доме',
+          reply: R.lines([
+            'Вечеринки и празднования в квартирах запрещены: дома жилые, после ' + Set.quietFrom + ' действует режим тишины, штраф ' + U.money(Set.partyFine) + ' и выселение без возврата.',
+            many ? 'Для компании ' + U.guests(a.guests.total) + ' могу предложить проживание без мероприятия — например, две квартиры рядом.' : 'Если это спокойное проживание без гостей и музыки — подберу вариант, напишите даты.',
+            'Под праздник лучше искать загородный дом или кафе — с этим не помогу.'
+          ]),
+          internal: 'Отказ по признакам мероприятия: ' + a.signals._matched.join(', ') + '. Если гость подтвердит спокойное проживание — можно вернуться к подбору с депозитом ×2.' };
+      }
+    },
+    {
+      id: 'hourly', title: 'Аренда на несколько часов', group: 'стоп',
+      when: function (a) { return a.signals.hourly; },
+      build: function () {
+        return { action: 'decline', reason: 'минимальный срок — сутки',
+          reply: 'Почасово не сдаём, минимальный срок — сутки: заезд с ' + Set.checkIn + ', выезд до ' + Set.checkOut + '. Если нужно переночевать одну ночь — подберу.' };
+      }
+    },
+    {
+      id: 'aggression', title: 'Конфликт и угрозы', group: 'стоп',
+      when: function (a) {
+        /* «вдруг вы мошенники» — это сомнение перед оплатой, а не скандал */
+        if (/вдруг|а если|боюсь|как убедиться|гаранти|почему предоплат/.test(a.norm)) return false;
+        return a.signals.aggression;
+      },
+      build: function () {
+        return { action: 'escalate', reason: 'конфликтный разговор',
+          reply: R.lines([
+            'Понимаю, что вы недовольны, и не буду спорить в переписке.',
+            'Опишите одним сообщением, что произошло и какое решение вас устроит — передам сразу.',
+            R.human('разбор спорной ситуации')
+          ]) };
+      }
+    },
+    {
+      id: 'human', title: 'Просит живого человека', group: 'служебные',
+      when: function (a) { return a.signals.human; },
+      build: function () {
+        return { action: 'handoff', reason: 'запрос оператора',
+          reply: R.lines(['Да, я бот — отвечаю мгновенно и считаю цены.', R.human('вы просили человека')]) };
+      }
+    },
+
+    /* ===== 2. Гость уже живёт: проблемы и просьбы ===== */
+    {
+      id: 'emergency', title: 'Авария или не может попасть в квартиру', group: 'проживание',
+      when: function (a) {
+        return a.signals.complaint && /нет воды|нет света|нет отоплен|не могу попасть|не открывается|затоп|залив|газ|дым|пожар|прорвал/.test(a.norm);
+      },
+      build: function (a) {
+        var lock = /не могу попасть|не открывается|замок|код не подход/.test(a.norm);
+        return { action: 'escalate', reason: 'срочная проблема у живущего гостя', priority: 'срочно',
+          reply: R.lines([
+            lock ? 'Сейчас решим. Пришлите, пожалуйста, адрес квартиры и что именно не открывается — дверь подъезда, сейф-бокс или сама дверь.'
+                 : 'Принял, это срочно. Напишите адрес квартиры и что именно не работает — передаю мастеру прямо сейчас.',
+            'Если проблема не решится за час — переселим в свободную квартиру того же класса без доплаты.',
+            'Телефон дежурного: ' + Set.escalationPhone + ', звоните в любое время.'
+          ]),
+          internal: 'Срочная эскалация: живущий гость. SLA — ответ мастера 15 минут, решение час, иначе переселение.' };
+      }
+    },
+    {
+      id: 'damage', title: 'Гость сообщает об ущербе', group: 'проживание',
+      when: function (a) { return a.signals.damage; },
+      build: function () {
+        return { action: 'escalate', reason: 'ущерб и депозит',
+          reply: R.lines([
+            'Спасибо, что сказали сами — так проще. Пришлите фото повреждения.',
+            'Мелочи вроде разбитой чашки не считаем. Если нужен ремонт или замена, стоимость удержим из депозита и покажем чек, остаток вернём в тот же день.'
+          ]) };
+      }
+    },
+    {
+      id: 'complaint', title: 'Жалоба на квартиру или сервис', group: 'проживание',
+      when: function (a) { return a.signals.complaint; },
+      build: function (a) {
+        return { action: 'escalate', reason: 'жалоба по качеству',
+          reply: R.lines([
+            'Извините, так быть не должно. Пришлите фото и адрес — отправлю мастера или клинера сегодня.',
+            'Если поправить быстро не получится, предложу переселение или пересчитаю стоимость за эти сутки.'
+          ]),
+          internal: 'Жалоба: «' + a.raw.slice(0, 120) + '». Проверить объект перед следующим заездом.' };
+      }
+    },
+    {
+      id: 'keys', title: 'Потерял ключи, захлопнул дверь', group: 'проживание',
+      when: function (a) { return a.signals.keys; },
+      build: function () {
+        return { action: 'escalate', reason: 'доступ в квартиру', priority: 'срочно',
+          reply: R.lines([
+            'Не переживайте. Напишите адрес — привезу дубликат, обычно это 30–40 минут.',
+            'Если замок захлопнулся и дубликат не подойдёт, вызовем мастера: вскрытие ' + U.money(Set.lockFee || 12000) + ', новый комплект ключей ' + U.money(Set.keysFee || 7000) + '.',
+            'Дежурный телефон: ' + Set.escalationPhone + '.'
+          ]) };
+      }
+    },
+
+    /* ===== 3. Изменения брони ===== */
+    {
+      id: 'cancel', title: 'Отмена брони', group: 'изменения',
+      when: function (a) { return a.signals.cancel && !/рейс|поезд|самол[её]т|вылет|прилет/.test(a.norm); },
+      build: function (a) {
+        var b = a.ctx.booking;
+        if (!b) {
+          return { action: 'ask', reason: 'нет данных о брони',
+            reply: 'Отменю. Напишите, пожалуйста, даты брони и на чьё имя она оформлена — посчитаю возврат по условиям.' };
+        }
+        var r = PO.refund(b.from, b.paid || (b.status === 'оплачено' ? b.prepay : 0));
+        if (!r.sum) {
+          return { action: 'confirm', reason: 'отмена без внесённых денег',
+            reply: R.lines([
+              'Бронь ' + U.range(b.from, b.to) + ' снял, возвращать нечего — предоплата не вносилась.',
+              'Если соберётесь снова, напишите: подберу по наличию на тот момент.'
+            ]),
+            internal: 'Отмена удержания без оплаты, деньги не двигаем.' };
+        }
+        return { action: 'confirm', reason: 'отмена по правилам',
+          reply: R.lines([
+            'Бронь ' + U.range(b.from, b.to) + ' отменяю.',
+            'До заезда ' + U.plural(r.days, 'остался', 'осталось', 'осталось') + ' ' + r.days + ' ' + U.plural(r.days, 'день', 'дня', 'дней') + ', поэтому ' + r.note + ': ' + U.money(r.sum) + ' вернём на карту оплаты за 1–3 рабочих дня.',
+            'Если планы сдвинулись, а не отменились — могу перенести даты без потери предоплаты.'
+          ]),
+          internal: 'Возврат ' + U.money(r.sum) + ' из ' + U.money(b.prepay) + '. Освободить календарь.' };
+      }
+    },
+    {
+      id: 'change-dates', title: 'Перенос дат', group: 'изменения',
+      when: function (a) { return a.signals.changeDates; },
+      build: function (a) {
+        var b = a.ctx.booking;
+        if (!a.dates.from) {
+          return { action: 'ask', reason: 'нет новых дат',
+            reply: 'Перенесём. На какие даты сдвигаем? Проверю, свободна ли та же квартира, и посчитаю разницу в цене.' };
+        }
+        if (b) {
+          var obj = KB.byId(b.objectId), nights = a.dates.nights || U.diffDays(b.from, b.to);
+          var to = a.dates.to || U.addDays(a.dates.from, nights);
+          var free = PO.isFree(obj, a.dates.from, to);
+          if (free.free) {
+            var q = PO.quote(obj, { from: a.dates.from, to: to, guests: b.guests });
+            var diff = q.total - (b.total || 0);
+            return { action: 'confirm', reason: 'новые даты свободны',
+              reply: R.lines([
+                obj.title + ' на ' + U.range(a.dates.from, to) + ' свободна — переношу.',
+                'Новая сумма ' + U.money(q.total) + (diff ? (diff > 0 ? ', доплата ' + U.money(diff) : ', вернём разницу ' + U.money(-diff)) : ', цена та же') + '.',
+                'Предоплата переходит на новые даты.'
+              ]) };
+          }
+          var win = PO.nearestWindows(obj, a.dates.from, nights, 2);
+          return { action: 'offer', reason: 'даты заняты, есть соседние',
+            reply: R.lines([
+              'На ' + U.range(a.dates.from, to) + ' эта квартира занята.',
+              win.length ? 'Свободна ' + win.map(function (x) { return U.range(x.from, x.to); }).join(' или ') + '.' : null,
+              'Либо перенесу в другую квартиру на ваши даты — скажите, что удобнее.'
+            ]) };
+        }
+        return { action: 'ask', reason: 'нет исходной брони',
+          reply: 'Напишите, какая бронь переносится (даты и имя), и на какие даты — проверю и пересчитаю.' };
+      }
+    },
+    {
+      id: 'extend', title: 'Продление проживания', group: 'изменения',
+      when: function (a) { return a.signals.extend; },
+      build: function (a) {
+        var b = a.ctx.booking;
+        var addNights = a.dates.nights || 1;
+        if (!b) {
+          return { action: 'ask', reason: 'нет текущей брони',
+            reply: 'Продлим. Напишите адрес квартиры и до какого числа хотите остаться — проверю, свободна ли она дальше.' };
+        }
+        var obj = KB.byId(b.objectId);
+        var newTo = U.addDays(b.to, addNights);
+        var free = PO.isFree(obj, b.to, newTo);
+        if (free.free) {
+          var q = PO.quote(obj, { from: b.to, to: newTo, guests: b.guests });
+          return { action: 'confirm', reason: 'квартира свободна дальше',
+            reply: R.lines([
+              'Можно остаться до ' + U.fmtFull(newTo) + ' — квартира свободна.',
+              'Доплата ' + U.money(q.total) + ' за ' + U.nights(addNights) + '. Переезжать не нужно, уборку сделаем по вашему графику.'
+            ]) };
+        }
+        var alt = PO.freeOn(b.to, newTo);
+        return { action: 'offer', reason: 'после выезда квартира занята',
+          reply: R.lines([
+            'В этой квартире после ' + U.fmtFull(b.to) + ' уже заезжают другие гости.',
+            alt.length ? 'Могу переселить рядом: ' + alt.slice(0, 2).map(function (o) { return o.title + ' — ' + U.money(PO.nightPrice(o, b.to)) + '/ночь'; }).join('; ') + '. Переезд поможем организовать.' : 'На эти даты всё занято — подскажу, как только что-то освободится.'
+          ]) };
+      }
+    },
+
+    /* ===== 4. Особые типы заявок ===== */
+    {
+      id: 'group', title: 'Большая группа, нужно несколько квартир', group: 'заявка',
+      when: function (a) { return (a.guests.total && a.guests.total > KB.capacityMax()) || (a.signals.group && a.guests.total > 6); },
+      build: function (a) {
+        if (!a.dates.from || !a.dates.to) {
+          return { action: 'ask', reason: 'группа без дат',
+            reply: ask(a, 'Разместим ' + U.guests(a.guests.total || 0) + ' в двух-трёх квартирах рядом — так дешевле, чем отель.', ['На какие даты?', 'Сколько мужчин и женщин, нужны ли раздельные квартиры?']) };
+        }
+        var c = PO.combo({ from: a.dates.from, to: a.dates.to, guests: a.guests.total, pets: a.signals.pets });
+        if (!c) {
+          return { action: 'escalate', reason: 'не хватает свободных квартир',
+            reply: R.lines(['На ' + U.range(a.dates.from, a.dates.to) + ' столько мест сразу нет.', R.human('подберём варианты у партнёров')]) };
+        }
+        return { action: 'offer', reason: 'групповое размещение',
+          reply: R.lines([
+            'На ' + U.guests(a.guests.total) + ', ' + U.range(a.dates.from, a.dates.to) + ' собрал комплект:',
+            '',
+            c.parts.map(function (p, i) { return (i + 1) + ') ' + p.object.title + ' — ' + R.objLine(p.object) + ' → ' + U.guests(p.guests) + ', ' + U.money(p.quote.total); }).join('\n'),
+            '',
+            'Итого ' + U.money(c.total) + ' за ' + U.nights(U.diffDays(a.dates.from, a.dates.to)) + ' на всех.',
+            'Оформляем одной бронью, предоплата ' + Math.round(Set.prepay * 100) + '%. Для компании сделаем договор и закрывающие документы.',
+            R.hold()
+          ]),
+          internal: 'Групповая заявка. Проверить у менеджера скидку от 3 квартир.' };
+      }
+    },
+    {
+      id: 'long-stay', title: 'Длительная аренда от месяца', group: 'заявка',
+      when: function (a) { return a.signals.longStay || (a.dates.nights && a.dates.nights >= Set.longStayFrom); },
+      build: function (a) {
+        var nights = a.dates.nights || 30;
+        var from = a.dates.from || U.addDays(U.today(), 1);
+        var to = a.dates.to || U.addDays(from, nights);
+        var m = PO.match({ from: from, to: to, guests: a.guests.total || 2, pets: a.signals.pets, rooms: a.prefs.rooms });
+        var head = 'На ' + U.nights(nights) + ' работает длительный тариф: скидка ' + Math.round(Set.longStayDiscount * 100) + '%, договор, оплата помесячно.';
+        if (m.offers.length) {
+          return { action: 'offer', reason: 'длительное проживание',
+            reply: R.lines([
+              head, '',
+              R.offers(m.offers, 2), '',
+              'Депозит один раз, коммунальные включены. Регистрацию оформляем сразу.',
+              'Нужен паспорт и предоплата за первый месяц. Подойдёт — закреплю квартиру за вами.'
+            ]),
+            internal: 'Длительная аренда: передать менеджеру для договора.' };
+        }
+        var starts = [];
+        KB.objects.forEach(function (o) {
+          PO.nearestWindows(o, from, Math.min(nights, 30), 1).forEach(function (win) {
+            if (win.shift > 0) starts.push({ object: o, from: win.from, to: win.to });
+          });
+        });
+        starts.sort(function (x, y) { return x.from < y.from ? -1 : 1; });
+        if (starts.length) {
+          return { action: 'offer', reason: 'сдвигаем старт длительной брони',
+            reply: R.lines([
+              head,
+              'Ровно с ' + U.fmt(from) + ' на такой срок всё занято, но освобождается:',
+              starts.slice(0, 2).map(function (x) {
+                return '· ' + x.object.title + ' — с ' + U.fmtFull(x.from) + ', ' + U.money(PO.nightPrice(x.object, x.from)) + '/ночь до скидки';
+              }).join('\n'),
+              'Могу закрепить за вами дату освобождения — предоплата за первый месяц вносится ближе к заезду.'
+            ]),
+            internal: 'Длительная аренда со сдвигом старта. Проверить, не съедет ли текущий гость раньше.' };
+        }
+        return { action: 'escalate', reason: 'нет подходящих на длинный срок',
+          reply: R.lines([head, 'На эти даты свободных под длительное проживание нет.', R.human('подберём из ближайших освобождающихся')]) };
+      }
+    },
+    {
+      id: 'corporate', title: 'Командировка и документы для юрлица', group: 'заявка',
+      when: function (a) {
+        /* Если заявка полная, её ведёт основной сценарий, а документы попадают в дополнения */
+        return a.signals.invoice && !(a.match && a.match.offers.length && a.dates.from && a.guests.total);
+      },
+      build: function (a) {
+        var base = R.lines([
+          'С юрлицами работаем: договор, счёт, акт и счёт-фактура, оплата по безналу (обычно 1–2 рабочих дня).',
+          'Для счёта нужны реквизиты компании, ФИО гостей и даты.'
+        ]);
+        if (a.match && a.match.offers.length) {
+          var sorted = a.match.offers.slice().sort(function (x, y) {
+            var wx = x.object.features.indexOf('рабочее место') >= 0 ? 1 : 0;
+            var wy = y.object.features.indexOf('рабочее место') >= 0 ? 1 : 0;
+            return wy - wx || y.score - x.score;
+          });
+          a.match = { offers: sorted, rejected: a.match.rejected, alternatives: a.match.alternatives, status: a.match.status };
+          return { action: 'offer', reason: 'корпоративная бронь',
+            reply: R.lines([base, '', R.offers(a.match.offers, 2), '', 'Для командировок чаще берут вариант с рабочим местом — там тихо и есть стол. Выставить счёт?']),
+            internal: 'Корпоратив: запросить реквизиты, счёт готовит бухгалтерия.' };
+        }
+        return { action: 'ask', reason: 'корпоративная заявка без дат',
+          reply: ask(a, base, ['На какие даты и сколько сотрудников?', 'Нужны отдельные квартиры или можно вместе?']) };
+      }
+    },
+    {
+      id: 'registration', title: 'Вопрос про регистрацию и миграционный учёт', group: 'инфо',
+      when: function (a) { return a.signals.registration && !a.dates.from; },
+      build: function () {
+        return { action: 'info', reason: 'вопрос про учёт',
+          reply: R.lines([KB.faq.registration, KB.faq.docs, 'Напишите даты — подберу квартиру и всё оформим вместе с заездом.']) };
+      }
+    },
+
+    /* ===== 5. Проблемы с датами ===== */
+    {
+      id: 'dates-invalid', title: 'Даты в прошлом или перепутаны', group: 'заявка',
+      when: function (a) { return a.dates.issues.length > 0; },
+      build: function (a) {
+        var issue = a.dates.issues[0];
+        return { action: 'ask', reason: issue,
+          reply: R.lines([
+            /не открыт/.test(issue) ? 'На такой срок вперёд бронь ещё не открыта — мы продаём даты на ' +
+              Math.round(Set.bookingHorizonDays / 30) + ' месяцев вперёд, до ' + U.fmtFull(U.addDays(U.today(), Set.bookingHorizonDays)) + '.'
+              : /прошла/.test(issue) ? 'Кажется, дата заезда уже прошла — уточните, пожалуйста, какой месяц имеется в виду.'
+              : /не позже/.test(issue) ? 'Похоже, выезд получился раньше заезда. Напишите даты ещё раз: с какого по какое?'
+              : 'Уточню по срокам: ' + issue + '.',
+            /не открыт/.test(issue) ? 'Напишите, когда планируете поездку ближе к делу — поставлю напоминание и вернусь с ценами.'
+              : 'Например: «с 12 по 15 ноября» или «с 3 числа на 4 ночи».'
+          ]) };
+      }
+    },
+    {
+      id: 'next-free', title: 'Когда ближайшее свободное', group: 'заявка',
+      when: function (a) { return a.signals.otherDates && a.matchReq; },
+      build: function (a) {
+        var next = PO.nextAvailable(a.matchReq, 90);
+        if (!next) {
+          return { action: 'escalate', reason: 'на горизонте трёх месяцев свободного нет',
+            reply: R.lines([
+              'Честно: на ближайшие три месяца под ваш запрос свободного нет.',
+              R.human('подскажет, что освобождается раньше, и предложит партнёрские квартиры')
+            ]) };
+        }
+        var q = next.offer.quote;
+        return { action: 'offer', reason: 'ближайшая доступная дата',
+          reply: R.lines([
+            'Ближайшее, что подходит под ваш запрос: ' + U.range(next.from, next.to) + '.',
+            next.offer.object.title + ' — ' + U.money(q.perNightStay) + '/ночь, за ' + U.nights(q.nights) + ' ' + U.money(q.total) + '.',
+            'Если эти даты не подходят, напишите свои — проверю по всему фонду.'
+          ]) };
+      }
+    },
+    {
+      id: 'no-availability', title: 'На эти даты нет подходящего', group: 'заявка',
+      when: function (a) { return a.match && a.match.status === 'none'; },
+      build: function (a) {
+        var alt = R.alternatives(a.match);
+        var tooShort = a.match.rejected.every(function (r) { return r.reasons.some(function (x) { return /минимум/.test(x); }); });
+        if (tooShort) {
+          /* Берём самый мягкий минимум: гостю важно, с какого срока хоть что-то
+             доступно, а не сколько просит квартира под длительную аренду */
+          var min = a.match.rejected.reduce(function (m, r) {
+            return Math.min(m, PO.minNights(r.object, a.dates.from, a.dates.to));
+          }, Infinity);
+          var add = min - a.dates.nights;
+          var season = PO.seasonsOf(a.dates.from, a.dates.to).map(function (x) { return x.name; }).join(', ');
+          return { action: 'ask', reason: 'меньше минимального срока',
+            reply: R.lines([
+              'На эти даты минимум ' + U.nights(min) + (season ? ' — это ' + season : '') + ', а у вас ' + U.nights(a.dates.nights) + '.',
+              'Добавьте ' + U.nights(add) + ' — например, ' + U.range(a.dates.from, U.addDays(a.dates.from, min)) +
+                ' — или сдвиньте даты за пределы праздников, там минимума нет.'
+            ]) };
+        }
+
+        var why = PO.whyBlocked(a.matchReq);
+        var next = PO.nextAvailable(a.matchReq, 90);
+        var nextLine = next
+          ? 'Ближайшее подходящее — ' + U.range(next.from, next.to) + ': ' + next.offer.object.title +
+            ', ' + U.money(next.offer.quote.perNightStay) + '/ночь.'
+          : null;
+
+        /* Свободные квартиры есть, просто не подходят — говорить «всё занято» нечестно */
+        if (why.freeButUnfit) {
+          var u = why.unfit[0];
+          var group = a.guests.total && a.guests.total > u.object.capacity + u.object.extraBeds;
+          var combo = group ? PO.combo({ from: a.dates.from, to: a.dates.to, guests: a.guests.total, pets: a.req.pets }) : null;
+          return { action: 'offer', reason: 'свободное есть, но не под запрос',
+            reply: R.lines([
+              'Свободное на ' + U.range(a.dates.from, a.dates.to) + ' есть, но под ваш запрос не подходит:',
+              why.unfit.slice(0, 3).map(function (x) {
+                return '· ' + x.object.title + ' — ' + x.reasons.join(', ');
+              }).join('\n'),
+              '',
+              combo ? 'Могу разместить вас в двух квартирах на эти же даты — вместе выйдет ' + U.money(combo.total) + '.' : null,
+              nextLine,
+              'Скажите, что удобнее: другие даты, несколько квартир или лист ожидания.'
+            ]),
+            internal: 'Свободные есть, но не подходят: ' + why.unfit.map(function (x) { return x.object.id; }).join(', ') + '.' };
+        }
+
+        var heldByOther = a.match.rejected.some(function (r) { return r.held; });
+        return { action: 'offer', reason: 'нет свободных на запрошенные даты',
+          reply: R.lines([
+            'На ' + U.range(a.dates.from, a.dates.to) + ' всё занято — не буду обещать того, чего нет.',
+            heldByOther ? 'Часть квартир сейчас держит другой гость: если он не внесёт предоплату в течение часа, они снова освободятся — могу написать вам первым.' : null,
+            alt ? '' : null,
+            alt ? 'Ближайшее свободное:' : null,
+            alt,
+            !alt && nextLine ? nextLine : null,
+            !alt && !nextLine ? 'Свободного под ваш запрос нет и в ближайшие три месяца — это редкость, передам менеджеру, он посмотрит партнёрские квартиры.' : null,
+            '',
+            'Могу поставить вас первым в лист ожидания: если освободится, напишу сразу. Или подберу на другие даты — скажите, насколько они гибкие.'
+          ]),
+          escalate: !alt && !nextLine,
+          internal: 'Лист ожидания на ' + U.range(a.dates.from, a.dates.to) + '.' };
+      }
+    },
+
+    {
+      id: 'nearby', title: 'Что рядом с домом', group: 'вопросы',
+      when: function (a) { return !(a.freshChanged && a.dates.from) && !!(a.signals.nearby || nearbyTopics(a.norm).length); },
+      build: function (a) {
+        var topics = nearbyTopics(a.norm);
+        var objects = shownObjects(a);
+
+        /* Ещё не выбирали квартиру — отвечаем по всем районам сразу */
+        if (!objects.length) objects = KB.objects.slice(0, 3);
+        if (!topics.length) topics = ['аптека', 'продукты', 'кафе', 'транспорт'];
+
+        var lines = objects.map(function (o) {
+          var facts = topics.map(function (t) {
+            return o.nearby && o.nearby[t] ? '   · ' + t + ': ' + o.nearby[t] : null;
+          }).filter(Boolean);
+          return facts.length ? o.title + ':\n' + facts.join('\n') : null;
+        }).filter(Boolean);
+
+        if (!lines.length) {
+          return { action: 'escalate', reason: 'нет данных по этой теме', priority: 'обычный',
+            reply: R.lines([
+              'Точно не скажу, чтобы не соврать — уточню у менеджера и вернусь с ответом.',
+              R.human('знает район лучше меня')
+            ]) };
+        }
+
+        return { action: 'info', reason: 'вопрос про окружение дома',
+          reply: R.lines([
+            lines.join('\n\n'),
+            '',
+            a.ctx.booking || a.ctx.offers.length
+              ? 'Что-то ещё уточнить по району?'
+              : 'Напишите даты и число гостей — подберу квартиру и расскажу про её двор подробнее.'
+          ]) };
+      }
+    },
+    {
+      id: 'city-info', title: 'Вопрос про город', group: 'вопросы',
+      when: function (a) { return a.signals.cityInfo && !(a.freshChanged && a.dates.from); },
+      build: function (a) {
+        var t = a.norm, out = [];
+        var map = [
+          [/аэропорт|прилет|прилечу|самолет/, 'аэропорт'],
+          [/вокзал|поезд/, 'вокзал'],
+          [/такси/, 'такси'],
+          [/автобус|транспорт|как передвигаться|метро/, 'транспорт'],
+          [/доставк|поесть|еду заказ/, 'еда'],
+          [/обмен|валют|поменять деньги/, 'обмен'],
+          [/оплат[а-я]* картой|наличн[а-я]*|kaspi|каспи/, 'деньги'],
+          [/посмотреть|достопримечат|экскурс|куда сходить/, 'достопримечательности'],
+          [/скорая|полиц|112|103|экстренн/, 'экстренно'],
+          [/погод|холодно|мороз|жарко ли/, 'погода'],
+          [/ветклиник|ветеринар/, 'ветклиника']
+        ];
+        map.forEach(function (pair) {
+          if (pair[0].test(t) && KB.city[pair[1]]) out.push(KB.city[pair[1]]);
+        });
+        if (!out.length) out.push(KB.city.транспорт);
+
+        return { action: 'info', reason: 'справка по городу',
+          reply: R.lines(out.concat([
+            a.ctx.booking ? 'Если нужна встреча — организуем, напишите номер рейса.'
+                          : 'Если ещё выбираете квартиру — напишите даты, подберу поближе к нужному месту.'
+          ])) };
+      }
+    },
+    /* ===== 6. Основной путь брони ===== */
+    {
+      id: 'payment-claimed', title: 'Гость говорит, что оплатил', group: 'бронь',
+      when: function (a) { return a.signals.paid; },
+      build: function (a) {
+        var b = a.ctx.booking;
+        if (b && b.paymentClaimedAt) {
+          return { action: 'escalate', reason: 'оплата заявлена повторно', priority: 'важно',
+            reply: R.lines([
+              'Вижу, что вы уже писали об оплате — повторно переводить не нужно, иначе придётся возвращать второй платёж.',
+              'Проверяю поступление вручную, менеджер подключён. Если перевод был больше часа назад — пришлите чек или последние 4 цифры карты, найдём по ним.'
+            ]),
+            internal: 'Повторное заявление об оплате по брони ' + b.objectId + ' — риск двойного платежа, проверить срочно.' };
+        }
+        if (b) {
+          var o = KB.byId(b.objectId);
+          return { action: 'escalate', reason: 'заявлена оплата, нужна сверка', priority: 'важно',
+            reply: R.lines([
+              'Спасибо, проверяю поступление — обычно перевод виден в течение 10–15 минут.',
+              'Как только увижу оплату, пришлю точный адрес, код от подъезда и контакт встречающего по брони: ' +
+                o.title + ', ' + U.range(b.from, b.to) + '.',
+              'Если оплата была с чужой карты или другим способом — напишите, с какого номера и на какую сумму, так найду быстрее.'
+            ]),
+            internal: 'Гость заявил оплату ' + U.money(b.prepay) + ' по брони ' + b.objectId + '. Сверить поступление до отправки адреса.' };
+        }
+        return { action: 'escalate', reason: 'оплата без брони в системе', priority: 'важно',
+          reply: R.lines([
+            'Проверю платёж. Напишите, пожалуйста: сумму, время перевода и на какие даты бронь — по этим данным найду оплату.',
+            'Адрес отправляю только после того, как вижу деньги на счёте, — так безопаснее для обеих сторон.'
+          ]),
+          internal: 'Гость заявил оплату, но брони в диалоге нет. Проверить поступление вручную.' };
+      }
+    },
+    {
+      id: 'hold-expired', title: 'Час удержания истёк', group: 'бронь',
+      when: function (a) {
+        var b = a.ctx.booking;
+        return !!(b && b.status === 'удержание' && b.heldAt &&
+                  Date.now() - b.heldAt > Set.holdMinutes * 60000);
+      },
+      build: function (a) {
+        var b = a.ctx.booking, o = KB.byId(b.objectId);
+        var free = PO.isFree(o, b.from, b.to).free;
+        a.ctx.booking = null;                                  // удержание снято
+        return { action: free ? 'offer' : 'ask', reason: 'истёк срок удержания без предоплаты',
+          reply: R.lines([
+            'Час удержания прошёл, и без предоплаты я снял даты — так честнее по отношению к другим гостям.',
+            free
+              ? o.title + ' на ' + U.range(b.from, b.to) + ' всё ещё свободна: ' + U.money(b.total) +
+                ', предоплата ' + U.money(b.prepay) + '. Держу снова час, если подтвердите.'
+              : 'Эту квартиру уже забронировали. Напишите даты — подберу из того, что есть сейчас.'
+          ]),
+          internal: 'Удержание снято по таймауту. ' + (free ? 'Квартира ещё свободна.' : 'Квартира ушла.') };
+      }
+    },
+    {
+      id: 'installment', title: 'Оплата частями или в рассрочку', group: 'вопросы',
+      when: function (a) { return a.signals.installment; },
+      build: function () {
+        return { action: 'info', reason: 'вопрос про оплату частями',
+          reply: R.lines([
+            'Так и работаем: ' + Math.round(Set.prepay * 100) + '% предоплаты, остальное при заезде наличными или переводом.',
+            'Рассрочки на несколько месяцев нет — мы не банк. В праздничные даты предоплата полная, там вариантов нет.',
+            'Для юрлиц можно по счёту с оплатой после заезда, но тогда нужен договор.'
+          ]) };
+      }
+    },
+    {
+      id: 'booking-payment', title: 'Гость прислал контакты по удержанной брони', group: 'бронь',
+      when: function (a) { return a.ctx.booking && a.ctx.booking.status === 'удержание' && (a.contacts.phone || a.signals.book || a.signals.payment); },
+      build: function (a) {
+        var b = a.ctx.booking, o = KB.byId(b.objectId);
+        return { action: 'confirm', reason: 'бронь оформляется',
+          reply: R.lines([
+            'Записал' + (a.contacts.name ? ': ' + a.contacts.name : '') + (a.contacts.phone ? ', ' + a.contacts.phone : '') + '.',
+            'Бронь: ' + o.title + ', ' + U.range(b.from, b.to) + ', ' + U.guests(b.guests) + '.',
+            '',
+            'Предоплата ' + U.money(b.prepay) + ' — ' + Set.companyCard + '. Реквизиты отправлю следующим сообщением.',
+            'Как только увижу оплату: пришлю точный адрес, код от подъезда и контакт встречающего.',
+            'Остаток ' + U.money(b.total - b.prepay) + ' — при заезде, наличными или переводом.'
+          ]),
+          internal: 'Ждём предоплату ' + U.money(b.prepay) + ' по брони ' + b.objectId + '. Через ' + Set.holdMinutes + ' минут без оплаты — снять удержание.' };
+      }
+    },
+    {
+      id: 'booking-confirm', title: 'Гость выбрал вариант', group: 'бронь',
+      when: function (a) { return a.selected; },
+      build: function (a) {
+        var o = a.selected.object, q = a.selected.quote;
+        return { action: 'hold', reason: 'подтверждение брони',
+          reply: R.lines([
+            'Отлично, держу ' + o.title + ', ' + U.range(q.from, q.to) + ', ' + U.guests(q.guests) + '.',
+            '',
+            R.breakdown(q),
+            '',
+            'Чтобы закрепить, пришлите: ФИО, номер телефона и фото паспорта (нужно для регистрации).',
+            'После предоплаты отправлю точный адрес, код от подъезда и инструкцию по заселению.',
+            R.hold()
+          ]),
+          internal: 'Бронь-удержание ' + o.id + ' ' + q.from + '→' + q.to + ', предоплата ' + U.money(q.prepay) + '.' };
+      }
+    },
+    {
+      id: 'full-request', title: 'Полная заявка: даты, гости, всё считается', group: 'бронь',
+      when: function (a) {
+        if (!(a.match && a.match.offers.length > 0 && a.dates.from && a.dates.to && a.guests.total)) return false;
+        /* Варианты уже на экране и ничего не изменилось — пусть отвечает
+           справочный сценарий, а не второй раз тот же список */
+        return !a.ctx.offers.length || a.freshChanged || a.signals.book;
+      },
+      build: function (a) {
+        var head = 'Смотрю на ' + U.range(a.dates.from, a.dates.to) + ', ' + U.nights(a.dates.nights) + ', ' + U.guests(a.guests.total) +
+                   (a.guests.children ? ' (из них ' + a.guests.children + ' ' + U.plural(a.guests.children, 'ребёнок', 'детей', 'детей') + ')' : '') + ' — свободно:';
+        var over = a.budget.amount && a.match.offers[0].quote.perNight > a.budget.amount && a.budget.per === 'night';
+        var reply = offersReply(a, head);
+        if (over) {
+          reply = R.lines([reply, '', 'В ваш бюджет ' + R.budget(a) + '/ночь на эти даты попадает только эконом у вокзала — если интересно, пришлю.']);
+        }
+        return { action: 'offer', reason: 'заявка разобрана полностью', reply: reply,
+          internal: 'Готово к брони. Осталось получить выбор варианта и контакты.' };
+      }
+    },
+    {
+      id: 'partial-request', title: 'Заявка неполная — уточняем', group: 'бронь',
+      when: function (a) { return a.missing.length > 0 && (a.dates.from || a.guests.total || a.budget.amount || a.prefs.district || a.prefs.rooms !== null); },
+      build: function (a) {
+        var known = [];
+        if (a.dates.from) known.push('даты: ' + R.dates(a));
+        else if (a.dates.nights) known.push('срок: ' + U.nights(a.dates.nights));
+        if (a.guests.total) known.push('гостей: ' + a.guests.total);
+        if (a.prefs.rooms !== null && a.prefs.rooms !== undefined) {
+          known.push(a.prefs.rooms ? a.prefs.rooms + '-комнатная' : 'студия');
+        }
+        if (a.budget.amount) known.push('бюджет: ' + R.budget(a) + (a.budget.per === 'night' ? '/ночь' : ' всего'));
+        if (a.prefs.district) known.push('район: ' + a.prefs.district);
+        var head = known.length ? 'Записал: ' + known.join(', ') + '.' : 'Помогу подобрать квартиру.';
+        var teaser = null;
+        if (a.dates.from && a.dates.to && !a.guests.total) {
+          var free = PO.freeOn(a.dates.from, a.dates.to);
+          teaser = free.length ? 'На эти даты свободно ' + free.length + ' ' + U.plural(free.length, 'квартира', 'квартиры', 'квартир') + ', от ' + U.money(Math.min.apply(null, free.map(function (o) { return PO.nightPrice(o, a.dates.from); }))) + '/ночь.' : null;
+        }
+        if (!a.dates.from && !a.guests.total) teaser = R.priceFrom();
+        var extra = addons(a, null);
+        return { action: 'ask', reason: 'не хватает данных: ' + a.missing.join(', '),
+          reply: R.lines([head, assumptions(a), teaser ? teaser : null,
+                          extra.length ? '' : null, extra.length ? extra.join('\n') : null,
+                          '', R.ask(a.questions)]),
+          internal: 'Ждём: ' + a.missing.join(', ') + '.' };
+      }
+    },
+
+    /* ===== 7. Вопросы без заявки ===== */
+    {
+      id: 'discount', title: 'Просят скидку', group: 'вопросы',
+      when: function (a) { return a.signals.discount; },
+      build: function (a) {
+        var lines = [
+          'Цены держим без наценки за переписку, но скидки есть:',
+          '· от ' + Set.weekDiscountFrom + ' ночей — ' + Math.round(Set.weekDiscount * 100) + '%',
+          '· от ' + Set.longStayFrom + ' ночей — ' + Math.round(Set.longStayDiscount * 100) + '%',
+          '· постоянным гостям — ' + Math.round(Set.repeatGuestDiscount * 100) + '%'
+        ];
+        if (a.dates.nights && a.dates.nights < Set.weekDiscountFrom) {
+          lines.push('На ваш срок могу дать 5% при оплате сразу за все ночи — это максимум, что решаю сам.');
+        }
+        if (a.match && a.match.offers.length) {
+          lines.push('', 'С учётом этого: ' + a.match.offers[0].object.title + ' — ' + U.money(Math.round(a.match.offers[0].quote.total * 0.95)) + ' вместо ' + U.money(a.match.offers[0].quote.total) + '.');
+        }
+        return { action: 'offer', reason: 'торг в пределах полномочий', reply: R.lines(lines),
+          internal: 'Скидка больше 10% — только через менеджера.' };
+      }
+    },
+    {
+      id: 'price', title: 'Вопрос о цене без дат', group: 'вопросы',
+      when: function (a) { return a.signals.price; },
+      build: function (a) {
+        return { action: 'ask', reason: 'цена зависит от дат',
+          reply: R.lines([
+            R.priceFrom(),
+            'В выходные и в праздники дороже, от ' + Set.weekDiscountFrom + ' ночей — скидка ' + Math.round(Set.weekDiscount * 100) + '%.',
+            'Назовите даты и число гостей — посчитаю точно, с депозитом и предоплатой.'
+          ]) };
+      }
+    },
+    {
+      id: 'availability', title: 'Есть ли свободные — без дат', group: 'вопросы',
+      when: function (a) {
+        /* «есть ли вайфай» — это вопрос про быт, а не про свободные квартиры */
+        if (topicsFor(a).length || nearbyTopics(a.norm).length) return false;
+        return a.signals.availability || a.signals.book;
+      },
+      build: function () {
+        return { action: 'ask', reason: 'нужны даты',
+          reply: 'Свободные есть почти всегда — вопрос в датах. Напишите: с какого по какое и сколько гостей?' };
+      }
+    },
+    {
+      id: 'address', title: 'Просят точный адрес до брони', group: 'вопросы',
+      when: function (a) { return a.signals.address; },
+      build: function () {
+        return { action: 'info', reason: 'политика адреса',
+          reply: R.lines([
+            KB.faq.address,
+            'Районы: ' + U.uniq(KB.objects.map(function (x) { return x.district.split(',')[0]; })).join(', ') + '.',
+            'Скажите, какой район удобнее, и я пришлю ориентиры и фото двора.'
+          ]) };
+      }
+    },
+    {
+      id: 'payment', title: 'Как оплатить', group: 'вопросы',
+      when: function (a) { return a.signals.payment || a.signals.prepayNo; },
+      build: function (a) {
+        var lines = [KB.faq.payment];
+        if (a.signals.prepayNo) {
+          lines.push('Без предоплаты даты держу ' + Set.holdMinutes + ' минут — дальше квартира снова в продаже, брони не будет.',
+                     'Если не хотите платить заранее — можно приехать и заселиться в свободную квартиру в тот же день, но выбор будет из того, что останется.');
+        }
+        return { action: 'info', reason: 'вопрос по оплате', reply: R.lines(lines) };
+      }
+    },
+    {
+      id: 'pets', title: 'Вопрос про животных', group: 'вопросы',
+      when: function (a) { return a.signals.pets && topicsFor(a).length <= 1; },
+      build: function () {
+        var ok = KB.objects.filter(function (o) { return o.pets; }).map(function (o) { return o.title; });
+        return { action: 'info', reason: 'pet policy',
+          reply: R.lines([
+            'С питомцем можно в: ' + ok.join(', ') + '.',
+            'Доплата ' + U.money(Set.petFee) + '/ночь, депозит +' + U.money(Set.petDeposit) + ' — возвращаем, если всё цело.',
+            'Одного оставлять в квартире нельзя. Напишите даты и породу — подберу.'
+          ]) };
+      }
+    },
+    {
+      id: 'accessibility', title: 'Доступность: лифт, коляска', group: 'вопросы',
+      when: function (a) { return a.prefs.accessible; },
+      build: function () {
+        var ok = KB.objects.filter(function (o) { return o.elevator && o.accessible; });
+        return { action: 'info', reason: 'доступность',
+          reply: R.lines([
+            'С лифтом и без ступеней на входе: ' + ok.map(function (o) { return o.title + ' (' + o.floor + '-й этаж)'; }).join(', ') + '.',
+            'В премиум-варианте широкие двери и большая ванная — там удобнее всего с коляской.',
+            'Напишите даты — проверю, свободна ли.'
+          ]) };
+      }
+    },
+    {
+      id: 'checkin-time', title: 'Время заезда и выезда', group: 'вопросы',
+      when: function (a) { return a.signals.checkinTime || a.signals.earlyCheckIn || a.signals.lateCheckOut || a.signals.lateArrival || a.signals.selfCheckIn; },
+      build: function (a) {
+        return { action: 'info', reason: 'вопрос по заезду',
+          reply: R.lines([KB.faq.checkin].concat(addons(a, null)).concat([
+            a.dates.from ? 'Во сколько планируете быть на месте? Подстроим заселение под ваше время.'
+                         : 'Напишите даты и время прилёта — подстроим заселение под вас.'
+          ])) };
+      }
+    },
+    {
+      id: 'thanks', title: 'Благодарность', group: 'служебные',
+      when: function (a) { return a.signals.thanks && a.length < 60 && !a.dates.from; },
+      build: function (a) {
+        var b = a.ctx.booking;
+        return { action: 'info', reason: 'вежливый обмен',
+          reply: b
+            ? 'Пожалуйста! Бронь на месте: ' + U.range(b.from, b.to) + '. Напишите за день до заезда — пришлю адрес и инструкцию.'
+            : 'Пожалуйста! Появятся даты — напишите, подберу и посчитаю.' };
+      }
+    },
+    {
+      id: 'later', title: 'Гость взял паузу подумать', group: 'служебные',
+      when: function (a) { return a.signals.later; },
+      build: function (a) {
+        var hold = a.ctx.offers.length;
+        return { action: 'info', reason: 'пауза на решение',
+          reply: R.lines([
+            'Хорошо, не тороплю.',
+            hold ? 'Эти даты держу ' + Set.holdMinutes + ' минут, дальше квартира снова в продаже — если решите позже, просто напишите, проверю заново.'
+                 : 'Напишите, когда определитесь с датами, — подберу по наличию на тот момент.',
+            'Цены на выходные и праздники растут, так что раннее бронирование обычно дешевле.'
+          ]) };
+      }
+    },
+    {
+      id: 'faq', title: 'Вопрос из каталога тем', group: 'вопросы',
+      when: function (a) {
+        if (a.prefs.accessible || (a.freshChanged && a.dates.from)) return false;
+        return topicsFor(a).length > 0;
+      },
+      build: function (a) {
+        var hits = topicsFor(a).slice(0, 4);
+        var out = hits.map(function (t) {
+          return typeof t.a === 'function' ? t.a(a) : t.a;
+        });
+        /* Если гость заодно спросил про район — добавим и это */
+        var near = nearbyTopics(a.norm);
+        if (near.length) {
+          shownObjects(a).slice(0, 2).forEach(function (o) {
+            near.forEach(function (n) {
+              if (o.nearby && o.nearby[n]) out.push(o.title + ' — ' + n + ': ' + o.nearby[n]);
+            });
+          });
+        }
+        out.push(a.ctx.offers.length || a.ctx.booking
+          ? 'Ещё вопросы — или бронируем?'
+          : 'Напишите даты и число гостей — подберу и посчитаю.');
+        return { action: 'info', reason: 'ответ по темам: ' + hits.map(function (t) { return t.id; }).join(', '),
+          reply: R.lines(out) };
+      }
+    },
+    {
+      id: 'greeting', title: 'Просто поздоровались', group: 'служебные',
+      when: function (a) { return a.signals.greeting; },
+      build: function () {
+        return { action: 'ask', reason: 'начало диалога',
+          reply: R.lines([
+            'Здравствуйте! ' + Set.brand + ' — ' + Set.business + ' в ' + (Set.cityIn || Set.city) + '.',
+            'Напишите даты и сколько гостей — подберу варианты с ценами.'
+          ]) };
+      }
+    },
+    {
+      id: 'fallback', title: 'Не понял запрос', group: 'служебные',
+      when: function () { return true; },
+      build: function (a) {
+        /* Вопрос, на который у меня нет данных, — это работа для человека,
+           а не повод в третий раз просить даты */
+        var looksLikeQuestion = /\?|^(а |и )?(как|что|где|когда|можно|есть|сколько|почему|зачем|кто|куда|какой|кака|какие)/.test(a.norm);
+        if (looksLikeQuestion) {
+          return { action: 'escalate', reason: 'вопрос вне известных тем',
+            reply: R.lines([
+              'Честно — такого в моей памяти нет, а выдумывать не буду.',
+              R.human('ответит точно'),
+              'Если вопрос про бронь, напишите даты и число гостей — это посчитаю сам.'
+            ]),
+            internal: 'Вопрос вне каталога тем: «' + a.raw.slice(0, 160) + '». Стоит добавить тему в KB.topics.' };
+        }
+        return { action: 'ask', reason: 'запрос не распознан',
+          reply: R.lines([
+            'Не уверен, что понял. Напишите, пожалуйста, одной фразой, что нужно.',
+            'Для подбора хватит даты заезда и выезда и числа гостей.'
+          ]),
+          internal: 'Нераспознанный запрос: «' + a.raw.slice(0, 120) + '». Стоит посмотреть, не пропущен ли сценарий.' };
+      }
+    }
+  ];
+
+  S.byId = function (id) {
+    for (var i = 0; i < S.list.length; i++) if (S.list[i].id === id) return S.list[i];
+    return null;
+  };
+
+  S.addons = addons;
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = S;
+  w.SCEN = S;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+;
+/* js/agent.js */
+/* Оркестратор: разбор → накопление слотов → подбор → риск → сценарий → ответ.
+   Возвращает не только текст, но и весь разбор: что понял, что предположил,
+   чего не хватает и почему принято такое решение. */
+(function (w) {
+  'use strict';
+
+  var U    = w.U    || (typeof require !== 'undefined' ? require('./util.js') : null);
+  var KB   = w.KB   || (typeof require !== 'undefined' ? require('./knowledge.js') : null);
+  var NLU  = w.NLU  || (typeof require !== 'undefined' ? require('./nlu.js') : null);
+  var PO   = w.PO   || (typeof require !== 'undefined' ? require('./policy.js') : null);
+  var RISK = w.RISK || (typeof require !== 'undefined' ? require('./risk.js') : null);
+  var SCEN = w.SCEN || (typeof require !== 'undefined' ? require('./scenarios.js') : null);
+  var HOLDS = w.HOLDS || (typeof require !== 'undefined' ? require('./holds.js') : null);
+  var R    = w.R    || (typeof require !== 'undefined' ? require('./reply.js') : null);
+
+  var AGENT = {};
+
+  AGENT.newContext = function (init) {
+    var c = {
+      id: (init && init.id) || ('гость-' + Math.random().toString(36).slice(2, 8)),
+      channel: (init && init.channel) || 'чат',
+      turns: 0,
+      guest: { name: null, phone: null, repeat: false, lang: 'ru' },
+      request: { from: null, to: null, nights: null, guests: null, adults: null, children: null,
+                 childAges: [], budget: null, budgetPer: null, district: null, rooms: null,
+                 features: [], pets: false, needElevator: false, needParking: false,
+                 needCrib: false, needWorkspace: false, quiet: false, selfCheckIn: false,
+                 earlyCheckIn: false, lateCheckOut: false, lateArrival: false, repeatGuest: false },
+      offers: [],
+      booking: (init && init.booking) || null,
+      history: [],
+      unresolved: 0
+    };
+    return c;
+  };
+
+  /* Слоты копятся: «нас четверо» из первого сообщения работает и в пятом */
+  function merge(ctx, p) {
+    var r = ctx.request;
+    if (p.dates.from) { r.from = p.dates.from; r.to = p.dates.to || null; }
+    if (p.dates.to) r.to = p.dates.to;
+    if (p.dates.nights) r.nights = p.dates.nights;
+    if (r.from && !r.to && r.nights) r.to = U.addDays(r.from, r.nights);
+    if (r.from && r.to) r.nights = U.diffDays(r.from, r.to);
+
+    if (p.guests.total) { r.guests = p.guests.total; r.adults = p.guests.adults; r.children = p.guests.children; }
+    if (p.guests.childAges.length) r.childAges = p.guests.childAges;
+    if (p.budget.amount) {
+      /* Бюджет в валюте переводим в сумы — иначе «до 50$» сравнивается с
+         сотнями тысяч и агент пишет, что квартира дороже на 279 950 */
+      var rate = (KB.settings.rates || {})[p.budget.currency];
+      r.budget = rate ? Math.round(p.budget.amount * rate) : p.budget.amount;
+      r.budgetPer = p.budget.per;
+      r.budgetCurrency = rate ? p.budget.currency : null;
+      r.budgetOriginal = rate ? p.budget.amount : null;
+    }
+    if (p.prefs.district) r.district = p.prefs.district;
+    if (p.prefs.rooms !== null) r.rooms = p.prefs.rooms;
+    if (p.prefs.features.length) r.features = U.uniq(r.features.concat(p.prefs.features));
+    ['needElevator', 'needParking', 'needCrib', 'needWorkspace', 'quiet'].forEach(function (k) {
+      if (p.prefs[k]) r[k] = true;
+    });
+    if (p.prefs.accessible) r.accessible = true;
+    if (p.signals.pets) r.pets = true;
+    if (p.signals.earlyCheckIn) r.earlyCheckIn = true;
+    if (p.signals.lateCheckOut) r.lateCheckOut = true;
+    if (p.signals.lateArrival) r.lateArrival = true;
+    if (p.signals.selfCheckIn) r.selfCheckIn = true;
+    if (p.signals.repeat) { r.repeatGuest = true; ctx.guest.repeat = true; }
+    if (p.contacts.phone) ctx.guest.phone = p.contacts.phone;
+    if (p.contacts.name) ctx.guest.name = p.contacts.name;
+    ctx.guest.lang = p.lang;
+    return r;
+  }
+
+  /* Чего не хватает и как об этом спросить */
+  function gaps(a) {
+    var r = a.req, missing = [], questions = [];
+    if (!r.from) { missing.push('даты'); questions.push('На какие даты? Например: «с 12 по 15 ноября».'); }
+    else if (!r.to) { missing.push('срок'); questions.push('Сколько ночей — с ' + U.fmt(r.from) + ' по какое число?'); }
+    if (!r.guests) { missing.push('гости'); questions.push('Сколько гостей, есть ли дети?'); }
+    else if (r.children && !r.childAges.length) { missing.push('возраст детей'); questions.push('Сколько лет ребёнку — нужна ли кроватка?'); }
+    if (r.guests && r.from && r.to && !r.budget && !a.signals.book) {
+      questions.push('Есть бюджет за ночь, чтобы не показывать лишнее?');
+    }
+    if (a.selected && !a.ctx.guest.phone) { missing.push('контакты'); questions.push('Оставьте телефон и ФИО — закреплю бронь.'); }
+    return { missing: missing, questions: questions };
+  }
+
+  /* Выбор варианта из прошлого сообщения: «беру второй», «давайте лофт» */
+  function selection(ctx, p) {
+    if (!ctx.offers.length) return null;
+    var t = p.norm;
+    if (/(^|[^а-я])(перв|перв|1-?й|1\))/.test(t)) return ctx.offers[0];
+    if (/(^|[^а-я])(втор|2-?й|2\))/.test(t)) return ctx.offers[1] || null;
+    if (/(^|[^а-я])(трет|3-?й|3\))/.test(t)) return ctx.offers[2] || null;
+    for (var i = 0; i < ctx.offers.length; i++) {
+      var title = U.norm(ctx.offers[i].object.title);
+      var words = title.split(' ').filter(function (x) { return x.length > 4; });
+      for (var j = 0; j < words.length; j++) {
+        if (t.indexOf(words[j].slice(0, 6)) >= 0) return ctx.offers[i];
+      }
+    }
+    if (p.signals.book && ctx.offers.length === 1) return ctx.offers[0];
+    if (/(^|[^а-я])(беру|берем|подходит|оформля|давайте|согласен|согласна)/.test(t) && ctx.offers.length) return ctx.offers[0];
+    /* «да», «ок», «давай» сразу после вариантов — это согласие на первый */
+    if (t.length <= 14 && /^(да|ок|окей|ok|хорошо|ага|угу|давай|годится|\+)/.test(t)) return ctx.offers[0];
+    return null;
+  }
+
+  function intents(a) {
+    var s = a.signals, list = [];
+    function add(id, score) { list.push({ id: id, score: score }); }
+    if (a.req.from && a.req.guests) add('бронирование', 90);
+    else if (s.availability || s.book) add('бронирование', 60);
+    if (s.price || a.budget.amount) add('цена', 55);
+    if (s.cancel) add('отмена', 85);
+    if (s.changeDates) add('перенос', 85);
+    if (s.extend) add('продление', 85);
+    if (s.complaint || s.damage || s.keys) add('проблема у гостя', 95);
+    if (s.invoice) add('документы для юрлица', 70);
+    if (s.registration) add('регистрация', 65);
+    if (s.party || s.hourly || s.illegal || s.sublease) add('нежелательное использование', 95);
+    if (s.fraud) add('подозрительный платёж', 99);
+    if (s.human) add('нужен человек', 80);
+    if (!list.length) add('вопрос', 30);
+    list.sort(function (x, y) { return y.score - x.score; });
+    return list;
+  }
+
+  function confidence(a) {
+    var c = 0.4;
+    if (a.req.from) c += 0.2;
+    if (a.req.to) c += 0.1;
+    if (a.req.guests) c += 0.15;
+    if (a.dates.assumed.length) c -= 0.1;
+    if (a.dates.issues.length) c -= 0.15;
+    if (a.scenario === 'fallback') c = 0.25;
+    if (a.signals._matched.length === 0 && !a.req.from) c -= 0.1;
+    return Math.round(U.clamp(c, 0.1, 0.99) * 100) / 100;
+  }
+
+  AGENT.analyze = function (text, ctx) {
+    ctx = ctx || AGENT.newContext();
+    var p = NLU.parse(text);
+    var req = merge(ctx, p);
+
+    var a = {
+      raw: p.raw, norm: p.norm, lang: p.lang, empty: p.empty, length: p.length,
+      dates: { from: req.from, to: req.to, nights: req.nights,
+               flexible: p.dates.flexible, assumed: p.dates.assumed, issues: p.dates.issues,
+               source: p.dates.source, monthHint: p.dates.monthHint || null, hourly: !!p.dates.hourly },
+      guests: { total: req.guests, adults: req.adults, children: req.children, childAges: req.childAges, stated: p.guests.stated, assumed: p.guests.assumed },
+      budget: { amount: req.budget, per: req.budgetPer, currency: p.budget.currency, assumed: p.budget.assumed },
+      prefs: { rooms: req.rooms, district: req.district, features: req.features,
+               needElevator: req.needElevator, needParking: req.needParking, needCrib: req.needCrib,
+               needWorkspace: req.needWorkspace, quiet: req.quiet, accessible: req.accessible || false },
+      signals: p.signals,
+      contacts: { phone: ctx.guest.phone, name: ctx.guest.name },
+      purpose: p.purpose,
+      req: req, ctx: ctx, turn: ctx.turns + 1
+    };
+
+    a.selected = selection(ctx, p);
+
+    /* Что нового принесло именно это сообщение: если ничего, а варианты уже
+       показаны, значит гость задал уточняющий вопрос — оффер повторять не надо */
+    a.fresh = {
+      dates: !!p.dates.from || !!p.dates.nights,
+      guests: p.guests.stated,
+      budget: !!p.budget.amount,
+      pets: p.signals.pets,
+      district: !!p.prefs.district,
+      rooms: p.prefs.rooms !== null,
+      extras: !!(p.signals.earlyCheckIn || p.signals.lateCheckOut || p.signals.lateArrival)
+    };
+    a.freshChanged = Object.keys(a.fresh).some(function (k) { return a.fresh[k]; });
+
+    /* Подбор считаем, только когда есть даты и срок */
+    if (req.from && req.to && req.nights > 0 && !p.dates.hourly) {
+      a.matchReq = {
+        from: req.from, to: req.to,
+        guests: req.guests || 1,
+        pets: req.pets, rooms: req.rooms, district: req.district,
+        features: req.features, needElevator: req.needElevator, needParking: req.needParking,
+        needCrib: req.needCrib, needWorkspace: req.needWorkspace, quiet: req.quiet,
+        selfCheckIn: req.selfCheckIn, budget: req.budget, budgetPer: req.budgetPer,
+        earlyCheckIn: req.earlyCheckIn, lateCheckOut: req.lateCheckOut, lateArrival: req.lateArrival,
+        repeatGuest: req.repeatGuest,
+        holder: ctx.id                       // свои удержания себе не мешают
+      };
+      a.match = PO.match(a.matchReq);
+      a.quoteTotal = a.match.offers.length ? a.match.offers[0].quote.total : null;
+    } else {
+      a.match = null;
+    }
+
+    var g = gaps(a);
+    a.missing = g.missing;
+    a.questions = g.questions;
+    a.risk = RISK.assess(a);
+    a.intents = intents(a);
+    return a;
+  };
+
+  AGENT.respond = function (text, ctx) {
+    ctx = ctx || AGENT.newContext();
+    var a = AGENT.analyze(text, ctx);
+
+    var candidates = [];
+    var chosen = null, out = null;
+    for (var i = 0; i < SCEN.list.length; i++) {
+      var sc = SCEN.list[i], hit = false;
+      try { hit = !!sc.when(a); } catch (e) { hit = false; }
+      if (hit) {
+        candidates.push({ id: sc.id, title: sc.title, group: sc.group });
+        if (!chosen) { chosen = sc; out = sc.build(a); }
+      }
+    }
+
+    a.scenario = chosen.id;
+    a.confidence = confidence(a);
+
+    var result = {
+      scenario: chosen.id,
+      scenarioTitle: chosen.title,
+      group: chosen.group,
+      candidates: candidates,
+      action: out.action,
+      reason: out.reason,
+      reply: out.reply,
+      internal: out.internal || null,
+      priority: out.priority || (a.risk.needsHuman ? 'важно' : 'обычный'),
+      escalate: !!out.escalate || out.action === 'escalate' || a.risk.needsHuman,
+      analysis: a,
+      crm: AGENT.crm(a, out)
+    };
+
+    /* Память диалога */
+    ctx.turns++;
+    ctx.history.push({ in: text, out: out.reply, scenario: chosen.id, action: out.action });
+    if (a.match && a.match.offers.length && /offer|hold/.test(out.action)) ctx.offers = a.match.offers.slice(0, 3);
+    if (a.selected && out.action === 'hold') {
+      /* Удержание видно всем диалогам: пока этот гость думает,
+         другой не должен получить подтверждение на те же даты */
+      if (HOLDS) HOLDS.add(a.selected.object.id, a.selected.quote.from, a.selected.quote.to,
+                           ctx.id, KB.settings.holdMinutes);
+      ctx.booking = {
+        objectId: a.selected.object.id, from: a.selected.quote.from, to: a.selected.quote.to,
+        guests: a.selected.quote.guests, total: a.selected.quote.total, prepay: a.selected.quote.prepay,
+        status: 'удержание', heldAt: Date.now(), paid: 0
+      };
+    }
+    if (chosen.id === 'payment-claimed' && ctx.booking) {
+      ctx.booking.paymentClaimedAt = Date.now();
+      if (HOLDS) HOLDS.markPaid(ctx.id, 24);              // сверка платежа — сутки на удержание
+    }
+    if (chosen.id === 'booking-payment' && ctx.booking) {
+      ctx.booking.heldAt = Date.now();                    // реквизиты отправлены — держим заново
+      if (HOLDS) HOLDS.add(ctx.booking.objectId, ctx.booking.from, ctx.booking.to, ctx.id, KB.settings.holdMinutes);
+    }
+    if (chosen.id === 'hold-expired' || (chosen.id === 'cancel' && out.action === 'confirm')) {
+      if (HOLDS) HOLDS.release(ctx.id);
+    }
+    if (out.action === 'ask') ctx.unresolved++; else ctx.unresolved = 0;
+    if (ctx.unresolved >= 3) {
+      /* Третий раз спрашиваем одно и то же — это уже не диалог, зовём человека */
+      result.escalate = true;
+      result.action = 'handoff';
+      result.reply = R.lines([
+        'Кажется, по переписке мы ходим по кругу — так быстрее не станет.',
+        R.human('поможет подобрать голосом за пару минут'),
+        'Если удобнее здесь — напишите одной строкой: даты, сколько гостей и до какой суммы за ночь.'
+      ]);
+      result.crm.status = 'handoff';
+      result.crm.nextStep = 'передано менеджеру';
+      result.internal = (result.internal ? result.internal + ' ' : '') + 'Третий уточняющий вопрос подряд — подключить человека.';
+    }
+    return result;
+  };
+
+  /* Заявка в том виде, в котором её удобно класть в CRM или таблицу */
+  AGENT.crm = function (a, out) {
+    var r = a.req;
+    return {
+      createdAt: U.today(),
+      channel: a.ctx.channel,
+      status: out.action,
+      scenario: a.scenario || null,
+      guest: { name: a.contacts.name, phone: a.contacts.phone, lang: a.lang, repeat: r.repeatGuest },
+      stay: {
+        from: r.from, to: r.to, nights: r.nights,
+        guests: r.guests, adults: r.adults, children: r.children, childAges: r.childAges,
+        flexible: a.dates.flexible
+      },
+      needs: {
+        district: r.district, rooms: r.rooms, features: r.features,
+        pets: r.pets, elevator: r.needElevator, parking: r.needParking, crib: r.needCrib,
+        earlyCheckIn: r.earlyCheckIn, lateCheckOut: r.lateCheckOut, lateArrival: r.lateArrival,
+        registration: !!a.signals.registration, invoice: !!a.signals.invoice
+      },
+      budget: { amount: r.budget, per: r.budgetPer },
+      purpose: a.purpose,
+      offers: a.match ? a.match.offers.slice(0, 3).map(function (o) {
+        return { id: o.object.id, title: o.object.title, total: o.quote.total, perNight: o.quote.perNight, prepay: o.quote.prepay };
+      }) : [],
+      risk: { score: a.risk.score, level: a.risk.level, flags: a.risk.flags.map(function (f) { return f.id; }) },
+      missing: a.missing,
+      confidence: a.confidence,
+      nextStep: out.action === 'hold' ? 'получить предоплату' :
+                out.action === 'offer' ? 'ждём выбор варианта' :
+                out.action === 'ask' ? 'ждём ответ гостя' :
+                out.action === 'escalate' ? 'передано менеджеру' :
+                out.action === 'decline' ? 'отказ по правилам' : 'информирование'
+    };
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = AGENT;
+  w.AGENT = AGENT;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+;
+/* js/demo-platform.js */
+/* Демонстрация платформы целиком в браузере: гость слева, пульт справа.
+   Тот же движок, что и на сервере, — здесь только хранилище в памяти. */
+(function (w, d) {
+  'use strict';
+
+  /* ---------- хранилище ---------- */
+
+  var state = {
+    guest: 'g1',
+    tab: 'dialogs',
+    current: null,
+    dialogs: {},
+    order: []
+  };
+
+  var NAMES = { g1: 'Айгерим', g2: 'Ержан' };
+
+  var SAMPLES = [
+    'нужна квартира с 10 по 13 марта, нас трое',
+    'аптека и магазин рядом есть?',
+    'беру первый',
+    'Айгерим, +7 701 555 44 33',
+    'оплатил, скинул на Kaspi',
+    'можно с котом?',
+    'как добраться из аэропорта?',
+    'хотим отметить день рождения, нас 12',
+    'я перевёл лишнее, верните на другую карту',
+    'позовите человека'
+  ];
+
+  function dialog(id) {
+    if (!state.dialogs[id]) {
+      state.dialogs[id] = {
+        id: id, name: NAMES[id] || id, mode: 'бот',
+        ctx: AGENT.newContext({ channel: 'сайт', id: id }),
+        messages: [], escalated: false, risk: 0, scenario: null, lastAt: Date.now(),
+        booking: null
+      };
+      state.order.push(id);
+    }
+    return state.dialogs[id];
+  }
+
+  function push(dlg, from, text, meta) {
+    dlg.messages.push({ from: from, text: text, at: Date.now(), meta: meta || null });
+    dlg.lastAt = Date.now();
+  }
+
+  /* ---------- обработка сообщения гостя ---------- */
+
+  function incoming(id, text) {
+    var dlg = dialog(id);
+    push(dlg, 'guest', text);
+
+    if (dlg.mode === 'менеджер') {          // диалог у человека — бот молчит
+      dlg.escalated = true;
+      render();
+      return;
+    }
+
+    var res = AGENT.respond(text, dlg.ctx);
+    dlg.scenario = res.scenario;
+    dlg.risk = res.analysis.risk.score;
+    if (res.escalate) dlg.escalated = true;
+
+    /* бронь идёт следом за состоянием диалога */
+    var b = dlg.ctx.booking;
+    if (b) {
+      var obj = KB.byId(b.objectId);
+      dlg.booking = {
+        object: obj ? obj.title : b.objectId, from: b.from, to: b.to,
+        guests: b.guests, total: b.total, prepay: b.prepay,
+        status: res.scenario === 'payment-claimed' ? 'оплата заявлена'
+              : res.scenario === 'booking-payment' ? 'ждёт оплату' : 'удержание'
+      };
+    }
+    if (res.scenario === 'cancel' && res.action === 'confirm') { if (dlg.booking) dlg.booking.status = 'отменена'; }
+    if (res.scenario === 'hold-expired' && dlg.booking) dlg.booking.status = 'снята';
+
+    if (res.action !== 'ignore') {
+      setTimeout(function () {
+        push(dlg, 'agent', res.reply, { scenario: res.scenario, action: res.action });
+        render();
+      }, 220);
+    }
+    render();
+  }
+
+  /* ---------- отрисовка: гость ---------- */
+
+  function renderGuest() {
+    var dlg = dialog(state.guest);
+    var thread = d.getElementById('thread');
+    thread.innerHTML = dlg.messages.map(function (m) {
+      var who = m.from === 'guest' ? 'me' : m.from === 'manager' ? 'manager' : 'bot';
+      var label = m.from === 'manager' ? '<span class="who">менеджер Арман</span>' : '';
+      return '<div class="msg ' + who + '">' + label + esc(m.text) + '</div>';
+    }).join('') || '<div class="msg bot">Здравствуйте! ' + KB.settings.brand + ' — ' + KB.settings.business +
+      ' в ' + KB.settings.cityIn + '. Напишите даты и сколько гостей.</div>';
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  /* ---------- отрисовка: пульт ---------- */
+
+  function renderPanel() {
+    var dialogs = state.order.map(function (id) { return state.dialogs[id]; })
+      .sort(function (a, b) { return b.lastAt - a.lastAt; });
+
+    var active = dialogs.filter(function (x) { return x.booking && ['удержание', 'ждёт оплату', 'оплата заявлена'].indexOf(x.booking.status) >= 0; });
+    d.getElementById('stats').innerHTML = [
+      ['диалогов', dialogs.length],
+      ['нужен человек', dialogs.filter(function (x) { return x.escalated; }).length],
+      ['активных броней', active.length],
+      ['на сумму', U.money(active.reduce(function (s, x) { return s + (x.booking.total || 0); }, 0))],
+      ['удержаний', HOLDS.count()]
+    ].map(function (x) { return x[0] + ': <b>' + x[1] + '</b>'; }).join('');
+
+    d.getElementById('queue').innerHTML = dialogs.map(function (x) {
+      var marks = [];
+      if (x.escalated) marks.push('<span class="tag bad">нужен человек</span>');
+      if (x.mode === 'менеджер') marks.push('<span class="tag warn">у менеджера</span>');
+      if (x.risk >= 45) marks.push('<span class="tag bad">риск ' + x.risk + '</span>');
+      if (x.booking) marks.push('<span class="tag ok">' + esc(x.booking.status) + '</span>');
+      if (x.scenario) marks.push('<span class="tag">' + esc(x.scenario) + '</span>');
+      var last = x.messages.length ? x.messages[x.messages.length - 1].text : '';
+      return '<div class="item' + (state.current === x.id ? ' on' : '') + '" data-open="' + x.id + '">' +
+        '<div class="line"><b>' + esc(x.name) + '</b><span>сайт</span></div>' +
+        '<div class="last">' + esc(last.slice(0, 60)) + '</div>' +
+        '<div class="marks">' + marks.join('') + '</div></div>';
+    }).join('') || '<div class="empty" style="padding:12px">Пока пусто — напишите что-нибудь слева</div>';
+
+    var work = d.getElementById('work');
+    if (state.tab === 'bookings') return renderBookings(work, dialogs);
+    if (state.tab === 'holds') return renderHolds(work);
+
+    var cur = state.current && state.dialogs[state.current];
+    if (!cur) { work.innerHTML = '<div class="empty">Выберите диалог в очереди</div>'; return; }
+
+    var r = cur.ctx.request;
+    work.innerHTML =
+      '<div class="block"><h3>Переписка · ведёт ' + esc(cur.mode) + '</h3>' +
+        '<div class="talk">' + cur.messages.map(function (m) {
+          var who = m.from === 'guest' ? 'guest' : m.from === 'manager' ? 'manager' : 'agent';
+          var label = m.from === 'guest' ? 'Гость' : m.from === 'manager' ? 'Менеджер' : 'Агент';
+          var meta = m.meta && m.meta.scenario ? ' · ' + m.meta.scenario : '';
+          return '<div class="msg ' + who + '"><span class="who">' + label + meta + '</span>' + esc(m.text) + '</div>';
+        }).join('') + '</div>' +
+        '<div class="acts">' +
+          (cur.mode === 'бот'
+            ? '<button class="primary" data-act="takeover">Взять диалог на себя</button>'
+            : '<button data-act="release">Вернуть боту</button>') +
+        '</div>' +
+        (cur.mode === 'менеджер'
+          ? '<div class="reply-row" style="margin-top:10px">' +
+            '<input id="mreply" placeholder="Ответить гостю от своего имени…">' +
+            '<button data-act="send">Отправить</button></div>'
+          : '') +
+      '</div>' +
+
+      '<div class="block"><h3>Что понял агент</h3>' +
+        kv('Даты', r.from ? U.fmtFull(r.from) + (r.to ? ' → ' + U.fmtFull(r.to) : '') : '—') +
+        kv('Ночей', r.nights) + kv('Гостей', r.guests) +
+        kv('Бюджет', r.budget ? U.money(r.budget) + (r.budgetPer === 'night' ? '/ночь' : '') : '—') +
+        kv('Особое', [r.pets ? 'питомец' : '', r.needElevator ? 'лифт' : '', r.needParking ? 'парковка' : '',
+                      r.lateArrival ? 'ночной заезд' : ''].filter(Boolean).join(', ') || '—') +
+        kv('Сценарий', cur.scenario) + kv('Риск', cur.risk + ' из 100') +
+      '</div>' +
+
+      (cur.booking
+        ? '<div class="block"><h3>Бронь</h3>' +
+          kv('Квартира', cur.booking.object) +
+          kv('Даты', U.range(cur.booking.from, cur.booking.to)) +
+          kv('Гостей', cur.booking.guests) +
+          kv('Сумма', U.money(cur.booking.total)) +
+          kv('Предоплата', U.money(cur.booking.prepay)) +
+          kv('Статус', cur.booking.status) +
+          '<div class="acts">' +
+          ['подтверждена', 'гость заселился', 'завершена', 'отменена'].map(function (s) {
+            return '<button data-status="' + s + '">' + s + '</button>';
+          }).join('') + '</div></div>'
+        : '');
+  }
+
+  function renderBookings(work, dialogs) {
+    var rows = dialogs.filter(function (x) { return x.booking; });
+    work.innerHTML = rows.length
+      ? '<table><thead><tr><th>Гость</th><th>Квартира</th><th>Даты</th><th>Сумма</th><th>Статус</th></tr></thead><tbody>' +
+        rows.map(function (x) {
+          return '<tr><td>' + esc(x.name) + '</td><td>' + esc(x.booking.object) + '</td>' +
+            '<td>' + esc(U.range(x.booking.from, x.booking.to)) + '</td>' +
+            '<td>' + U.money(x.booking.total) + '<br><span class="empty">предоплата ' + U.money(x.booking.prepay) + '</span></td>' +
+            '<td>' + esc(x.booking.status) + '</td></tr>';
+        }).join('') + '</tbody></table>'
+      : '<div class="empty">Броней пока нет. Попросите слева квартиру и нажмите «беру первый».</div>';
+  }
+
+  function renderHolds(work) {
+    var list = HOLDS.all();
+    work.innerHTML = list.length
+      ? '<table><thead><tr><th>Квартира</th><th>Даты</th><th>Кто держит</th><th>Истекает</th></tr></thead><tbody>' +
+        list.map(function (h) {
+          var o = KB.byId(h.objectId);
+          return '<tr><td>' + esc(o ? o.title : h.objectId) + '</td>' +
+            '<td>' + esc(U.range(h.from, h.to)) + '</td>' +
+            '<td>' + esc(NAMES[h.holder] || h.holder) + '</td>' +
+            '<td>' + new Date(h.until).toTimeString().slice(0, 5) + (h.paid ? ' · оплачено' : '') + '</td></tr>';
+        }).join('') + '</tbody></table>' +
+        '<div class="empty" style="margin-top:10px">Пока квартира удержана, второй гость её не увидит — попробуйте спросить те же даты от второго гостя.</div>'
+      : '<div class="empty">Удержаний нет. Они появляются, когда гость выбирает вариант.</div>';
+  }
+
+  /* ---------- вспомогательное ---------- */
+
+  function kv(k, v) {
+    return (v === null || v === undefined || v === '') ? '' :
+      '<div class="kv"><span>' + esc(k) + '</span><span>' + esc(v) + '</span></div>';
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c];
+    });
+  }
+
+  function render() { renderGuest(); renderPanel(); }
+
+  /* ---------- события ---------- */
+
+  function sendGuest() {
+    var input = d.getElementById('input');
+    var text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    if (!state.current) state.current = state.guest;
+    incoming(state.guest, text);
+  }
+
+  d.getElementById('send').onclick = sendGuest;
+  d.getElementById('input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendGuest(); }
+  });
+
+  d.getElementById('who').onclick = function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    state.guest = b.dataset.guest;
+    [].forEach.call(this.children, function (x) { x.classList.toggle('on', x === b); });
+    render();
+  };
+
+  d.getElementById('tabs').onclick = function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    state.tab = b.dataset.tab;
+    [].forEach.call(this.children, function (x) { x.classList.toggle('on', x === b); });
+    renderPanel();
+  };
+
+  d.body.addEventListener('click', function (e) {
+    var t = e.target;
+    var open = t.closest('[data-open]');
+    if (open) { state.current = open.dataset.open; renderPanel(); return; }
+
+    var cur = state.current && state.dialogs[state.current];
+    if (!cur) return;
+
+    if (t.dataset.act === 'takeover') { cur.mode = 'менеджер'; cur.escalated = false; renderPanel(); }
+    if (t.dataset.act === 'release') { cur.mode = 'бот'; renderPanel(); }
+    if (t.dataset.act === 'send') {
+      var input = d.getElementById('mreply');
+      var text = input && input.value.trim();
+      if (!text) return;
+      push(cur, 'manager', text);
+      render();
+    }
+    if (t.dataset.status) { if (cur.booking) cur.booking.status = t.dataset.status; renderPanel(); }
+  });
+
+  d.getElementById('reset').onclick = function () {
+    HOLDS.reset();
+    state.dialogs = {}; state.order = []; state.current = null;
+    render();
+  };
+
+  /* ---------- старт ---------- */
+
+  (function init() {
+    var chips = d.getElementById('chips');
+    SAMPLES.forEach(function (s) {
+      var b = d.createElement('button');
+      b.textContent = s.length > 34 ? s.slice(0, 32) + '…' : s;
+      b.title = s;
+      b.onclick = function () {
+        if (!state.current) state.current = state.guest;
+        incoming(state.guest, s);
+      };
+      chips.appendChild(b);
+    });
+    render();
+  })();
+
+})(window, document);
+
+</script>
+</body>
+</html>
