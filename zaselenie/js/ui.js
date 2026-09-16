@@ -8,6 +8,8 @@
   var send = d.getElementById('send');
   var modal = d.getElementById('modal');
 
+  /* ?guest=1 — чистый гостевой вид: так страницу можно показать постороннему */
+  var guestView = /(?:\?|&)guest=1/.test(location.search);
   var ctx = AGENT.newContext({ channel: 'демо' });
   var mode = 'engine';
   var history = [];
@@ -215,6 +217,21 @@
     input.style.height = Math.min(140, input.scrollHeight) + 'px';
   });
 
+  function applyView() {
+    d.body.classList.toggle('guest', guestView);
+    var seg = d.getElementById('view');
+    [].forEach.call(seg.children, function (b) {
+      b.classList.toggle('on', (b.dataset.view === 'guest') === guestView);
+    });
+  }
+
+  d.getElementById('view').onclick = function (e) {
+    var btn = e.target.closest('button');
+    if (!btn) return;
+    guestView = btn.dataset.view === 'guest';
+    applyView();
+  };
+
   d.getElementById('mode').onclick = function (e) {
     var btn = e.target.closest('button');
     if (!btn) return;
@@ -258,7 +275,9 @@
   }
 
   function hello() {
-    bubble('sys', 'Демо: слева вы пишете как гость, справа видно, что агент понял и почему так ответил.');
+    if (!guestView) {
+      bubble('sys', 'Демо: слева вы пишете как гость, справа видно, что агент понял и почему так ответил. Кнопка «Как видит гость» убирает разбор.');
+    }
     bubble('agent', 'Здравствуйте! ' + KB.settings.brand + ' — ' + KB.settings.business + ' в ' + KB.settings.cityIn + '.\nНапишите даты и сколько гостей — подберу варианты с ценами.', 'сценарий: greeting');
   }
 
@@ -282,8 +301,9 @@
     if (cfg.key) d.getElementById('key').value = cfg.key;
     if (cfg.model) sel.value = cfg.model;
 
+    applyView();
     hello();
-    checkCalendar();
+    if (!guestView) checkCalendar();
   })();
 
 })(window, document);

@@ -182,6 +182,16 @@ pre.json{
 .modal p{font-size:12.5px;color:var(--muted);line-height:1.5;}
 .modal .acts{display:flex;gap:10px;justify-content:flex-end;}
 
+/* Гостевой вид: только переписка, без служебной кухни */
+body.guest .dev,
+body.guest .tabs,
+body.guest #pane-insight,
+body.guest .msg .tag,
+body.guest .msg.sys{display:none;}
+body.guest .main{grid-template-columns:minmax(0,1fr);}
+body.guest .msg{max-width:min(78%,640px);}
+body.guest .chat{padding-top:28px;}
+
 @media (max-width:900px){
     .main{grid-template-columns:1fr;}
     .tabs{display:flex;}
