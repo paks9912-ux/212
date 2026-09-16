@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Заявка на заселение",
+  "type": "object",
+  "required": ["intent", "stay", "guests", "confidence"],
+  "properties": {
+    "intent": {
+      "type": "string",
+      "description": "Основное намерение гостя",
+      "enum": ["booking", "availability", "price", "info", "extend", "change-dates",
+               "cancel", "complaint", "payment", "documents", "other", "spam"]
+    },
+    "stay": {
+      "type": "object",
+      "properties": {
+        "checkIn": { "type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "checkOut": { "type": ["string", "null"], "pattern": "^\\d{4}-\\d{2}-\\d{2}$" },
+        "nights": { "type": ["integer", "null"], "minimum": 1 },
+        "flexible": { "type": "boolean" },
+        "arrivalTime": { "type": ["string", "null"] }
+      }
+    },
+    "guests": {
+      "type": "object",
+      "properties": {
+        "total": { "type": ["integer", "null"], "minimum": 1 },
+        "adults": { "type": ["integer", "null"], "minimum": 0 },
+        "children": { "type": ["integer", "null"], "minimum": 0 },
+        "childAges": { "type": "array", "items": { "type": "integer", "minimum": 0 } }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "amount": { "type": ["number", "null"] },
+        "currency": { "type": ["string", "null"], "enum": ["UZS", "USD", "KGS", "RUB", null] },
+        "per": { "type": ["string", "null"], "enum": ["night", "total", null] }
+      }
+    },
+    "needs": {
+      "type": "object",
+      "properties": {
+        "district": { "type": ["string", "null"] },
+        "rooms": { "type": ["integer", "null"] },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "pets": { "type": "boolean" },
+        "elevator": { "type": "boolean" },
+        "parking": { "type": "boolean" },
+        "crib": { "type": "boolean" },
+        "earlyCheckIn": { "type": "boolean" },
+        "lateCheckOut": { "type": "boolean" },
+        "lateArrival": { "type": "boolean" },
+        "registration": { "type": "boolean" },
+        "invoice": { "type": "boolean" }
+      }
+    },
+    "signals": {
+      "type": "array",
+      "description": "Ярлыки скрытых смыслов запроса",
+      "items": {
+        "type": "string",
+        "enum": ["party", "hourly", "pets", "no-docs", "fraud", "sublease", "fake-registration",
+                 "storage", "minor", "invoice", "registration", "complaint", "damage", "keys",
+                 "cancel", "extend", "change-dates", "discount", "address", "payment",
+                 "late-arrival", "early-checkin", "late-checkout", "accessibility",
+                 "group", "long-stay", "repeat-guest", "aggression", "human", "spam"]
+      }
+    },
+    "assumptions": { "type": "array", "items": { "type": "string" },
+      "description": "Что пришлось предположить — гость должен это подтвердить" },
+    "issues": { "type": "array", "items": { "type": "string" },
+      "description": "Противоречия и ошибки в запросе" },
+    "missing": { "type": "array", "items": { "type": "string" },
+      "description": "Данные, без которых нельзя посчитать" },
+    "risk": {
+      "type": "object",
+      "properties": {
+        "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "level": { "type": "string", "enum": ["низкий", "средний", "высокий", "критический"] },
+        "flags": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "decision": {
+      "type": "object",
+      "properties": {
+        "action": { "type": "string", "enum": ["ask", "offer", "hold", "confirm", "info", "decline", "escalate", "handoff", "ignore"] },
+        "reason": { "type": "string" },
+        "nextStep": { "type": "string" }
+      }
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+  }
+}

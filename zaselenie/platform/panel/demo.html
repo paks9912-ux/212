@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ключи 24 — квартиры посуточно в Астане</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#08090b;--text:#eceef3;--muted:rgba(236,238,243,.5);--line:rgba(236,238,243,.12);--accent:#c9a227;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font:16px/1.6 Manrope,-apple-system,sans-serif;}
+.wrap{max-width:900px;margin:0 auto;padding:60px 20px 120px;}
+h1{font-size:clamp(28px,5vw,46px);font-weight:600;letter-spacing:-.02em;margin-bottom:14px;}
+p.lead{color:var(--muted);font-size:18px;max-width:620px;margin-bottom:40px;}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:40px;}
+.card{border:1px solid var(--line);border-radius:14px;padding:18px;}
+.card b{display:block;font-weight:500;margin-bottom:6px;}
+.card span{color:var(--muted);font-size:14px;}
+.note{border:1px dashed var(--line);border-radius:14px;padding:18px;color:var(--muted);font-size:14px;}
+code{background:#111419;border:1px solid var(--line);border-radius:6px;padding:2px 6px;font-size:13px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Квартиры посуточно в Астане</h1>
+  <p class="lead">Это демонстрация обычного сайта: та же страница, что у вас, плюс одна строка кода — и внизу справа появляется помощник, который отвечает гостям и записывает брони.</p>
+
+  <div class="cards">
+    <div class="card"><b>Студия у Байтерека</b><span>Есиль, вид на Байтерек, от 18 000 тг/ночь</span></div>
+    <div class="card"><b>2-комнатная в Highvill</b><span>семейная, можно с питомцем, от 26 000 тг/ночь</span></div>
+    <div class="card"><b>3-комнатная в Триумфе</b><span>премиум, документы для командировок, от 48 000 тг/ночь</span></div>
+  </div>
+
+  <div class="note">
+    Чтобы подключить помощника к своему сайту, добавьте перед <code>&lt;/body&gt;</code> одну строку:<br><br>
+    <code>&lt;script src="https://ваш-сервер/widget.js" data-title="Ключи 24"&gt;&lt;/script&gt;</code>
+  </div>
+</div>
+
+<script src="/widget.js" data-title="Ключи 24"></script>
+</body>
+</html>
