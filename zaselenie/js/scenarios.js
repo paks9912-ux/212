@@ -40,6 +40,13 @@
     return out;
   }
 
+  /* «беру ближайшие выходные», «месяц не назван» — гость должен это увидеть */
+  function assumptions(a) {
+    var list = (a.dates.assumed || []).concat(a.guests.assumed || []).concat(a.budget.assumed || [])
+      .filter(function (x) { return !/бюджет за ночь|по курсу/.test(x); });
+    return list.length ? 'Уточню, как понял: ' + list.join('; ') + '. Поправьте, если не так.' : null;
+  }
+
   function offersReply(a, head) {
     var m = a.match;
     var best = m.offers[0];
@@ -50,6 +57,7 @@
     if (a.req.repeatGuest) extra.unshift('Как постоянному гостю скидка ' + Math.round(Set.repeatGuestDiscount * 100) + '% уже в цене.');
     return R.lines([
       head,
+      assumptions(a),
       '',
       body,
       '',
@@ -100,9 +108,49 @@
     {
       id: 'lang-en', title: 'Гость пишет на английском', group: 'служебные',
       when: function (a) { return a.lang === 'en' && !a.risk.hard; },
+      build: function (a) {
+        var S = Set;
+        if (a.match && a.match.offers.length) {
+          var list = a.match.offers.slice(0, 2).map(function (o, i) {
+            return (i + 1) + ') ' + o.object.title + ' — ' + o.object.district +
+                   ', up to ' + (o.object.capacity + o.object.extraBeds) + ' guests\n' +
+                   '   ' + U.money(o.quote.perNightStay, 'UZS') + ' per night · ' +
+                   U.money(o.quote.total, 'UZS') + ' total · deposit ' + U.money(o.quote.deposit, 'UZS');
+          }).join('\n');
+          return { action: 'offer', reason: 'заявка на английском разобрана',
+            reply: R.lines([
+              'Available for ' + a.dates.from + ' — ' + a.dates.to + ', ' + a.guests.total + ' guest(s):',
+              '', list, '',
+              'Cleaning, linen and Wi-Fi included. Check-in ' + S.checkIn + ', check-out ' + S.checkOut + '.',
+              'Prepayment ' + Math.round(S.prepay * 100) + '%, the rest on arrival. Passport needed at check-in.',
+              a.signals.pets ? 'Pets are allowed in these apartments for an extra fee.' : null,
+              'Which one works for you? I can hold the dates for ' + S.holdMinutes + ' minutes.'
+            ]) };
+        }
+        return { action: 'ask', reason: 'нужны даты, гость пишет по-английски',
+          reply: R.lines([
+            'Hi! Yes, we rent apartments in ' + (S.cityEn || S.city) + ' by the day.',
+            'Tell me the dates and the number of guests — I will send options with exact prices.',
+            'Example: "20-23 Nov for 2 people".',
+            'Check-in ' + S.checkIn + ', check-out ' + S.checkOut + '. Parking is free at most of our apartments.',
+            '',
+            '(Отвечаю и по-русски — как удобнее.)'
+          ]) };
+      }
+    },
+    {
+      id: 'lang-uz', title: 'Гость пишет по-узбекски', group: 'служебные',
+      when: function (a) { return a.lang === 'uz' && !a.risk.hard; },
       build: function () {
-        return { action: 'info', reason: 'другой язык',
-          reply: 'Hi! Yes, we rent apartments in ' + Set.city + ' by the day. Tell me the dates, number of guests and your budget — I will send options with prices.\nCheck-in ' + Set.checkIn + ', check-out ' + Set.checkOut + ', passport required.\n\n(Отвечаю и по-русски — как удобнее.)' };
+        return { action: 'ask', reason: 'узбекский язык',
+          reply: R.lines([
+            'Assalomu alaykum! ' + Set.brand + ' — ' + Set.cityEn + 'da kunlik kvartiralar.',
+            'Sanalarni va nechta mehmon ekanini yozing — narxlari bilan variantlarni yuboraman.',
+            'Masalan: «12-15 noyabr, 3 kishi».',
+            'Kirish ' + Set.checkIn + ', chiqish ' + Set.checkOut + '. Pasport kerak.',
+            '',
+            '(Rus tilida ham yozishingiz mumkin.)'
+          ]) };
       }
     },
 
@@ -237,6 +285,17 @@
       }
     },
     {
+      id: 'damage', title: 'Гость сообщает об ущербе', group: 'проживание',
+      when: function (a) { return a.signals.damage; },
+      build: function () {
+        return { action: 'escalate', reason: 'ущерб и депозит',
+          reply: R.lines([
+            'Спасибо, что сказали сами — так проще. Пришлите фото повреждения.',
+            'Мелочи вроде разбитой чашки не считаем. Если нужен ремонт или замена, стоимость удержим из депозита и покажем чек, остаток вернём в тот же день.'
+          ]) };
+      }
+    },
+    {
       id: 'complaint', title: 'Жалоба на квартиру или сервис', group: 'проживание',
       when: function (a) { return a.signals.complaint; },
       build: function (a) {
@@ -246,17 +305,6 @@
             'Если поправить быстро не получится, предложу переселение или пересчитаю стоимость за эти сутки.'
           ]),
           internal: 'Жалоба: «' + a.raw.slice(0, 120) + '». Проверить объект перед следующим заездом.' };
-      }
-    },
-    {
-      id: 'damage', title: 'Гость сообщает об ущербе', group: 'проживание',
-      when: function (a) { return a.signals.damage; },
-      build: function () {
-        return { action: 'escalate', reason: 'ущерб и депозит',
-          reply: R.lines([
-            'Спасибо, что сказали сами — так проще. Пришлите фото повреждения.',
-            'Мелочи вроде разбитой чашки не считаем. Если нужен ремонт или замена, стоимость удержим из депозита и покажем чек, остаток вернём в тот же день.'
-          ]) };
       }
     },
     {
@@ -518,6 +566,30 @@
       }
     },
     {
+      id: 'payment-claimed', title: 'Гость говорит, что оплатил', group: 'бронь',
+      when: function (a) { return a.signals.paid; },
+      build: function (a) {
+        var b = a.ctx.booking;
+        if (b) {
+          var o = KB.byId(b.objectId);
+          return { action: 'escalate', reason: 'заявлена оплата, нужна сверка', priority: 'важно',
+            reply: R.lines([
+              'Спасибо, проверяю поступление — обычно перевод виден в течение 10–15 минут.',
+              'Как только увижу оплату, пришлю точный адрес, код от подъезда и контакт встречающего по брони: ' +
+                o.title + ', ' + U.range(b.from, b.to) + '.',
+              'Если оплата была с чужой карты или другим способом — напишите, с какого номера и на какую сумму, так найду быстрее.'
+            ]),
+            internal: 'Гость заявил оплату ' + U.money(b.prepay) + ' по брони ' + b.objectId + '. Сверить поступление до отправки адреса.' };
+        }
+        return { action: 'escalate', reason: 'оплата без брони в системе', priority: 'важно',
+          reply: R.lines([
+            'Проверю платёж. Напишите, пожалуйста: сумму, время перевода и на какие даты бронь — по этим данным найду оплату.',
+            'Адрес отправляю только после того, как вижу деньги на счёте, — так безопаснее для обеих сторон.'
+          ]),
+          internal: 'Гость заявил оплату, но брони в диалоге нет. Проверить поступление вручную.' };
+      }
+    },
+    {
       id: 'booking-confirm', title: 'Гость выбрал вариант', group: 'бронь',
       when: function (a) { return a.selected; },
       build: function (a) {
@@ -537,7 +609,12 @@
     },
     {
       id: 'full-request', title: 'Полная заявка: даты, гости, всё считается', group: 'бронь',
-      when: function (a) { return a.match && a.match.offers.length > 0 && a.dates.from && a.dates.to && a.guests.total; },
+      when: function (a) {
+        if (!(a.match && a.match.offers.length > 0 && a.dates.from && a.dates.to && a.guests.total)) return false;
+        /* Варианты уже на экране и ничего не изменилось — пусть отвечает
+           справочный сценарий, а не второй раз тот же список */
+        return !a.ctx.offers.length || a.freshChanged || a.signals.book;
+      },
       build: function (a) {
         var head = 'Смотрю на ' + U.range(a.dates.from, a.dates.to) + ', ' + U.nights(a.dates.nights) + ', ' + U.guests(a.guests.total) +
                    (a.guests.children ? ' (из них ' + a.guests.children + ' ' + U.plural(a.guests.children, 'ребёнок', 'детей', 'детей') + ')' : '') + ' — свободно:';
@@ -572,7 +649,7 @@
         if (!a.dates.from && !a.guests.total) teaser = R.priceFrom();
         var extra = addons(a, null);
         return { action: 'ask', reason: 'не хватает данных: ' + a.missing.join(', '),
-          reply: R.lines([head, teaser ? teaser : null,
+          reply: R.lines([head, assumptions(a), teaser ? teaser : null,
                           extra.length ? '' : null, extra.length ? extra.join('\n') : null,
                           '', R.ask(a.questions)]),
           internal: 'Ждём: ' + a.missing.join(', ') + '.' };
@@ -583,19 +660,30 @@
     {
       id: 'faq', title: 'Быт: Wi-Fi, кухня, стирка, парковка', group: 'вопросы',
       when: function (a) {
-        return /wi-?fi|вайфай|интернет|кухн|готовить|стиральн|постирать|полотенц|бель[еёя]|убор|парковк|трансфер|фото/.test(a.norm);
+        /* Коляска и ограниченная подвижность — не бытовой вопрос, там свой сценарий */
+        if (a.prefs.accessible) return false;
+        return /wi-?fi|вайфай|интернет|кухн|готовить|стиральн|постирать|полотенц|бель[еёя]|убор|парковк|трансфер|фото|лифт|этаж/.test(a.norm);
       },
       build: function (a) {
         var t = a.norm, out = [];
+        var shown = a.ctx.offers.map(function (o) { return o.object; });
+        if (/парковк/.test(t) && shown.length) {
+          out.push(shown.map(function (o) { return o.title + ' — парковка: ' + o.parking + '.'; }).join('\n'));
+        }
+        if (/лифт|этаж/.test(t) && shown.length) {
+          out.push(shown.map(function (o) {
+            return o.title + ' — ' + o.floor + '-й этаж, ' + (o.elevator ? 'лифт есть' : 'лифта нет') + '.';
+          }).join('\n'));
+        }
         if (/wi-?fi|вайфай|интернет/.test(t)) out.push(KB.faq.wifi);
         if (/кухн|готовить/.test(t)) out.push(KB.faq.kitchen);
         if (/стиральн|постирать/.test(t)) out.push(KB.faq.laundry);
         if (/полотенц|бель[еёя]/.test(t)) out.push(KB.faq.towels);
         if (/убор/.test(t)) out.push(KB.faq.cleaning);
-        if (/парковк/.test(t)) out.push(KB.faq.parking);
+        if (/парковк/.test(t) && !shown.length) out.push(KB.faq.parking);
         if (/трансфер/.test(t)) out.push(KB.faq.transfer);
         if (/фото/.test(t)) out.push('Фото и планировки пришлю следующим сообщением — скажите, какой район интересует.');
-        out.push('Что-то ещё уточнить, или подбираем даты?');
+        out.push(a.ctx.offers.length ? 'Ещё вопросы — или бронируем?' : 'Что-то ещё уточнить, или подбираем даты?');
         return { action: 'info', reason: 'справочный вопрос', reply: R.lines(out) };
       }
     },
@@ -694,7 +782,35 @@
       when: function (a) { return a.signals.checkinTime || a.signals.earlyCheckIn || a.signals.lateCheckOut || a.signals.lateArrival || a.signals.selfCheckIn; },
       build: function (a) {
         return { action: 'info', reason: 'вопрос по заезду',
-          reply: R.lines([KB.faq.checkin].concat(addons(a, null)).concat(['Напишите даты и рейс — подстроим заселение под ваше время.'])) };
+          reply: R.lines([KB.faq.checkin].concat(addons(a, null)).concat([
+            a.dates.from ? 'Во сколько планируете быть на месте? Подстроим заселение под ваше время.'
+                         : 'Напишите даты и время прилёта — подстроим заселение под вас.'
+          ])) };
+      }
+    },
+    {
+      id: 'thanks', title: 'Благодарность', group: 'служебные',
+      when: function (a) { return a.signals.thanks && a.length < 60 && !a.dates.from; },
+      build: function (a) {
+        var b = a.ctx.booking;
+        return { action: 'info', reason: 'вежливый обмен',
+          reply: b
+            ? 'Пожалуйста! Бронь на месте: ' + U.range(b.from, b.to) + '. Напишите за день до заезда — пришлю адрес и инструкцию.'
+            : 'Пожалуйста! Появятся даты — напишите, подберу и посчитаю.' };
+      }
+    },
+    {
+      id: 'later', title: 'Гость взял паузу подумать', group: 'служебные',
+      when: function (a) { return a.signals.later; },
+      build: function (a) {
+        var hold = a.ctx.offers.length;
+        return { action: 'info', reason: 'пауза на решение',
+          reply: R.lines([
+            'Хорошо, не тороплю.',
+            hold ? 'Эти даты держу ' + Set.holdMinutes + ' минут, дальше квартира снова в продаже — если решите позже, просто напишите, проверю заново.'
+                 : 'Напишите, когда определитесь с датами, — подберу по наличию на тот момент.',
+            'Цены на выходные и праздники растут, так что раннее бронирование обычно дешевле.'
+          ]) };
       }
     },
     {

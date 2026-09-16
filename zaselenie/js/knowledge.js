@@ -13,6 +13,7 @@
     business: 'квартиры посуточно',
     city: 'Ташкент',
     cityIn: 'Ташкенте',
+    cityEn: 'Tashkent',
     currency: 'сум',
     checkIn: '14:00',
     checkOut: '12:00',

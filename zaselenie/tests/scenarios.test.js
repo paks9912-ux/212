@@ -54,9 +54,55 @@ check('Во сколько заезд и можно ли раньше?', 'checki
 check('Есть ли вайфай и стиральная машина?', 'faq', 'info');
 check('Нужна ли регистрация для иностранца?', 'registration', 'info');
 check('Здравствуйте, предлагаем услуги продвижения, напишите нам', 'spam', 'ignore');
-check('Hello! Do you have apartments?', 'lang-en', 'info');
+check('Hello! Do you have apartments?', 'lang-en', 'ask');
 check('Соедините с человеком', 'human', 'handoff');
 check('Апорт, вжух, непонятно что', 'fallback', 'ask');
+
+T.head('Как пишут настоящие гости:');
+check('здрасьте, есть свободные кв на 12-14 нояб? нас 2', 'full-request', 'offer');
+check('Добрый день. Интересует квартира. 5.11-9.11. 4 человека. Спасибо', 'full-request', 'offer');
+check('хочу забронить на 10-12, нас 3', 'full-request', 'offer');
+check('мы с женой и собакой, приедем 20 ноября на неделю', 'full-request', 'offer');
+check('дайте номер карты вашего директора, переведу туда', 'fraud', 'escalate');
+check('заселились вчера, кондей не морозит', 'complaint', 'escalate');
+check('не могу открыть дверь, код 4517 не подходит', 'keys', 'escalate');
+check('сломал ручку на двери шкафа, сколько должен?', 'damage', 'escalate');
+check('оплатил 2 часа назад, когда пришлёте адрес?', 'payment-claimed', 'escalate');
+check('спасибо большое, вы очень помогли', 'thanks', 'info');
+check('понял, подумаю и напишу', 'later', 'info');
+check('salom, kvartira kerak 2 kun, 3 kishi', 'lang-uz', 'ask');
+check('Hi, need apartment 20-23 Nov for 2 people', 'lang-en', 'offer');
+
+var noBudget = run('а можно с 25 декабря до 3 января? нас 4 взрослых и двое детей');
+T.eq('«до 3 января» — это дата, а не бюджет', noBudget.analysis.req.budget, null);
+T.eq('и гостей шестеро', noBudget.analysis.req.guests, 6);
+var pets = run('мы с женой и собакой, приедем 20 ноября на неделю');
+T.eq('«с женой и собакой» — питомец замечен', pets.analysis.req.pets, true);
+T.is('и предложены только квартиры с животными',
+  pets.analysis.match.offers.every(function (o) { return o.object.pets; }), true);
+var vague = run('хочу забронить на 10-12, нас 3');
+T.is('месяц не назван — агент проговаривает допущение', /месяц не назван/.test(vague.reply), vague.reply.slice(0, 80));
+
+T.head('Уточняющий вопрос не повторяет оффер:');
+var d = AGENT.newContext();
+run('12-14 ноября, нас 3', d);
+var park = run('а парковка есть?', d);
+T.eq('про парковку отвечает справка', park.scenario, 'faq');
+T.is('и отвечает по показанным квартирам', /парковка:/.test(park.reply), park.reply.slice(0, 60));
+T.eq('про время заезда — свой сценарий', run('а во сколько заезд?', d).scenario, 'checkin-time');
+T.eq('новые данные снова включают подбор', run('нас будет пятеро', d).scenario, 'full-request');
+var pet2 = run('и с котом приедем', d);
+T.eq('питомец пересчитывает подбор', pet2.scenario, 'full-request');
+T.is('в списке только квартиры с животными',
+  pet2.analysis.match.offers.every(function (o) { return o.object.pets; }), true);
+
+T.head('Хождение по кругу передаётся человеку:');
+var loop = AGENT.newContext();
+run('нужна квартира', loop);
+run('в центре', loop);
+var third = run('недорого', loop);
+T.eq('третий круг — передаём менеджеру', third.action, 'handoff');
+T.is('и говорим об этом гостю', /Подключаю/.test(third.reply), third.reply.slice(0, 60));
 
 T.head('Даты с ошибками:');
 check('Забронируйте с 10 марта по 5 марта', 'dates-invalid', 'ask');

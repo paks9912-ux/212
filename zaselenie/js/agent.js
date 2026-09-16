@@ -93,6 +93,8 @@
     }
     if (p.signals.book && ctx.offers.length === 1) return ctx.offers[0];
     if (/(^|[^а-я])(беру|берем|подходит|оформля|давайте|согласен|согласна)/.test(t) && ctx.offers.length) return ctx.offers[0];
+    /* «да», «ок», «давай» сразу после вариантов — это согласие на первый */
+    if (t.length <= 14 && /^(да|ок|окей|ok|хорошо|ага|угу|давай|годится|\+)/.test(t)) return ctx.offers[0];
     return null;
   }
 
@@ -150,6 +152,19 @@
     };
 
     a.selected = selection(ctx, p);
+
+    /* Что нового принесло именно это сообщение: если ничего, а варианты уже
+       показаны, значит гость задал уточняющий вопрос — оффер повторять не надо */
+    a.fresh = {
+      dates: !!p.dates.from || !!p.dates.nights,
+      guests: p.guests.stated,
+      budget: !!p.budget.amount,
+      pets: p.signals.pets,
+      district: !!p.prefs.district,
+      rooms: p.prefs.rooms !== null,
+      extras: !!(p.signals.earlyCheckIn || p.signals.lateCheckOut || p.signals.lateArrival)
+    };
+    a.freshChanged = Object.keys(a.fresh).some(function (k) { return a.fresh[k]; });
 
     /* Подбор считаем, только когда есть даты и срок */
     if (req.from && req.to && req.nights > 0 && !p.dates.hourly) {
@@ -222,7 +237,16 @@
     }
     if (out.action === 'ask') ctx.unresolved++; else ctx.unresolved = 0;
     if (ctx.unresolved >= 3) {
+      /* Третий раз спрашиваем одно и то же — это уже не диалог, зовём человека */
       result.escalate = true;
+      result.action = 'handoff';
+      result.reply = R.lines([
+        'Кажется, по переписке мы ходим по кругу — так быстрее не станет.',
+        R.human('поможет подобрать голосом за пару минут'),
+        'Если удобнее здесь — напишите одной строкой: даты, сколько гостей и до какой суммы за ночь.'
+      ]);
+      result.crm.status = 'handoff';
+      result.crm.nextStep = 'передано менеджеру';
       result.internal = (result.internal ? result.internal + ' ' : '') + 'Третий уточняющий вопрос подряд — подключить человека.';
     }
     return result;
