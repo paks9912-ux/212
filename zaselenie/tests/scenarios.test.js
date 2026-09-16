@@ -153,7 +153,7 @@ T.head('Деньги и оплата:');
 
 T.head('Бюджет в чужой валюте:');
 var usd = run('бюджет до 50$ за ночь, с 10 по 12 марта, нас двое');
-T.eq('доллары переводятся в сумы', usd.analysis.req.budget, 50 * KB.settings.rates.USD);
+T.eq('доллары переводятся в тенге', usd.analysis.req.budget, 50 * KB.settings.rates.USD);
 T.is('и квартира за 280 000 больше не «дороже бюджета»',
   !/дороже бюджета/.test(usd.reply), usd.reply.slice(0, 120));
 var usdAsk = run('бюджет до 40$ за ночь, нас двое');
@@ -204,7 +204,7 @@ T.head('Гонка за последнюю квартиру:');
 (function () {
   var saved = KB.objects.map(function (o) { return o.busy; });
   KB.objects.forEach(function (o) { o.busy = [{ from: U.today(), to: U.addDays(U.today(), 60), guest: 'тест' }]; });
-  KB.byId('loft-chilanzar').busy = [];
+  KB.byId('loft-expo').busy = [];
   HOLDS.reset();
 
   var dates = 'с ' + U.fmt(U.addDays(U.today(), 10)) + ' по ' + U.fmt(U.addDays(U.today(), 12)) + ', нас двое';

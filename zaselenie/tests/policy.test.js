@@ -1,13 +1,14 @@
 /* Цены, занятость, подбор: node zaselenie/tests/policy.test.js */
 var T = require('./helper.js');
 
-var obj = KB.byId('studio-amir');
+var obj = KB.byId('studio-baiterek');
+var BASE = obj.base;
 obj.busy = [{ from: '2026-03-10', to: '2026-03-14', guest: 'тест' }];
 
 T.head('Цена ночи:');
-T.eq('будни — база', PO.nightPrice(obj, '2026-03-03'), 420000);
-T.eq('пятница — коэффициент выходного', PO.nightPrice(obj, '2026-03-06'), Math.round(420000 * 1.15 / 1000) * 1000);
-T.eq('Навруз — сезонная наценка', PO.nightPrice(obj, '2026-03-20'), Math.round(420000 * 1.15 * 1.3 / 1000) * 1000);
+T.eq('будни — база', PO.nightPrice(obj, '2026-03-03'), BASE);
+T.eq('пятница — коэффициент выходного', PO.nightPrice(obj, '2026-03-06'), Math.round(BASE * 1.15 / 1000) * 1000);
+T.eq('Наурыз — сезонная наценка', PO.nightPrice(obj, '2026-03-20'), Math.round(BASE * 1.15 * 1.35 / 1000) * 1000);
 T.eq('новогодние даты — пик', PO.isPeak('2026-12-30', '2027-01-02'), true);
 
 T.head('Занятость:');
@@ -18,9 +19,9 @@ T.eq('соседнее окно предлагается', PO.nearestWindows(obj
 T.head('Расчёт:');
 var q = PO.quote(obj, { from: '2026-03-03', to: '2026-03-06', guests: 2 });
 T.eq('3 ночи будней', q.nights, 3);
-T.eq('сумма без допов', q.total, 420000 * 3);
-T.eq('предоплата 30%', q.prepay, Math.round(420000 * 3 * 0.3));
-T.eq('депозит объекта', q.deposit, 500000);
+T.eq('сумма без допов', q.total, BASE * 3);
+T.eq('предоплата 30%', q.prepay, Math.round(BASE * 3 * 0.3));
+T.eq('депозит объекта', q.deposit, obj.deposit);
 
 var q2 = PO.quote(obj, { from: '2026-03-03', to: '2026-03-06', guests: 3 });
 T.eq('третий гость — доп. место за каждую ночь', q2.total - q.total, KB.settings.extraGuestFee * 3);
@@ -66,13 +67,13 @@ T.head('Сезоны и стыки:');
   }
   T.eq('сезоны не перекрывают друг друга', overlaps.length, 0);
 })();
-T.eq('ночь до начала сезона — по базе', PO.nightPrice(obj, '2026-12-27'), 420000);
-T.eq('первая ночь сезона — с коэффициентом', PO.nightPrice(obj, '2026-12-28'), Math.round(420000 * 1.6 / 1000) * 1000);
-T.eq('последняя ночь сезона ещё дорогая', PO.nightPrice(obj, '2027-01-05'), Math.round(420000 * 1.6 / 1000) * 1000);
-T.eq('следующая ночь — снова база', PO.nightPrice(obj, '2027-01-06'), 420000);
+T.eq('ночь до начала сезона — по базе', PO.nightPrice(obj, '2026-12-27'), BASE);
+T.eq('первая ночь сезона — с коэффициентом', PO.nightPrice(obj, '2026-12-28'), Math.round(BASE * 1.6 / 1000) * 1000);
+T.eq('последняя ночь сезона ещё дорогая', PO.nightPrice(obj, '2027-01-05'), Math.round(BASE * 1.6 / 1000) * 1000);
+T.eq('следующая ночь — снова база', PO.nightPrice(obj, '2027-01-06'), BASE);
 T.eq('праздник и выходной умножаются вместе',
-  PO.nightPrice(obj, '2027-01-01'), Math.round(420000 * 1.15 * 1.6 / 1000) * 1000);
-T.eq('ночь воскресенья — не выходной тариф', PO.nightPrice(obj, '2026-10-18'), 420000);
+  PO.nightPrice(obj, '2027-01-01'), Math.round(BASE * 1.15 * 1.6 / 1000) * 1000);
+T.eq('ночь воскресенья — не выходной тариф', PO.nightPrice(obj, '2026-10-18'), BASE);
 
 (function () {
   var cases = [['2026-12-29', '2027-01-03'], ['2027-01-08', '2027-01-13'],
@@ -89,10 +90,10 @@ T.eq('ночь воскресенья — не выходной тариф', PO.
 })();
 
 T.head('Предоплата в праздники:');
-var mixed = PO.quote(obj, { from: '2027-03-18', to: '2027-03-20', guests: 2 });   // 1 ночь Навруза из 2
+var mixed = PO.quote(obj, { from: '2027-03-19', to: '2027-03-21', guests: 2 });   // 1 ночь Наурыза из 2
 T.eq('в смешанной броне пиковых ночей ровно одна', mixed.peakNights, 1);
 T.eq('праздничная ночь оплачивается полностью, остальное по 30%',
-  mixed.prepay, Math.round(PO.nightPrice(obj, '2027-03-19') + PO.nightPrice(obj, '2027-03-18') * 0.3));
+  mixed.prepay, Math.round(PO.nightPrice(obj, '2027-03-20') + PO.nightPrice(obj, '2027-03-19') * 0.3));
 T.is('одна праздничная ночь не делает всю бронь стопроцентной', mixed.prepayPart < 1, mixed.prepayPart);
 
 var allPeak = PO.quote(obj, { from: '2026-12-29', to: '2027-01-01', guests: 2 });
@@ -112,11 +113,11 @@ T.is('но обычные ночи в той же броне со скидкой
 
 T.head('Минимальный срок по сезону:');
 T.eq('в новогодние даты минимум три ночи', PO.minNights(obj, '2026-12-29', '2026-12-30'), 3);
-T.eq('в Навруз — две', PO.minNights(obj, '2027-03-19', '2027-03-20'), 2);
+T.eq('в Наурыз — две', PO.minNights(obj, '2027-03-21', '2027-03-22'), 2);
 T.eq('вне сезона — одна', PO.minNights(obj, '2026-10-12', '2026-10-13'), 1);
 
 T.head('Разброс цен виден гостю:');
-T.is('в праздники показываем «от и до»', !!R.spread(PO.quote(obj, { from: '2027-03-18', to: '2027-03-20', guests: 2 })), true);
+T.is('в праздники показываем «от и до»', !!R.spread(PO.quote(obj, { from: '2027-03-20', to: '2027-03-22', guests: 2 })), true);
 T.eq('в ровные даты лишнего не пишем', R.spread(PO.quote(obj, { from: '2026-10-12', to: '2026-10-15', guests: 2 })), null);
 
 T.head('Когда всё занято:');
@@ -145,8 +146,8 @@ T.head('Когда всё занято:');
 
 T.head('Битый календарь не молчит:');
 (function () {
-  var saved = KB.byId('studio-amir').busy;
-  KB.byId('studio-amir').busy = [
+  var saved = KB.byId('studio-baiterek').busy;
+  KB.byId('studio-baiterek').busy = [
     { from: '2026-10-10', to: '2026-10-05' },
     { from: 'кривая', to: '2026-10-20' },
     {},
@@ -158,7 +159,7 @@ T.head('Битый календарь не молчит:');
   T.is('кривой формат замечен', problems.some(function (x) { return /не в формате/.test(x); }), true);
   T.is('пустая запись замечена', problems.some(function (x) { return /нет дат/.test(x); }), true);
   T.is('наложение броней замечено', problems.some(function (x) { return /наложились/.test(x); }), true);
-  KB.byId('studio-amir').busy = saved;
+  KB.byId('studio-baiterek').busy = saved;
   T.eq('на исправном календаре жалоб нет', KB.validate().length, 0);
 })();
 
@@ -191,7 +192,7 @@ T.is('возврат никогда не больше внесённого',
 T.head('Удержания как занятость:');
 (function () {
   HOLDS.reset();
-  var o = KB.byId('loft-chilanzar'), saved = o.busy;
+  var o = KB.byId('loft-expo'), saved = o.busy;
   o.busy = [];
   var from = U.addDays(U.today(), 5), to = U.addDays(from, 2);
   HOLDS.add(o.id, from, to, 'гость-А', 60);

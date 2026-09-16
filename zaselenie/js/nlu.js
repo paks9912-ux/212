@@ -293,11 +293,12 @@
     if (/\$|долл|usd|у\.?е/.test(cur)) { b.currency = 'USD'; b.assumed.push('бюджет в долларах, пересчитаем по курсу'); }
     else if (/сом/.test(cur)) b.currency = 'KGS';
     else if (/руб/.test(cur)) b.currency = 'RUB';
-    else b.currency = 'UZS';
+    else if (/сум/.test(cur)) b.currency = 'UZS';
+    else b.currency = null;                     // валюта не названа — значит местная
 
     /* Без валюты и без «тысяч/к/млн» маленькое число — это не бюджет, а что-то другое */
     if (!m[3] && !mult && amount < 1000) return { amount: null, per: null, currency: null, assumed: [] };
-    if (b.currency === 'UZS' && amount < 1000) { amount *= 1000; b.assumed.push('сумму меньше тысячи прочитали как тысячи'); }
+    if (!b.currency && amount < 1000) { amount *= 1000; b.assumed.push('сумму меньше тысячи прочитали как тысячи'); }
     b.amount = amount;
 
     if (/(за|в)\s*(ночь|сутк|день)|ночь|сутк/.test(t)) b.per = 'night';

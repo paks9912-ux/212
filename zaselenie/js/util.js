@@ -108,9 +108,11 @@
   U.guests = function (n) { return n + ' ' + U.plural(n, 'гость', 'гостя', 'гостей'); };
   U.guestsUpTo = function (n) { return n + ' ' + U.plural(n, 'гостя', 'гостей', 'гостей'); };   // «вмещает до N гостей»
 
+  /* Валюта берётся из базы знаний: смена города — это одна настройка */
+  U.CURRENCY = 'тг';
   U.money = function (n, cur) {
     var s = Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    return s + (cur === undefined ? ' сум' : (cur ? ' ' + cur : ''));
+    return s + (cur === undefined ? ' ' + U.CURRENCY : (cur ? ' ' + cur : ''));
   };
 
   /* Нормализация сообщения: регистр, ё, лишние пробелы, латинские двойники */

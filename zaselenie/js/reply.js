@@ -129,7 +129,9 @@
 
   R.priceFrom = function () {
     var p = PO.priceRange();
-    return 'Цены от ' + U.money(p.min) + ' за ночь (эконом у вокзала) до ' + U.money(p.max) + ' (премиум в Мирабаде).';
+    var sorted = KB.objects.slice().sort(function (a, b) { return a.base - b.base; });
+    return 'Цены от ' + U.money(p.min) + ' за ночь — ' + sorted[0].title + ', до ' +
+           U.money(p.max) + ' — ' + sorted[sorted.length - 1].title + '.';
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = R;

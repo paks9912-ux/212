@@ -64,7 +64,7 @@ var b = newBot();
     .then(function () { return b.bot.handleUpdate(msg(10, 'нас четверо, с 10 по 13 марта')); })
     .then(function () {
       var last = texts()[texts().length - 1].params;
-      T.is('на заявку приходят варианты с ценой', /сум/.test(last.text), last.text.slice(0, 60));
+      T.is('на заявку приходят варианты с ценой', /тг/.test(last.text), last.text.slice(0, 60));
       T.is('к вариантам прикручены кнопки выбора',
         !!(last.reply_markup && last.reply_markup.inline_keyboard[0][0].callback_data === 'pick:0'), last.reply_markup);
       return b.bot.handleUpdate({ callback_query: { id: 'c1', data: 'pick:0', from: { id: 10, first_name: 'Азиз' }, message: { chat: { id: 10, type: 'private' } } } });
@@ -183,7 +183,7 @@ var b = newBot();
       var sessions = new Store(file + '.2', 48).attach(KB, AGENT);
       var bot = TG.createBot({ call: fakeCall, sessions: sessions, claude: broken, log: function () {} });
       return bot.handleUpdate(msg(60, 'нас двое, с 10 по 13 марта')).then(function () {
-        T.is('гость всё равно получил ответ движка', /сум/.test(toGuest(60).pop().params.text), true);
+        T.is('гость всё равно получил ответ движка', /тг/.test(toGuest(60).pop().params.text), true);
       });
     })
 
