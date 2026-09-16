@@ -39,6 +39,11 @@ function build(name) {
     return '/* ' + f + ' */\n' + read(f);
   }).join('\n;\n');
 
+  /* Закрывающий тег внутри строки кода разорвал бы <script>.
+     Экранируем только вставляемый код — трогать готовую страницу нельзя,
+     иначе разорвётся тег самого встроенного скрипта. */
+  js = js.replace(/<\/script>/gi, '<\\/script>');
+
   /* Вставляем код только через функцию-заменитель: иначе «$» внутри кода
      превратится в спецпоследовательность замены и файл сломается */
   html = html
@@ -47,27 +52,6 @@ function build(name) {
     .replace(/<link rel="stylesheet"[^>]*>\s*/g, function () { return '<style>\n' + css + '\n</style>'; })
     .replace(/<script src="[^"]*"><\/script>\s*/g, '')
     .replace('</body>', function () { return '<script>\n' + js + '\n</script>\n</body>'; });
-
-  /* Закрывающий тег внутри строки кода разорвал бы <script> */
-  /* Страница не должна молчать: любую ошибку показываем прямо на экране,
-     иначе «не работает» невозможно диагностировать на чужом телефоне */
-  var guard = [
-    '<script>',
-    'window.onerror = function (msg, src, line) {',
-    '  var d = document.createElement("div");',
-    '  d.setAttribute("style", "position:fixed;left:0;right:0;bottom:0;z-index:99999;background:#3a1512;' +
-      'color:#ffd9d4;font:13px/1.5 -apple-system,sans-serif;padding:12px 14px;white-space:pre-wrap");',
-    '  d.textContent = "Страница не запустилась: " + msg + " (строка " + line + ")." +',
-    '    " Покажите этот текст тому, кто прислал файл.";',
-    '  (document.body || document.documentElement).appendChild(d);',
-    '};',
-    '</script>'
-  ].join('\n');
-  html = html.replace('</head>', function () { return guard + '\n</head>'; });
-
-  html = html.replace(/<\/script>/g, function (m, i) {
-    return i > html.indexOf('<script>') && i < html.lastIndexOf('</script>') ? '<\\/script>' : m;
-  });
 
   /* Manrope недоступен офлайн — берём системный шрифт */
   html = html.replace(/"Manrope",?\s*/g, '');
