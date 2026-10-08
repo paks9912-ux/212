@@ -9,7 +9,8 @@
 Папка [`zaselenie/`](zaselenie/) — агент, который принимает заявки на посуточное
 заселение: разбирает сообщение гостя, считает цену по календарю и тарифам,
 отвечает по сценариям и доводит заявку до брони. Работает как демо в виде
-Telegram-чата ([zaselenie/telegram.html](zaselenie/telegram.html)), телеграм-бот и платформа с пультом менеджера, куда можно подключить сайт и любые
+Telegram-чата ([zaselenie/telegram.html](zaselenie/telegram.html)), презентация
+([zaselenie/kak-rabotaet-bot.html](zaselenie/kak-rabotaet-bot.html)), телеграм-бот и платформа с пультом менеджера, куда можно подключить сайт и любые
 внешние источники заявок. Описание, база знаний, промпты и тесты — в
 [zaselenie/README.md](zaselenie/README.md), запуск бота — в
 [zaselenie/bot/README.md](zaselenie/bot/README.md).

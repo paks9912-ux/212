@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Как работает бот заселения — Ключи 24</title>
+<meta name="description" content="Наглядно: что происходит от первого сообщения гостя до кода от двери. Бот сам проигрывает диалоги, считает цену, держит даты и зовёт менеджера, когда нужен человек.">
+<meta name="theme-color" content="#0e1621">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2329a9eb'/%3E%3Cpath d='M7 15.5l16-6.5-2.5 13-5-3.5-2.5 2.5v-4l7-6-9 5z' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* Презентация бота: страница сама проигрывает диалоги в телефонах.
+   Ответы не записаны заранее — их считает тот же движок, что и настоящий бот. */
+:root {
+  --bg: #0b1320; --bg2: #101b2b; --card: #15233a; --line: rgba(255,255,255,.08);
+  --text: #eef3f8; --muted: #8a9bb0; --accent: #2fa5e8; --amber: #e0b06a; --ok: #4cc38a; --bad: #e5655a;
+  --tg-in: #182533; --tg-out: #2b5278; --gutter: clamp(16px, 4vw, 48px); --wrap: 1120px;
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font: 16px/1.55 Manrope, -apple-system, system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+a { color: var(--accent); }
+button { font: inherit; color: inherit; }
+.wrap { width: min(var(--wrap), 100% - var(--gutter) * 2); margin-inline: auto; }
+.eyebrow { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-bottom: 14px; }
+h1, h2, h3 { line-height: 1.1; letter-spacing: -.02em; }
+h2 { font-size: clamp(30px, 4.4vw, 50px); font-weight: 800; max-width: 20ch; margin-bottom: 14px; }
+.lead { color: var(--muted); font-size: clamp(16px, 1.6vw, 19px); max-width: 60ch; margin-bottom: clamp(32px, 5vw, 60px); }
+section { padding: clamp(64px, 10vw, 120px) 0; }
+section + section { border-top: 1px solid var(--line); }
+
+/* Появление при прокрутке */
+.rv { opacity: 0; transform: translateY(26px); transition: opacity .8s var(--ease), transform .8s var(--ease); }
+.rv.in { opacity: 1; transform: none; }
+
+/* ---------- телефон ---------- */
+.phone { width: 330px; max-width: 100%; aspect-ratio: 9 / 18.6; border-radius: 40px; background: #000; padding: 10px; box-shadow: 0 40px 90px -30px rgba(0,0,0,.9), 0 0 0 1px #2a2f36; flex: 0 0 auto; }
+.phone.sm { width: 290px; border-radius: 34px; }
+.screen { height: 100%; border-radius: 31px; overflow: hidden; background: radial-gradient(circle at 20% 10%, rgba(82,136,193,.14), transparent 40%), #0e1621; display: flex; flex-direction: column; font-size: 13.5px; line-height: 1.38; }
+.head { background: #17212b; padding: 34px 12px 8px; display: flex; align-items: center; gap: 10px; }
+.head .ava { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #c98a3a, #e0b06a); display: grid; place-items: center; font-weight: 800; color: #fff; font-size: 11px; }
+.head .name { font-weight: 700; font-size: 14px; line-height: 1.15; }
+.head .st { font-size: 11.5px; color: #6d7f8f; }
+.head .st.on { color: var(--accent); }
+.thread { flex: 1; overflow: hidden; padding: 10px 8px; display: flex; flex-direction: column; justify-content: flex-end; }
+.msg { max-width: 86%; padding: 6px 9px 5px; border-radius: 12px; margin-top: 4px; white-space: pre-wrap; word-wrap: break-word; animation: pop .3s var(--ease); }
+.msg.in { background: var(--tg-in); border-bottom-left-radius: 3px; align-self: flex-start; }
+.msg.out { background: var(--tg-out); border-bottom-right-radius: 3px; align-self: flex-end; }
+.msg .t { display: block; text-align: right; font-size: 10px; color: rgba(255,255,255,.4); margin-top: 1px; }
+.kb { max-width: 86%; display: grid; gap: 3px; margin-top: 4px; animation: pop .3s var(--ease); }
+.kb .row { display: flex; gap: 3px; }
+.kb span { flex: 1; background: rgba(255,255,255,.1); border-radius: 7px; padding: 7px 8px; font-size: 12.5px; text-align: center; transition: background .3s; }
+.kb span.hit { background: var(--accent); }
+.typing { display: inline-flex; gap: 4px; padding: 9px 11px; background: var(--tg-in); border-radius: 12px; border-bottom-left-radius: 3px; align-self: flex-start; margin-top: 4px; }
+.typing i { width: 5px; height: 5px; border-radius: 50%; background: #8fa5b7; animation: blink 1.2s infinite; }
+.typing i:nth-child(2) { animation-delay: .2s } .typing i:nth-child(3) { animation-delay: .4s }
+@keyframes blink { 0%, 60%, 100% { opacity: .3 } 30% { opacity: 1 } }
+@keyframes pop { from { transform: translateY(8px); opacity: 0 } to { transform: none; opacity: 1 } }
+.composer { background: #17212b; padding: 7px 8px 14px; display: flex; gap: 6px; align-items: center; }
+.composer .f { flex: 1; background: #242f3d; border-radius: 15px; padding: 7px 11px; color: #6d7f8f; min-height: 30px; }
+.composer .f.live { color: #fff; }
+.composer .s { width: 30px; height: 30px; border-radius: 50%; background: #5288c1; display: grid; place-items: center; font-size: 13px; }
+
+/* ---------- 1. первый экран ---------- */
+.hero { min-height: 100svh; display: grid; align-items: center; padding: 90px 0 60px; background: radial-gradient(ellipse at 70% 30%, rgba(47,165,232,.18), transparent 50%), radial-gradient(ellipse at 20% 90%, rgba(224,176,106,.12), transparent 50%); }
+.hero .wrap { display: grid; grid-template-columns: 1.1fr auto; gap: clamp(32px, 6vw, 96px); align-items: center; }
+.hero h1 { font-size: clamp(40px, 6vw, 76px); font-weight: 800; margin-bottom: 20px; }
+.hero h1 em { font-style: normal; color: var(--amber); }
+.hero .lead { margin-bottom: 28px; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn { display: inline-flex; align-items: center; min-height: 50px; padding: 0 24px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; text-decoration: none; border: 1px solid transparent; transition: transform .3s var(--ease); }
+.btn:hover { transform: translateY(-2px); }
+.btn.ghost { background: transparent; border-color: rgba(255,255,255,.25); }
+.live-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 18px; }
+.live-tag i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(76,195,138,.6); animation: ping 1.8s infinite; }
+@keyframes ping { to { box-shadow: 0 0 0 10px rgba(76,195,138,0); } }
+@media (max-width: 860px) { .hero .wrap { grid-template-columns: 1fr; } .hero .phone { margin: 0 auto; } }
+
+/* ---------- 2. схема ---------- */
+.flow { display: grid; grid-template-columns: 1fr auto 1.3fr auto 1fr; gap: 16px; align-items: stretch; }
+.node { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 24px; position: relative; }
+.node h3 { font-size: 20px; margin-bottom: 8px; }
+.node p { color: var(--muted); font-size: 14px; }
+.node ul { list-style: none; margin-top: 14px; display: grid; gap: 6px; font-size: 14px; }
+.node li { padding-left: 18px; position: relative; }
+.node li::before { content: ''; position: absolute; left: 0; top: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.node.bot { border-color: rgba(47,165,232,.5); box-shadow: 0 0 60px -20px rgba(47,165,232,.6); }
+.node.bot h3 { color: var(--accent); }
+.node .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.node .chips span { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(255,255,255,.07); }
+.arrow { display: grid; place-items: center; width: 56px; position: relative; }
+.arrow::before { content: ''; width: 100%; height: 2px; background: linear-gradient(90deg, var(--accent), transparent); background-size: 12px 2px; animation: dash 1s linear infinite; }
+.arrow::after { content: '▸'; position: absolute; right: -2px; color: var(--accent); font-size: 18px; }
+@keyframes dash { to { background-position: 12px 0; } }
+.pulse { position: absolute; top: 14px; right: 14px; font-size: 11px; padding: 4px 9px; border-radius: 999px; background: rgba(76,195,138,.15); color: var(--ok); font-weight: 700; }
+@media (max-width: 900px) { .flow { grid-template-columns: 1fr; } .arrow { width: auto; height: 40px; } .arrow::before { width: 2px; height: 100%; background: linear-gradient(180deg, var(--accent), transparent); } .arrow::after { content: '▾'; right: auto; bottom: -8px; } }
+
+/* ---------- 3. путь гостя ---------- */
+.steps { display: grid; gap: clamp(48px, 7vw, 96px); }
+.step { display: grid; grid-template-columns: 1fr auto; gap: clamp(28px, 5vw, 80px); align-items: center; }
+.step:nth-child(even) { grid-template-columns: auto 1fr; }
+.step:nth-child(even) .txt { order: 2; }
+.step .num { font-size: 64px; font-weight: 800; color: rgba(255,255,255,.08); line-height: 1; margin-bottom: 6px; }
+.step h3 { font-size: clamp(24px, 3vw, 34px); font-weight: 800; margin-bottom: 12px; }
+.step p { color: var(--muted); max-width: 50ch; }
+.step .what { margin-top: 18px; display: grid; gap: 8px; }
+.step .what div { display: flex; gap: 10px; font-size: 14px; }
+.step .what b { color: var(--amber); font-weight: 700; white-space: nowrap; }
+@media (max-width: 860px) { .step, .step:nth-child(even) { grid-template-columns: 1fr; } .step:nth-child(even) .txt { order: 0; } .step .phone { margin: 0 auto; } }
+
+/* ---------- 4. сам / человек ---------- */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.col { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 28px; }
+.col h3 { font-size: 22px; margin-bottom: 6px; }
+.col.ok h3 { color: var(--ok); } .col.bad h3 { color: var(--bad); }
+.col > p { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+.ex { border-top: 1px solid var(--line); padding: 12px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px; }
+.ex .q { color: var(--text); } .ex .q::before { content: '«'; } .ex .q::after { content: '»'; }
+.ex .a { color: var(--muted); }
+@media (max-width: 760px) { .two { grid-template-columns: 1fr; } .ex { grid-template-columns: 1fr; gap: 4px; } }
+
+/* ---------- 5. менеджер ---------- */
+.mgr { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 5vw, 80px); align-items: center; }
+.card { background: #17212b; border-radius: 16px; padding: 16px 18px; font-size: 14px; border-left: 3px solid var(--bad); box-shadow: 0 30px 60px -30px rgba(0,0,0,.8); }
+.card b { display: block; font-size: 16px; margin-bottom: 8px; }
+.card .row { display: grid; grid-template-columns: 90px 1fr; gap: 6px; padding: 4px 0; color: var(--muted); }
+.card .row span:last-child { color: var(--text); }
+.card .act { margin-top: 12px; display: flex; gap: 6px; }
+.card .act span { flex: 1; text-align: center; padding: 8px; border-radius: 8px; background: rgba(255,255,255,.08); font-size: 13px; }
+@media (max-width: 760px) { .mgr { grid-template-columns: 1fr; } }
+
+/* ---------- 6. цифры ---------- */
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; }
+.nums div { background: var(--bg2); padding: 28px 24px; }
+.nums b { display: block; font-size: 44px; font-weight: 800; color: var(--amber); line-height: 1; margin-bottom: 8px; }
+.nums span { color: var(--muted); font-size: 14px; }
+
+/* ---------- 7. запуск ---------- */
+.launch { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.launch div { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 24px; }
+.launch b { display: block; font-size: 32px; color: var(--accent); margin-bottom: 10px; }
+.launch h3 { font-size: 18px; margin-bottom: 6px; }
+.launch p { color: var(--muted); font-size: 14px; }
+@media (max-width: 760px) { .launch { grid-template-columns: 1fr; } }
+.cta { text-align: center; padding-bottom: 120px; }
+.cta h2 { margin-inline: auto; }
+.cta .actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+footer { padding: 24px 0 40px; color: var(--muted); font-size: 13px; text-align: center; }
+
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; transition: none; } .arrow::before, .live-tag i { animation: none; } }
+</style>
+</head>
+<body>
+
+<!-- 1. Первый экран: телефон сам ведёт диалог -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <p class="eyebrow">Ключи 24 · бот заселения</p>
+      <h1>Гость пишет — бот <em>селит</em>. Менеджер подключается, только когда нужен человек.</h1>
+      <p class="lead">Справа — не запись. Это настоящий бот отвечает прямо сейчас: разбирает сообщение, смотрит календарь, считает цену и ведёт к брони.</p>
+      <div class="actions">
+        <a class="btn" href="telegram.html">Попробовать самому</a>
+        <a class="btn ghost" href="#path">Как это устроено</a>
+      </div>
+      <div class="live-tag"><i></i>диалог проигрывается и повторяется</div>
+    </div>
+    <div class="phone" data-play="hero" data-loop="1"></div>
+  </div>
+</section>
+
+<!-- 2. Схема -->
+<section id="scheme">
+  <div class="wrap">
+    <p class="eyebrow rv">Схема</p>
+    <h2 class="rv">Один бот — все заявки в одном месте</h2>
+    <p class="lead rv">Откуда бы ни написал гость, с ним разговаривает один и тот же агент. Цены, календарь и правила живут в одном файле — поправили тариф, изменились ответы везде.</p>
+    <div class="flow">
+      <div class="node rv"><h3>Гость</h3><p>Пишет как привык, своими словами и в любое время.</p><div class="chips"><span>Telegram</span><span>Сайт</span><span>WhatsApp</span><span>Instagram</span></div></div>
+      <div class="arrow rv"></div>
+      <div class="node bot rv"><span class="pulse">24/7</span><h3>Бот</h3><p>За секунду делает то, на что у менеджера уходит пять минут:</p>
+        <ul><li>понимает даты, гостей, бюджет, питомцев, лифт</li><li>проверяет календарь и считает цену по сезону</li><li>предлагает варианты и держит даты час</li><li>собирает контакт и присылает реквизиты</li><li>после оплаты — адрес, код, инструкцию</li></ul></div>
+      <div class="arrow rv"></div>
+      <div class="node rv"><h3>Менеджер</h3><p>Видит все диалоги и брони в пульте. Получает карточку, только если бот решил позвать человека.</p><ul><li>авария у живущего гостя</li><li>подозрение на мошенничество</li><li>группа на несколько квартир</li><li>«хочу поговорить с человеком»</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Путь гостя -->
+<section id="path">
+  <div class="wrap">
+    <p class="eyebrow rv">Путь гостя</p>
+    <h2 class="rv">От «здравствуйте» до кода от двери — четыре сообщения</h2>
+    <p class="lead rv">Каждый экран ниже проигрывается сам, когда вы до него долистаете. Ответы считает движок — те же, что получит настоящий гость.</p>
+    <div class="steps">
+      <div class="step rv">
+        <div class="txt"><div class="num">01</div><h3>Понял запрос</h3><p>Гость пишет одной фразой — бот вытаскивает даты, число ночей, гостей, детей и пожелания. Чего не хватает — спросит, что предположил — скажет вслух.</p>
+          <div class="what"><div><b>Понимает</b><span>«с 12 по 15», «на выходные», «завтра на две ночи», «нас трое с ребёнком»</span></div><div><b>Считает</b><span>ночи, сезон, выходные, скидку за срок</span></div></div></div>
+        <div class="phone sm" data-play="s1"></div>
+      </div>
+      <div class="step rv">
+        <div class="txt"><div class="num">02</div><h3>Предложил варианты</h3><p>Только свободные на эти даты квартиры, с ценой за всё проживание. Под каждым — кнопка «Беру», плюс «Другие даты» и «Позвать менеджера».</p>
+          <div class="what"><div><b>Нельзя</b><span>выдумать цену или занятую дату: модель получает только то, что посчитал движок</span></div></div></div>
+        <div class="phone sm" data-play="s2"></div>
+      </div>
+      <div class="step rv">
+        <div class="txt"><div class="num">03</div><h3>Удержал даты и посчитал</h3><p>Итого, предоплата 30 %, депозит, что прислать. Даты держатся час — за это время их не увидит другой гость, даже из другого чата.</p>
+          <div class="what"><div><b>Кнопка</b><span>«Отправить мой номер» — имя и телефон попадают в заявку без ручного ввода</span></div></div></div>
+        <div class="phone sm" data-play="s3"></div>
+      </div>
+      <div class="step rv">
+        <div class="txt"><div class="num">04</div><h3>Довёл до оплаты и заселил</h3><p>Реквизиты в чат, после оплаты — точный адрес, код от подъезда и двери, инструкция. Заявка уже в пульте менеджера со всеми данными.</p>
+          <div class="what"><div><b>Дальше</b><span>вопросы живущего гостя: wi-fi, парковка, аптека, продление, выезд</span></div></div></div>
+        <div class="phone sm" data-play="s4"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Сам / человек -->
+<section id="rules">
+  <div class="wrap">
+    <p class="eyebrow rv">Границы</p>
+    <h2 class="rv">Что бот решает сам, а где зовёт человека</h2>
+    <p class="lead rv">Бот не «болтает»: у него есть сценарии и правила риска. Всё, что ниже, — реальные ответы движка на эти фразы.</p>
+    <div class="two">
+      <div class="col ok rv"><h3>Решает сам</h3><p>Отвечает сразу, менеджера не дёргает.</p><div id="selfList"></div></div>
+      <div class="col bad rv"><h3>Зовёт человека</h3><p>Гостю — вежливый ответ, менеджеру — карточка с причиной.</p><div id="humanList"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. Менеджер -->
+<section id="manager">
+  <div class="wrap mgr">
+    <div>
+      <p class="eyebrow rv">Менеджер</p>
+      <h2 class="rv">Карточка вместо звонка в два ночи</h2>
+      <p class="lead rv" style="margin-bottom:0">Когда бот решает позвать человека, менеджеру в его Telegram приходит карточка: кто, что написал, почему бот не стал отвечать сам и что он уже ответил гостю. В пульте — все диалоги, брони и удержания.</p>
+    </div>
+    <div class="card rv">
+      <b>Нужен человек — Срочная проблема у живущего гостя</b>
+      <div class="row"><span>Гость</span><span>Ержан · @erzhan · chat 48213</span></div>
+      <div class="row"><span>Сообщение</span><span>«В квартире нет воды со вчера»</span></div>
+      <div class="row"><span>Сценарий</span><span>жалоба живущего · решение: escalate · приоритет: срочно</span></div>
+      <div class="row"><span>Ответ бота</span><span id="mgrReply">…</span></div>
+      <div class="act"><span>Открыть диалог</span><span>Перехватить</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. Цифры -->
+<section id="numbers">
+  <div class="wrap">
+    <div class="nums rv">
+      <div><b>&lt; 1 с</b><span>ответ на любое сообщение, днём и ночью</span></div>
+      <div><b>30+</b><span>сценариев: от подбора до отмены и продления</span></div>
+      <div><b>16</b><span>правил риска: вечеринка, субаренда, схемы с оплатой</span></div>
+      <div><b>0</b><span>выдуманных цен: модель получает только расчёт движка</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. Запуск -->
+<section id="launch">
+  <div class="wrap">
+    <p class="eyebrow rv">Запуск</p>
+    <h2 class="rv">Подключается за день</h2>
+    <div class="launch">
+      <div class="rv"><b>1</b><h3>Квартиры и цены</h3><p>Заполняем один файл: объекты, тарифы, сезоны, правила, что рядом. Занятость — из вашей системы или вручную.</p></div>
+      <div class="rv"><b>2</b><h3>Бот в Telegram</h3><p>Создаём бота у @BotFather, ставим токен, запускаем на небольшом сервере. Эскалации — в ваш чат.</p></div>
+      <div class="rv"><b>3</b><h3>Сайт и другие каналы</h3><p>Одна строка кода — и чат на сайте. WhatsApp и Instagram подключаются к той же платформе.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="wrap">
+    <h2 class="rv">Попробуйте написать боту сами</h2>
+    <p class="lead rv" style="margin-inline:auto">Любые даты, любые вопросы — так, как написал бы ваш гость.</p>
+    <div class="actions rv">
+      <a class="btn" href="telegram.html">Открыть чат с ботом</a>
+      <a class="btn ghost" href="demo.html">Пульт менеджера</a>
+    </div>
+  </div>
+</section>
+
+<footer>Ключи 24 · квартиры и цены в демо тестовые</footer>
+
+<script src="js/util.js"></script>
+<script src="js/knowledge.js"></script>
+<script src="js/holds.js"></script>
+<script src="js/nlu.js"></script>
+<script src="js/policy.js"></script>
+<script src="js/reply.js"></script>
+<script src="js/risk.js"></script>
+<script src="js/scenarios.js"></script>
+<script src="js/agent.js"></script>
+<script>
+(function (w, d) {
+  'use strict';
+  var reduced = w.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var PICK = ['первый', 'второй', 'третий'];
+
+  /* Ближайшие свободные даты, чтобы демо не упёрлось в занятость */
+  function dates(offset, nights) {
+    var from = U.addDays(U.today(), offset), to = U.addDays(from, nights);
+    var f = U.fmtFull(from).replace(/^\D+/, ''), t = U.fmtFull(to).replace(/^\D+/, '');
+    return 'с ' + parseInt(f, 10) + ' по ' + t;
+  }
+
+  /* Сценарии: что говорит гость; ответы считает движок по ходу */
+  var SCRIPTS = {
+    hero: [{ say: dates(30, 3) + ', нас двое' }, { pick: 0 }, { contact: true }, { say: 'оплатил' }],
+    s1:   [{ say: 'Нужна квартира ' + dates(45, 2) + ', нас трое, с ребёнком 4 года' }],
+    s2:   [{ say: dates(30, 3) + ', нас двое', silent: true }, { pick: 0, highlight: true }],
+    s3:   [{ say: dates(30, 3) + ', нас двое', silent: true }, { pick: 0, silent: true }, { contact: true }],
+    s4:   [{ say: dates(30, 3) + ', нас двое', silent: true }, { pick: 0, silent: true }, { contact: true, silent: true }, { say: 'оплатил' }, { say: 'Как добраться из аэропорта?' }]
+  };
+
+  function keyboard(res) {
+    var offers = res.analysis.match ? res.analysis.match.offers.slice(0, 3) : [];
+    if (res.action === 'offer' && offers.length) {
+      var rows = offers.map(function (o) { return ['Беру: ' + o.object.title]; });
+      rows.push(['Другие даты', 'Позвать менеджера']);
+      return rows;
+    }
+    if (res.action === 'hold') return [['📱 Отправить мой номер']];
+    if (res.action === 'decline' || res.escalate) return [['Позвать менеджера']];
+    return null;
+  }
+
+  function el(cls, html) { var e = d.createElement('div'); e.className = cls; if (html != null) e.innerHTML = html; return e; }
+  function esc(s) { return String(s).replace(/[&<>]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]; }); }
+  function time() { var t = new Date(); return ('0' + t.getHours()).slice(-2) + ':' + ('0' + t.getMinutes()).slice(-2); }
+
+  function buildPhone(host) {
+    host.innerHTML = '<div class="screen"><div class="head"><div class="ava">К24</div><div><div class="name">Ключи 24</div><div class="st">бот</div></div></div>' +
+      '<div class="thread"></div><div class="composer"><div class="f">Сообщение</div><div class="s">➤</div></div></div>';
+    return { thread: host.querySelector('.thread'), st: host.querySelector('.st'), field: host.querySelector('.f') };
+  }
+
+  function wait(ms) { return new Promise(function (r) { setTimeout(r, reduced ? 0 : ms); }); }
+
+  function trim(thread) {
+    /* Старые сообщения уходят вверх: показываем только то, что влезает */
+    while (thread.scrollHeight > thread.clientHeight && thread.children.length > 1) thread.removeChild(thread.firstChild);
+  }
+
+  function bubble(ui, who, text) {
+    var m = el('msg ' + who); m.textContent = text;
+    var t = d.createElement('span'); t.className = 't'; t.textContent = time(); m.appendChild(t);
+    ui.thread.appendChild(m); trim(ui.thread); return m;
+  }
+
+  /* Текст гостя «печатается» в поле ввода, потом улетает пузырём */
+  function typeIn(ui, text) {
+    ui.field.classList.add('live'); ui.field.textContent = '';
+    var i = 0;
+    return new Promise(function (r) {
+      (function step() {
+        if (reduced) { ui.field.textContent = text; return r(); }
+        ui.field.textContent = text.slice(0, ++i);
+        if (i < text.length) setTimeout(step, 22 + Math.random() * 30); else setTimeout(r, 250);
+      })();
+    }).then(function () { ui.field.classList.remove('live'); ui.field.textContent = 'Сообщение'; });
+  }
+
+  function botTurn(ui, ctx, text, kbHit) {
+    var res = AGENT.respond(text, ctx);
+    var ty = el('typing', '<i></i><i></i><i></i>');
+    ui.thread.appendChild(ty); trim(ui.thread); ui.st.textContent = 'печатает…'; ui.st.classList.add('on');
+    return wait(Math.min(1600, 500 + res.reply.length * 4)).then(function () {
+      ty.remove(); ui.st.textContent = 'бот'; ui.st.classList.remove('on');
+      bubble(ui, 'in', res.reply);
+      var rows = keyboard(res), kb = null;
+      if (rows) {
+        kb = el('kb');
+        rows.forEach(function (r) { var row = el('row'); r.forEach(function (b) { var s = d.createElement('span'); s.textContent = b; row.appendChild(s); }); kb.appendChild(row); });
+        ui.thread.appendChild(kb); trim(ui.thread);
+      }
+      return { res: res, kb: kb };
+    });
+  }
+
+  function play(host, script, loop) {
+    if (host.__playing) return; host.__playing = true;
+    var ui = buildPhone(host);
+    var ctx = AGENT.newContext({ channel: 'презентация' });
+    var last = null;
+    var seq = Promise.resolve();
+
+    script.forEach(function (st, idx) {
+      seq = seq.then(function () {
+        var text, shown;
+        if (st.pick != null) {
+          var offers = last && last.res.analysis.match ? last.res.analysis.match.offers : [];
+          shown = 'Беру: ' + (offers[st.pick] ? offers[st.pick].object.title : 'первый вариант');
+          text = 'беру ' + PICK[st.pick];
+        } else if (st.contact) {
+          shown = '📱 Айгерим Сапарова\n+7 701 555-12-34';
+          text = 'Меня зовут Айгерим Сапарова, телефон +7 701 555-12-34';
+        } else { text = shown = st.say; }
+
+        if (st.silent) {                       // прошлые шаги диалога — без анимации
+          bubble(ui, 'out', shown);
+          var r = AGENT.respond(text, ctx); last = { res: r, kb: null };
+          bubble(ui, 'in', r.reply);
+          return;
+        }
+        var pre = (st.pick != null || st.contact)
+          ? (function () { if (last && last.kb) { var hit = last.kb.querySelector('span'); if (hit) hit.classList.add('hit'); } return wait(900); })()
+          : wait(idx === 0 ? 600 : 1200).then(function () { return typeIn(ui, text); });
+        return pre.then(function () { bubble(ui, 'out', shown); return wait(500); })
+          .then(function () { return botTurn(ui, ctx, text); })
+          .then(function (out) { last = out; return wait(1800); });
+      });
+    });
+
+    seq.then(function () {
+      host.__playing = false;
+      if (loop) wait(3500).then(function () { play(host, script, loop); });
+    });
+  }
+
+  /* Телефоны запускаются, когда попадают в экран */
+  var phones = d.querySelectorAll('[data-play]');
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      var host = e.target;
+      play(host, SCRIPTS[host.dataset.play], host.dataset.loop === '1');
+      if (host.dataset.loop !== '1') io.unobserve(host);
+    });
+  }, { threshold: 0.35 });
+  phones.forEach(function (p) { buildPhone(p); io.observe(p); });
+
+  /* Появление блоков */
+  var rv = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); rv.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  d.querySelectorAll('.rv').forEach(function (x) { rv.observe(x); });
+
+  /* Примеры «сам / человек» — живые ответы движка */
+  function examples(id, list) {
+    var box = d.getElementById(id);
+    list.forEach(function (q) {
+      var r = AGENT.respond(q, AGENT.newContext({ channel: 'презентация' }));
+      var a = r.reply.split('\n').slice(0, 2).join(' ').slice(0, 150);
+      var row = el('ex', '<div class="q">' + esc(q) + '</div><div class="a">' + esc(a) + '</div>');
+      box.appendChild(row);
+    });
+  }
+  examples('selfList', ['А скидка будет?', 'Парковка и лифт есть?', 'Приедем с котом', 'Аптека рядом есть?', 'Можно на пару часов?', 'Хотим отметить день рождения, нас 12', 'Нужен счёт и акт для компании']);
+  examples('humanList', ['В квартире нет воды со вчера', 'Потерял ключи, не могу попасть в квартиру', 'Разбили зеркало, что делать?', 'Я перевёл лишнее, верните на другую карту']);
+
+  var mgr = AGENT.respond('В квартире нет воды со вчера', AGENT.newContext({ channel: 'презентация' }));
+  d.getElementById('mgrReply').textContent = mgr.reply.split('\n')[0];
+})(window, document);
+</script>
+</body>
+</html>
