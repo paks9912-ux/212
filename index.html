@@ -939,23 +939,50 @@ a{
 
 /*
    СОСТОЯНИЕ:
-   товар уже добавлен
+   товар уже в заказе — степпер количества
 */
 
-.add-product.added{
+.card-qty{
+    margin-top:18px;
+    display:grid;
+    grid-template-columns:44px 1fr 44px;
+    align-items:stretch;
+    border:1px solid rgba(217,74,67,.45);
     background:rgba(217,74,67,.08);
-    border-color:rgba(217,74,67,.45);
     color:var(--red);
 }
 
-.add-product.added:hover{
+.card-qty button{
+    min-height:40px;
+    border:0;
+    background:none;
+    color:inherit;
+    font-size:14px;
+    cursor:pointer;
+    transition:background .3s ease;
+}
+
+.card-qty button:hover{
     background:rgba(217,74,67,.15);
-    border-color:var(--red);
-    color:var(--red);
 }
 
-.add-product.added::before{
-    display:none;
+.card-qty button:disabled{
+    opacity:.35;
+    cursor:default;
+}
+
+.card-qty .card-qty-value{
+    font-size:7px;
+    letter-spacing:.22em;
+    border-left:1px solid rgba(217,74,67,.25);
+    border-right:1px solid rgba(217,74,67,.25);
+}
+
+.card-qty-value b{
+    margin-right:6px;
+    font-size:11px;
+    font-weight:500;
+    letter-spacing:0;
 }
 
 .menu-bottom{
@@ -1544,6 +1571,79 @@ a{
    CART
 ===================================================== */
 
+.cart-button.has-items .cart-dot,
+.cart-fab.has-items .cart-dot{
+    background:var(--red);
+}
+
+
+/*
+   Плавающая кнопка корзины:
+   появляется, когда кнопка в шапке
+   уехала за экран вместе с первым экраном
+*/
+
+.cart-fab{
+    position:fixed;
+    top:26px;
+    right:5vw;
+    z-index:400;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:13px 18px;
+    border:1px solid var(--line);
+    background:rgba(5,5,5,.78);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    color:var(--white);
+    font-size:8px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+    cursor:pointer;
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(-10px);
+    transition:
+        opacity .4s ease,
+        visibility .4s ease,
+        transform .5s cubic-bezier(.16,1,.3,1),
+        border-color .4s ease;
+}
+
+.cart-fab.visible{
+    opacity:1;
+    visibility:visible;
+    transform:none;
+}
+
+.cart-fab:hover,
+.cart-fab.has-items{
+    border-color:rgba(217,74,67,.45);
+}
+
+.cart-fab-total{
+    color:var(--muted);
+    letter-spacing:.08em;
+}
+
+.cart-fab-total:empty{
+    display:none;
+}
+
+.cart-fab.bump{
+    animation:cartBump .5s cubic-bezier(.16,1,.3,1);
+}
+
+@keyframes cartBump{
+    0%{ transform:scale(1); }
+    35%{ transform:scale(1.07); }
+    100%{ transform:scale(1); }
+}
+
+
+/* ПАНЕЛЬ */
+
 .cart-overlay{
     position:fixed;
     inset:0;
@@ -1588,16 +1688,19 @@ a{
     border-bottom:1px solid rgba(242,239,232,.1);
     display:flex;
     align-items:center;
-    justify-content:space-between;
+    gap:16px;
 }
 
 .cart-head-title{
+    flex:1;
     font-size:11px;
     letter-spacing:.25em;
     text-transform:uppercase;
 }
 
-.cart-close{
+.cart-close,
+.cart-back{
+    flex:none;
     width:35px;
     height:35px;
     border:1px solid rgba(242,239,232,.15);
@@ -1606,16 +1709,55 @@ a{
     border-radius:50%;
     cursor:pointer;
     font-size:16px;
+    transition:border-color .3s ease;
+}
+
+.cart-close:hover,
+.cart-back:hover{
+    border-color:rgba(242,239,232,.45);
+}
+
+.cart-back{
+    display:none;
+    font-size:14px;
+}
+
+.cart-panel[data-step="checkout"] .cart-back{
+    display:block;
+}
+
+.cart-body{
+    flex:1;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    padding:25px 30px;
+    display:flex;
+    flex-direction:column;
+}
+
+.cart-step{
+    display:none;
+}
+
+.cart-panel[data-step="cart"] .cart-step-cart,
+.cart-panel[data-step="checkout"] .cart-step-checkout,
+.cart-panel[data-step="done"] .cart-step-done{
+    display:flex;
+    flex-direction:column;
+    flex:1 0 auto;
 }
 
 .cart-items{
-    flex:1;
-    overflow-y:auto;
-    padding:25px 30px;
+    flex:1 0 auto;
+    display:flex;
+    flex-direction:column;
 }
 
+
+/* ПУСТАЯ КОРЗИНА */
+
 .cart-empty{
-    height:100%;
+    flex:1;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -1635,22 +1777,83 @@ a{
     color:rgba(242,239,232,.35);
 }
 
+.cart-empty-link{
+    margin-top:28px;
+    padding:13px 22px;
+    border:1px solid rgba(242,239,232,.2);
+    background:none;
+    color:var(--white);
+    font-size:7px;
+    letter-spacing:.25em;
+    cursor:pointer;
+    transition:border-color .3s ease;
+}
+
+.cart-empty-link:hover{
+    border-color:var(--white);
+}
+
+
+/* ПОЗИЦИИ */
+
 .cart-item{
-    padding:20px 0;
+    padding:18px 0;
     border-bottom:1px solid rgba(242,239,232,.08);
     display:grid;
-    grid-template-columns:1fr auto;
-    gap:15px;
+    grid-template-columns:56px 1fr auto;
+    align-items:center;
+    gap:16px;
+}
+
+.cart-item-thumb{
+    width:56px;
+    height:56px;
+    object-fit:cover;
+    display:block;
+    background:#101010;
+    filter:
+        saturate(.72)
+        contrast(1.08)
+        brightness(.78);
 }
 
 .cart-item-name{
     font-size:11px;
+    letter-spacing:.04em;
 }
 
 .cart-item-price{
-    margin-top:7px;
+    margin-top:6px;
     font-size:9px;
     color:rgba(242,239,232,.4);
+}
+
+.cart-remove{
+    margin-top:9px;
+    padding:0;
+    border:0;
+    background:none;
+    color:rgba(242,239,232,.28);
+    font-size:7px;
+    letter-spacing:.22em;
+    cursor:pointer;
+    transition:color .3s ease;
+}
+
+.cart-remove:hover{
+    color:var(--red);
+}
+
+.cart-item-side{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+    gap:10px;
+}
+
+.cart-item-sum{
+    font-size:11px;
+    white-space:nowrap;
 }
 
 .cart-controls{
@@ -1660,23 +1863,162 @@ a{
 }
 
 .qty-button{
-    width:25px;
-    height:25px;
+    width:28px;
+    height:28px;
     border:1px solid rgba(242,239,232,.15);
     background:none;
     color:var(--white);
     cursor:pointer;
+    transition:border-color .3s ease;
+}
+
+.qty-button:hover{
+    border-color:rgba(242,239,232,.45);
+}
+
+.qty-button:disabled{
+    opacity:.3;
+    cursor:default;
 }
 
 .qty-number{
     min-width:15px;
     text-align:center;
-    font-size:9px;
+    font-size:10px;
 }
+
+
+/* ОФОРМЛЕНИЕ */
+
+.checkout-form .form-field{
+    min-height:72px;
+    border-bottom:1px solid rgba(242,239,232,.12);
+}
+
+.checkout-form .form-field[hidden]{
+    display:none;
+}
+
+.checkout-form .form-field textarea{
+    min-height:90px;
+}
+
+.checkout-form .form-field.invalid{
+    border-bottom-color:rgba(217,74,67,.7);
+}
+
+.checkout-form .form-field.invalid label{
+    color:var(--red);
+}
+
+.checkout-method{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    padding:20px 0;
+    border-bottom:1px solid rgba(242,239,232,.12);
+}
+
+.checkout-method label{
+    position:relative;
+    display:block;
+}
+
+.checkout-method input{
+    position:absolute;
+    opacity:0;
+    pointer-events:none;
+}
+
+.checkout-method span{
+    display:block;
+    padding:14px 8px;
+    border:1px solid rgba(242,239,232,.12);
+    text-align:center;
+    font-size:7px;
+    letter-spacing:.22em;
+    color:rgba(242,239,232,.45);
+    cursor:pointer;
+    transition:
+        color .3s ease,
+        border-color .3s ease,
+        background .3s ease;
+}
+
+.checkout-method input:checked + span{
+    border-color:rgba(217,74,67,.45);
+    background:rgba(217,74,67,.08);
+    color:var(--red);
+}
+
+.checkout-method input:focus-visible + span{
+    outline:1px solid var(--white);
+    outline-offset:2px;
+}
+
+
+/* ЗАКАЗ ПРИНЯТ */
+
+.cart-done{
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.cart-done-mark{
+    width:64px;
+    height:64px;
+    border:1px solid rgba(217,74,67,.5);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--red);
+    font-size:20px;
+    margin-bottom:30px;
+}
+
+.cart-done-title{
+    font-size:24px;
+    font-weight:300;
+}
+
+.cart-done-number{
+    margin-top:14px;
+    font-size:8px;
+    letter-spacing:.25em;
+    color:var(--red);
+}
+
+.cart-done-text{
+    margin-top:18px;
+    max-width:260px;
+    font-size:9px;
+    line-height:1.8;
+    color:rgba(242,239,232,.4);
+}
+
+
+/* НИЗ ПАНЕЛИ */
 
 .cart-footer{
     padding:25px 30px 30px;
     border-top:1px solid rgba(242,239,232,.1);
+}
+
+.cart-error{
+    display:none;
+    margin-bottom:18px;
+    padding:12px 14px;
+    border:1px solid rgba(217,74,67,.45);
+    background:rgba(217,74,67,.08);
+    color:#f0b4b0;
+    font-size:9px;
+    line-height:1.7;
+}
+
+.cart-error.show{
+    display:block;
 }
 
 .cart-total{
@@ -1684,6 +2026,10 @@ a{
     justify-content:space-between;
     align-items:flex-end;
     margin-bottom:20px;
+}
+
+.cart-panel[data-step="done"] .cart-total{
+    display:none;
 }
 
 .cart-total-label{
@@ -1706,6 +2052,12 @@ a{
     font-size:8px;
     letter-spacing:.25em;
     cursor:pointer;
+    transition:opacity .3s ease;
+}
+
+.checkout-button:disabled{
+    opacity:.35;
+    cursor:default;
 }
 
 
@@ -1910,9 +2262,17 @@ a{
     }
 
     .add-product{
-        font-size:5.5px;
-        letter-spacing:.12em;
-        padding:12px 3px;
+        font-size:7px;
+        letter-spacing:.14em;
+        padding:13px 3px;
+    }
+
+    .card-qty{
+        grid-template-columns:36px 1fr 36px;
+    }
+
+    .card-qty .card-qty-value{
+        letter-spacing:.14em;
     }
 
     .menu-bottom{
@@ -2057,6 +2417,46 @@ a{
         width:100%;
     }
 
+    .cart-fab{
+        top:auto;
+        right:16px;
+        bottom:calc(16px + env(safe-area-inset-bottom));
+        padding:15px 18px;
+    }
+
+    .toast{
+        bottom:auto;
+        top:20px;
+        transform:translate(-50%,-30px);
+    }
+
+    .toast.show{
+        transform:translate(-50%,0);
+    }
+
+    .cart-head{
+        min-height:70px;
+        padding:0 20px;
+    }
+
+    .cart-body{
+        padding:10px 20px 20px;
+    }
+
+    .cart-footer{
+        padding:18px 20px calc(20px + env(safe-area-inset-bottom));
+    }
+
+    .cart-item-name{
+        font-size:12px;
+    }
+
+    /* iOS приближает страницу, если шрифт поля меньше 16px */
+    .checkout-form .form-field input,
+    .checkout-form .form-field textarea{
+        font-size:16px;
+    }
+
 }
 
 </style>
@@ -2089,7 +2489,7 @@ Japanese dining experience
 
 CART
 
-<span id="cartCount">0</span>
+<span class="js-cart-count" id="cartCount">0</span>
 
 </button>
 
@@ -2860,25 +3260,65 @@ JAPANESE DINING EXPERIENCE
      CART
 ===================================================== -->
 
+<button
+class="cart-fab"
+id="cartFab"
+type="button"
+aria-label="Открыть корзину"
+>
+
+<span class="cart-dot"></span>
+
+CART
+
+<span class="js-cart-count">0</span>
+
+<span
+class="cart-fab-total"
+id="cartFabTotal"
+></span>
+
+</button>
+
+
 <div
 class="cart-overlay"
 id="cartOverlay"
+aria-hidden="true"
 >
 
 <div
 class="cart-panel"
 id="cartPanel"
+data-step="cart"
+role="dialog"
+aria-modal="true"
+aria-labelledby="cartTitle"
 >
 
 <div class="cart-head">
 
-<div class="cart-head-title">
+<button
+class="cart-back"
+id="cartBack"
+type="button"
+aria-label="Назад к корзине"
+>
+←
+</button>
+
+<div
+class="cart-head-title"
+id="cartTitle"
+>
 YOUR CART
 </div>
 
 <button
 class="cart-close"
 id="closeCart"
+type="button"
+aria-label="Закрыть корзину"
 >
 ×
 </button>
@@ -2887,12 +3327,133 @@ id="closeCart"
 
 
 <div
+class="cart-body"
+id="cartBody"
+>
+
+<div class="cart-step cart-step-cart">
+
+<div
 class="cart-items"
 id="cartItems"
 ></div>
 
+</div>
+
+
+<form
+class="cart-step cart-step-checkout checkout-form"
+id="checkoutForm"
+novalidate
+>
+
+<div class="form-field">
+<label for="orderName">Имя</label>
+<input
+id="orderName"
+name="name"
+type="text"
+autocomplete="name"
+maxlength="60"
+placeholder="Имя"
+>
+</div>
+
+<div class="form-field">
+<label for="orderPhone">Телефон</label>
+<input
+id="orderPhone"
+name="phone"
+type="tel"
+inputmode="tel"
+autocomplete="tel"
+placeholder="+998"
+>
+</div>
+
+<div class="checkout-method">
+
+<label>
+<input
+type="radio"
+name="method"
+value="delivery"
+checked
+>
+<span>ДОСТАВКА</span>
+</label>
+
+<label>
+<input
+type="radio"
+name="method"
+value="pickup"
+>
+<span>САМОВЫВОЗ</span>
+</label>
+
+</div>
+
+<div
+class="form-field"
+id="addressField"
+>
+<label for="orderAddress">Адрес доставки</label>
+<input
+id="orderAddress"
+name="address"
+type="text"
+autocomplete="street-address"
+maxlength="160"
+placeholder="Адрес"
+>
+</div>
+
+<div class="form-field">
+<label for="orderComment">Комментарий</label>
+<textarea
+id="orderComment"
+name="comment"
+maxlength="300"
+placeholder="Комментарий"
+></textarea>
+</div>
+
+</form>
+
+
+<div class="cart-step cart-step-done cart-done">
+
+<div class="cart-done-mark">
+✓
+</div>
+
+<div class="cart-done-title">
+Заказ принят
+</div>
+
+<div
+class="cart-done-number"
+id="orderNumber"
+></div>
+
+<div class="cart-done-text">
+Мы перезвоним, чтобы подтвердить
+заказ и время.
+</div>
+
+</div>
+
+</div>
+
 
 <div class="cart-footer">
+
+<div
+class="cart-error"
+id="cartError"
+role="alert"
+></div>
 
 <div class="cart-total">
 
@@ -2913,10 +3474,9 @@ id="cartTotal"
 <button
 class="checkout-button"
 id="checkoutButton"
+type="button"
 >
-
 ОФОРМИТЬ ЗАКАЗ
-
 </button>
 
 </div>
@@ -2945,8 +3505,11 @@ const TG_CONFIG = {
     chatId: "689217749"
 };
 
+// Возвращает { ok } или { ok:false, error } — текст ошибки Telegram, "network" или "timeout"
 async function sendTelegramMessage(text) {
     const url = `https://api.telegram.org/bot${TG_CONFIG.token}/sendMessage`;
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 15000);
     try {
         const response = await fetch(url, {
             method: "POST",
@@ -2955,12 +3518,20 @@ async function sendTelegramMessage(text) {
                 chat_id: TG_CONFIG.chatId,
                 text: text,
                 parse_mode: "HTML"
-            })
+            }),
+            signal: controller.signal
         });
-        return response.ok;
+        const data = await response.json().catch(() => ({}));
+        if (response.ok && data.ok !== false) {
+            return { ok: true };
+        }
+        console.error("Telegram API error:", response.status, data.description);
+        return { ok: false, error: data.description || `HTTP ${response.status}` };
     } catch (error) {
         console.error("Telegram send error:", error);
-        return false;
+        return { ok: false, error: error.name === "AbortError" ? "timeout" : "network" };
+    } finally {
+        clearTimeout(timer);
     }
 }
 
@@ -3690,53 +4261,134 @@ const products=[
    CART
 ===================================================== */
 
-let cart={};
+const CART_KEY="kyoto-cart";
 
-try{
+const MAX_QUANTITY=99;
 
-    cart =
-        JSON.parse(
-            localStorage.getItem(
-                "kyoto-cart"
-            )
-        ) || {};
 
-}catch(error){
+/*
+   Хранилище может быть недоступно:
+   приватный режим, запрет cookies,
+   встроенные браузеры Instagram и Telegram.
+   Тогда корзина просто живёт до перезагрузки,
+   а не ломается целиком.
+*/
 
-    cart={};
+const storage={
+
+    get(key){
+        try{
+            return localStorage.getItem(key);
+        }catch(error){
+            return null;
+        }
+    },
+
+    set(key,value){
+        try{
+            localStorage.setItem(key,value);
+        }catch(error){
+            console.warn("Корзина не сохранена:",error);
+        }
+    }
+
+};
+
+
+function findProduct(id){
+
+    return products.find(
+        product=>product.id===id
+    );
 
 }
 
 
+/*
+   В корзине хранится только id → количество.
+   Название и цена всегда берутся из меню,
+   поэтому старые сохранения, удалённые блюда
+   и изменённые цены ничего не ломают.
+*/
+
+function loadCart(){
+
+    let saved=null;
+
+    try{
+        saved=JSON.parse(storage.get(CART_KEY));
+    }catch(error){
+        saved=null;
+    }
+
+    const result={};
+
+    if(!saved || typeof saved!=="object"){
+        return result;
+    }
+
+    Object.entries(saved).forEach(([id,value])=>{
+
+        const raw =
+            value && typeof value==="object"
+            ? value.quantity
+            : value;
+
+        const quantity =
+            Math.floor(Number(raw));
+
+        if(findProduct(id) && quantity>0){
+            result[id]=Math.min(quantity,MAX_QUANTITY);
+        }
+
+    });
+
+    return result;
+
+}
+
+
+let cart=loadCart();
+
+
 const productsContainer =
-    document.getElementById(
-        "products"
-    );
+    document.getElementById("products");
 
 const cartItems =
-    document.getElementById(
-        "cartItems"
-    );
+    document.getElementById("cartItems");
 
 const cartTotal =
-    document.getElementById(
-        "cartTotal"
-    );
-
-const cartCount =
-    document.getElementById(
-        "cartCount"
-    );
+    document.getElementById("cartTotal");
 
 const cartOverlay =
-    document.getElementById(
-        "cartOverlay"
-    );
+    document.getElementById("cartOverlay");
+
+const cartPanel =
+    document.getElementById("cartPanel");
+
+const cartBody =
+    document.getElementById("cartBody");
+
+const cartTitle =
+    document.getElementById("cartTitle");
+
+const cartError =
+    document.getElementById("cartError");
+
+const cartFab =
+    document.getElementById("cartFab");
+
+const cartFabTotal =
+    document.getElementById("cartFabTotal");
+
+const openCartButton =
+    document.getElementById("openCart");
+
+const checkoutButton =
+    document.getElementById("checkoutButton");
 
 const toast =
-    document.getElementById(
-        "toast"
-    );
+    document.getElementById("toast");
 
 
 function formatPrice(price){
@@ -3750,9 +4402,35 @@ function formatPrice(price){
 
 function saveCart(){
 
-    localStorage.setItem(
-        "kyoto-cart",
+    storage.set(
+        CART_KEY,
         JSON.stringify(cart)
+    );
+
+}
+
+
+function getQuantity(id){
+
+    return cart[id] || 0;
+
+}
+
+
+function getCartLines(){
+
+    return Object.entries(cart).map(
+        ([id,quantity])=>{
+
+            const product=findProduct(id);
+
+            return {
+                product,
+                quantity,
+                sum:product.price*quantity
+            };
+
+        }
     );
 
 }
@@ -3762,8 +4440,7 @@ function getCartCount(){
 
     return Object.values(cart)
         .reduce(
-            (sum,item)=>
-                sum+item.quantity,
+            (sum,quantity)=>sum+quantity,
             0
         );
 
@@ -3772,17 +4449,16 @@ function getCartCount(){
 
 function getCartTotal(){
 
-    return Object.values(cart)
+    return getCartLines()
         .reduce(
-            (sum,item)=>
-                sum+
-                item.price*
-                item.quantity,
+            (sum,line)=>sum+line.sum,
             0
         );
 
 }
 
+
+let toastTimer=null;
 
 function showToast(
     text="ДОБАВЛЕНО В КОРЗИНУ"
@@ -3792,7 +4468,9 @@ function showToast(
 
     toast.classList.add("show");
 
-    setTimeout(
+    clearTimeout(toastTimer);
+
+    toastTimer=setTimeout(
         ()=>{
             toast.classList.remove("show");
         },
@@ -3802,106 +4480,114 @@ function showToast(
 }
 
 
-function updateCartCounter(){
+function bumpCartFab(){
 
-    cartCount.textContent =
-        getCartCount();
+    cartFab.classList.remove("bump");
+
+    void cartFab.offsetWidth;
+
+    cartFab.classList.add("bump");
 
 }
 
 
 /* =====================================================
-   ДОБАВЛЕНИЕ В КОРЗИНУ
+   КОЛИЧЕСТВО
 ===================================================== */
 
-function addToCart(productId){
+function setQuantity(id,quantity){
 
-    const product =
-        products.find(
-            item =>
-                item.id === productId
+    if(!findProduct(id)) return;
+
+    const next =
+        Math.max(
+            0,
+            Math.min(MAX_QUANTITY,quantity)
         );
 
-    if(!product) return;
-
-
-    if(!cart[productId]){
-
-        cart[productId]={
-            id:product.id,
-            name:product.name,
-            price:product.price,
-            quantity:0
-        };
-
+    if(next===0){
+        delete cart[id];
+    }else{
+        cart[id]=next;
     }
-
-
-    cart[productId].quantity++;
 
     saveCart();
 
-    updateCartCounter();
+    updateCartUI();
 
-    renderCart();
+}
 
-    showToast();
+
+function changeQuantity(id,change){
+
+    const before=getQuantity(id);
+
+    setQuantity(id,before+change);
+
+    if(change>0 && getQuantity(id)>before){
+
+        bumpCartFab();
+
+        if(before===0){
+            showToast();
+        }
+
+    }
 
 }
 
 
 /* =====================================================
-   QUANTITY
+   ОТРИСОВКА
 ===================================================== */
 
-function changeQuantity(
-    productId,
-    change
-){
+function updateCartUI(){
 
-    if(!cart[productId]) return;
+    const count=getCartCount();
 
-    cart[productId].quantity +=
-        change;
+    const total=getCartTotal();
 
+    document
+        .querySelectorAll(".js-cart-count")
+        .forEach(
+            counter=>{
+                counter.textContent=count;
+            }
+        );
+
+    cartFabTotal.textContent =
+        count>0
+        ? formatPrice(total)
+        : "";
+
+    cartFab.classList.toggle("has-items",count>0);
+
+    openCartButton.classList.toggle("has-items",count>0);
+
+    cartTotal.textContent=formatPrice(total);
+
+    renderCart();
+
+    updateProductActions();
+
+    // корзину опустошили прямо на шаге оформления
     if(
-        cart[productId].quantity<=0
+        count===0 &&
+        cartPanel.dataset.step==="checkout"
     ){
-
-        delete cart[productId];
-
+        setCartStep("cart");
     }
 
-    saveCart();
-
-    updateCartCounter();
-
-    renderCart();
-
-    const activeTab =
-        document.querySelector(
-            ".menu-tab.active"
-        );
-
-    if(activeTab){
-
-        renderProducts(
-            activeTab.dataset.category,
-            false
-        );
-
-    }
+    updateCheckoutButton();
 
 }
 
 
 function renderCart(){
 
-    const items =
-        Object.values(cart);
+    const lines=getCartLines();
 
-
-    if(items.length===0){
+    if(lines.length===0){
 
         cartItems.innerHTML=`
 
@@ -3916,112 +4602,326 @@ function renderCart(){
                     из меню KYOTO.
                 </div>
 
+                <button
+                    class="cart-empty-link"
+                    type="button"
+                    data-cart-action="menu"
+                >
+                    СМОТРЕТЬ МЕНЮ
+                </button>
+
             </div>
 
         `;
 
-    }else{
+        return;
 
-        cartItems.innerHTML =
-            items.map(
-                item=>`
+    }
 
-                <div class="cart-item">
+    cartItems.innerHTML =
+        lines.map(
+            ({product,quantity,sum})=>`
 
-                    <div>
+            <div class="cart-item">
 
-                        <div class="cart-item-name">
-                            ${item.name}
-                        </div>
+                <img
+                    class="cart-item-thumb"
+                    src="${product.image}"
+                    alt=""
+                    loading="lazy"
+                >
 
-                        <div class="cart-item-price">
-                            ${formatPrice(item.price)}
-                        </div>
+                <div>
 
+                    <div class="cart-item-name">
+                        ${product.name}
                     </div>
+
+                    <div class="cart-item-price">
+                        ${formatPrice(product.price)}
+                    </div>
+
+                    <button
+                        class="cart-remove"
+                        type="button"
+                        data-cart-action="remove"
+                        data-id="${product.id}"
+                    >
+                        УДАЛИТЬ
+                    </button>
+
+                </div>
+
+                <div class="cart-item-side">
 
                     <div class="cart-controls">
 
                         <button
                             class="qty-button"
-                            onclick="
-                                changeQuantity(
-                                    '${item.id}',
-                                    -1
-                                )
-                            "
+                            type="button"
+                            data-cart-action="dec"
+                            data-id="${product.id}"
+                            aria-label="Убрать одну порцию"
                         >
                             −
                         </button>
 
                         <span class="qty-number">
-                            ${item.quantity}
+                            ${quantity}
                         </span>
 
                         <button
                             class="qty-button"
-                            onclick="
-                                changeQuantity(
-                                    '${item.id}',
-                                    1
-                                )
-                            "
+                            type="button"
+                            data-cart-action="inc"
+                            data-id="${product.id}"
+                            aria-label="Добавить порцию"
+                            ${quantity>=MAX_QUANTITY ? "disabled" : ""}
                         >
                             +
                         </button>
 
                     </div>
 
+                    <div class="cart-item-sum">
+                        ${formatPrice(sum)}
+                    </div>
+
                 </div>
 
-                `
-            )
-            .join("");
+            </div>
+
+            `
+        )
+        .join("");
+
+}
+
+
+function renderProductAction(id){
+
+    const quantity=getQuantity(id);
+
+    if(quantity===0){
+
+        return`
+            <button
+                class="add-product"
+                type="button"
+                data-action="add"
+                data-id="${id}"
+            >
+                ДОБАВИТЬ В ЗАКАЗ
+            </button>
+        `;
 
     }
 
+    return`
+        <div class="card-qty">
 
-    cartTotal.textContent =
-        formatPrice(
-            getCartTotal()
+            <button
+                type="button"
+                data-action="dec"
+                data-id="${id}"
+                aria-label="Убрать одну порцию"
+            >
+                −
+            </button>
+
+            <button
+                class="card-qty-value"
+                type="button"
+                data-action="open"
+                aria-label="Открыть корзину"
+            >
+                <b>${quantity}</b> В ЗАКАЗЕ
+            </button>
+
+            <button
+                type="button"
+                data-action="inc"
+                data-id="${id}"
+                aria-label="Добавить порцию"
+                ${quantity>=MAX_QUANTITY ? "disabled" : ""}
+            >
+                +
+            </button>
+
+        </div>
+    `;
+
+}
+
+
+/*
+   Обновляем только кнопку под карточкой,
+   а не всё меню: не сбивается наведение,
+   прокрутка и фокус.
+*/
+
+function updateProductActions(){
+
+    productsContainer
+        .querySelectorAll("[data-product]")
+        .forEach(
+            card=>{
+
+                const id=card.dataset.product;
+
+                const slot =
+                    card.querySelector(".product-action");
+
+                const quantity=getQuantity(id);
+
+                const stepper =
+                    slot.querySelector(".card-qty");
+
+                if(quantity>0 && stepper){
+
+                    stepper.querySelector("b").textContent=quantity;
+
+                    stepper
+                        .querySelector('[data-action="inc"]')
+                        .disabled = quantity>=MAX_QUANTITY;
+
+                    return;
+
+                }
+
+                slot.innerHTML=renderProductAction(id);
+
+            }
         );
+
+}
+
+
+/* =====================================================
+   ОТКРЫТИЕ И ШАГИ
+===================================================== */
+
+const CART_TITLES={
+    cart:"YOUR CART",
+    checkout:"CHECKOUT",
+    done:"THANK YOU"
+};
+
+let isSending=false;
+
+
+function setCartStep(step){
+
+    cartPanel.dataset.step=step;
+
+    cartTitle.textContent=CART_TITLES[step];
+
+    cartBody.scrollTop=0;
+
+    hideCartError();
+
+    updateCheckoutButton();
+
+}
+
+
+function updateCheckoutButton(){
+
+    const step=cartPanel.dataset.step;
+
+    if(isSending){
+
+        checkoutButton.textContent="ОТПРАВКА…";
+
+        checkoutButton.disabled=true;
+
+        return;
+
+    }
+
+    if(step==="cart"){
+
+        checkoutButton.textContent="ОФОРМИТЬ ЗАКАЗ";
+
+        checkoutButton.disabled=getCartCount()===0;
+
+    }
+
+    if(step==="checkout"){
+
+        checkoutButton.textContent="ОТПРАВИТЬ ЗАКАЗ";
+
+        checkoutButton.disabled=false;
+
+    }
+
+    if(step==="done"){
+
+        checkoutButton.textContent="ВЕРНУТЬСЯ В МЕНЮ";
+
+        checkoutButton.disabled=false;
+
+    }
+
+}
+
+
+function showCartError(text){
+
+    cartError.textContent=text;
+
+    cartError.classList.add("show");
+
+}
+
+
+function hideCartError(){
+
+    cartError.textContent="";
+
+    cartError.classList.remove("show");
 
 }
 
 
 function openCart(){
 
-    cartOverlay.classList.add(
-        "open"
-    );
+    if(
+        cartPanel.dataset.step==="done" &&
+        !isSending
+    ){
+        setCartStep("cart");
+    }
 
-    document.body.classList.add(
-        "cart-open"
-    );
+    cartOverlay.classList.add("open");
+
+    cartOverlay.setAttribute("aria-hidden","false");
+
+    document.body.classList.add("cart-open");
 
 }
 
 
 function closeCart(){
 
-    cartOverlay.classList.remove(
-        "open"
-    );
+    cartOverlay.classList.remove("open");
 
-    document.body.classList.remove(
-        "cart-open"
-    );
+    cartOverlay.setAttribute("aria-hidden","true");
+
+    document.body.classList.remove("cart-open");
 
 }
 
 
-document
-    .getElementById("openCart")
-    .addEventListener(
-        "click",
-        openCart
-    );
+openCartButton.addEventListener(
+    "click",
+    openCart
+);
 
+cartFab.addEventListener(
+    "click",
+    openCart
+);
 
 document
     .getElementById("closeCart")
@@ -4030,18 +4930,158 @@ document
         closeCart
     );
 
+document
+    .getElementById("cartBack")
+    .addEventListener(
+        "click",
+        ()=>setCartStep("cart")
+    );
+
 
 cartOverlay.addEventListener(
     "click",
     event=>{
 
+        if(event.target===cartOverlay){
+            closeCart();
+        }
+
+    }
+);
+
+
+document.addEventListener(
+    "keydown",
+    event=>{
+
         if(
-            event.target ===
-            cartOverlay
+            event.key==="Escape" &&
+            cartOverlay.classList.contains("open")
         ){
+            closeCart();
+        }
+
+    }
+);
+
+
+/* Плавающая кнопка — когда кнопка в шапке не видна */
+
+if("IntersectionObserver" in window){
+
+    new IntersectionObserver(
+        ([entry])=>{
+
+            cartFab.classList.toggle(
+                "visible",
+                !entry.isIntersecting
+            );
+
+        }
+    ).observe(openCartButton);
+
+}else{
+
+    cartFab.classList.add("visible");
+
+}
+
+
+/* Кнопки на карточках меню */
+
+productsContainer.addEventListener(
+    "click",
+    event=>{
+
+        const button =
+            event.target.closest("[data-action]");
+
+        if(!button) return;
+
+        const {action,id}=button.dataset;
+
+        if(action==="open"){
+            openCart();
+            return;
+        }
+
+        changeQuantity(
+            id,
+            action==="dec" ? -1 : 1
+        );
+
+        // клавиатура: фокус остаётся на карточке
+        if(event.detail===0){
+
+            const card =
+                productsContainer.querySelector(
+                    `[data-product="${id}"]`
+                );
+
+            const target =
+                card &&
+                (
+                    card.querySelector(`[data-action="${action}"]`) ||
+                    card.querySelector('[data-action="inc"]') ||
+                    card.querySelector("[data-action]")
+                );
+
+            if(target){
+                target.focus({preventScroll:true});
+            }
+
+        }
+
+    }
+);
+
+
+/* Кнопки внутри корзины */
+
+cartItems.addEventListener(
+    "click",
+    event=>{
+
+        const button =
+            event.target.closest("[data-cart-action]");
+
+        if(!button) return;
+
+        const action=button.dataset.cartAction;
+
+        const id=button.dataset.id;
+
+        if(action==="menu"){
 
             closeCart();
 
+            document
+                .getElementById("menu")
+                .scrollIntoView({behavior:"smooth"});
+
+            return;
+
+        }
+
+        if(action==="remove"){
+            setQuantity(id,0);
+        }
+
+        if(action==="dec"){
+            changeQuantity(id,-1);
+        }
+
+        if(action==="inc"){
+            changeQuantity(id,1);
+        }
+
+        const again =
+            cartItems.querySelector(
+                `[data-cart-action="${action}"][data-id="${id}"]`
+            );
+
+        if(again){
+            again.focus({preventScroll:true});
         }
 
     }
@@ -4125,22 +5165,9 @@ function renderProducts(
                         </div>
 
 
-                        <button
-                            class="add-product ${
-                                quantity>0
-                                ?"added"
-                                :""
-                            }"
-                            data-id="${product.id}"
-                        >
-
-                            ${
-                                quantity>0
-                                ?"ДОБАВЛЕНО · "+quantity+" → КОРЗИНА"
-                                :"ДОБАВИТЬ В ЗАКАЗ"
-                            }
-
-                        </button>
+                        <div class="product-action">
+                            ${renderProductAction(product.id)}
+                        </div>
 
                     </article>
 
@@ -4263,43 +5290,6 @@ function renderProducts(
                 }
             );
 
-
-            const button =
-                card.querySelector(
-                    ".add-product"
-                );
-
-
-            button.addEventListener(
-                "click",
-                ()=>{
-
-                    const productId =
-                        button.dataset.id;
-
-
-                    if(cart[productId]){
-
-                        openCart();
-
-                        return;
-
-                    }
-
-
-                    addToCart(
-                        productId
-                    );
-
-
-                    renderProducts(
-                        category,
-                        true
-                    );
-
-                }
-            );
-
         }
     );
 
@@ -4352,57 +5342,333 @@ document
    CHECKOUT (TELEGRAM INTEGRATION)
 ===================================================== */
 
-document
-    .getElementById(
-        "checkoutButton"
-    )
-    .addEventListener(
-        "click",
-        async ()=>{
+const checkoutForm =
+    document.getElementById("checkoutForm");
 
-            if(
-                getCartCount()===0
-            ){
+const orderName =
+    document.getElementById("orderName");
 
-                showToast(
-                    "СНАЧАЛА ДОБАВЬТЕ БЛЮДА"
-                );
+const orderPhone =
+    document.getElementById("orderPhone");
 
-                return;
+const orderAddress =
+    document.getElementById("orderAddress");
+
+const orderComment =
+    document.getElementById("orderComment");
+
+const addressField =
+    document.getElementById("addressField");
+
+
+// Telegram в режиме HTML не принимает «<», «>» и «&» без экранирования
+function escapeHtml(value){
+
+    return String(value)
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;");
+
+}
+
+
+function formatUzPhone(raw){
+
+    let value =
+        raw.replace(/\D/g,"");
+
+    if(value.startsWith("998")){
+        value=value.substring(3);
+    }
+
+    value=value.substring(0,9);
+
+    let formatted="+998";
+
+    if(value.length>0){
+        formatted+=" "+value.substring(0,2);
+    }
+
+    if(value.length>2){
+        formatted+=" "+value.substring(2,5);
+    }
+
+    if(value.length>5){
+        formatted+=" "+value.substring(5,7);
+    }
+
+    if(value.length>7){
+        formatted+=" "+value.substring(7,9);
+    }
+
+    return formatted;
+
+}
+
+
+function getPhoneDigits(value){
+
+    return value
+        .replace(/\D/g,"")
+        .replace(/^998/,"");
+
+}
+
+
+orderPhone.addEventListener(
+    "input",
+    event=>{
+        event.target.value =
+            formatUzPhone(event.target.value);
+    }
+);
+
+
+checkoutForm.addEventListener(
+    "input",
+    event=>{
+
+        const field =
+            event.target.closest(".form-field");
+
+        if(field){
+            field.classList.remove("invalid");
+        }
+
+    }
+);
+
+
+checkoutForm.addEventListener(
+    "change",
+    event=>{
+
+        if(event.target.name!=="method") return;
+
+        const pickup =
+            event.target.value==="pickup";
+
+        addressField.hidden=pickup;
+
+        if(pickup){
+            addressField.classList.remove("invalid");
+        }
+
+    }
+);
+
+
+checkoutForm.addEventListener(
+    "submit",
+    event=>{
+        event.preventDefault();
+        submitOrder();
+    }
+);
+
+
+function readCheckout(){
+
+    const data=new FormData(checkoutForm);
+
+    const order={
+        name:(data.get("name") || "").trim(),
+        phone:(data.get("phone") || "").trim(),
+        method:data.get("method")==="pickup" ? "pickup" : "delivery",
+        address:(data.get("address") || "").trim(),
+        comment:(data.get("comment") || "").trim()
+    };
+
+    const checks=[
+        [orderName,"имя",order.name.length>=2],
+        [orderPhone,"телефон",getPhoneDigits(order.phone).length===9],
+        [orderAddress,"адрес",order.method==="pickup" || order.address.length>=5]
+    ];
+
+    const missing=[];
+
+    let firstInvalid=null;
+
+    checks.forEach(
+        ([input,label,valid])=>{
+
+            input
+                .closest(".form-field")
+                .classList.toggle("invalid",!valid);
+
+            if(!valid){
+
+                missing.push(label);
+
+                firstInvalid=firstInvalid || input;
 
             }
-
-            const items = Object.values(cart);
-            let message = `<b>🍱 НОВЫЙ ЗАКАЗ — KYOTO</b>\n\n`;
-            
-            items.forEach((item, idx) => {
-                message += `${idx + 1}. <b>${item.name}</b> x ${item.quantity} = ${formatPrice(item.price * item.quantity)}\n`;
-            });
-
-            message += `\n<b>ИТОГО: ${formatPrice(getCartTotal())}</b>`;
-
-            const btn = document.getElementById("checkoutButton");
-            btn.disabled = true;
-            btn.textContent = "ОТПРАВКА...";
-
-            const sent = await sendTelegramMessage(message);
-
-            if(sent) {
-                cart = {};
-                saveCart();
-                updateCartCounter();
-                renderCart();
-                closeCart();
-                showToast("ЗАКАЗ УСПЕШНО ОТПРАВЛЕН!");
-            } else {
-                showToast("ОШИБКА ОТПРАВКИ ЗАКАЗА");
-            }
-
-            btn.disabled = false;
-            btn.textContent = "ОФОРМИТЬ ЗАКАЗ";
 
         }
     );
+
+    if(firstInvalid){
+
+        showCartError(
+            "Проверьте: "+missing.join(", ")+"."
+        );
+
+        firstInvalid.focus();
+
+        return null;
+
+    }
+
+    return order;
+
+}
+
+
+function createOrderNumber(){
+
+    return "K-"+
+        Date.now()
+            .toString(36)
+            .slice(-5)
+            .toUpperCase();
+
+}
+
+
+function buildOrderMessage(order,number){
+
+    const lines =
+        getCartLines().map(
+            ({product,quantity,sum},index)=>
+                `${index+1}. <b>${escapeHtml(product.name)}</b> × ${quantity} = ${formatPrice(sum)}`
+        );
+
+    const parts=[
+        `<b>🍱 НОВЫЙ ЗАКАЗ ${number} — KYOTO</b>`,
+        "",
+        ...lines,
+        "",
+        `<b>ИТОГО: ${formatPrice(getCartTotal())}</b>`,
+        "",
+        `👤 <b>Имя:</b> ${escapeHtml(order.name)}`,
+        `📞 <b>Телефон:</b> ${escapeHtml(order.phone)}`,
+        order.method==="pickup"
+            ? "🏃 <b>Самовывоз</b>"
+            : `🚚 <b>Доставка:</b> ${escapeHtml(order.address)}`
+    ];
+
+    if(order.comment){
+        parts.push(`💬 <b>Комментарий:</b> ${escapeHtml(order.comment)}`);
+    }
+
+    return parts.join("\n");
+
+}
+
+
+function describeSendError(error){
+
+    if(error==="network"){
+        return "Нет связи с сервером заказов. Проверьте интернет и попробуйте ещё раз — корзина сохранена.";
+    }
+
+    if(error==="timeout"){
+        return "Сервер заказов долго не отвечает. Попробуйте ещё раз — корзина сохранена.";
+    }
+
+    return `Заказ не отправлен (${error}). Попробуйте ещё раз или позвоните нам — корзина сохранена.`;
+
+}
+
+
+async function submitOrder(){
+
+    if(isSending || getCartCount()===0) return;
+
+    hideCartError();
+
+    const order=readCheckout();
+
+    if(!order) return;
+
+    const number=createOrderNumber();
+
+    isSending=true;
+
+    updateCheckoutButton();
+
+    const result =
+        await sendTelegramMessage(
+            buildOrderMessage(order,number)
+        );
+
+    isSending=false;
+
+    const panelOpen =
+        cartOverlay.classList.contains("open");
+
+    if(!result.ok){
+
+        updateCheckoutButton();
+
+        showCartError(
+            describeSendError(result.error)
+        );
+
+        if(!panelOpen){
+            showToast("ЗАКАЗ НЕ ОТПРАВЛЕН");
+        }
+
+        return;
+
+    }
+
+    cart={};
+
+    saveCart();
+
+    orderComment.value="";
+
+    document
+        .getElementById("orderNumber")
+        .textContent="ЗАКАЗ "+number;
+
+    setCartStep("done");
+
+    updateCartUI();
+
+    if(!panelOpen){
+        showToast("ЗАКАЗ ОТПРАВЛЕН");
+    }
+
+}
+
+
+checkoutButton.addEventListener(
+    "click",
+    ()=>{
+
+        const step=cartPanel.dataset.step;
+
+        if(step==="done"){
+            closeCart();
+            return;
+        }
+
+        if(step==="cart"){
+
+            if(getCartCount()>0){
+                setCartStep("checkout");
+            }
+
+            return;
+
+        }
+
+        submitOrder();
+
+    }
+);
 
 
 /* =====================================================
@@ -4456,60 +5722,8 @@ guestPhone.addEventListener(
     "input",
     event=>{
 
-        let value =
-            event.target.value
-                .replace(/\D/g,"");
-
-        if(
-            value.startsWith("998")
-        ){
-
-            value =
-                value.substring(3);
-
-        }
-
-        value =
-            value.substring(0,9);
-
-
-        let formatted="+998";
-
-
-        if(value.length>0){
-
-            formatted +=
-                " "+
-                value.substring(0,2);
-
-        }
-
-        if(value.length>2){
-
-            formatted +=
-                " "+
-                value.substring(2,5);
-
-        }
-
-        if(value.length>5){
-
-            formatted +=
-                " "+
-                value.substring(5,7);
-
-        }
-
-        if(value.length>7){
-
-            formatted +=
-                " "+
-                value.substring(7,9);
-
-        }
-
         event.target.value =
-            formatted;
+            formatUzPhone(event.target.value);
 
     }
 );
@@ -4539,20 +5753,20 @@ reservationForm.addEventListener(
         };
 
         const message = `<b>🍶 БРОНИРОВАНИЕ СТОЛА — KYOTO</b>\n\n` +
-            `👤 <b>Имя:</b> ${reservationData.name}\n` +
-            `📞 <b>Телефон:</b> ${reservationData.phone}\n` +
-            `📅 <b>Дата:</b> ${reservationData.date}\n` +
-            `⏰ <b>Время:</b> ${reservationData.time}\n` +
-            `👥 <b>Гости:</b> ${reservationData.guests}\n` +
-            `🎉 <b>Повод:</b> ${reservationData.occasion}\n` +
-            `💬 <b>Пожелания:</b> ${reservationData.message}`;
+            `👤 <b>Имя:</b> ${escapeHtml(reservationData.name)}\n` +
+            `📞 <b>Телефон:</b> ${escapeHtml(reservationData.phone)}\n` +
+            `📅 <b>Дата:</b> ${escapeHtml(reservationData.date)}\n` +
+            `⏰ <b>Время:</b> ${escapeHtml(reservationData.time)}\n` +
+            `👥 <b>Гости:</b> ${escapeHtml(reservationData.guests)}\n` +
+            `🎉 <b>Повод:</b> ${escapeHtml(reservationData.occasion)}\n` +
+            `💬 <b>Пожелания:</b> ${escapeHtml(reservationData.message)}`;
 
         const submitBtn = document.getElementById("reserveBtn");
         submitBtn.disabled = true;
 
         const sent = await sendTelegramMessage(message);
 
-        if(sent) {
+        if(sent.ok) {
             reservationForm.style.display = "none";
             reservationSuccess.classList.add("active");
             reservationSuccess.scrollIntoView({
@@ -4577,9 +5791,7 @@ renderProducts(
     false
 );
 
-renderCart();
-
-updateCartCounter();
+updateCartUI();
 
 </script>
 
