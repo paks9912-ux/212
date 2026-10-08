@@ -13,3 +13,10 @@
 внешние источники заявок. Описание, база знаний, промпты и тесты — в
 [zaselenie/README.md](zaselenie/README.md), запуск бота — в
 [zaselenie/bot/README.md](zaselenie/bot/README.md).
+
+## Сайт квартиры посуточно
+
+Папка [`kvartira/`](kvartira/) — лендинг студии у Байтерека с зацикленным
+видео-фоном и скролл-анимацией «день → вечер» на кадрах, сгенерированных в
+Nano Banana и Kling. Как устроен и как заменить видео — в
+[kvartira/README.md](kvartira/README.md).

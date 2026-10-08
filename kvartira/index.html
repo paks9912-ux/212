@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Студия у Байтерека — квартира посуточно в Астане</title>
+<meta name="description" content="Светлая студия на 9 этаже с видом на Байтерек. Самостоятельное заселение, честная цена, бронь в Telegram за пару минут.">
+<meta property="og:title" content="Студия у Байтерека — квартира посуточно в Астане">
+<meta property="og:description" content="Светлая студия с видом на Байтерек. Самостоятельное заселение, бронь в Telegram.">
+<meta property="og:image" content="media/day.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%23c98a3a'/%3E%3Ctext x='16' y='21' text-anchor='middle' font-family='sans-serif' font-size='15' font-weight='700' fill='%23fff'%3E24%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<a class="skip" href="#about">К описанию квартиры</a>
+
+<header class="nav" id="nav">
+  <a class="nav__brand" href="#top">Ключи <span>24</span></a>
+  <nav class="nav__links" aria-label="Разделы">
+    <a href="#about">Квартира</a>
+    <a href="#price">Цены</a>
+    <a href="#how">Заселение</a>
+    <a href="#faq">Правила</a>
+  </nav>
+  <a class="btn btn--small" href="#book">Забронировать</a>
+</header>
+
+<!-- 1. Первый экран: зацикленный видео-фон -->
+<section class="hero" id="top">
+  <div class="hero__media">
+    <video class="hero__video" autoplay muted loop playsinline preload="metadata" poster="media/day.jpg">
+      <source src="media/hero-loop.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero__content">
+    <p class="eyebrow reveal">Астана · Есиль · 9 этаж</p>
+    <h1 class="hero__title reveal">Студия у Байтерека.<br>Свет на весь день, тишина на всю ночь.</h1>
+    <p class="hero__lead reveal">Заселение без звонков и ожидания: напишите в Telegram, получите цену за минуту, адрес и код от двери — сразу после предоплаты.</p>
+    <div class="hero__actions reveal">
+      <a class="btn" href="#book">Узнать цену на свои даты</a>
+      <a class="btn btn--ghost" href="#about">Посмотреть квартиру</a>
+    </div>
+  </div>
+  <div class="hero__scroll" aria-hidden="true"><span></span>Листайте</div>
+</section>
+
+<!-- 2. Скролл-анимация: кадры день → вечер проигрываются в такт прокрутке -->
+<section class="seq" id="seq" aria-label="Квартира от утра до вечера">
+  <div class="seq__sticky">
+    <canvas class="seq__canvas" id="seqCanvas" aria-hidden="true"></canvas>
+    <img class="seq__fallback" src="media/dusk.jpg" alt="Студия вечером: тёплый свет ламп и вид на вечерний город">
+    <div class="seq__shade"></div>
+    <div class="seq__captions">
+      <div class="seq__cap" data-at="0.05">
+        <h2>Утро</h2>
+        <p>Панорамное окно на восток. Солнце будит мягко, а кофе — на столике у окна.</p>
+      </div>
+      <div class="seq__cap" data-at="0.45">
+        <h2>День</h2>
+        <p>Рабочее место, wi-fi 100 мбит и кондиционер. Отсюда удобно и работать, и ходить пешком к Байтереку.</p>
+      </div>
+      <div class="seq__cap" data-at="0.85">
+        <h2>Вечер</h2>
+        <p>Тёплый свет, тихий дом, огни левого берега за стеклом. Выспитесь.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. Квартира -->
+<section class="section" id="about">
+  <div class="wrap">
+    <p class="eyebrow reveal">Квартира</p>
+    <h2 class="h2 reveal">Всё, что нужно на несколько ночей. И ничего лишнего.</h2>
+    <div class="facts">
+      <div class="fact reveal"><strong>32 м²</strong><span>студия, 9 этаж из 16, лифт</span></div>
+      <div class="fact reveal"><strong>2 + 1</strong><span>двуспальная кровать и дополнительное место</span></div>
+      <div class="fact reveal"><strong>100 мбит</strong><span>wi-fi, рабочий стол у окна</span></div>
+      <div class="fact reveal"><strong>24/7</strong><span>самостоятельное заселение по коду</span></div>
+    </div>
+    <div class="cols">
+      <ul class="list reveal">
+        <li>Кондиционер и тёплые полы</li>
+        <li>Стиральная машина, сушилка, утюг</li>
+        <li>Кухня: плита, духовка, холодильник, посуда</li>
+        <li>Постельное и полотенца на каждого гостя</li>
+        <li>Бесплатная парковка во дворе</li>
+        <li>Доступно для гостей на коляске</li>
+      </ul>
+      <div class="near reveal">
+        <h3>Рядом</h3>
+        <dl>
+          <dt>3 мин</dt><dd>остановка «Байтерек», автобусы 10, 12, 18 до вокзала</dd>
+          <dt>10 мин</dt><dd>набережная Ишима и Президентский парк</dd>
+          <dt>12 мин</dt><dd>Хан Шатыр: кино, фудкорт, аквапарк, Magnum</dd>
+          <dt>в доме</dt><dd>круглосуточная аптека, магазин до 23:00, кафе во дворе</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. Цены -->
+<section class="section section--dark" id="price">
+  <div class="wrap">
+    <p class="eyebrow reveal">Цены</p>
+    <h2 class="h2 reveal">Одна цена за ночь. Скидки за срок, а не за торг.</h2>
+    <div class="price reveal">
+      <div class="price__main">
+        <span class="price__num">18 000 <small>тг</small></span>
+        <span class="price__per">за ночь в будни</span>
+      </div>
+      <ul class="price__rows">
+        <li><span>Пятница и суббота</span><b>+15 %</b></li>
+        <li><span>От 7 ночей</span><b>−10 %</b></li>
+        <li><span>От 28 ночей</span><b>−20 %</b></li>
+        <li><span>Повторный гость</span><b>−5 %</b></li>
+        <li><span>Третий гость</span><b>+3 000 тг / ночь</b></li>
+      </ul>
+    </div>
+    <p class="note reveal">Предоплата 30 % — и даты ваши. Депозит 30 000 тг возвращаем при выезде. В праздники (Новый год, Наурыз, День столицы) действует сезонный тариф и минимум 2–3 ночи — точную сумму на ваши даты посчитает бот.</p>
+  </div>
+</section>
+
+<!-- 5. Как заселиться -->
+<section class="section" id="how">
+  <div class="wrap">
+    <p class="eyebrow reveal">Заселение</p>
+    <h2 class="h2 reveal">Четыре сообщения — и вы дома.</h2>
+    <ol class="steps">
+      <li class="step reveal"><span>01</span><h3>Напишите даты</h3><p>«С 12 по 15 марта, нас двое». Бот ответит за минуту: свободно ли и сколько стоит.</p></li>
+      <li class="step reveal"><span>02</span><h3>Подтвердите</h3><p>Даты держим за вами час, пока вы решаете. Нужен документ на каждого взрослого.</p></li>
+      <li class="step reveal"><span>03</span><h3>Внесите предоплату</h3><p>Kaspi-перевод на счёт компании или безнал для юрлиц. Реквизиты — в том же чате.</p></li>
+      <li class="step reveal"><span>04</span><h3>Получите код</h3><p>Адрес и код от двери придут сразу. Заезд с 14:00, выезд до 12:00, ключи не нужны.</p></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 6. Правила -->
+<section class="section section--soft" id="faq">
+  <div class="wrap wrap--narrow">
+    <p class="eyebrow reveal">Правила</p>
+    <h2 class="h2 reveal">Коротко о важном</h2>
+    <div class="faq">
+      <details class="reveal"><summary>Можно ли приехать ночью?</summary><p>Да, код работает круглосуточно. Заезд после 23:00 — плюс 5 000 тг. Ранний заезд или поздний выезд — половина стоимости суток, если дата свободна.</p></details>
+      <details class="reveal"><summary>Что с отменой?</summary><p>За 7 дней и раньше вернём всю предоплату, за 3–7 дней — половину, позже — предоплата не возвращается. Перенос дат считаем заново по тарифу.</p></details>
+      <details class="reveal"><summary>С питомцем или ребёнком?</summary><p>В студии питомцев не размещаем — для них есть другие наши квартиры, бот подскажет. Детская кроватка — бесплатно по запросу.</p></details>
+      <details class="reveal"><summary>Иностранным гостям нужна регистрация?</summary><p>Оформляем миграционный учёт через eQonaq в течение 3 суток, бесплатно.</p></details>
+      <details class="reveal"><summary>Что нельзя?</summary><p>Курить в квартире, шуметь с 23:00 до 08:00, проводить вечеринки и сдавать квартиру дальше. Штрафы прописаны в договоре, который приходит в чат.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- 7. Бронь -->
+<section class="cta" id="book">
+  <div class="cta__media" aria-hidden="true"><img src="media/dusk.jpg" alt=""></div>
+  <div class="cta__content">
+    <h2 class="reveal">Узнайте цену на свои даты</h2>
+    <p class="reveal">Бот ответит сразу, менеджер Арман подключится, если нужно решить что-то нестандартное.</p>
+    <div class="hero__actions reveal">
+      <a class="btn" href="https://t.me/kluchi24_bot" target="_blank" rel="noopener">Написать в Telegram</a>
+      <a class="btn btn--ghost" href="tel:+77011234567">+7 701 123-45-67</a>
+    </div>
+    <p class="cta__hours reveal">Менеджер на связи с 09:00 до 21:00. Бот — всегда.</p>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap footer__row">
+    <span>© <span id="year"></span> Ключи 24 · квартиры посуточно в Астане</span>
+    <span>ул. Достык, Есиль. Точный адрес — после предоплаты.</span>
+  </div>
+</footer>
+
+<script src="js/main.js" defer></script>
+</body>
+</html>
