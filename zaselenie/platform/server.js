@@ -36,6 +36,8 @@ var core = new Core({ store: store, llm: claude, log: log });
 /* ---------- каналы ---------- */
 
 require('./channels/telegram.js').install(core, { log: log, cfg: cfg });
+var WA = require('./channels/whatsapp.js');
+WA.install(core, { log: log, cfg: cfg });
 require('./channels/web.js').install(core, { log: log });
 
 /* ---------- утилиты ---------- */
@@ -61,7 +63,7 @@ function body(req) {
     });
     req.on('end', function () {
       if (!buf) return ok({});
-      try { ok(JSON.parse(buf)); } catch (e) { fail(new Error('тело запроса не JSON')); }
+      try { var parsed = JSON.parse(buf); req.rawBody = buf; ok(parsed); } catch (e) { fail(new Error('тело запроса не JSON')); }
     });
   });
 }
@@ -161,6 +163,25 @@ var server = http.createServer(function (req, res) {
     return body(req).then(function (update) {
       send(res, 200, { ok: true });                   // телеграму отвечаем сразу
       var adapter = core.channels.telegram;
+      if (adapter && adapter.update) adapter.update(update);
+    }).catch(function () { send(res, 200, { ok: true }); });
+  }
+
+  /* Вебхук WhatsApp: GET — проверка адреса при подключении в Meta,
+     POST — сообщения с подписью приложения */
+  if (p === '/webhook/whatsapp' && req.method === 'GET') {
+    if (q['hub.mode'] === 'subscribe' && q['hub.verify_token'] === cfg.whatsapp.verifyToken && cfg.whatsapp.verifyToken) {
+      return send(res, 200, q['hub.challenge'] || '', { 'content-type': 'text/plain' });
+    }
+    return send(res, 403, { error: 'verify token не совпал' });
+  }
+  if (p === '/webhook/whatsapp' && req.method === 'POST') {
+    return body(req).then(function (update) {
+      if (!WA.verifySignature(cfg.whatsapp.appSecret, req.rawBody || '', req.headers['x-hub-signature-256'])) {
+        return send(res, 403, { error: 'подпись не совпала' });
+      }
+      send(res, 200, { ok: true });                   // Meta ждёт ответ быстро, иначе шлёт повторно
+      var adapter = core.channels.whatsapp;
       if (adapter && adapter.update) adapter.update(update);
     }).catch(function () { send(res, 200, { ok: true }); });
   }

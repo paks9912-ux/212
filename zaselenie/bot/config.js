@@ -26,6 +26,14 @@ var cfg = {
   webhookUrl: process.env.WEBHOOK_URL || '',
   webhookSecret: process.env.WEBHOOK_SECRET || '',
   port: +(process.env.PORT || 8080),
+  /* WhatsApp Business Cloud API: токен и id номера из Meta for Developers,
+     verify token придумываете сами и вводите в настройках вебхука */
+  whatsapp: {
+    token: process.env.WHATSAPP_TOKEN || '',
+    phoneId: process.env.WHATSAPP_PHONE_ID || '',
+    verifyToken: process.env.WHATSAPP_VERIFY_TOKEN || '',
+    appSecret: process.env.WHATSAPP_APP_SECRET || ''
+  },
   sessionsFile: process.env.SESSIONS_FILE || path.join(__dirname, 'sessions.json'),
   sessionTtlHours: +(process.env.SESSION_TTL_HOURS || 48),
   /* Защита от флуда: сколько сообщений от одного чата в минуту обрабатываем */
