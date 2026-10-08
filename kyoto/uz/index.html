@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KYOTO — Toshkentda sushi va rollar yetkazib berish</title>
+<meta name="description" content="Toshkent bo'ylab sushi, rollar va setlar yetkazib berish. Qori Niyoziy 11. Tel. +998 88 119-88-78">
+
+<!-- Разметка для поисковиков: кто мы, где, когда работаем.
+     Из неё Google и Яндекс строят карточку заведения в выдаче. -->
+<link rel="canonical" href="https://kyoto.uz/uz/"><link rel="alternate" hreflang="ru" href="https://kyoto.uz/"><link rel="alternate" hreflang="uz" href="https://kyoto.uz/uz/"><link rel="alternate" hreflang="x-default" href="https://kyoto.uz/">
+<meta property="og:type" content="restaurant">
+<meta property="og:site_name" content="KYOTO">
+<meta property="og:title" content="KYOTO — суши и роллы с доставкой в Ташкенте">
+<meta property="og:description" content="Роллы, сеты, корейская и европейская кухня. Доставка по Ташкенту, заказ от любой суммы.">
+<meta property="og:url" content="https://kyoto.uz/">
+<meta property="og:image" content="https://kyoto.uz/photos/hero/h2.jpg">
+<meta property="og:locale" content="uz_UZ">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Restaurant",
+  "name": "KYOTO",
+  "alternateName": ["Киото", "KYOTO Ташкент", "Киото суши"],
+  "description": "Суши-бар и доставка: роллы, сеты, корейская и европейская кухня",
+  "url": "https://kyoto.uz/",
+  "telephone": "+998881198878",
+  "servesCuisine": ["Японская", "Корейская", "Европейская"],
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "улица Кары-Ниязи, 11",
+    "addressLocality": "Ташкент",
+    "addressCountry": "UZ"
+  },
+  "openingHoursSpecification": {
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+    "opens": "10:00",
+    "closes": "23:00"
+  },
+  "hasMenu": "https://kyoto.uz/menu.html",
+  "logo": "https://kyoto.uz/logo.svg",
+  "areaServed": { "@type": "City", "name": "Ташкент" },
+  "currenciesAccepted": "UZS",
+  "paymentAccepted": "Наличные, Click",
+  "hasDeliveryMethod": "https://schema.org/OnSitePickup",
+  "sameAs": [
+    "https://www.instagram.com/kyoto.uz",
+    "https://t.me/kyoto_tash",
+    "https://www.facebook.com/kyotosushichicken",
+    "https://yandex.uz/maps/org/kyoto/172256976264",
+    "https://2gis.uz/tashkent/firm/70000001096891700"
+  ],
+  "acceptsReservations": "False"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Onest:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<style>
+.hero{padding:24px 0 0}
+/* Единый графический ритм: каждая секция открывается голд-меткой */
+.sec-eye{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:9px}
+.sec-eye::before{content:"";width:20px;height:1.5px;background:var(--gold)}
+/* Типографический герой: без фото. Заголовок-афиша в Unbounded,
+   «О» в КИОТО — фирменное энсо с красным солнцем, как в логотипе.
+   Справа вертикальное 京都 («Киото») золотом — тихий второй слой. */
+/* Герой — такая же мягкая плашка, как карточки товара: заливка,
+   радиус 24, без рамки. Раньше он висел прямо на фоне страницы
+   огромным блоком и выпадал из общего языка. */
+/* Баннер держит свой тёмный тон в обеих темах — это афиша, а не карточка.
+   Так фото еды всегда контрастно, а первый экран узнаётся сразу. */
+.hero{--hero-bg:#101010}
+.hero-grid{position:relative;padding:clamp(30px,4.2vw,58px) clamp(26px,4vw,56px);
+  background:var(--hero-bg);border-radius:var(--r-l);overflow:hidden;
+  min-height:clamp(300px,32vw,430px);display:flex;align-items:center}
+.hero-grid .eyebrow{color:#A8A8AE}
+.hero-grid h1{color:#FFFFFF}
+.hero-grid .hero-desc{color:rgba(255,255,255,.72)}
+.hero-grid .btn-ghost{border-color:rgba(255,255,255,.42);color:#fff;
+  background:rgba(255,255,255,.06);backdrop-filter:blur(6px)}
+.hero-grid .btn-ghost:hover{border-color:#fff;background:rgba(255,255,255,.16)}
+/* Текст не должен подлезать под мозаику справа */
+.hero-text{position:relative;z-index:2;max-width:min(640px,58%)}
+@media (max-width:1100px){ .hero-text{max-width:none} }
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;font-weight:700;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.eyebrow::before{content:"";width:24px;height:1.5px;background:var(--gold)}
+.hero h1{margin-bottom:18px}
+.hero h1 .l1{display:block;font-size:clamp(44px,7.6vw,96px);line-height:1;font-weight:800;
+  text-transform:uppercase;letter-spacing:.02em;white-space:nowrap}
+.hero h1 .l2{display:block;font-size:clamp(17px,1.9vw,23px);line-height:1.3;font-weight:600;
+  margin-top:12px;letter-spacing:-.01em;max-width:30ch}
+.o-sun{display:inline-block;width:.94em;height:.94em;vertical-align:-.055em;overflow:visible}
+.hero-desc{color:var(--text-2);font-size:17px;max-width:52ch;margin:0 0 28px}
+.hero-actions{display:flex;gap:11px;flex-wrap:wrap}
+.btn{padding:15px 26px;border-radius:100px;font-weight:600;font-size:15px;text-decoration:none;
+  display:inline-flex;align-items:center;gap:9px;transition:all .15s}
+.btn-primary{background:linear-gradient(180deg,var(--shu),var(--shu-btn));color:#fff}
+.btn-primary:hover{background:var(--shu-deep);transform:translateY(-1px);box-shadow:0 10px 28px -8px rgba(200,16,46,.55)}
+.btn-ghost{border:1.5px solid var(--border-2);color:var(--text)}
+.btn-ghost:hover{border-color:var(--text);background:var(--surface-2)}
+.hero-jp{position:absolute;top:clamp(20px,3vw,38px);right:clamp(20px,3vw,42px);z-index:0;writing-mode:vertical-rl;
+  font-family:"Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
+  font-size:clamp(56px,7vw,104px);line-height:1;letter-spacing:.18em;
+  color:var(--gold);opacity:.14;user-select:none;pointer-events:none}
+
+/* Первый экран — промо-баннер: фото занимает правую половину и уходит
+   под текст мягким растворением, слева фирменная плашка с типографикой. */
+.hero-media{position:absolute;inset:0 0 0 auto;width:56%;z-index:0;pointer-events:none;
+  animation:shot-in .8s .15s backwards}
+.hero-media img{width:100%;height:100%;object-fit:cover;display:block}
+/* Растворение фото в цвет плашки — граница не должна читаться линией */
+.hero-media::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(90deg,var(--hero-bg) 0%,rgba(16,16,16,.72) 34%,
+             rgba(16,16,16,.18) 62%,transparent 88%)}
+@keyframes shot-in{from{opacity:0;transform:scale(1.04)}}
+@keyframes hero-rise{from{opacity:0;transform:translateY(12px)}}
+@keyframes hero-jp{from{opacity:0}to{opacity:.16}}
+.hero-text .eyebrow{animation:hero-rise .5s .04s backwards}
+.hero-text h1{animation:hero-rise .55s .1s backwards}
+.hero-desc{animation:hero-rise .55s .18s backwards}
+.hero-actions{animation:hero-rise .55s .26s backwards}
+.hero-jp{animation:hero-jp .9s .35s backwards}
+
+/* Отдельные мягкие плашки вместо таблицы с разделителями */
+.strip{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.strip div{background:var(--surface);border-radius:var(--r-m);padding:17px 20px 18px;
+  transition:background .16s,transform .16s,box-shadow .2s}
+.strip div:hover{background:var(--surface-2);transform:translateY(-4px);box-shadow:var(--shadow-lift)}
+.strip-i{display:block;font-style:normal;font-size:19px;line-height:1;margin-bottom:9px;opacity:.9}
+.strip b{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
+.strip span{font-size:13px;color:var(--text-2)}
+
+/* Категории — витрина, а не список: фото самого популярного блюда
+   раздела на всю карточку, текст поверх тёмной вуали. Пустые плашки
+   с одним значком не давали понять, что внутри. */
+.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.cat{position:relative;display:block;text-decoration:none;overflow:hidden;
+  border-radius:var(--r-l);aspect-ratio:4/3;background:var(--surface-2);
+  transition:transform .18s,box-shadow .22s}
+.cat:hover{transform:translateY(-5px);box-shadow:var(--shadow-lift)}
+.cat-pic{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transition:transform .45s cubic-bezier(.2,.8,.3,1)}
+.cat:hover .cat-pic{transform:scale(1.07)}
+/* Вуаль: снизу плотная под текст, сверху фото дышит */
+.cat::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(0deg,rgba(10,10,11,.94) 0%,rgba(10,10,11,.72) 26%,
+             rgba(10,10,11,.32) 55%,rgba(10,10,11,.06) 80%)}
+.cat-in{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:18px 20px;color:#fff}
+.cat b{display:block;font-size:17px;font-weight:600;margin-bottom:2px;
+  text-shadow:0 1px 10px rgba(0,0,0,.45)}
+.cat span{font-size:13px;color:rgba(255,255,255,.75)}
+/* Раздел без фото — фирменный градиент со знаком категории */
+.cat.no-pic{background:linear-gradient(150deg,var(--shu),#101010)}
+.cat.no-pic::after{background:linear-gradient(0deg,rgba(10,10,11,.55),transparent 65%)}
+
+.delivery{background:var(--surface);border-radius:var(--r-l);
+  padding:36px 40px;display:grid;grid-template-columns:1fr 1fr;gap:36px}
+.dlist{display:flex;flex-direction:column;gap:14px}
+.drow{display:flex;gap:14px;align-items:flex-start}
+.dnum{width:28px;height:28px;border-radius:50%;flex-shrink:0;background:var(--surface-2);
+  border:1px solid var(--border-2);display:grid;place-items:center;font-size:12.5px;font-weight:700;color:var(--shu)}
+.drow b{display:block;font-size:15px;font-weight:600}
+.drow span{font-size:13.5px;color:var(--text-2)}
+.dbox{background:var(--surface-2);border-radius:var(--r-m);padding:24px;align-self:start}
+.dbox h3{font-size:17px;margin-bottom:14px;font-weight:600}
+.dbox dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:9px 16px;font-size:14.5px}
+.dbox dt{color:var(--text-2)}
+.dbox dd{margin:0;text-align:right;font-weight:600}
+.note{margin-top:17px;padding-top:15px;border-top:1px solid var(--border-2);font-size:13.5px;
+  color:var(--text-2);line-height:1.5}
+.note b{display:block;color:var(--shu);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;
+  margin-bottom:5px;font-weight:700}
+
+/* ТЕЛЕФОН. Фото перестало быть фоном под вуалью: на 375px от блюда
+   оставалась тёмная текстура, и первый экран не показывал еду вовсе.
+   Теперь снимок — полоса сверху, под ним текст. Заголовок и плашка
+   скидки ужаты, чтобы кнопка заказа осталась выше сгиба. */
+@media (max-width:700px){
+  /* Родитель — flex-строка: фото рядом с текстом сжималось в полоску */
+  .hero-grid{display:block;min-height:0;padding:0 0 clamp(20px,5vw,26px)}
+  .hero-media{position:static;width:auto;height:150px;margin:0 0 16px;
+    border-radius:var(--r-l) var(--r-l) 0 0;overflow:hidden;animation:shot-in .7s .1s backwards}
+  /* Лёгкое затемнение только у нижней кромки — стык с плашкой */
+  .hero-media::after{background:linear-gradient(0deg,rgba(16,16,16,.62),transparent 46%)}
+  .hero-text{padding:0 clamp(18px,5vw,22px)}
+  .hero h1{margin-bottom:14px}
+  .hero h1 .l1{font-size:clamp(40px,13.5vw,58px)}
+  .hero h1 .l2{font-size:16px;margin-top:9px}
+  /* «Суши-бар в Ташкенте» дублирует подзаголовок под вордмарком —
+     на телефоне убираем, экран дороже надписи */
+  .hero-grid .eyebrow{display:none}
+  /* Подзаголовок под вордмарком уже говорит, что мы возим по городу.
+     Второй абзац об этом же отжимал кнопку за сгиб — на телефоне
+     его не показываем, адрес есть в шапке, в подвале и на /dostavka */
+  .hero-desc-s{display:none}
+  /* Одно действие вместо двух равнозначных: сеты уходят в текстовую ссылку */
+  /* Одно действие вместо двух равнозначных: сеты уходят в текстовую ссылку */
+  .hero-actions{flex-direction:column;align-items:stretch;gap:6px}
+  .hero-actions .btn-primary{justify-content:center;padding:16px 22px}
+  .hero-grid .btn-ghost{background:none;border:none;backdrop-filter:none;
+    padding:10px;font-size:14.5px;text-decoration:underline;text-underline-offset:4px;
+    color:rgba(255,255,255,.8)}
+}
+
+/* На узких экранах фото уходит в фон целиком, текст поверх вуали */
+@media (max-width:960px){
+  .hero-media{width:100%}
+  .hero-media::after{background:linear-gradient(0deg,var(--hero-bg) 8%,
+    rgba(16,16,16,.86) 42%,rgba(16,16,16,.62) 100%)}
+  .hero-grid{padding-top:14px;min-height:0}
+  /* На телефоне 京都 налезает на сам вордмарк — там его не показываем */
+  .hero-jp{display:none}
+  .hero h1 .l1{font-size:clamp(46px,17vw,74px)}
+  .hero h1 .l2{font-size:17px;margin-top:12px}
+  .cats{grid-template-columns:repeat(2,1fr)}
+  .strip{grid-template-columns:repeat(2,1fr)}
+  .delivery{grid-template-columns:1fr;padding:26px 22px}
+}
+
+/* Первый экран на телефоне. Ставим блок последним: правила для 960px
+   идут ниже 700px и с той же силой перебивали размеры вордмарка.
+   Цель — чтобы еда попадала в первый экран, как на витринах доставок.
+   Контент прежний, ужаты только отступы и кегль. */
+@media (max-width:700px){
+  .hero{padding-top:10px}
+  .hero-media{height:112px;margin-bottom:12px}
+  .hero h1{margin-bottom:10px}
+  .hero h1 .l1{font-size:clamp(32px,10.5vw,44px)}
+  .hero h1 .l2{font-size:14px;margin-top:6px;line-height:1.35}
+  .hero-grid{padding-bottom:16px}
+  .offer{margin:0 0 12px;padding:11px 14px}
+  .offer b{font-size:19px}
+  .offer span:last-child{font-size:12.5px}
+  .hero-actions .btn-primary{padding:14px 20px}
+  .hero-grid .btn-ghost{padding:6px 10px}
+  #hits{padding-top:20px}
+  .strip{margin-top:20px}
+}
+
+/* Лента разделов на главной. Повторяет полосу со страницы меню:
+   липнет под шапкой на десктопе и к самому верху на телефоне, где
+   шапка уезжает вместе со страницей. */
+/* Шапка уезжает вместе со страницей, липнет только лента разделов —
+   так устроены витрины доставок: при прокрутке сверху остаётся 56
+   пикселей навигации вместо 134. Корзина при этом не теряется: её
+   полоса всплывает снизу, как только в ней что-то есть. */
+.top-main{position:static}
+.nav{position:sticky;top:0;z-index:55;background:var(--top-bg);
+  backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.nav-in{display:flex;gap:8px;overflow-x:auto;padding:12px 22px;
+  max-width:var(--maxw);margin:0 auto;scrollbar-width:none}
+.nav-in::-webkit-scrollbar{display:none}
+.nav-in .chip{white-space:nowrap;padding:11px 18px;border-radius:100px;font-size:14px;
+  font-weight:500;border:1px solid transparent;background:var(--surface-2);
+  color:var(--text-2);text-decoration:none;display:flex;align-items:center;gap:7px;
+  transition:background .15s,color .15s}
+.nav-in .chip:hover{background:var(--border);color:var(--text)}
+.nav-in .chip b{font-weight:inherit;opacity:.6;font-size:12.5px}
+@media (max-width:700px){
+  .top-main{position:static}
+  .nav{top:0}
+  .nav-in{padding:10px 16px;gap:7px}
+  .nav-in .chip{padding:9px 14px;font-size:13.5px}
+}
+</style>
+<script>
+(function(){try{var t=localStorage.getItem("kyoto_theme");
+if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+</head>
+<body data-lang="uz" data-title-key="page.title">
+
+<header class="top">
+  <div class="top-main">
+    <div class="wrap top-in">
+    <button class="burger" id="burgerBtn" type="button" aria-label="Разделы меню" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <a class="logo" href="/uz/"><img class="logo-img" src="/logo.svg" alt="KYOTO — sushi &amp; chicken" width="200" height="34"></a>
+    <form class="search" action="/uz/menu.html" method="get" role="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="q" name="q" type="search" placeholder="Поиск по меню…" autocomplete="off" aria-label="Поиск по меню" data-i18n-ph="search.ph" data-i18n-aria="search.aria">
+    </form>
+    <div class="addr">
+      <button class="addr-btn" id="addrBtn" type="button" data-i18n-aria="addr.aria" aria-label="Адрес доставки">
+        <span class="addr-pin">◎</span><span class="addr-t" data-i18n="addr.ask">Куда везём?</span><span class="addr-v">⌄</span>
+      </button>
+      <div class="addr-menu" id="addrMenu"></div>
+    </div>
+    <a class="top-tel" href="tel:+998881198878">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5 9 3.9l1 4-2 1.4a12 12 0 0 0 6.7 6.7l1.4-2 4 1 .4 2.4a2 2 0 0 1-2 2.3A17 17 0 0 1 4.3 5.5a2 2 0 0 1 2.3-2Z"/></svg>
+      <span class="tel-i"><b>+998 88 119-88-78</b><em data-i18n="strip.hours">10:00–23:00</em></span>
+    </a>
+    <div class="lang">
+      <button class="lang-btn" id="langBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
+        <span class="flag"></span><span class="lang-name"></span><span class="lang-v">⌄</span>
+      </button>
+      <div class="lang-menu" id="langMenu" role="listbox"></div>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button" data-i18n-aria="theme.aria" data-i18n-title="theme.title" aria-label="Переключить тему" title="День / ночь">
+      <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.3M12 19.1v2.3M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.6 12h2.3M19.1 12h2.3M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg>
+      <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a7 7 0 0 0 11.1 11.1Z"/></svg>
+    </button>
+    <button class="acc-btn" id="accBtn" type="button" aria-label="Мой кабинет" title="Мой кабинет">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"/></svg>
+    </button>
+    <button class="cart-btn" id="cartBtn"><svg class="cart-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2.2l2.3 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.5L21 8H6.3"/><circle cx="10" cy="20" r="1.3"/><circle cx="17.5" cy="20" r="1.3"/></svg><span class="cart-txt" data-i18n="cart.btn">Корзина</span><span class="cart-count" id="count">0</span></button>
+    </div>
+  </div>
+</header>
+
+
+<main>
+  <div class="wrap hero-wrap">
+
+    <section class="hero" style="padding-bottom:0">
+      <div class="hero-grid">
+        <div class="hero-jp" aria-hidden="true">京都</div>
+        <!-- Снимки для первого экрана: студийные кадры со стока (Pexels,
+             лицензия разрешает коммерческое использование). Это настроение
+             витрины, а не карточки блюд — в меню везде свои фото. -->
+        <div class="hero-media" aria-hidden="true">
+          <img src="/photos/hero/h2.jpg" alt="" width="560" height="560" fetchpriority="high">
+        </div>
+        <div class="hero-text">
+          <div class="eyebrow" data-i18n="hero.eyebrow">Суши-бар в Ташкенте</div>
+          <h1><span class="sr-only">KYOTO (Киото) — суши-бар и доставка суши в Ташкенте</span><span aria-hidden="true"><span class="l1">Ки<svg class="o-sun" viewBox="0 0 120 120"><circle cx="62" cy="60" r="33" fill="var(--shu)"/><path d="M62 9 a51 51 0 1 1 -36 15" fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"/></svg>то</span><span class="l2" data-i18n="hero.sub">— роллы, сеты и горячее с доставкой по городу</span></span></h1>
+          <p class="hero-desc" data-i18n="hero.desc">До Киото в Японии — полдня самолётом. До нашего — пара кликов: готовим под заказ на Кары-Ниязи 11 и передаём Яндекс-курьеру.</p>
+          <!-- На телефоне длинный абзац уводил кнопку заказа за сгиб —
+               там показываем короткую строку, смысл тот же -->
+          <p class="hero-desc hero-desc-s" data-i18n="hero.descShort">Готовим под заказ на Кары-Ниязи 11 и везём Яндекс-курьером.</p>
+          <div class="offer">
+            <span class="offer-badge" data-i18n="offer.badge">Только на сайте</span>
+            <b data-i18n="offer.title">−30 000 сум</b>
+            <span data-i18n="offer.sub">на первый заказ от 70 000 сум</span>
+          </div>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="/uz/menu.html" data-i18n="hero.cta">Заказать со скидкой</a>
+            <a class="btn btn-ghost" href="#sets" data-i18n="hero.cta2">Фирменный сет</a>
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+<!-- Лента разделов, как на витринах доставок: с главной можно уйти
+     сразу в нужную категорию меню, не пролистывая страницу.
+     Наполняется из того же /api/menu, ссылки ведут на якоря меню. -->
+<nav class="nav" id="homeNav" hidden>
+  <div class="nav-in" id="homeChips"></div>
+</nav>
+
+  <!-- Баннер «блюдо недели»: разметку подставляет сервер из выбора
+       в админке. Пусто — значит владелец баннер выключил. -->
+  <section class="bnr-sec"><div class="wrap"><article class="card bnr" data-name="(Зап-Рол) с Курицей" data-price="58000"><div class="bnr-pic"><img src="/photos/16.jpg?v=1787823789000" alt="" width="640" height="427" loading="lazy"></div><div class="bnr-in"><div class="bnr-eye">Haftaning taomi</div><h2 class="bnr-t">Tovuqli Pishirilgan Roll</h2><div class="card-foot"></div></div></article></div></section>
+
+  <div class="wrap">
+    <section id="hits">
+      <div class="sec-head">
+        <div><div class="sec-eye" data-i18n="sec.hits">хиты месяца</div><h2 data-i18n="sec.hitsTitle">Роллы, которые берут чаще всего</h2>
+          <p data-i18n="sec.hitsSub">По реальным заказам за последние 30 дней</p></div>
+        <a class="sec-link" href="/uz/menu.html" data-i18n="sec.allMenu">Всё меню →</a>
+      </div>
+      <div class="grid" id="hitsGrid"><div class="empty">Загружаем…</div></div>
+    </section>
+
+
+    <section id="sets" style="padding-bottom:12px">
+      <div class="sec-head">
+        <div><div class="sec-eye" data-i18n="sec.sets">готовые наборы</div><h2 data-i18n="sec.setsTitle">Setlar</h2><p data-i18n="sec.setsSub">Готовый набор выгоднее, чем собирать роллы по одному</p></div>
+        <a class="sec-link" href="/uz/menu.html#g-sets" data-i18n="sec.allSets">Все сеты →</a>
+      </div>
+    </section>
+  </div>
+
+  <div class="wrap">
+    <div class="lane-wrap">
+      <button class="lane-nav prev" id="lanePrev" type="button" aria-label="Предыдущие сеты" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
+      <div class="lane" id="setsLane"><ul><li><b>Сет Китана</b> — 195 000 сум</li><li><b>Сет Сакура</b> — 178 000 сум</li><li><b>Мини сет Оригами</b> — 188 000 сум</li><li><b>Сет 3 Цезаря</b> — 168 000 сум</li><li><b>Сет Салмон</b> — 211 000 сум</li><li><b>сет Романтика</b> — 198 000 сум</li><li><b>Сет Осака</b> — 248 000 сум</li><li><b>Сытный микс янд</b> — 200 000 сум</li><li><b>сет Акита</b> — 335 000 сум</li><li><b>сет Дракон</b> — 485 000 сум</li><li><b>Сет Маки</b> — 155 000 сум</li><li><b>Сет Токио</b> — 398 000 сум</li><li><b>сет Якудза</b> — 525 000 сум</li><li><b>комбо на двоих</b> — 198 000 сум</li></ul></div>
+      <button class="lane-nav next" id="laneNext" type="button" aria-label="Следующие сеты" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <section id="other" style="padding-top:8px">
+      <div class="sec-head">
+        <div><div class="sec-eye" data-i18n="sec.world">кухня мира</div><h2 data-i18n="sec.worldTitle">Не только суши</h2><p data-i18n="sec.worldSub">Эти блюда заказывают наравне с роллами</p></div>
+        <a class="sec-link" href="/uz/menu.html" data-i18n="sec.allKitchen">Вся кухня →</a>
+      </div>
+      <div class="grid" id="otherGrid"></div>
+    </section>
+
+    <!-- Полоса условий переехала под хиты: на первом экране она
+         отодвигала еду за сгиб. Референсные витрины доставок ставят
+         товар сразу, а условия — ниже. Контент прежний. -->
+    <div class="strip">
+      <div><i class="strip-i">🧾</i><b data-i18n="strip.any">Заказ от любой суммы</b><span data-i18n="strip.anySub">минимума нет</span></div>
+      <div><i class="strip-i">🚚</i><b data-i18n="strip.yandex">Доставка Яндексом</b><span data-i18n="strip.yandexSub">оплачивается курьеру отдельно</span></div>
+      <div><i class="strip-i">🍣</i><b id="sushiCount">87 видов</b><span data-i18n="strip.kindsSub">роллов и суши</span></div>
+      <div><i class="strip-i">🕙</i><b>10:00–23:00</b><span data-i18n="strip.hoursSub">ежедневно, без выходных</span></div>
+    </div>
+
+    <section id="cats">
+      <div class="sec-head">
+        <div><div class="sec-eye" data-i18n="sec.catalog">каталог</div><h2 data-i18n="sec.catalogTitle">Butun menyu</h2><p data-i18n="sec.catalogSub">Суши и роллы — основа. Плюс корейская и европейская кухня</p></div>
+      </div>
+      <div class="cats" id="catsGrid"><ul><li><a href="/uz/menu.html">Ролы</a> — 33 позиций</li><li><a href="/uz/menu.html">Сэты</a> — 23 позиций</li><li><a href="/uz/menu.html">Вторые блюда Европа</a> — 17 позиций</li><li><a href="/uz/menu.html">Салаты Европа</a> — 15 позиций</li><li><a href="/uz/menu.html">Ichimliklar</a> — 14 позиций</li><li><a href="/uz/menu.html">Салаты Корея</a> — 11 позиций</li><li><a href="/uz/menu.html">Супы Корея</a> — 11 позиций</li><li><a href="/uz/menu.html">Вторые блюда Корея</a> — 10 позиций</li><li><a href="/uz/menu.html">Garnirlar</a> — 10 позиций</li><li><a href="/uz/menu.html">Жареные роллы</a> — 10 позиций</li><li><a href="/uz/menu.html">Чай</a> — 10 позиций</li><li><a href="/uz/menu.html">Запеченные роллы</a> — 8 позиций</li><li><a href="/uz/menu.html">Супы Европа</a> — 8 позиций</li><li><a href="/uz/menu.html">Кофе</a> — 7 позиций</li><li><a href="/uz/menu.html">Суши</a> — 7 позиций</li><li><a href="/uz/menu.html">Лимонады</a> — 6 позиций</li><li><a href="/uz/menu.html">Мини роллы</a> — 6 позиций</li><li><a href="/uz/menu.html">Гункан суши</a> — 5 позиций</li><li><a href="/uz/menu.html">Чикен</a> — 5 позиций</li><li><a href="/uz/menu.html">Коктейли</a> — 4 позиций</li><li><a href="/uz/menu.html">Милкшейки</a> — 4 позиций</li><li><a href="/uz/menu.html">Поке</a> — 3 позиций</li><li><a href="/uz/menu.html">Комбо</a> — 2 позиций</li><li><a href="/uz/menu.html">Паста</a> — 1 позиций</li></ul></div>
+    </section>
+
+
+    <section id="delivery">
+      <div class="sec-head"><div><div class="sec-eye" data-i18n="sec.how">как это работает</div><h2 data-i18n="sec.howTitle">Yetkazib berish va to'lov</h2></div></div>
+      <div class="delivery">
+        <div class="dlist">
+          <div class="drow"><span class="dnum num">1</span><div><b data-i18n="how.1">Собираете заказ</b><span data-i18n="how.1s">На любую сумму — минимума нет</span></div></div>
+          <div class="drow"><span class="dnum num">2</span><div><b data-i18n="how.2">Оставляете телефон и адрес</b><span data-i18n="how.2s">Без регистрации — только то, что нужно курьеру</span></div></div>
+          <div class="drow"><span class="dnum num">3</span><div><b data-i18n="how.3">Подтверждаем звонком и готовим</b><span data-i18n="how.3s">Заказ сразу поступает на кухню</span></div></div>
+          <div class="drow"><span class="dnum num">4</span><div><b data-i18n="how.4">Вызываем Яндекс Доставку</b><span data-i18n="how.4s">Передаём заказ курьеру, как только он готов</span></div></div>
+          <div class="drow"><span class="dnum num">5</span><div><b data-i18n="how.5">Встречаете курьера</b><span data-i18n="how.5s">Доставку оплачиваете курьеру по тарифу Яндекса</span></div></div>
+        </div>
+        <div class="dbox">
+          <h3 data-i18n="cond.title">Условия</h3>
+          <dl>
+            <dt data-i18n="cond.min">Минимальный заказ</dt><dd data-i18n="cond.minV">Любая сумма</dd>
+            <dt data-i18n="cond.pay">Оплата заказа</dt><dd data-i18n="cond.payV">Наличные курьеру или Click</dd>
+            <dt data-i18n="cond.hours">Время работы</dt><dd class="num">10:00–23:00</dd>
+            <dt data-i18n="cond.addr">Адрес кухни</dt><dd data-i18n="cond.addrV">Кары-Ниязи 11</dd>
+          </dl>
+          <div class="note">
+            <b data-i18n="cond.note">Как считается доставка</b>
+            Мы вызываем Яндекс Доставку. Стоимость зависит от вашего адреса и рассчитывается Яндексом — вы оплачиваете её курьеру напрямую при получении.
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap foot-in">
+    <div>
+      <div class="logo" style="margin-bottom:9px"><img class="logo-img" src="/logo.svg" alt="KYOTO — sushi &amp; chicken" width="200" height="34"></div>
+      <span data-i18n="foot.about">Суши и роллы с доставкой</span><br><span data-i18n="foot.hours">Доставляем Яндексом ежедневно 10:00–23:00</span>
+    </div>
+    <div><b data-i18n="foot.contacts">Контакты</b><br><span data-i18n="foot.address">г. Ташкент, ул. Кары-Ниязи 11</span><br><a class="foot-tel" href="tel:+998881198878">+998 88 119-88-78</a></div>
+    <div class="foot-menu"><b data-i18n="foot.menu">Меню</b>
+      <a href="/uz/menu/sushi">Rollar va sushi</a>
+      <a href="/uz/menu/sets">Setlar</a>
+      <a href="/uz/menu/hot">Issiq taomlar</a>
+      <a href="/uz/menu/soups">Sho'rvalar</a>
+      <a href="/uz/menu/salads">Salatlar</a>
+      <a href="/uz/menu/poke">Poke va makaron</a>
+      <a href="/uz/menu/sides">Garnirlar</a>
+      <a href="/uz/menu/drinks">Ichimliklar</a>
+      <a href="/uz/dostavka">Yetkazib berish va to'lov</a>
+      <a href="/uz/menu.html" data-i18n="foot.menuAll">Butun menyu</a>
+    </div>
+    <div class="foot-social">
+      <b data-i18n="foot.social">Мы в сетях</b>
+      <div class="soc">
+        <a class="soc-a" href="https://www.instagram.com/kyoto.uz" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.2c3.2 0 3.6 0 4.9.07 1.2.05 1.8.25 2.2.42.6.22 1 .48 1.4.9.4.4.7.8.9 1.4.2.4.4 1 .4 2.2.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c0 1.2-.2 1.8-.4 2.2-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .4-2.2.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2 0-1.8-.2-2.2-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.4-1-.4-2.2C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.9c0-1.2.2-1.8.4-2.2.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.4 2.2-.4C8.4 2.2 8.8 2.2 12 2.2zm0 3.2A6.6 6.6 0 1 0 18.6 12 6.6 6.6 0 0 0 12 5.4zm0 10.9A4.3 4.3 0 1 1 16.3 12 4.3 4.3 0 0 1 12 16.3zm6.9-11.1a1.55 1.55 0 1 1-1.55-1.55A1.55 1.55 0 0 1 18.9 5.2z"/></svg>
+          Instagram</a>
+        <a class="soc-a" href="https://t.me/kyoto_tash" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.9 4.3 18.7 19c-.2 1-.9 1.3-1.8.8l-4.9-3.6-2.4 2.3c-.3.3-.5.5-1 .5l.3-4.9 9-8.1c.4-.3-.1-.5-.6-.2L6.2 12.7 1.4 11.2c-1-.3-1-1 .2-1.5l19-7.3c.9-.3 1.6.2 1.3 1.9z"/></svg>
+          Telegram</a>
+        <a class="soc-a" href="https://www.facebook.com/kyotosushichicken" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.5V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.4v7A10 10 0 0 0 22 12z"/></svg>
+          Facebook</a>
+        <a class="soc-a" href="https://yandex.uz/maps/org/kyoto/172256976264" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1 1 14.5 9 2.5 2.5 0 0 1 12 11.5z"/></svg>
+          Мы на картах</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<aside class="side-drawer" id="sideDrawer" aria-label="Разделы меню">
+  <div class="sd-head"><b data-i18n="nav.menu">Меню</b>
+    <button class="sd-close" id="sdClose" type="button" data-i18n-aria="close" aria-label="Закрыть">×</button></div>
+  <div class="sd-body" id="sdBody"></div>
+</aside>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Корзина">
+  <div class="dr-head"><h2 id="drTitle">Корзина</h2><button class="dr-close" id="drClose" data-i18n-aria="close" aria-label="Закрыть">×</button></div>
+  <div class="dr-body" id="drBody"></div>
+  <div class="dr-foot" id="drFoot"></div>
+</aside>
+
+<script src="/i18n.js"></script>
+<script src="/app.js"></script>
+<script src="/product.js"></script>
+<script>
+(function(){
+  var K=window.KYOTO;
+
+  function pick(items,names){
+    return names.map(function(n){
+      return items.filter(function(i){return i.name===n;})[0];
+    }).filter(Boolean);
+  }
+
+  function paint(menu){
+    var items=menu.items.filter(function(i){return i.available;});
+    var uz=K.lang()==="uz";
+
+    // --- Сет Киото: в герое больше не участвует, но открывает ленту сетов ---
+    var kyoto=items.filter(function(i){return /сет киото/i.test(i.name);})[0];
+
+    // --- сколько суши ---
+    var sushi=items.filter(function(i){return i.group==="sushi";}).length;
+    document.getElementById("sushiCount").textContent =
+      uz ? (sushi+" "+K.t("strip.kinds")) : (sushi+" "+K.plural(sushi,"вид","вида","видов"));
+
+    // --- хиты роллов: по реальным продажам ---
+    var hits=items.filter(function(i){return i.group==="sushi";})
+      .sort(function(a,b){return b.sold-a.sold;}).slice(0,8);
+    document.getElementById("hitsGrid").innerHTML=hits.map(function(i){return K.cardHTML(i);}).join("");
+
+    // --- сеты: Киото первым, дальше по продажам ---
+    var sets=items.filter(function(i){return i.group==="sets";})
+      .sort(function(a,b){return b.sold-a.sold;});
+    if(kyoto){
+      sets=[kyoto].concat(sets.filter(function(i){return i.name!==kyoto.name;}));
+    }
+    document.getElementById("setsLane").innerHTML=sets.slice(0,8).map(function(i,idx){
+      return K.cardHTML(i, idx===0&&kyoto?"signature":null);
+    }).join("");
+    if(laneRefresh)laneRefresh();
+
+    // --- категории ---
+    var order=["sushi","sets","drinks","hot","salads","soups","sides","poke"];
+    document.getElementById("catsGrid").innerHTML=order.map(function(id){
+      var g=menu.groups.filter(function(x){return x.id===id;})[0];
+      if(!g||!g.count)return "";
+      // Обложка раздела — фото его самого популярного блюда
+      var cover=items.filter(function(i){return i.group===id&&i.photo;})
+        .sort(function(a,b){return b.sold-a.sold;})[0];
+      return '<a class="cat'+(cover?"":" no-pic")+'" href="/uz/menu.html#g-'+g.id+'">'+
+        (cover?'<img class="cat-pic" src="'+K.esc(cover.photo)+'" alt="" loading="lazy">':'')+
+        '<span class="cat-in">'+
+        '<b>'+K.esc(K.group(g.title))+'</b>'+
+        '<span>'+g.count+' '+(uz?K.t("menu.dishes"):K.plural(g.count,"блюдо","блюда","блюд"))+'</span>'+
+        '</span></a>';
+    }).join("");
+
+    // --- разделы в панели бургера: с главной ведут в каталог ---
+    var sd=document.getElementById("sdBody");
+    if(sd){
+      sd.innerHTML='<a class="sd-item" href="/uz/menu.html">'+
+        K.t("menu.all")+
+        '<span class="sd-n">'+menu.items.length+'</span></a>'+
+        menu.groups.filter(function(g){return g.count;}).map(function(g){
+          return '<a class="sd-item" href="/uz/menu.html#g-'+g.id+'">'+
+            K.esc(K.group(g.title))+
+            '<span class="sd-n">'+g.count+'</span></a>';
+        }).join("");
+      sd.querySelectorAll(".sd-item").forEach(function(a){ a.style.textDecoration="none"; });
+    }
+
+    // --- не только суши ---
+    var other=items.filter(function(i){return i.group!=="sushi"&&i.group!=="sets";})
+      .sort(function(a,b){return b.sold-a.sold;}).slice(0,4);
+    document.getElementById("otherGrid").innerHTML=other.map(function(i){return K.cardHTML(i);}).join("");
+  }
+
+  // --- стрелки ленты сетов ---
+  var laneRefresh=null;
+  function initLaneNav(){
+    var lane=document.getElementById("setsLane");
+    var prev=document.getElementById("lanePrev"), next=document.getElementById("laneNext");
+    if(!lane||!prev||!next)return;
+
+    function refresh(){
+      var max=lane.scrollWidth-lane.clientWidth;
+      // У ленты есть горизонтальный padding, и scroll-snap встаёт на него:
+      // «начало» — это не 0, а величина отступа. Плюс 2px на округление.
+      var start=parseFloat(getComputedStyle(lane).paddingLeft)||0;
+      prev.hidden = lane.scrollLeft <= start+2;
+      next.hidden = lane.scrollLeft >= max-2;
+    }
+    // Шаг — целое число карточек. Прокрутка «почти на экран» приземляется
+    // между карточками, и scroll-snap:mandatory отматывает ленту обратно.
+    function step(){
+      var card=lane.querySelector(".card");
+      if(!card)return lane.clientWidth;
+      var cs=getComputedStyle(lane);
+      var gap=parseFloat(cs.columnGap||cs.gap)||22;
+      var one=card.getBoundingClientRect().width+gap;
+      var perPage=Math.max(1,Math.floor(lane.clientWidth/one));
+      return perPage*one;
+    }
+    // Своя анимация вместо behavior:"smooth" — он не везде срабатывает
+    // (и молча ничего не делает), а прокрутка стрелкой обязана работать.
+    var anim=null;
+    function page(dir){
+      var max=lane.scrollWidth-lane.clientWidth;
+      var from=lane.scrollLeft;
+      var to=Math.max(0,Math.min(max, from+dir*step()));
+      if(to===from)return;
+      // В скрытой вкладке кадры анимации не идут — прыгаем сразу.
+      // Там же уважаем просьбу системы не анимировать.
+      var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if(reduce||document.hidden){ lane.scrollLeft=to; refresh(); return; }
+      cancelAnimationFrame(anim);
+      var t0=performance.now(), dur=380;
+      (function tick(now){
+        var p=Math.min(1,(now-t0)/dur);
+        var e=1-Math.pow(1-p,3);          // ease-out
+        lane.scrollLeft=from+(to-from)*e;
+        if(p<1)anim=requestAnimationFrame(tick); else refresh();
+      })(t0);
+    }
+    prev.onclick=function(){page(-1);};
+    next.onclick=function(){page(1);};
+    lane.addEventListener("scroll",refresh,{passive:true});
+    window.addEventListener("resize",refresh);
+    refresh();
+    return refresh;
+  }
+
+  laneRefresh=initLaneNav();
+
+  // Лента разделов под шапкой. Ссылки ведут на якоря страницы меню —
+  // человек с главной попадает сразу в нужную категорию.
+  function paintHomeChips(menu){
+    var box=document.getElementById("homeChips");
+    var nav=document.getElementById("homeNav");
+    if(!box||!nav||!menu)return;
+    var html='<a class="chip" href="/uz/menu.html">'+K.t("menu.all")+
+             ' <b>'+menu.items.length+'</b></a>';
+    menu.groups.forEach(function(g){
+      if(!g.count)return;
+      html+='<a class="chip" href="/uz/menu.html#g-'+g.id+'">'+
+            K.esc(K.group(g.title))+' <b>'+g.count+'</b></a>';
+    });
+    box.innerHTML=html;
+    nav.hidden=false;
+  }
+
+  K.init(function(menu){ paint(menu); paintFeet(); paintHomeChips(menu); }).catch(function(){
+    document.getElementById("hitsGrid").innerHTML=
+      '<div class="empty"><b>'+K.t("err.serverDown")+'</b>'+K.t("err.serverHint")+'</div>';
+  });
+
+  // Смена языка — перерисовываем карточки заново
+  if(window.I18N) window.I18N.onChange(function(){
+    var m=K.menu(); if(m){ paint(m); paintHomeChips(m); }
+  });
+
+  // Перерисовываем счётчики на карточках при изменении корзины.
+  // Имя берём из data-name: на экране оно причёсано, а ключ — как в Poster.
+  function repaintFoot(card){
+    var name=card.dataset.name;
+    if(!name)return;
+    card.querySelector(".card-foot").innerHTML=K.cardFootHTML(name, Number(card.dataset.price)||0);
+  }
+
+  function paintFeet(){
+    if(!K.menu())return;
+    ["hitsGrid","otherGrid","setsLane"].forEach(function(id){
+      var el=document.getElementById(id);if(!el)return;
+      el.querySelectorAll(".card").forEach(repaintFoot);
+    });
+    // Баннер приходит с сервера уже свёрстанным, но цена и счётчик
+    // в нём рисуются тем же кодом, что и в карточках витрины
+    document.querySelectorAll(".bnr").forEach(repaintFoot);
+  }
+
+  K.onChange(paintFeet);
+
+  document.addEventListener("click",K.clickQty);
+})();
+</script>
+</body>
+</html>

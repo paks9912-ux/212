@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toshkentda sushi setlari — KYOTO yetkazib berish</title>
+<meta name="description" content="Kompaniya uchun va ikki kishilik roll setlari: tarkibi, vazni va narxi. Toshkent bo'ylab yetkazib berish.">
+<link rel="canonical" href="https://kyoto.uz/uz/menu/sets"><link rel="alternate" hreflang="ru" href="https://kyoto.uz/menu/sets"><link rel="alternate" hreflang="uz" href="https://kyoto.uz/uz/menu/sets"><link rel="alternate" hreflang="x-default" href="https://kyoto.uz/menu/sets">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Меню суши-бара KYOTO — роллы, сеты и суши в Ташкенте">
+<meta property="og:description" content="Роллы, сеты, суши, горячее и корейская кухня с доставкой по Ташкенту. Цены и наличие — как на кухне.">
+<meta property="og:url" content="https://kyoto.uz/menu.html">
+<meta property="og:image" content="https://kyoto.uz/photos/hero/h2.jpg">
+<meta property="og:locale" content="ru_RU">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Menu","name":"Setlar — KYOTO","url":"https://kyoto.uz/uz/menu/sets","inLanguage":"uz","hasMenuSection":[{"@type":"MenuSection","name":"Setlar","hasMenuItem":[{"@type":"MenuItem","name":"Kitana Seti","image":"https://kyoto.uz/photos/401.jpg?v=1787581097000","offers":{"@type":"Offer","price":"195000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Sakura Seti","image":"https://kyoto.uz/photos/367.jpg?v=1787581096000","offers":{"@type":"Offer","price":"178000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Origami Mini Seti","image":"https://kyoto.uz/photos/110.jpg?v=1787581096000","offers":{"@type":"Offer","price":"188000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Losos Seti","image":"https://kyoto.uz/photos/425.jpg?v=1787581096000","offers":{"@type":"Offer","price":"211000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Osaka Seti","image":"https://kyoto.uz/photos/426.jpg?v=1787581098000","offers":{"@type":"Offer","price":"248000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Akita Seti","image":"https://kyoto.uz/photos/455.jpg?v=1787581099000","offers":{"@type":"Offer","price":"335000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Ajdaho Seti","image":"https://kyoto.uz/photos/452.jpg?v=1787581097000","offers":{"@type":"Offer","price":"485000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Maki Seti","image":"https://kyoto.uz/photos/427.jpg?v=1787581098000","offers":{"@type":"Offer","price":"155000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Tokio Seti","image":"https://kyoto.uz/photos/171.jpg?v=1787581097000","offers":{"@type":"Offer","price":"398000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Yakudza Seti","image":"https://kyoto.uz/photos/451.jpg?v=1787581099000","offers":{"@type":"Offer","price":"525000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Love Seti","image":"https://kyoto.uz/photos/458.jpg?v=1787581099000","offers":{"@type":"Offer","price":"208000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Sharq Seti","image":"https://kyoto.uz/photos/457.jpg?v=1787581099000","offers":{"@type":"Offer","price":"248000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Geysha Seti","image":"https://kyoto.uz/photos/454.jpg?v=1787581099000","offers":{"@type":"Offer","price":"395000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Kioto Seti","image":"https://kyoto.uz/photos/186.jpg?v=1787581097000","offers":{"@type":"Offer","price":"415000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Lyuks Seti","image":"https://kyoto.uz/photos/453.jpg?v=1787581099000","offers":{"@type":"Offer","price":"595000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Miks Seti","image":"https://kyoto.uz/photos/432.jpg?v=1787581097000","offers":{"@type":"Offer","price":"308000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Samuray Seti","image":"https://kyoto.uz/photos/431.jpg?v=1787581099000","offers":{"@type":"Offer","price":"480000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}},{"@type":"MenuItem","name":"Unagi Seti","image":"https://kyoto.uz/photos/450.jpg?v=1787581098000","offers":{"@type":"Offer","price":"240000","priceCurrency":"UZS","availability":"https://schema.org/InStock"}}]}]}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Onest:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="/styles.css">
+<style>
+/* Фон берём из темы: раньше был захардкожен светлым и в тёмной теме
+   полоса категорий светилась белым.
+   top равен высоте шапки (78px) — иначе полоса наезжает на неё. */
+/* Шапка уезжает, липнет только полоса категорий — 56 пикселей вместо
+   134. Корзина остаётся доступной: её полоса всплывает снизу. */
+.top-main{position:static}
+.nav{position:sticky;top:0;z-index:55;background:var(--top-bg);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border)}
+/* На телефоне шапка не липнет: вдвоём с полосой они съедали бы
+   четверть экрана. Липкой остаётся ПОЛОСА КАТЕГОРИЙ — человек всегда
+   видит, в каком разделе. Корзина при этом не теряется: внизу живёт
+   липкая полоса корзины, а поиск переехал прямо сюда, к чипсам. */
+@media (max-width:700px){
+  .top-main{position:static}
+  .nav{top:0}
+  .group{scroll-margin-top:90px}
+}
+.nav-in{display:flex;gap:8px;overflow-x:auto;padding:12px 22px;max-width:var(--maxw);margin:0 auto;scrollbar-width:none}
+/* Место под кнопку поиска, прижатую к правому краю полосы.
+   Строго ПОСЛЕ .nav-in: сокращение padding выше перебило бы отступ. */
+@media (max-width:700px){ .nav-in{padding-right:70px} }
+.nav-in::-webkit-scrollbar{display:none}
+/* Чипсы — заливка без рамок, как всё остальное */
+.chip{white-space:nowrap;padding:11px 18px;border-radius:100px;font-size:14px;font-weight:500;
+  border:1px solid transparent;background:var(--surface-2);color:var(--text-2);
+  transition:background .15s,color .15s;display:flex;align-items:center;gap:7px}
+.chip:hover{background:var(--border);color:var(--text)}
+.chip.on{background:var(--shu);color:#fff;font-weight:600}
+.chip b{font-weight:inherit;opacity:.6;font-size:12.5px}
+.head{padding:32px 0 6px}
+.head h1{font-size:clamp(26px,3.3vw,36px);font-weight:700;margin-bottom:7px}
+.head p{color:var(--text-2);margin:0;font-size:15px}
+.group{padding:32px 0 6px;scroll-margin-top:150px}
+.group-head{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+.group-head h2{font-size:clamp(20px,2.4vw,27px);font-weight:700}
+.group-count{color:var(--text-2);font-size:14px;margin:0 0 18px}
+.sub{font-size:12.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-2);
+  margin:26px 0 14px}
+
+/* Телефон: до правки над первым блюдом стояли три заголовка подряд
+   («Меню» → «Роллы и суши» → «Гункан-суши») и съедали 264 пикселя из
+   812 — треть первого экрана уходила на текст, а не на еду.
+   Заголовки остаются все (они нужны и человеку, и поиску), но дышат
+   заметно теснее. */
+@media (max-width:700px){
+  .head{padding:18px 0 2px}
+  .head h1{font-size:24px;margin-bottom:3px}
+  .head p{font-size:13.5px}
+  .group{padding:20px 0 4px}
+  .group-head{gap:9px;margin-bottom:2px}
+  .group-count{font-size:13px;margin:0 0 12px}
+  .sub{margin:18px 0 10px}
+}
+
+/* Разделы переехали в выезжающую панель (бургер в шапке) — каталогу
+   досталась вся ширина, полоса чипсов на десктопе больше не нужна */
+@media (min-width:1100px){
+  /* Разделы на широком экране живут в выезжающей панели, полоса
+     категорий не нужна. Но тогда липнуть сверху нечему — возвращаем
+     шапке фиксацию, иначе при прокрутке верх остаётся пустым и до
+     корзины с поиском не добраться. */
+  .nav{display:none}
+  .top-main{position:sticky;top:0}
+  .group{scroll-margin-top:100px}
+}
+
+</style>
+<script>
+(function(){try{var t=localStorage.getItem("kyoto_theme");
+if(t==="light"||t==="dark")document.documentElement.setAttribute("data-theme",t);}catch(e){}})();
+</script>
+</head>
+<body data-group="sets" data-lang="uz">
+
+<header class="top">
+  <div class="top-main">
+    <div class="wrap top-in">
+    <button class="burger" id="burgerBtn" type="button" aria-label="Разделы меню" aria-expanded="false">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <a class="logo" href="/uz/"><img class="logo-img" src="/logo.svg" alt="KYOTO — sushi &amp; chicken" width="200" height="34"></a>
+    <form class="search" role="search" onsubmit="return false">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input id="q" type="search" placeholder="Поиск — филадельфия, сет, кола…" autocomplete="off" aria-label="Поиск по меню" data-i18n-ph="menu.searchPh" data-i18n-aria="search.aria">
+    </form>
+    <div class="addr">
+      <button class="addr-btn" id="addrBtn" type="button" data-i18n-aria="addr.aria" aria-label="Адрес доставки">
+        <span class="addr-pin">◎</span><span class="addr-t" data-i18n="addr.ask">Куда везём?</span><span class="addr-v">⌄</span>
+      </button>
+      <div class="addr-menu" id="addrMenu"></div>
+    </div>
+    <a class="top-tel" href="tel:+998881198878">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5 9 3.9l1 4-2 1.4a12 12 0 0 0 6.7 6.7l1.4-2 4 1 .4 2.4a2 2 0 0 1-2 2.3A17 17 0 0 1 4.3 5.5a2 2 0 0 1 2.3-2Z"/></svg>
+      <span class="tel-i"><b>+998 88 119-88-78</b><em data-i18n="strip.hours">10:00–23:00</em></span>
+    </a>
+    <div class="lang">
+      <button class="lang-btn" id="langBtn" type="button" aria-haspopup="listbox" aria-expanded="false">
+        <span class="flag"></span><span class="lang-name"></span><span class="lang-v">⌄</span>
+      </button>
+      <div class="lang-menu" id="langMenu" role="listbox"></div>
+    </div>
+    <button class="theme-btn" id="themeBtn" type="button" data-i18n-aria="theme.aria" data-i18n-title="theme.title" aria-label="Переключить тему" title="День / ночь">
+      <svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.3M12 19.1v2.3M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.6 12h2.3M19.1 12h2.3M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/></svg>
+      <svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.6 8.6 0 1 1 9.4 3.5a7 7 0 0 0 11.1 11.1Z"/></svg>
+    </button>
+    <button class="acc-btn" id="accBtn" type="button" aria-label="Мой кабинет" title="Мой кабинет">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"/></svg>
+    </button>
+    <button class="cart-btn" id="cartBtn"><svg class="cart-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2.2l2.3 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.5L21 8H6.3"/><circle cx="10" cy="20" r="1.3"/><circle cx="17.5" cy="20" r="1.3"/></svg><span class="cart-txt" data-i18n="cart.btn">Корзина</span><span class="cart-count" id="count">0</span></button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav">
+  <div class="nav-in" id="chips"></div>
+  <button class="nav-search" id="navSearch" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/>
+    <path d="M20 20l-3.5-3.5"/></svg></button>
+</nav>
+
+<main class="wrap">
+  <div class="menu-layout">
+    <div class="head">
+      <h1>Setlar</h1><span class="sr-only">KYOTO (Киото) — меню суши-бара в Ташкенте: роллы, сеты, суши, корейская и европейская кухня</span>
+      <p id="total"></p>
+    </div>
+
+    <!-- Оффер и путь к сетам. Раньше человек с рекламы попадал сразу
+         в список из 159 позиций, который начинается с гунканов: ни
+         причины остаться, ни сетов, ради которых он кликнул. Цифры
+         те же, что на главной, — правило одно, firstOrder в server. -->
+    <div class="menu-offer">
+      <div class="mo-text">
+        <span class="mo-badge" data-i18n="offer.badge">Только на сайте</span>
+        <b data-i18n="offer.title">−30 000 сум</b>
+        <span data-i18n="offer.sub">на первый заказ от 70 000 сум</span>
+        <!-- Порог 70 000 в отрыве от цен выглядит высоким. Медиана
+             ролла — 68 000, двух хватает для 37 позиций из 45,
+             поэтому «обычно» — точное слово, а не рекламное. -->
+        <span class="mo-hint" data-i18n="menu.offerHint">Обычно это два ролла</span>
+      </div>
+      <!-- Ведём на роллы, а не на сеты: самый дешёвый сет стоит
+           155 000 — дороже медианного чека заведения (120 000).
+           Для первого заказа с рекламы это слишком высокий вход. -->
+      <a class="mo-cta" href="#g-sushi" data-i18n="menu.toDiscount">Собрать заказ со скидкой</a>
+    </div>
+    <div id="list"><section class="group"><h2>Setlar</h2><ul><li><b>Kitana Seti</b> — 195 000 so'm</li><li><b>Sakura Seti</b> — 178 000 so'm</li><li><b>Origami Mini Seti</b> — 188 000 so'm</li><li><b>Losos Seti</b> — 211 000 so'm</li><li><b>Osaka Seti</b> — 248 000 so'm</li><li><b>Akita Seti</b> — 335 000 so'm</li><li><b>Ajdaho Seti</b> — 485 000 so'm</li><li><b>Maki Seti</b> — 155 000 so'm</li><li><b>Tokio Seti</b> — 398 000 so'm</li><li><b>Yakudza Seti</b> — 525 000 so'm</li><li><b>Love Seti</b> — 208 000 so'm</li><li><b>Sharq Seti</b> — 248 000 so'm</li><li><b>Geysha Seti</b> — 395 000 so'm</li><li><b>Kioto Seti</b> — 415 000 so'm</li><li><b>Lyuks Seti</b> — 595 000 so'm</li><li><b>Miks Seti</b> — 308 000 so'm</li><li><b>Samuray Seti</b> — 480 000 so'm</li><li><b>Unagi Seti</b> — 240 000 so'm</li></ul></section></div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <nav class="foot-menu" aria-label="Разделы меню">
+      <a href="/uz/menu/sushi">Rollar va sushi</a>
+      <a href="/uz/menu/sets">Setlar</a>
+      <a href="/uz/menu/hot">Issiq taomlar</a>
+      <a href="/uz/menu/soups">Sho'rvalar</a>
+      <a href="/uz/menu/salads">Salatlar</a>
+      <a href="/uz/menu/poke">Poke va makaron</a>
+      <a href="/uz/menu/sides">Garnirlar</a>
+      <a href="/uz/menu/drinks">Ichimliklar</a>
+      <a href="/uz/dostavka">Yetkazib berish va to'lov</a>
+    </nav>
+    <span data-i18n="foot.address">г. Ташкент, ул. Кары-Ниязи 11</span> · <span data-i18n="strip.hoursSub">ежедневно, без выходных</span><br><a class="foot-tel" href="tel:+998881198878">+998 88 119-88-78</a><br>
+    <span data-i18n="strip.yandex">Доставка Яндексом</span> — <span data-i18n="strip.yandexSub">оплачивается курьеру отдельно</span>
+    <div class="soc" style="margin-top:14px;justify-content:center">
+      <a class="soc-a" href="https://www.instagram.com/kyoto.uz" target="_blank" rel="noopener">Instagram</a>
+      <a class="soc-a" href="https://t.me/kyoto_tash" target="_blank" rel="noopener">Telegram</a>
+      <a class="soc-a" href="https://www.facebook.com/kyotosushichicken" target="_blank" rel="noopener">Facebook</a>
+      <a class="soc-a" href="https://yandex.uz/maps/org/kyoto/172256976264" target="_blank" rel="noopener">Мы на картах</a>
+    </div>
+  </div>
+</footer>
+
+
+<aside class="side-drawer" id="sideDrawer" aria-label="Разделы меню">
+  <div class="sd-head"><b data-i18n="nav.menu">Меню</b>
+    <button class="sd-close" id="sdClose" type="button" data-i18n-aria="close" aria-label="Закрыть">×</button></div>
+  <div class="sd-body" id="sdBody"></div>
+</aside>
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Корзина">
+  <div class="dr-head"><h2 id="drTitle">Корзина</h2><button class="dr-close" id="drClose" data-i18n-aria="close" aria-label="Закрыть">×</button></div>
+  <div class="dr-body" id="drBody"></div>
+  <div class="dr-foot" id="drFoot"></div>
+</aside>
+
+<script src="/i18n.js"></script>
+<script src="/app.js"></script>
+<script src="/product.js"></script>
+<script>
+(function(){
+  var K=window.KYOTO, MENU=null, active="all";
+  var $=function(id){return document.getElementById(id);};
+
+
+  function renderList(){
+    if(!MENU)return;
+    var term=$("q").value.trim().toLowerCase();
+    var items=MENU.items.filter(function(it){
+      if(!it.available)return false;
+      if(active!=="all"&&it.group!==active)return false;
+      if(term&&it.name.toLowerCase().indexOf(term)===-1&&K.nameOf(it.name).toLowerCase().indexOf(term)===-1&&it.category.toLowerCase().indexOf(term)===-1)return false;
+      return true;
+    });
+    $("total").textContent=items.length+" "+(K.lang()==="uz"?K.t("menu.dishes"):K.plural(items.length,"блюдо","блюда","блюд"))+
+      (term?" — «"+$("q").value.trim()+"»":"");
+    if(!items.length){
+      $("list").innerHTML='<div class="empty"><b>'+K.t("menu.nothing")+'</b>'+K.t("menu.tryOther")+'</div>';
+      return;
+    }
+    var html="";
+    MENU.groups.forEach(function(g){
+      var inG=items.filter(function(i){return i.group===g.id;});
+      if(!inG.length)return;
+      html+='<section class="group" id="g-'+g.id+'"><div class="group-head"><h2>'+K.esc(K.group(g.title))+'</h2></div>'+
+        '<p class="group-count">'+inG.length+' '+(K.lang()==="uz"?K.t("menu.positions"):K.plural(inG.length,"позиция","позиции","позиций"))+'</p>';
+      var cats=[];inG.forEach(function(i){if(cats.indexOf(i.category)===-1)cats.push(i.category);});
+      cats.forEach(function(c){
+        var rows=inG.filter(function(i){return i.category===c;});
+        if(cats.length>1)html+='<div class="sub">'+K.esc(K.cat(c))+'</div>';
+        html+='<div class="grid">'+rows.map(function(i){return K.cardHTML(i);}).join("")+'</div>';
+      });
+      html+='</section>';
+    });
+    $("list").innerHTML=html;
+  }
+
+  function renderChips(){
+    if(!MENU)return;
+    var c='<button class="chip'+(active==="all"?" on":"")+'" data-g="all">'+K.t("menu.all")+' <b>'+MENU.items.length+'</b></button>';
+    MENU.groups.forEach(function(g){
+      if(!g.count)return;
+      c+='<button class="chip'+(active===g.id?" on":"")+'" data-g="'+g.id+'">'+
+         K.esc(K.group(g.title))+' <b>'+g.count+'</b></button>';
+    });
+    $("chips").innerHTML=c;
+
+    // Кнопка поиска живёт в липкой полосе рядом с чипсами: на телефоне
+    // шапка с полем поиска уезжает вместе со страницей, а искать в 158
+    // позициях надо. Сама кнопка — в разметке, вне прокрутки чипсов,
+    // иначе чипсы проезжали бы под ней.
+    var ns=$("navSearch");
+    if(ns)ns.setAttribute("aria-label",K.t("search.aria"));
+    if(ns)ns.onclick=function(){
+      var input=$("q");
+      if(!input)return;
+      // Возвращаем шапку в поле зрения и ставим курсор в поиск
+      window.scrollTo({top:0,behavior:"smooth"});
+      setTimeout(function(){ input.focus(); }, 320);
+    };
+
+    renderSide();
+  }
+
+  // Разделы в выезжающей панели — её открывает бургер в шапке
+  function renderSide(){
+    var side=$("sdBody");
+    if(!side||!MENU)return;
+    var h='<button class="sd-item'+(active==="all"?" on":"")+'" data-g="all">'+
+          K.t("menu.all")+
+          '<span class="sd-n">'+MENU.items.length+'</span></button>';
+    MENU.groups.forEach(function(g){
+      if(!g.count)return;
+      h+='<button class="sd-item'+(active===g.id?" on":"")+'" data-g="'+g.id+'">'+
+         K.esc(K.group(g.title))+
+         '<span class="sd-n">'+g.count+'</span></button>';
+    });
+    side.innerHTML=h;
+  }
+
+  // Выбор раздела — из чипсов или из бокового списка
+  function pickGroup(id){
+    active=id;
+    // Какой раздел открыли — в аналитику поведения
+    try{
+      var g=(MENU&&MENU.groups||[]).filter(function(x){return x.id===id})[0];
+      if(g&&K.ev)K.ev("cat",g.title,"открыл раздел: "+g.title);
+    }catch(e){}
+    renderChips();
+    renderList();
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+
+  // Пришли на страницу раздела (/menu/sushi) — сразу открываем его
+  var fromPath=document.body.dataset.group;
+  if(fromPath)active=fromPath;
+
+  K.init(function(menu){
+    MENU=menu;
+    renderChips();
+    $("chips").addEventListener("click",function(e){
+      var b=e.target.closest(".chip");
+      if(b)pickGroup(b.dataset.g);
+    });
+    $("sdBody").addEventListener("click",function(e){
+      var b=e.target.closest(".sd-item");
+      if(b){ K.closeSide(); pickGroup(b.dataset.g); }
+    });
+    renderList();
+
+    // Кнопка «Смотреть сеты» — обычный якорь href="#g-sets", без
+    // скрипта: у карточек задан aspect-ratio, высота не пляшет от
+    // ленивых фото, а отступ под шапку берётся из scroll-margin-top
+    // у .group. Родной переход браузера тут надёжнее обработчика.
+
+    // Прямой переход на раздел: /menu.html#g-sets
+    // Пробуем несколько раз: карточки грузят фото, и высота страницы
+    // растёт уже после первой отрисовки — одиночный прыжок промахивался
+    // и человек оставался наверху меню.
+    if(location.hash){
+      var hash=location.hash;
+      var jump=function(){
+        var target=document.querySelector(hash);
+        if(!target)return false;
+        var y=target.getBoundingClientRect().top+window.scrollY-70;
+        window.scrollTo(0,Math.max(0,y));
+        return true;
+      };
+      [60,400,1200,2500].forEach(function(ms){ setTimeout(jump,ms); });
+      window.addEventListener("load",function(){ setTimeout(jump,300); });
+    }
+  }).catch(function(){
+    $("list").innerHTML='<div class="empty"><b>'+K.t("err.serverDown")+'</b>'+K.t("err.serverHint")+'</div>';
+  });
+
+  // Запрос из адресной строки: /menu.html?q=филадельфия (поиск с главной)
+  var fromUrl=new URLSearchParams(location.search).get("q");
+  if(fromUrl){$("q").value=fromUrl;}
+
+  var st;
+  $("q").addEventListener("input",function(){clearTimeout(st);st=setTimeout(renderList,120);});
+  $("list").addEventListener("click",K.clickQty);
+  K.onChange(renderList);
+  // Смена языка — перерисовываем и разделы, и список
+  if(window.I18N) window.I18N.onChange(function(){ renderChips(); renderList(); });
+})();
+</script>
+</body>
+</html>
