@@ -761,33 +761,44 @@ window.KYOTO = (function () {
 
         bindNotePanel();
 
+        // Расчёт — в прокрутку, под блюда. Внизу закреплены только
+        // полоска до скидки и кнопка с суммой: раньше подвал из шести
+        // строк занимал полэкрана телефона и сжимал сами блюда.
         var SUM = t("sum");
-        var f = '<div class="sline"><span>' + t("cart.dishes") + '</span><span class="num">' + money(quote.subtotal) + ' ' + SUM + '</span></div>';
+        var s = '<div class="sum-box"><div class="sline"><span>' + t("cart.dishes") + '</span><span class="num">' + money(quote.subtotal) + ' ' + SUM + '</span></div>';
         if (quote.firstOff)
-            f += '<div class="sline disc"><span>🎉 ' + t("cart.first") +
+            s += '<div class="sline disc"><span>🎉 ' + t("cart.first") +
                  (quote.firstAssumed ? ' <em class="cap">' + t("cart.firstCheck") + '</em>' : '') +
                  '</span><span class="num">−' + money(quote.firstOff) + ' ' + SUM + '</span></div>';
-        else if (quote.firstGap)
-            // Подсказка «добавьте ещё» — и клиенту польза, и чек выше
-            f += '<div class="sline gap"><span>🎉 ' + t("cart.firstGap1") + ' ' + money(quote.firstAmount) + ' ' + SUM +
-                 '</span><span>' + t("cart.firstGap2") + ' ' + money(quote.firstGap) + ' ' + SUM + '</span></div>';
-        else if (quote.firstPromise)
-            f += '<div class="sline disc"><span>🎉 ' + t("cart.first") + '</span><span>' + t("cart.firstWait") + '</span></div>';
+        else if (quote.firstPromise && !quote.firstGap)
+            s += '<div class="sline disc"><span>🎉 ' + t("cart.first") + '</span><span>' + t("cart.firstWait") + '</span></div>';
         if (quote.discount)
-            f += '<div class="sline disc"><span>' + t("cart.discount") + '</span><span class="num">−' + money(quote.discount) + ' ' + SUM + '</span></div>';
+            s += '<div class="sline disc"><span>' + t("cart.discount") + '</span><span class="num">−' + money(quote.discount) + ' ' + SUM + '</span></div>';
         quote.gifts.forEach(function (g) {
-            f += '<div class="sline disc"><span>🎁 ' + esc(nameOf(g)) + '</span><span>0 ' + SUM + '</span></div>';
+            s += '<div class="sline disc"><span>🎁 ' + esc(nameOf(g)) + '</span><span>0 ' + SUM + '</span></div>';
         });
         if (quote.gifts.length && quote.discountRaw)
-            f += '<div class="note-small">' + t("cart.giftNoStack") + '</div>';
-        f += '<div class="sline"><span>' + t("cart.delivery") + '</span><span>' + t("cart.deliveryByYandex") + '</span></div>' +
-            '<div class="total"><span>' + t("cart.total") + '</span><b class="num">' + money(quote.total) + '</b></div>' +
-            '<div class="dnote"><b>' + t("cart.delivery") + '</b>' + t("cart.deliveryNote") + '</div>' +
-            '<button class="btn-main" id="toForm">' + t("cart.checkout") + '</button>';
+            s += '<div class="note-small">' + t("cart.giftNoStack") + '</div>';
+        s += '<div class="sline"><span>' + t("cart.delivery") + '</span><span>' + t("cart.deliveryByYandex") + '</span></div>' +
+            '<div class="total"><span>' + t("cart.total") + '</span><b class="num">' + money(quote.total) + ' ' + SUM + '</b></div>' +
+            '<div class="dnote"><b>' + t("cart.delivery") + '</b>' + t("cart.deliveryNote") + '</div></div>';
+        $("drBody").insertAdjacentHTML("beforeend", s);
+
+        var f = "";
+        if (!quote.firstOff && quote.firstGap) {
+            // Подсказка «добавьте ещё» — и клиенту польза, и чек выше
+            var need = quote.subtotal + quote.firstGap;
+            var pct = Math.max(4, Math.min(100, Math.round(quote.subtotal / need * 100)));
+            f += '<div class="gap-bar"><div class="gap-t"><span>🎉 ' + t("cart.firstGap1") + ' ' + money(quote.firstAmount) + ' ' + SUM +
+                 '</span><b>' + t("cart.firstGap2") + ' ' + money(quote.firstGap) + ' ' + SUM + '</b></div>' +
+                 '<div class="bar"><i style="width:' + pct + '%"></i></div></div>';
+        }
+        f += '<button class="btn-main btn-sum" id="toForm"><span>' + t("cart.checkout") + '</span>' +
+            '<b class="num">' + money(quote.total) + ' ' + SUM + '</b></button>';
         $("drFoot").innerHTML = f;
         $("toForm").onclick = function () {
             track("InitiateCheckout", { value: quote.total, currency: "UZS" });
-            step = "form"; renderDrawer();
+            step = "form"; renderDrawer(); $("drBody").scrollTop = 0;
             ev("checkout", "", "перешёл к оформлению");
         };
     }
@@ -893,10 +904,10 @@ window.KYOTO = (function () {
             });
         }
         $("drFoot").innerHTML =
-            '<div class="total"><span>' + t("cart.total") + '</span><b class="num">' + money(quote.total) + '</b></div>' +
-            '<button class="btn-main" id="send">' + t("form.send") + '</button>' +
-            '<button class="btn-main btn-ghost2" id="back">' + t("form.back") + '</button>';
-        $("back").onclick = function () { step = "cart"; renderDrawer(); };
+            '<button class="btn-main btn-sum" id="send"><span>' + t("form.send") + '</span>' +
+            '<b class="num">' + money(quote.total) + ' ' + t("sum") + '</b></button>' +
+            '<button class="back-link" id="back" type="button">← ' + t("form.back") + '</button>';
+        $("back").onclick = function () { step = "cart"; renderDrawer(); $("drBody").scrollTop = 0; };
         $("send").onclick = send;
     }
 
@@ -925,7 +936,7 @@ window.KYOTO = (function () {
             showErr(t("form.errAddr"));
             $("f-adr").classList.add("err"); return;
         }
-        var btn = $("send"); btn.disabled = true; btn.textContent = t("form.sending");
+        var btn = $("send"), btnHTML = btn.innerHTML; btn.disabled = true; btn.textContent = t("form.sending");
         fetch("/api/order", {
             method: "POST", headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -938,7 +949,7 @@ window.KYOTO = (function () {
             .then(function (res) {
                 if (!res.ok || !res.d.ok) {
                     showErr(res.d.error || t("form.errSend"));
-                    btn.disabled = false; btn.textContent = t("form.send"); return;
+                    btn.disabled = false; btn.innerHTML = btnHTML; return;
                 }
                 saveProfile({ name: form.name, phone: form.phone });
                 addAddress(form.address);
@@ -1054,7 +1065,7 @@ window.KYOTO = (function () {
             })
             .catch(function () {
                 showErr(t("form.errNet"));
-                btn.disabled = false; btn.textContent = t("form.send");
+                btn.disabled = false; btn.innerHTML = btnHTML;
             });
     }
 

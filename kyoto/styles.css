@@ -1536,3 +1536,22 @@ h1,h2,h3{font-weight:800;letter-spacing:-.034em;line-height:1.04}
   .nav{position:static}
   .cart-bar{bottom:8px}
 }
+
+/* ============================================================
+   ПОДВАЛ КОРЗИНЫ: ТОЛЬКО ГЛАВНОЕ
+   ============================================================
+   Расчёт ушёл в прокрутку под блюда, внизу — полоска до скидки
+   и кнопка, в которой уже видна сумма. */
+.sum-box{margin-top:22px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-m)}
+.sum-box .total{margin-top:8px}
+.sum-box .total b{font-size:21px}
+.dr-foot{padding:12px 22px 16px}
+.gap-bar{margin-bottom:12px}
+.gap-t{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-bottom:7px}
+.gap-t span{color:var(--text-2)}
+.gap-t b{color:var(--shu);font-weight:600;white-space:nowrap}
+.btn-main.btn-sum{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-left:24px;padding-right:24px}
+.btn-sum b{font-family:Unbounded,sans-serif;font-weight:700;white-space:nowrap}
+.back-link{display:block;margin:10px auto 0;padding:8px 12px;background:none;border:0;
+  font-size:14px;color:var(--text-2);cursor:pointer}
+.back-link:hover{color:var(--text)}
