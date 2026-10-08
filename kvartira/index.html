@@ -18,6 +18,7 @@
 
 <a class="skip" href="#about">К описанию квартиры</a>
 
+<div class="progress" id="progress" aria-hidden="true"><span></span></div>
 <header class="nav" id="nav">
   <a class="nav__brand" href="#top">Ключи <span>24</span></a>
   <nav class="nav__links" aria-label="Разделы">
@@ -38,7 +39,7 @@
   </div>
   <div class="hero__content">
     <p class="eyebrow reveal">Астана · Есиль · 9 этаж</p>
-    <h1 class="hero__title reveal">Студия у Байтерека.<br>Свет на весь день, тишина на всю ночь.</h1>
+    <h1 class="hero__title" data-words>Студия у Байтерека.<br>Свет на весь день, тишина на всю ночь.</h1>
     <p class="hero__lead reveal">Заселение без звонков и ожидания: напишите в Telegram, получите цену за минуту, адрес и код от двери — сразу после предоплаты.</p>
     <div class="hero__actions reveal">
       <a class="btn" href="#book">Узнать цену на свои даты</a>
@@ -49,27 +50,42 @@
 </section>
 
 <!-- 2. Скролл-анимация: кадры день → вечер проигрываются в такт прокрутке -->
-<section class="seq" id="seq" aria-label="Квартира от утра до вечера">
+<section class="seq" id="seq" aria-label="Квартира от утра до ночи">
   <div class="seq__sticky">
     <canvas class="seq__canvas" id="seqCanvas" aria-hidden="true"></canvas>
-    <img class="seq__fallback" src="media/dusk.jpg" alt="Студия вечером: тёплый свет ламп и вид на вечерний город">
+    <img class="seq__fallback" src="media/night.jpg" alt="Студия ночью: огни города за панорамным окном и тёплый свет ламп">
     <div class="seq__shade"></div>
+    <div class="seq__rail" aria-hidden="true"><i></i><i></i><i></i><i></i><b id="seqRail"></b></div>
     <div class="seq__captions">
-      <div class="seq__cap" data-at="0.05">
-        <h2>Утро</h2>
-        <p>Панорамное окно на восток. Солнце будит мягко, а кофе — на столике у окна.</p>
+      <div class="seq__cap" data-at="0.03" data-to="0.24">
+        <span class="seq__num">01 — Утро</span>
+        <h2>Свет<br>будит мягко</h2>
+        <p>Панорамное окно на восток. Кофе — на столике у окна.</p>
       </div>
-      <div class="seq__cap" data-at="0.45">
-        <h2>День</h2>
-        <p>Рабочее место, wi-fi 100 мбит и кондиционер. Отсюда удобно и работать, и ходить пешком к Байтереку.</p>
+      <div class="seq__cap" data-at="0.28" data-to="0.52">
+        <span class="seq__num">02 — День</span>
+        <h2>Работать<br>и гулять</h2>
+        <p>Wi-fi 100 мбит, рабочее место, кондиционер. До Байтерека — пешком.</p>
       </div>
-      <div class="seq__cap" data-at="0.85">
-        <h2>Вечер</h2>
-        <p>Тёплый свет, тихий дом, огни левого берега за стеклом. Выспитесь.</p>
+      <div class="seq__cap" data-at="0.56" data-to="0.78">
+        <span class="seq__num">03 — Вечер</span>
+        <h2>Город<br>зажигается</h2>
+        <p>Огни левого берега за стеклом, тёплый свет ламп в комнате.</p>
+      </div>
+      <div class="seq__cap seq__cap--final" data-at="0.82" data-to="1.01">
+        <span class="seq__num">04 — Ночь</span>
+        <h2>Выспитесь</h2>
+        <p>Тихий дом, плотные шторы, кровать 180 см. А утром всё сначала.</p>
+        <a class="btn" href="#book">Узнать цену на свои даты</a>
       </div>
     </div>
   </div>
 </section>
+
+<div class="marquee" aria-hidden="true"><div class="marquee__track">
+  <span>Байтерек — 10 минут пешком</span><span>Хан Шатыр — 12 минут</span><span>Самостоятельное заселение 24/7</span><span>Wi-fi 100 мбит</span><span>Парковка во дворе</span><span>Набережная Ишима — 10 минут</span>
+  <span>Байтерек — 10 минут пешком</span><span>Хан Шатыр — 12 минут</span><span>Самостоятельное заселение 24/7</span><span>Wi-fi 100 мбит</span><span>Парковка во дворе</span><span>Набережная Ишима — 10 минут</span>
+</div></div>
 
 <!-- 3. Квартира -->
 <section class="section" id="about">
@@ -77,9 +93,9 @@
     <p class="eyebrow reveal">Квартира</p>
     <h2 class="h2 reveal">Всё, что нужно на несколько ночей. И ничего лишнего.</h2>
     <div class="facts">
-      <div class="fact reveal"><strong>32 м²</strong><span>студия, 9 этаж из 16, лифт</span></div>
+      <div class="fact reveal"><strong><span data-count="32">0</span> м²</strong><span>студия, 9 этаж из 16, лифт</span></div>
       <div class="fact reveal"><strong>2 + 1</strong><span>двуспальная кровать и дополнительное место</span></div>
-      <div class="fact reveal"><strong>100 мбит</strong><span>wi-fi, рабочий стол у окна</span></div>
+      <div class="fact reveal"><strong><span data-count="100">0</span> мбит</strong><span>wi-fi, рабочий стол у окна</span></div>
       <div class="fact reveal"><strong>24/7</strong><span>самостоятельное заселение по коду</span></div>
     </div>
     <div class="cols">
@@ -111,7 +127,7 @@
     <h2 class="h2 reveal">Одна цена за ночь. Скидки за срок, а не за торг.</h2>
     <div class="price reveal">
       <div class="price__main">
-        <span class="price__num">18 000 <small>тг</small></span>
+        <span class="price__num"><span data-count="18000">0</span> <small>тг</small></span>
         <span class="price__per">за ночь в будни</span>
       </div>
       <ul class="price__rows">
@@ -157,7 +173,7 @@
 
 <!-- 7. Бронь -->
 <section class="cta" id="book">
-  <div class="cta__media" aria-hidden="true"><img src="media/dusk.jpg" alt=""></div>
+  <div class="cta__media" aria-hidden="true"><img id="ctaImg" src="media/night.jpg" alt=""></div>
   <div class="cta__content">
     <h2 class="reveal">Узнайте цену на свои даты</h2>
     <p class="reveal">Бот ответит сразу, менеджер Арман подключится, если нужно решить что-то нестандартное.</p>
