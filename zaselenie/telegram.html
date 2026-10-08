@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ключи 24 — бот заселения в Telegram</title>
+<meta name="description" content="Демо телеграм-бота для заселения: напишите даты и число гостей — бот подберёт квартиру, посчитает цену и доведёт до брони.">
+<meta name="theme-color" content="#517da2">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='16' fill='%2329a9eb'/%3E%3Cpath d='M7 15.5l16-6.5-2.5 13-5-3.5-2.5 2.5v-4l7-6-9 5z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+/* Демо бота в оформлении Telegram: тот же движок, что в настоящем боте,
+   только вместо Telegram-сервера — страница. На телефоне занимает весь экран,
+   на компьютере показывается в рамке телефона. */
+:root {
+  --tg-bg: #0e1621; --tg-head: #17212b; --tg-panel: #17212b; --tg-text: #f5f5f5;
+  --tg-muted: #6d7f8f; --tg-in: #182533; --tg-out: #2b5278; --tg-link: #5eb5f7;
+  --tg-btn: rgba(255,255,255,.1); --tg-accent: #5288c1;
+  --wall: radial-gradient(circle at 20% 10%, rgba(82,136,193,.12), transparent 40%),
+          radial-gradient(circle at 80% 80%, rgba(82,136,193,.1), transparent 45%), #0e1621;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body {
+  background: #09111a; color: var(--tg-text);
+  font: 15px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased; display: grid; place-items: center; min-height: 100svh;
+}
+button, textarea { font: inherit; color: inherit; }
+
+.stage { display: grid; grid-template-columns: 1fr auto; gap: 56px; align-items: center; padding: 32px; max-width: 1100px; width: 100%; }
+.about { max-width: 420px; color: #c7d0d8; }
+.about h1 { font-size: 30px; line-height: 1.15; margin-bottom: 14px; color: #fff; }
+.about p { margin-bottom: 14px; color: #93a3b1; }
+.about ul { list-style: none; margin: 18px 0 24px; }
+.about li { padding: 8px 0 8px 26px; position: relative; border-top: 1px solid rgba(255,255,255,.07); }
+.about li::before { content: '✓'; position: absolute; left: 0; color: #5eb5f7; }
+.about .hint { font-size: 13px; color: #6d7f8f; }
+.about a { color: #5eb5f7; }
+
+/* Телефон */
+.phone {
+  width: 390px; height: min(820px, 92svh); border-radius: 44px; background: #000; padding: 12px;
+  box-shadow: 0 40px 100px -30px rgba(0,0,0,.9), 0 0 0 1px #2a2f36, inset 0 0 0 2px #15191e;
+}
+.screen { width: 100%; height: 100%; border-radius: 34px; overflow: hidden; background: var(--wall); display: flex; flex-direction: column; position: relative; }
+.notch { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); width: 120px; height: 32px; border-radius: 20px; background: #000; z-index: 5; }
+
+.head { background: var(--tg-head); padding: 52px 14px 10px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 0 rgba(0,0,0,.4); z-index: 2; }
+.head .back { color: var(--tg-link); font-size: 22px; line-height: 1; width: 22px; }
+.head .ava { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #c98a3a, #e0b06a); display: grid; place-items: center; font-weight: 700; color: #fff; font-size: 15px; }
+.head .name { font-weight: 600; line-height: 1.2; }
+.head .status { font-size: 13px; color: var(--tg-muted); }
+.head .status.on { color: var(--tg-link); }
+.head .more { margin-left: auto; color: var(--tg-muted); font-size: 22px; letter-spacing: 1px; }
+
+.thread { flex: 1; overflow-y: auto; padding: 12px 10px 8px; scroll-behavior: smooth; }
+.day { text-align: center; margin: 6px 0 12px; }
+.day span { background: rgba(0,0,0,.35); color: #cfd8df; font-size: 12px; padding: 4px 10px; border-radius: 12px; }
+.msg { max-width: 82%; padding: 7px 10px 6px; border-radius: 14px; margin-bottom: 4px; white-space: pre-wrap; word-wrap: break-word; position: relative; animation: pop .25s ease-out; }
+.msg.in { background: var(--tg-in); border-bottom-left-radius: 4px; margin-right: auto; }
+.msg.out { background: var(--tg-out); border-bottom-right-radius: 4px; margin-left: auto; }
+.msg .time { display: block; text-align: right; font-size: 11px; color: rgba(255,255,255,.45); margin-top: 2px; }
+.msg.out .time::after { content: ' ✓✓'; color: #7fc6ff; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+.kb { max-width: 82%; margin: 0 0 10px; display: grid; gap: 4px; }
+.kb .row { display: flex; gap: 4px; }
+.kb button { flex: 1; background: var(--tg-btn); border: 0; border-radius: 8px; padding: 9px 10px; font-size: 14px; color: #fff; cursor: pointer; backdrop-filter: blur(6px); }
+.kb button:hover { background: rgba(255,255,255,.16); }
+.kb.used button { opacity: .45; pointer-events: none; }
+
+.typing { display: inline-flex; gap: 4px; padding: 10px 12px; background: var(--tg-in); border-radius: 14px; border-bottom-left-radius: 4px; margin-bottom: 4px; }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: #8fa5b7; animation: blink 1.2s infinite; }
+.typing i:nth-child(2) { animation-delay: .2s } .typing i:nth-child(3) { animation-delay: .4s }
+@keyframes blink { 0%, 60%, 100% { opacity: .3 } 30% { opacity: 1 } }
+
+.reply-kb { background: var(--tg-panel); padding: 6px 8px; display: none; }
+.reply-kb.on { display: block; }
+.reply-kb button { width: 100%; background: #232e3c; border: 0; border-radius: 8px; padding: 11px; color: #fff; font-size: 15px; cursor: pointer; }
+
+.chips { display: flex; gap: 6px; overflow-x: auto; padding: 8px 8px 2px; scrollbar-width: none; background: var(--tg-panel); }
+.chips::-webkit-scrollbar { display: none; }
+.chips button { flex: 0 0 auto; background: #232e3c; border: 0; border-radius: 14px; padding: 6px 12px; font-size: 13px; color: #cfd8df; cursor: pointer; white-space: nowrap; }
+.chips button:hover { background: #2c3a4b; }
+
+.composer { background: var(--tg-panel); padding: 8px 8px calc(10px + env(safe-area-inset-bottom)); display: flex; align-items: flex-end; gap: 8px; }
+.composer .clip { color: var(--tg-muted); font-size: 22px; padding: 6px 4px; }
+.composer textarea { flex: 1; resize: none; border: 0; outline: 0; background: #242f3d; color: #fff; border-radius: 18px; padding: 9px 14px; max-height: 110px; line-height: 1.35; }
+.composer textarea::placeholder { color: #6d7f8f; }
+.composer .send { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--tg-accent); color: #fff; font-size: 18px; cursor: pointer; display: grid; place-items: center; }
+.composer .send:disabled { opacity: .4; }
+
+@media (max-width: 900px) {
+  body { display: block; }
+  .stage { display: block; padding: 0; max-width: none; }
+  .about { display: none; }
+  .phone { width: 100%; height: 100svh; border-radius: 0; padding: 0; box-shadow: none; }
+  .screen { border-radius: 0; }
+  .notch { display: none; }
+  .head { padding-top: calc(10px + env(safe-area-inset-top)); }
+}
+</style>
+</head>
+<body>
+
+<div class="stage">
+  <aside class="about">
+    <h1>Бот заселения «Ключи 24»</h1>
+    <p>Так переписка выглядит у гостя в Telegram. Напишите даты и сколько вас — бот ответит, как настоящий.</p>
+    <ul>
+      <li>Понимает живой текст: «с 12 по 15, нас трое, с котом»</li>
+      <li>Считает цену по календарю, сезонам и скидкам</li>
+      <li>Держит даты час и доводит до предоплаты</li>
+      <li>Отвечает на вопросы о квартире и районе</li>
+      <li>Зовёт менеджера, когда нужен человек</li>
+    </ul>
+    <p class="hint">Это демо на тестовых квартирах и ценах. Настоящий бот отвечает в Telegram теми же словами — <a href="bot/README.md">как подключить</a>.</p>
+  </aside>
+
+  <div class="phone"><div class="screen">
+    <div class="notch"></div>
+    <div class="head">
+      <span class="back">‹</span>
+      <span class="ava">К24</span>
+      <div><div class="name">Ключи 24</div><div class="status" id="status">бот</div></div>
+      <span class="more">⋮</span>
+    </div>
+    <div class="thread" id="thread"><div class="day"><span>Сегодня</span></div></div>
+    <div class="reply-kb" id="replyKb"><button id="contactBtn">📱 Отправить мой номер</button></div>
+    <div class="chips" id="chips"></div>
+    <div class="composer">
+      <span class="clip">📎</span>
+      <textarea id="input" rows="1" placeholder="Сообщение"></textarea>
+      <button class="send" id="send" aria-label="Отправить">➤</button>
+    </div>
+  </div></div>
+</div>
+
+<script src="js/util.js"></script>
+<script src="js/knowledge.js"></script>
+<script src="js/holds.js"></script>
+<script src="js/nlu.js"></script>
+<script src="js/policy.js"></script>
+<script src="js/reply.js"></script>
+<script src="js/risk.js"></script>
+<script src="js/scenarios.js"></script>
+<script src="js/agent.js"></script>
+<script>
+(function (w, d) {
+  'use strict';
+
+  var thread = d.getElementById('thread');
+  var input = d.getElementById('input');
+  var send = d.getElementById('send');
+  var chips = d.getElementById('chips');
+  var replyKb = d.getElementById('replyKb');
+  var status = d.getElementById('status');
+
+  var ctx = AGENT.newContext({ channel: 'telegram-демо' });
+  var PICK = ['первый', 'второй', 'третий'];
+  var busy = false;
+
+  var SAMPLES = [
+    'Нужна квартира с 12 по 15 марта, нас двое',
+    'Есть что-нибудь на выходные? Вдвоём',
+    'Приедем с ребёнком 3 года, на неделю',
+    'А скидка будет?',
+    'Парковка и лифт есть?',
+    'Как заселиться ночью?',
+    'Аптека и магазин рядом?',
+    'Хочу отменить бронь',
+    'Можно на пару часов?',
+    'Позовите менеджера'
+  ];
+
+  function now() {
+    var t = new Date();
+    return (t.getHours() < 10 ? '0' : '') + t.getHours() + ':' + (t.getMinutes() < 10 ? '0' : '') + t.getMinutes();
+  }
+
+  function bubble(who, text) {
+    var el = d.createElement('div');
+    el.className = 'msg ' + who;
+    el.appendChild(d.createTextNode(text));
+    var t = d.createElement('span'); t.className = 'time'; t.textContent = now();
+    el.appendChild(t);
+    thread.appendChild(el);
+    thread.scrollTop = thread.scrollHeight;
+    return el;
+  }
+
+  function typing() {
+    var el = d.createElement('div');
+    el.className = 'typing';
+    el.innerHTML = '<i></i><i></i><i></i>';
+    thread.appendChild(el);
+    thread.scrollTop = thread.scrollHeight;
+    status.textContent = 'печатает…';
+    status.classList.add('on');
+    return el;
+  }
+
+  /* Те же кнопки, что строит bot/telegram.js — чтобы демо не обещало лишнего */
+  function keyboard(res) {
+    var offers = res.analysis.match ? res.analysis.match.offers.slice(0, 3) : [];
+    if (res.action === 'offer' && offers.length) {
+      var rows = offers.map(function (o, i) { return [['Беру: ' + o.object.title, 'беру ' + PICK[i]]]; });
+      rows.push([['Другие даты', 'подберите другие даты'], ['Позвать менеджера', 'позовите человека']]);
+      return rows;
+    }
+    if (res.action === 'hold') { replyKb.classList.add('on'); return null; }
+    if (res.action === 'decline' || res.escalate) return [[['Позвать менеджера', 'позовите человека']]];
+    if (res.action === 'ask' && res.analysis.missing.indexOf('даты') >= 0) {
+      return [[['На сегодня', 'сегодня на 1 ночь'], ['На завтра', 'завтра на 2 ночи'], ['На выходные', 'на выходные']]];
+    }
+    return null;
+  }
+
+  function inlineKeyboard(rows) {
+    var kb = d.createElement('div');
+    kb.className = 'kb';
+    rows.forEach(function (r) {
+      var row = d.createElement('div'); row.className = 'row';
+      r.forEach(function (b) {
+        var btn = d.createElement('button');
+        btn.textContent = b[0];
+        btn.onclick = function () { kb.classList.add('used'); say(b[1], b[0]); };
+        row.appendChild(btn);
+      });
+      kb.appendChild(row);
+    });
+    thread.appendChild(kb);
+    thread.scrollTop = thread.scrollHeight;
+  }
+
+  function chunks(text) {
+    var LIMIT = 4096, out = [], rest = String(text);
+    while (rest.length > LIMIT) {
+      var cut = rest.lastIndexOf('\n', LIMIT);
+      if (cut < LIMIT / 2) cut = LIMIT;
+      out.push(rest.slice(0, cut));
+      rest = rest.slice(cut).replace(/^\n+/, '');
+    }
+    out.push(rest);
+    return out;
+  }
+
+  /* Гость сказал → движок ответил. shown — что показать в пузыре гостя
+     (для кнопок это подпись кнопки, а не служебная команда) */
+  function say(text, shown) {
+    if (busy || !text.trim()) return;
+    busy = true; send.disabled = true;
+    bubble('out', shown || text);
+    replyKb.classList.remove('on');
+
+    var res;
+    try { res = AGENT.respond(text, ctx); }
+    catch (e) {
+      busy = false; send.disabled = false;
+      bubble('in', 'Что-то сломалось на моей стороне. Напишите ещё раз или позвоните: ' + KB.settings.manager.phone);
+      if (w.console) console.error(e);
+      return;
+    }
+
+    if (res.action === 'ignore') { busy = false; send.disabled = false; return; }
+
+    var t = typing();
+    var delay = Math.min(1800, 500 + res.reply.length * 6);
+    setTimeout(function () {
+      t.remove();
+      status.textContent = 'бот'; status.classList.remove('on');
+      chunks(res.reply).forEach(function (part) { bubble('in', part); });
+      var rows = keyboard(res);
+      if (rows) inlineKeyboard(rows);
+      busy = false; send.disabled = false;
+      input.focus();
+    }, delay);
+  }
+
+  function fromInput() {
+    var v = input.value.trim();
+    if (!v) return;
+    input.value = ''; input.style.height = '';
+    if (v[0] === '/') return command(v);
+    say(v);
+  }
+
+  function command(c) {
+    bubble('out', c);
+    var cmd = c.split(/[\s@]/)[0].toLowerCase();
+    var t = typing();
+    setTimeout(function () {
+      t.remove(); status.textContent = 'бот'; status.classList.remove('on');
+      if (cmd === '/start' || cmd === '/reset') {
+        ctx = AGENT.newContext({ channel: 'telegram-демо' });
+        bubble('in', cmd === '/start' ? greeting() : 'Начинаем заново. Напишите даты и число гостей.');
+      } else if (cmd === '/help') {
+        bubble('in', 'Что я умею:\n· подобрать квартиру по датам, числу гостей и бюджету\n· посчитать цену, депозит и предоплату\n· забронировать и прислать инструкцию по заселению\n· ответить про питомцев, парковку, регистрацию и документы\n\n/reset — начать подбор заново\nНужен живой менеджер — напишите «позовите человека».');
+      } else {
+        bubble('in', 'Такой команды нет. Напишите даты и число гостей — подберу квартиру.');
+      }
+    }, 500);
+  }
+
+  function greeting() {
+    return 'Здравствуйте! ' + KB.settings.brand + ' — ' + KB.settings.business + ' в ' + KB.settings.cityIn + '.\n' +
+      'Напишите даты и сколько гостей — подберу варианты с ценами.\n' +
+      'Например: «с 12 по 15 ноября, нас трое, с ребёнком 4 года».';
+  }
+
+  /* Кнопка «Отправить мой номер» — как в Telegram, только имя и телефон демо-гостя */
+  d.getElementById('contactBtn').onclick = function () {
+    replyKb.classList.remove('on');
+    say('Меня зовут Айгерим Сапарова, телефон +7 701 555-12-34', '📱 Айгерим Сапарова\n+7 701 555-12-34');
+  };
+
+  SAMPLES.forEach(function (s) {
+    var b = d.createElement('button');
+    b.textContent = s;
+    b.onclick = function () { say(s); };
+    chips.appendChild(b);
+  });
+
+  send.onclick = fromInput;
+  input.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); fromInput(); }
+  });
+  input.addEventListener('input', function () {
+    input.style.height = ''; input.style.height = Math.min(110, input.scrollHeight) + 'px';
+  });
+
+  /* Приветствие, как после /start */
+  setTimeout(function () { bubble('in', greeting()); }, 300);
+})(window, document);
+</script>
+</body>
+</html>
